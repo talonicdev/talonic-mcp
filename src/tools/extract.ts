@@ -19,13 +19,20 @@ const DESCRIPTION = [
   "- The user wants to find documents matching a query (use talonic_search or talonic_filter).",
   "",
   "FILE SOURCES (provide exactly one):",
-  "- file_path: a local path to the document (the MCP server reads it from disk).",
-  "- file_url: a URL the Talonic API will fetch directly.",
+  "- file_data + filename (RECOMMENDED for chat clients): base64-encoded file bytes plus",
+  "  the original filename (with extension). Use this whenever you already have the file",
+  "  in memory, e.g. the user attached it to the conversation. Works in every MCP client",
+  "  regardless of where the file lives on disk.",
+  "- file_path: a local path to the document. Only works if the MCP server process can",
+  "  read that path on its own filesystem; many chat clients (Claude Desktop, Cowork)",
+  "  store user uploads in a sandbox the MCP server cannot access, in which case use",
+  "  file_data instead.",
+  "- file_url: a URL the Talonic API will fetch directly. Use for documents already on",
+  "  the public web.",
   "- document_id: re-extract a document already in the workspace.",
   "",
   "SCHEMA FORMATS (provide at most one of `schema` or `schema_id`):",
-  '- Flat map (recommended): { vendor_name: "string", total_amount: "number", due_date: "date" }',
-  '- JSON Schema: { type: "object", properties: { ... } }',
+  '- JSON Schema (recommended): { type: "object", properties: { vendor_name: { type: "string" } } }',
   "- schema_id: id of a saved schema from talonic_list_schemas",
   "",
   "IMPORTANT: production currently rejects requests with no schema. Always provide either",
@@ -33,17 +40,29 @@ const DESCRIPTION = [
 ].join("\n")
 
 const inputSchema = {
+  file_data: z
+    .string()
+    .optional()
+    .describe(
+      "Base64-encoded file bytes. Recommended path when the agent already has the file in memory (e.g., the user attached a PDF to the conversation). Pair with `filename` so MIME type can be inferred. Works regardless of where the file lives on disk.",
+    ),
+  filename: z
+    .string()
+    .optional()
+    .describe(
+      "Original filename including extension, e.g. 'invoice.pdf'. Used to infer MIME type when uploading via `file_data`. Required when `file_data` is provided.",
+    ),
   file_path: z
     .string()
     .optional()
     .describe(
-      "Local path to a document file. The MCP server reads it from disk and uploads it. Provide one of file_path, file_url, or document_id.",
+      "Local path to a document file. Only works if the MCP server has read access to that path. In sandboxed chat clients (Claude Desktop, Cowork) where uploads land in a host-owned directory, use `file_data` instead.",
     ),
   file_url: z
     .string()
     .optional()
     .describe(
-      "URL to a document file. The Talonic API fetches it server-side. Use this for remote documents.",
+      "URL to a document file. The Talonic API fetches it server-side. Use this for documents already on the public web.",
     ),
   document_id: z
     .string()
@@ -53,7 +72,7 @@ const inputSchema = {
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      "Inline schema definition. Flat map (recommended), simplified fields, or JSON Schema.",
+      "Inline schema definition. Use full JSON Schema: { type: 'object', properties: { ... } }.",
     ),
   schema_id: z
     .string()
@@ -72,6 +91,8 @@ const inputSchema = {
 }
 
 export interface ExtractArgs {
+  file_data?: string
+  filename?: string
   file_path?: string
   file_url?: string
   document_id?: string
@@ -84,6 +105,10 @@ export interface ExtractArgs {
 export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promise<ToolResult> {
   try {
     const params: ExtractParams = {}
+    if (args.file_data !== undefined) {
+      params.file = Buffer.from(args.file_data, "base64")
+      if (args.filename !== undefined) params.filename = args.filename
+    }
     if (args.file_path !== undefined) params.file_path = args.file_path
     if (args.file_url !== undefined) params.file_url = args.file_url
     if (args.document_id !== undefined) params.document_id = args.document_id

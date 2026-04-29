@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-04-29
+
+### Added
+
+- `file_data` (base64-encoded bytes) and `filename` inputs on `talonic_extract` and `talonic_to_markdown`. Lets agents pass uploaded files to Talonic when running inside chat-style MCP hosts (Claude Desktop, Cowork, Cursor) where the host's user-data directory is not readable by the MCP server process. Tool descriptions advertise `file_data` as the recommended path for chat clients.
+- Tests covering `file_data` decoding, MIME inference from `filename`, and rejection of multiple file sources.
+
+### Changed
+
+- `talonic_extract` description: clarified when each file source is appropriate. `file_data` is the recommended path for chat clients; `file_path` only works when the MCP server has filesystem access to that path; `file_url` is for documents already on the public web; `document_id` re-extracts an existing workspace document.
+- `talonic_to_markdown` description: added `file_data` + `filename` to the input list with the same chat-client guidance.
+- `talonic_extract` description no longer recommends the flat key-type schema map; recommends full JSON Schema only (the flat map is silently empty-saved by the API; tracked separately).
+
 ## [0.1.3] - 2026-04-29
 
 ### Fixed

@@ -5,8 +5,8 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
   "Get the OCR-converted markdown for a document. Accepts an existing document_id,",
-  "a local file path, or a URL. When given a raw file, the tool ingests it via",
-  "extract first (with a minimal schema) and then returns the markdown.",
+  "raw file bytes (base64), a local file path, or a URL. When given a raw file, the",
+  "tool ingests it via extract first and then returns the markdown.",
   "",
   "USE WHEN:",
   "- The user wants the full text content of a document for summarisation, translation, or analysis.",
@@ -19,7 +19,11 @@ const DESCRIPTION = [
   "",
   "INPUTS (provide exactly one):",
   "- document_id: id of an already-ingested document (cheapest path; one API call)",
-  "- file_path: local path to a document file (the MCP server reads it from disk)",
+  "- file_data + filename (RECOMMENDED for chat clients): base64-encoded file bytes plus",
+  "  the original filename (with extension). Use this whenever you already have the file",
+  "  in memory, e.g. the user attached it to the conversation. Works in every MCP client.",
+  "- file_path: local path to a document file. Only works if the MCP server has read access",
+  "  to that path; in sandboxed chat clients use file_data instead.",
   "- file_url: URL to a document file (the Talonic API fetches it server-side)",
 ].join("\n")
 
@@ -31,10 +35,24 @@ const inputSchema = {
     .describe(
       "The Talonic document id whose markdown you want. Get this from a previous talonic_extract or talonic_search response.",
     ),
+  file_data: z
+    .string()
+    .optional()
+    .describe(
+      "Base64-encoded file bytes. Recommended path when the agent already has the file in memory (e.g., the user attached a PDF to the conversation). Pair with `filename` so MIME type can be inferred.",
+    ),
+  filename: z
+    .string()
+    .optional()
+    .describe(
+      "Original filename including extension, e.g. 'invoice.pdf'. Used to infer MIME type when uploading via `file_data`. Required when `file_data` is provided.",
+    ),
   file_path: z
     .string()
     .optional()
-    .describe("Local path to a document file. The MCP server reads it from disk and uploads it."),
+    .describe(
+      "Local path to a document file. Only works if the MCP server has read access to that path. In sandboxed chat clients (Claude Desktop, Cowork) use `file_data` instead.",
+    ),
   file_url: z
     .string()
     .optional()
@@ -43,6 +61,8 @@ const inputSchema = {
 
 export interface ToMarkdownArgs {
   document_id?: string
+  file_data?: string
+  filename?: string
   file_path?: string
   file_url?: string
 }
@@ -61,12 +81,13 @@ export async function handleToMarkdown(
   args: ToMarkdownArgs,
 ): Promise<ToolResult> {
   try {
-    const sources = ["document_id", "file_path", "file_url"] as const
+    const sources = ["document_id", "file_data", "file_path", "file_url"] as const
     const provided = sources.filter((k) => args[k] !== undefined)
     if (provided.length === 0) {
       throw new TalonicError({
         code: "missing_input_source",
-        message: "talonic_to_markdown requires one of: document_id, file_path, file_url.",
+        message:
+          "talonic_to_markdown requires one of: document_id, file_data, file_path, file_url.",
         status: 0,
         retryable: false,
       })
@@ -83,6 +104,12 @@ export async function handleToMarkdown(
     let documentId = args.document_id
     if (!documentId) {
       const ingest = await talonic.extract({
+        ...(args.file_data !== undefined
+          ? {
+              file: Buffer.from(args.file_data, "base64"),
+              ...(args.filename !== undefined ? { filename: args.filename } : {}),
+            }
+          : {}),
         ...(args.file_path !== undefined ? { file_path: args.file_path } : {}),
         ...(args.file_url !== undefined ? { file_url: args.file_url } : {}),
         schema: INGEST_ONLY_SCHEMA,

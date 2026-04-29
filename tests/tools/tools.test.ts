@@ -230,6 +230,43 @@ describe("talonic_to_markdown handler", () => {
     expect((result as { isError?: boolean }).isError).toBe(true)
     expect(result.content[0]?.text).toMatch(/exactly one/)
   })
+
+  it("with file_data ingests via /v1/extract first, then fetches markdown", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          extraction_id: "ingested-fd",
+          status: "complete",
+          document: { id: "doc-from-data", filename: "scan.pdf" },
+          data: {},
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ document_id: "doc-from-data", markdown: "# Body" }))
+    const talonic = new Talonic({
+      apiKey: "k",
+      fetch: fetchFn as unknown as typeof fetch,
+      maxRetries: 0,
+    })
+
+    const bytes = Buffer.from("%PDF-1.4 fake")
+    const result = await handleToMarkdown(talonic, {
+      file_data: bytes.toString("base64"),
+      filename: "scan.pdf",
+    })
+
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("/v1/extract")
+    const ingestInit = fetchFn.mock.calls[0]?.[1] as RequestInit
+    const fd = ingestInit.body as FormData
+    const file = fd.get("file") as File
+    expect(file.name).toBe("scan.pdf")
+    expect(file.type).toBe("application/pdf")
+    expect(file.size).toBe(bytes.byteLength)
+
+    expect(fetchFn.mock.calls[1]?.[0]).toContain("/v1/documents/doc-from-data/markdown")
+    const parsed = parsedText(result) as { markdown: string }
+    expect(parsed.markdown).toBe("# Body")
+  })
 })
 
 describe("talonic_extract handler", () => {
@@ -277,5 +314,47 @@ describe("talonic_extract handler", () => {
     const result = await handleExtract(client.talonic, {})
     expect((result as { isError?: boolean }).isError).toBe(true)
     expect(result.content[0]?.text).toMatch(/file source/)
+  })
+
+  it("decodes file_data + filename and uploads as multipart with inferred MIME", async () => {
+    const bytes = Buffer.from("%PDF-1.4 fake pdf body for test")
+    const file_data = bytes.toString("base64")
+    await handleExtract(client.talonic, {
+      file_data,
+      filename: "invoice.pdf",
+      schema: { type: "object", properties: { vendor_name: { type: "string" } } },
+    })
+    const init = lastCall(client.fetchFn)[1]
+    expect(init.method).toBe("POST")
+    const fd = init.body as FormData
+    const file = fd.get("file") as File
+    expect(file).toBeInstanceOf(Blob)
+    expect(file.name).toBe("invoice.pdf")
+    expect(file.type).toBe("application/pdf")
+    // size should match the original buffer length
+    expect(file.size).toBe(bytes.byteLength)
+  })
+
+  it("file_data without filename still uploads (default filename, octet-stream)", async () => {
+    const bytes = Buffer.from("hello")
+    await handleExtract(client.talonic, {
+      file_data: bytes.toString("base64"),
+      schema: { type: "object", properties: { x: { type: "string" } } },
+    })
+    const fd = lastCall(client.fetchFn)[1].body as FormData
+    const file = fd.get("file") as File
+    expect(file).toBeInstanceOf(Blob)
+    expect(file.size).toBe(bytes.byteLength)
+  })
+
+  it("rejects when both file_data and file_path are provided", async () => {
+    const result = await handleExtract(client.talonic, {
+      file_data: Buffer.from("x").toString("base64"),
+      filename: "x.pdf",
+      file_path: "/tmp/x.pdf",
+      schema: { type: "object", properties: {} },
+    })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/multiple_file_sources|exactly one/)
   })
 })

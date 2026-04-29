@@ -101,15 +101,23 @@ Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Deskt
 
 Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT USE WHEN sections. Agents pick the right tool reliably without further prompting. Briefly:
 
-- **`talonic_extract`** — Extract structured, schema-validated data from a document. Inputs: one of `file_path`, `file_url`, `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.
+- **`talonic_extract`** — Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.
 - **`talonic_search`** — Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
 - **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Field names are auto-resolved to internal IDs (currently limited on production; see [Known limitations](#known-limitations-v01) for the recommended workaround).
 - **`talonic_get_document`** — Fetch full metadata for a single document by id, including processing log and link URLs.
-- **`talonic_to_markdown`** — Get OCR-converted markdown for a document already in the workspace.
+- **`talonic_to_markdown`** — Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`.
 - **`talonic_list_schemas`** — List all saved schemas with their definitions.
 - **`talonic_save_schema`** — Save a schema definition to the workspace for reuse.
 
 The `talonic://schemas` resource exposes the saved-schemas list to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).
+
+## Drag-and-drop in chat clients
+
+When the user drag-drops a PDF (or any supported file) into a chat-style MCP host such as Claude Desktop, Cowork, or Cursor, the file lands in a host-owned sandbox directory the MCP server cannot read. The path the host then hands the agent (something like `/mnt/user-data/uploads/abc.pdf`) is meaningless to a separately-running `npx` MCP process, so `file_path` calls fail with a filesystem error.
+
+`@talonic/mcp@0.1.4` and later solve this by accepting **`file_data`** (base64-encoded file bytes) and **`filename`** on `talonic_extract` and `talonic_to_markdown`. The agent reads the file bytes from the conversation, base64-encodes them, and passes them through the MCP tool call. The MCP server decodes, infers MIME type from the filename, and uploads to the Talonic API as a normal multipart request. The file never has to live on the MCP server's disk.
+
+Tool descriptions advertise `file_data` as the recommended input for chat-style clients, so well-trained agents will reach for it automatically. No client-side configuration is required beyond installing `@talonic/mcp@latest` (or `@0.1.4` or newer) as documented above.
 
 ## How it works
 
