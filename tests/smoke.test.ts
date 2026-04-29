@@ -5,7 +5,7 @@ import { main } from "../src/server"
 
 describe("@talonic/mcp scaffold", () => {
   it("exports a stable VERSION and SERVER_NAME", () => {
-    expect(VERSION).toBe("0.1.2")
+    expect(VERSION).toBe("0.1.3")
     expect(SERVER_NAME).toBe("talonic")
   })
 
