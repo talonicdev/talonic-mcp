@@ -49,15 +49,12 @@ describe("MCP server bin via symlink (regression: import.meta.url guard)", () =>
     },
   )
 
-  it.skipIf(!distExists)(
-    "prints help when the symlinked server is invoked with --help",
-    () => {
-      const result = spawnSync(process.execPath, [symlinkPath, "--help"], {
-        encoding: "utf8",
-      })
-      expect(result.status).toBe(0)
-      expect(result.stdout).toContain("USAGE")
-      expect(result.stdout).toContain("TALONIC_API_KEY")
-    },
-  )
+  it.skipIf(!distExists)("prints help when the symlinked server is invoked with --help", () => {
+    const result = spawnSync(process.execPath, [symlinkPath, "--help"], {
+      encoding: "utf8",
+    })
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("USAGE")
+    expect(result.stdout).toContain("TALONIC_API_KEY")
+  })
 })
