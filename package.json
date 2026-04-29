@@ -1,6 +1,6 @@
 {
   "name": "@talonic/mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the Model Context Protocol.",
   "license": "MIT",
   "author": "Talonic GmbH <info@talonic.ai> (https://talonic.com)",
