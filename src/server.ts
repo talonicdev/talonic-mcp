@@ -9,6 +9,8 @@
  * @internal
  */
 
+import { realpathSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "./server-factory.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -87,7 +89,34 @@ export async function main(
   return 0
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * True when this module is the process entry point.
+ *
+ * `process.argv[1]` is the path the OS handed to `node` (often a symlink
+ * inside `node_modules/.bin/`), while `import.meta.url` reflects the
+ * resolved module URL. Comparing them as strings is brittle: when the
+ * server is launched via the npm-managed bin symlink (or via `npx`) the
+ * two disagree, and the guard incorrectly returns `false`, so `main()`
+ * never runs and the server exits silently.
+ *
+ * Resolving both sides with `realpathSync` makes the comparison robust
+ * against symlinks while still preventing auto-run when the module is
+ * imported (e.g. from tests).
+ *
+ * @internal
+ */
+function isDirectInvocation(): boolean {
+  if (!process.argv[1]) return false
+  try {
+    const argvPath = realpathSync(process.argv[1])
+    const metaPath = realpathSync(fileURLToPath(import.meta.url))
+    return argvPath === metaPath
+  } catch {
+    return false
+  }
+}
+
+if (isDirectInvocation()) {
   main().then((code) => {
     if (code !== 0) process.exit(code)
   })
