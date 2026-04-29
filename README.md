@@ -2,7 +2,7 @@
 
 Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io).
 
-> **Status:** v0.1.0 with seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource.
+> **Status:** v0.1.3. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
 
 ## Why an agent should use this
 
@@ -20,41 +20,19 @@ Each user runs against their own isolated Talonic workspace. Your documents and 
 
 ## Install
 
-There are two paths today: a local-checkout path that works right now, and a one-line `npx` path that becomes available once we publish to npm.
-
-### A. Local checkout (works today)
-
-```bash
-# 1. Clone the SDK and the MCP server
-git clone https://github.com/talonicdev/talonic-node.git
-git clone https://github.com/talonicdev/talonic-mcp.git
-
-# 2. Build the SDK (the MCP server depends on it)
-cd talonic-node
-npm install
-npm run build
-
-# 3. Build the MCP server
-cd ../talonic-mcp
-npm install
-npm run build
-```
-
-Then point your MCP client at the absolute path to `dist/server.js`. Snippets per client below.
-
-### B. Published npm package (coming soon)
-
-Once `@talonic/mcp` is on npm, the install becomes:
+The package is on npm. Every MCP client launches it the same way: a one-line `npx` invocation with your API key in the `env` block. No clone, no build.
 
 ```jsonc
 {
   "command": "npx",
-  "args": ["-y", "@talonic/mcp"],
+  "args": ["-y", "@talonic/mcp@latest"],
   "env": { "TALONIC_API_KEY": "tlnc_..." }
 }
 ```
 
-No clone, no build. The `-y` flag skips the install prompt.
+The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart. To pin to a specific version, replace `@latest` with `@0.1.3`.
+
+Per-client snippets are below.
 
 ## MCP client setup
 
@@ -66,8 +44,8 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 {
   "mcpServers": {
     "talonic": {
-      "command": "node",
-      "args": ["/absolute/path/to/talonic-mcp/dist/server.js"],
+      "command": "npx",
+      "args": ["-y", "@talonic/mcp@latest"],
       "env": {
         "TALONIC_API_KEY": "tlnc_your_key_here"
       }
@@ -76,7 +54,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Restart Claude Desktop. Talonic appears in the connected servers list with all seven tools.
+Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools.
 
 ### Cursor
 
@@ -86,8 +64,8 @@ Edit `~/.cursor/mcp.json` (or open Cursor settings → MCP → edit config):
 {
   "mcpServers": {
     "talonic": {
-      "command": "node",
-      "args": ["/absolute/path/to/talonic-mcp/dist/server.js"],
+      "command": "npx",
+      "args": ["-y", "@talonic/mcp@latest"],
       "env": {
         "TALONIC_API_KEY": "tlnc_your_key_here"
       }
@@ -107,8 +85,8 @@ Edit `~/.continue/config.json`. Add to the `mcpServers` array:
 ```json
 {
   "name": "talonic",
-  "command": "node",
-  "args": ["/absolute/path/to/talonic-mcp/dist/server.js"],
+  "command": "npx",
+  "args": ["-y", "@talonic/mcp@latest"],
   "env": {
     "TALONIC_API_KEY": "tlnc_your_key_here"
   }
@@ -117,7 +95,7 @@ Edit `~/.continue/config.json`. Add to the `mcpServers` array:
 
 ### Cowork
 
-Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Desktop.
+Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Desktop above.
 
 ## Tool reference
 
@@ -125,7 +103,7 @@ Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT U
 
 - **`talonic_extract`** — Extract structured, schema-validated data from a document. Inputs: one of `file_path`, `file_url`, `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.
 - **`talonic_search`** — Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
-- **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Field names are auto-resolved to internal IDs.
+- **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Field names are auto-resolved to internal IDs (currently limited on production; see [Known limitations](#known-limitations-v01) for the recommended workaround).
 - **`talonic_get_document`** — Fetch full metadata for a single document by id, including processing log and link URLs.
 - **`talonic_to_markdown`** — Get OCR-converted markdown for a document already in the workspace.
 - **`talonic_list_schemas`** — List all saved schemas with their definitions.
@@ -160,7 +138,7 @@ Set via the `env` block in your MCP client config:
 The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing the config, fully restart the client (not just the conversation).
 
 **Talonic does not appear in the connected servers list.**
-Check the absolute path in `args` is correct and that `dist/server.js` exists. Try running it directly: `node /absolute/path/to/talonic-mcp/dist/server.js --version`. It should print `talonic 0.1.0`.
+Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print `talonic 0.1.3` (or newer). If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
 
 **`talonic_extract` returns 500 INTERNAL_ERROR with auto-discovery.**
 Known limitation. Always provide either an inline `schema` or a `schema_id`. The platform team is stabilising the auto-discovery code path.
@@ -169,17 +147,36 @@ Known limitation. Always provide either an inline `schema` or a `schema_id`. The
 The MIME type was inferred as `application/octet-stream`. The SDK now infers from common file extensions; if your filename has an unusual extension, pass `content_type` explicitly to the SDK call (the MCP layer does not yet expose this; a future tool version will).
 
 **`talonic_filter` errors with `field_not_found`.**
-The field name does not exist in your workspace yet. Run `talonic_search` or `talonic_list_schemas` first to discover available field names.
+Field-name resolution against `/v1/fields?search=` is currently limited on production: even names that `talonic_search` returns as live `displayName` / `canonicalName` values can fail. Until the API-side resolver is improved, the reliable path is to pass `field_id` directly. Get the id from a `talonic_search` response (`fields[].id`) and use the `field_id` parameter instead of `field` in your filter condition.
 
 **Tool descriptions look wrong in my client.**
 Some MCP clients cache tool descriptions. Restart the client after a server update.
 
 ## Known limitations (v0.1)
 
-- Auto-discovery extract (no schema) is not reliable on production. Always pass a schema.
-- The simplified-fields schema format `{ fields: [...] }` is unstable on production. Use flat-map (`{ vendor_name: "string", ... }`) or full JSON Schema.
-- `talonic_to_markdown` requires an existing `document_id`. To convert a fresh file, call `talonic_extract` first with a minimal schema, then `talonic_to_markdown` with the resulting `document.id`.
-- The `@talonic/node` SDK is not yet on npm; install via local checkout for now.
+- **Auto-discovery extract (no schema) is not reliable on production.** Always pass a `schema` or `schema_id` to `talonic_extract`.
+- **Only the full JSON Schema format is reliable today.** The flat key-type map (`{ vendor_name: "string", ... }`) is silently accepted by the API but currently saves with empty `properties`. The `{ fields: [...] }` simplified format is also unstable. Until the API normalises the simpler shapes, pass full JSON Schema:
+  ```json
+  {
+    "type": "object",
+    "properties": {
+      "vendor_name": { "type": "string", "title": "Vendor Name" },
+      "total_amount": { "type": "number", "title": "Total Amount" }
+    },
+    "required": ["vendor_name", "total_amount"]
+  }
+  ```
+- **`talonic_filter` field-name resolution is limited on production.** Even names returned live by `talonic_search` can fail with `field_not_found`. Until the API-side resolver is improved, pass `field_id` directly (the value of `fields[].id` from a `talonic_search` response).
+
+## Upgrading from 0.1.0 / 0.1.1 / 0.1.2
+
+Versions before `0.1.3` had a bug where the bundled MCP server bin would exit silently when launched via the npm bin symlink, which is exactly how every MCP client invokes it via `npx`. If your client config is on an older version and you see no `talonic_*` tools surface despite the config looking correct, you are hitting that bug.
+
+The fix is to point your `args` at `@latest` (or `@0.1.3` explicitly) and fully restart the client:
+
+```jsonc
+"args": ["-y", "@talonic/mcp@latest"]
+```
 
 ## Develop
 
