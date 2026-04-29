@@ -34,7 +34,7 @@
     }
   },
   "bin": {
-    "talonic-mcp": "./dist/server.js"
+    "talonic-mcp": "dist/server.js"
   },
   "files": [
     "dist",
@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@talonic/node": "file:../talonic-node",
+    "@talonic/node": "^0.1.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
