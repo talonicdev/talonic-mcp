@@ -4,7 +4,7 @@
  *
  * @public
  */
-export const VERSION = "0.1.0"
+export const VERSION = "0.1.2"
 
 /**
  * The MCP server name. Identifies the server to MCP clients (Claude

@@ -130,17 +130,32 @@ describe("talonic_filter handler", () => {
     expect(body.conditions[0]?.value).toBe("Acme")
   })
 
-  it("passes a field name straight through as fieldId (no autocomplete dance)", async () => {
-    const { talonic, fetchFn } = makeTalonic({ documents: [], total: 0 })
+  it("resolves a field name to a UUID via /v1/fields?search=, then filters", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: [{ id: "fld-uuid-vendor", canonical_name: "vendor_name" }],
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ documents: [], total: 0 }))
+    const talonic = new Talonic({
+      apiKey: "k",
+      fetch: fetchFn as unknown as typeof fetch,
+      maxRetries: 0,
+    })
+
     await handleFilter(talonic, {
       conditions: [{ field: "vendor_name", operator: "eq", value: "Acme" }],
     })
-    expect(fetchFn).toHaveBeenCalledOnce()
-    expect(fetchFn.mock.calls[0]?.[0]).toContain("/v1/documents/filter")
-    const body = JSON.parse((fetchFn.mock.calls[0]?.[1] as { body: string }).body) as {
+
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("/v1/fields")
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("search=vendor_name")
+    expect(fetchFn.mock.calls[1]?.[0]).toContain("/v1/documents/filter")
+    const body = JSON.parse((fetchFn.mock.calls[1]?.[1] as { body: string }).body) as {
       conditions: Array<{ fieldId: string }>
     }
-    expect(body.conditions[0]?.fieldId).toBe("vendor_name")
+    expect(body.conditions[0]?.fieldId).toBe("fld-uuid-vendor")
   })
 
   it("forwards search, sort, page, limit, source as source_id", async () => {
@@ -163,13 +178,57 @@ describe("talonic_filter handler", () => {
 })
 
 describe("talonic_to_markdown handler", () => {
-  it("calls GET /v1/documents/:id/markdown", async () => {
+  it("with document_id calls GET /v1/documents/:id/markdown directly", async () => {
     const { talonic, fetchFn } = makeTalonic({ document_id: "doc_1", markdown: "# Hello" })
     const result = await handleToMarkdown(talonic, { document_id: "doc_1" })
     const url = lastCall(fetchFn)[0]
     expect(url).toContain("/v1/documents/doc_1/markdown")
+    expect(fetchFn).toHaveBeenCalledOnce()
     const parsed = parsedText(result) as { markdown: string }
     expect(parsed.markdown).toBe("# Hello")
+  })
+
+  it("with file_url ingests via /v1/extract first, then fetches markdown", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          extraction_id: "ingested-1",
+          status: "complete",
+          document: { id: "doc-from-url", filename: "remote.pdf" },
+          data: {},
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ document_id: "doc-from-url", markdown: "# Hi" }))
+    const talonic = new Talonic({
+      apiKey: "k",
+      fetch: fetchFn as unknown as typeof fetch,
+      maxRetries: 0,
+    })
+
+    const result = await handleToMarkdown(talonic, { file_url: "https://example.com/x.pdf" })
+
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("/v1/extract")
+    expect(fetchFn.mock.calls[1]?.[0]).toContain("/v1/documents/doc-from-url/markdown")
+    const parsed = parsedText(result) as { markdown: string }
+    expect(parsed.markdown).toBe("# Hi")
+  })
+
+  it("rejects when no input is provided", async () => {
+    const { talonic } = makeTalonic({})
+    const result = await handleToMarkdown(talonic, {})
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/document_id/)
+  })
+
+  it("rejects when multiple inputs are provided", async () => {
+    const { talonic } = makeTalonic({})
+    const result = await handleToMarkdown(talonic, {
+      document_id: "doc_1",
+      file_url: "https://x",
+    })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/exactly one/)
   })
 })
 
