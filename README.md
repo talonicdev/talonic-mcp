@@ -2,7 +2,7 @@
 
 Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io).
 
-> **Status:** v0.1.5. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
+> **Status:** v0.1.6. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
 
 ## Why an agent should use this
 
@@ -146,7 +146,7 @@ Set via the `env` block in your MCP client config:
 The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing the config, fully restart the client (not just the conversation).
 
 **Talonic does not appear in the connected servers list.**
-Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print `talonic 0.1.5` (or newer). If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
+Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print `talonic 0.1.6` (or newer). If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
 
 **`talonic_extract` returns 500 INTERNAL_ERROR with auto-discovery.**
 Known limitation. Always provide either an inline `schema` or a `schema_id`. The platform team is stabilising the auto-discovery code path.
