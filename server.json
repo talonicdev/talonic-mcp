@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.talonicdev/talonic-mcp",
+  "title": "Talonic",
+  "description": "Extract structured, schema-validated data from PDFs, scans, images, spreadsheets, and forms.",
+  "websiteUrl": "https://talonic.com",
+  "repository": {
+    "url": "https://github.com/talonicdev/talonic-mcp",
+    "source": "github"
+  },
+  "version": "0.1.6",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@talonic/mcp",
+      "version": "0.1.6",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "TALONIC_API_KEY",
+          "description": "Your Talonic API key. Get one at https://app.talonic.com.",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
