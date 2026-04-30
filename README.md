@@ -2,7 +2,7 @@
 
 Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io).
 
-> **Status:** v0.1.3. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
+> **Status:** v0.1.5. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
 
 ## Why an agent should use this
 
@@ -103,7 +103,7 @@ Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT U
 
 - **`talonic_extract`** — Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.
 - **`talonic_search`** — Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
-- **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Field names are auto-resolved to internal IDs (currently limited on production; see [Known limitations](#known-limitations-v01) for the recommended workaround).
+- **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to ids server-side, or UUIDs directly. The `is_not_empty` operator currently underreports; see [Known limitations](#known-limitations-v01).
 - **`talonic_get_document`** — Fetch full metadata for a single document by id, including processing log and link URLs.
 - **`talonic_to_markdown`** — Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`.
 - **`talonic_list_schemas`** — List all saved schemas with their definitions.
@@ -146,7 +146,7 @@ Set via the `env` block in your MCP client config:
 The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing the config, fully restart the client (not just the conversation).
 
 **Talonic does not appear in the connected servers list.**
-Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print `talonic 0.1.3` (or newer). If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
+Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print `talonic 0.1.5` (or newer). If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
 
 **`talonic_extract` returns 500 INTERNAL_ERROR with auto-discovery.**
 Known limitation. Always provide either an inline `schema` or a `schema_id`. The platform team is stabilising the auto-discovery code path.
@@ -154,8 +154,11 @@ Known limitation. Always provide either an inline `schema` or a `schema_id`. The
 **`talonic_extract` rejects with `unsupported_file_type`.**
 The MIME type was inferred as `application/octet-stream`. The SDK now infers from common file extensions; if your filename has an unusual extension, pass `content_type` explicitly to the SDK call (the MCP layer does not yet expose this; a future tool version will).
 
-**`talonic_filter` errors with `field_not_found`.**
-Field-name resolution against `/v1/fields?search=` is currently limited on production: even names that `talonic_search` returns as live `displayName` / `canonicalName` values can fail. Until the API-side resolver is improved, the reliable path is to pass `field_id` directly. Get the id from a `talonic_search` response (`fields[].id`) and use the `field_id` parameter instead of `field` in your filter condition.
+**`talonic_filter` errors with `VALIDATION_ERROR` / "No field matches name".**
+You passed a `field` value the API does not know. Field names must be canonical names from the field registry (e.g. `vendor.name`, `policy.0_term_end`). Call `talonic_search` first; the canonical names appear in `fields[].canonicalName` of the response. You can also pass a UUID via `field_id` if you have one.
+
+**`talonic_filter` returns no results when you expect data.**
+The `is_not_empty` operator currently underreports. Use a more specific operator (`eq`, `gt`, `gte`, `lt`, `lte`, `between`, `contains`) against a known value when possible.
 
 **Tool descriptions look wrong in my client.**
 Some MCP clients cache tool descriptions. Restart the client after a server update.
@@ -163,7 +166,7 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
 ## Known limitations (v0.1)
 
 - **Auto-discovery extract (no schema) is not reliable on production.** Always pass a `schema` or `schema_id` to `talonic_extract`.
-- **Only the full JSON Schema format is reliable today.** The flat key-type map (`{ vendor_name: "string", ... }`) is silently accepted by the API but currently saves with empty `properties`. The `{ fields: [...] }` simplified format is also unstable. Until the API normalises the simpler shapes, pass full JSON Schema:
+- **Schema definition: prefer full JSON Schema for now.** The flat key-type map (`{ vendor_name: "string", ... }`) is documented as supported and the API's own error message lists it as accepted, but as of writing the server-side normaliser does not actually translate it. If a flat-map save returns a "no fields" error, fall back to:
   ```json
   {
     "type": "object",
@@ -174,7 +177,8 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
     "required": ["vendor_name", "total_amount"]
   }
   ```
-- **`talonic_filter` field-name resolution is limited on production.** Even names returned live by `talonic_search` can fail with `field_not_found`. Until the API-side resolver is improved, pass `field_id` directly (the value of `fields[].id` from a `talonic_search` response).
+- **`is_not_empty` filter currently underreports.** A condition with `operator: "is_not_empty"` may return zero documents even when fields are populated. Use specific operators (`eq`, `gt`, `gte`, `lt`, `lte`, `between`, `contains`) against known values instead.
+- **`schema_id` on `talonic_extract` requires the UUID form.** Other endpoints accept either UUID or `SCH-XXXXXXXX`, but `/v1/extract` currently only accepts UUIDs there. Pass the UUID from `talonic_list_schemas`.
 
 ## Upgrading from 0.1.0 / 0.1.1 / 0.1.2
 

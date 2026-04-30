@@ -130,32 +130,19 @@ describe("talonic_filter handler", () => {
     expect(body.conditions[0]?.value).toBe("Acme")
   })
 
-  it("resolves a field name to a UUID via /v1/fields?search=, then filters", async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValueOnce(
-        jsonResponse({
-          data: [{ id: "fld-uuid-vendor", canonical_name: "vendor_name" }],
-        }),
-      )
-      .mockResolvedValueOnce(jsonResponse({ documents: [], total: 0 }))
-    const talonic = new Talonic({
-      apiKey: "k",
-      fetch: fetchFn as unknown as typeof fetch,
-      maxRetries: 0,
-    })
-
+  it("passes a canonical field name straight through to the API in fieldId", async () => {
+    const { talonic, fetchFn } = makeTalonic({ documents: [], total: 0 })
     await handleFilter(talonic, {
-      conditions: [{ field: "vendor_name", operator: "eq", value: "Acme" }],
+      conditions: [{ field: "vendor.name", operator: "eq", value: "Acme" }],
     })
 
-    expect(fetchFn.mock.calls[0]?.[0]).toContain("/v1/fields")
-    expect(fetchFn.mock.calls[0]?.[0]).toContain("search=vendor_name")
-    expect(fetchFn.mock.calls[1]?.[0]).toContain("/v1/documents/filter")
-    const body = JSON.parse((fetchFn.mock.calls[1]?.[1] as { body: string }).body) as {
+    // No /v1/fields lookup: the API resolves canonical names server-side.
+    expect(fetchFn).toHaveBeenCalledOnce()
+    expect(lastCall(fetchFn)[0]).toContain("/v1/documents/filter")
+    const body = JSON.parse(lastCall(fetchFn)[1].body as string) as {
       conditions: Array<{ fieldId: string }>
     }
-    expect(body.conditions[0]?.fieldId).toBe("fld-uuid-vendor")
+    expect(body.conditions[0]?.fieldId).toBe("vendor.name")
   })
 
   it("forwards search, sort, page, limit, source as source_id", async () => {

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-04-30
+
+### Changed
+
+- `@talonic/node` dependency bumped to `^0.1.3`. Picks up the SDK refactor that drops local field-name pre-resolution; canonical names like `vendor.name` are now passed straight through to the API for server-side resolution.
+- `talonic_filter` description: documents that the API now resolves canonical field names server-side, and flags that `is_not_empty` currently underreports.
+- `talonic_extract` description: re-introduces the flat key-type map as an accepted schema format with a fallback note (the API documents it; if normalisation fails, the agent should retry with full JSON Schema).
+- `talonic_save_schema` description: same treatment as `talonic_extract`, plus mention that responses include `short_id` (e.g. `SCH-XXXXXXXX`) alongside the UUID.
+
+### Fixed in upstream API (no MCP change required)
+
+- `file_data` multipart uploads to `/v1/extract` no longer return `422 No document text available`.
+- Error responses from `/v1/extract`, `/v1/schemas`, and `/v1/documents/filter` now include `request_id` and a useful `message`.
+- `/v1/schemas/:id` accepts both UUIDs and `SCH-XXXXXXXX` short ids; responses include the `short_id` field.
+
+### Known issues (still open at upstream)
+
+- Schema flat-map normalisation rejects valid flat-map definitions with "Schema definition produced no fields" despite advertising the format. Workaround: send full JSON Schema.
+- `is_not_empty` filter operator returns empty results for fields known to be populated.
+- `/v1/extract` `schema_id` does not accept the SCH- short form yet; UUID required.
+
 ## [0.1.4] - 2026-04-29
 
 ### Added

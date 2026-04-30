@@ -5,7 +5,8 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
   "Filter the user's Talonic documents by extracted field values using composable conditions.",
-  "Conditions accept field names (e.g. 'vendor_name'); the SDK resolves them to internal field IDs.",
+  "Conditions accept either a canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type')",
+  "or a field UUID. The Talonic API resolves names to ids server-side.",
   "",
   "USE WHEN:",
   "- The user wants documents matching specific structured criteria, like 'invoices over 1000 EUR'",
@@ -23,9 +24,14 @@ const DESCRIPTION = [
   "- gt, gte, lt, lte: numeric or date comparisons",
   "- between: requires both `value` and `value_to`",
   "- contains: substring match on string fields",
-  "- is_empty, is_not_empty: presence checks (no value needed)",
+  "- is_empty: presence check (no value needed)",
+  "- is_not_empty: presence check (no value needed). Note: currently underreports;",
+  "  use `eq` / `gt` / `contains` etc. against a known value when possible.",
   "",
-  "TIP: To discover available field names, call talonic_search first with a related query.",
+  "TIPS:",
+  "- To discover available field names, call talonic_search first with a related query.",
+  "  fields[].canonicalName from the response is what to pass as `field` here.",
+  "- Both `field` (name) and `field_id` (UUID) reach the API as `fieldId`. Either is fine.",
 ].join("\n")
 
 const operatorEnum = z.enum([
@@ -45,11 +51,10 @@ const conditionSchema = z.object({
   field: z
     .string()
     .optional()
-    .describe("Field name (e.g. 'vendor_name'). Resolved to a fieldId automatically."),
-  field_id: z
-    .string()
-    .optional()
-    .describe("Talonic field id (e.g. 'fld_abc'). Use this if you already have it."),
+    .describe(
+      "Canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type'). The Talonic API resolves names to ids server-side. Mutually exclusive with `field_id`.",
+    ),
+  field_id: z.string().optional().describe("Talonic field UUID. Mutually exclusive with `field`."),
   operator: operatorEnum.describe("Comparison operator. See description for the full list."),
   value: z.unknown().optional().describe("Value to compare against."),
   value_to: z

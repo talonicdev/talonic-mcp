@@ -5,7 +5,7 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
   "Save a schema definition to the user's Talonic workspace so it can be reused",
-  "across future extractions. Returns the saved schema with its newly assigned id.",
+  "across future extractions. Returns the saved schema with its newly assigned id and short_id.",
   "",
   "USE WHEN:",
   "- The user asks to save a schema, store a template, or reuse the schema across docs.",
@@ -16,7 +16,11 @@ const DESCRIPTION = [
   "- The user just wants to extract once with an inline schema (call talonic_extract directly with the schema inline).",
   "- The user has not confirmed the schema design (avoid creating clutter in their workspace).",
   "",
-  "TIP: After saving, call talonic_extract with `schema_id` set to the returned id for consistent results.",
+  "DEFINITION FORMATS:",
+  '- JSON Schema (most reliable): { type: "object", properties: { vendor_name: { type: "string" } } }',
+  '- Flat key-type map: { vendor_name: "string", invoice_total: "number" } -- API normalises server-side. If you get a "no fields" error from the API, fall back to JSON Schema.',
+  "",
+  "TIP: After saving, call talonic_extract with `schema_id` set to the returned id (UUID or SCH- short id) for consistent results.",
 ].join("\n")
 
 const inputSchema = {
@@ -24,7 +28,7 @@ const inputSchema = {
   definition: z
     .record(z.string(), z.unknown())
     .describe(
-      "Schema definition. Accepts JSON Schema, simplified fields ({fields:[...]}), or a flat key-type map.",
+      "Schema definition. Most reliable: full JSON Schema {type:'object', properties:{...}}. Also accepted: a flat key-type map {field_name:'string', amount:'number'} which the API normalises.",
     ),
   description: z
     .string()

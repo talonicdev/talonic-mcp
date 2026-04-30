@@ -32,8 +32,9 @@ const DESCRIPTION = [
   "- document_id: re-extract a document already in the workspace.",
   "",
   "SCHEMA FORMATS (provide at most one of `schema` or `schema_id`):",
-  '- JSON Schema (recommended): { type: "object", properties: { vendor_name: { type: "string" } } }',
-  "- schema_id: id of a saved schema from talonic_list_schemas",
+  '- JSON Schema (most reliable): { type: "object", properties: { vendor_name: { type: "string" } } }',
+  '- Flat key-type map: { vendor_name: "string", invoice_total: "number" } -- API normalises server-side. If you get a "no fields" error, fall back to JSON Schema.',
+  "- schema_id: id of a saved schema from talonic_list_schemas. Accepts the UUID or the SCH-XXXXXXXX short id.",
   "",
   "IMPORTANT: production currently rejects requests with no schema. Always provide either",
   "an inline `schema` or a `schema_id`.",
@@ -72,12 +73,14 @@ const inputSchema = {
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      "Inline schema definition. Use full JSON Schema: { type: 'object', properties: { ... } }.",
+      "Inline schema definition. Most reliable: full JSON Schema {type:'object', properties:{...}}. Also accepted: a flat key-type map {field_name:'string', amount:'number'} which the API normalises. Mutually exclusive with `schema_id`.",
     ),
   schema_id: z
     .string()
     .optional()
-    .describe("ID of a saved schema. Mutually exclusive with `schema`."),
+    .describe(
+      "ID of a saved schema. Accepts UUID or SCH-XXXXXXXX short id. Mutually exclusive with `schema`.",
+    ),
   instructions: z
     .string()
     .optional()
