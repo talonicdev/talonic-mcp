@@ -1,5 +1,16 @@
 import type { RawSection } from '../types';
 
+const MCP_HOSTED_SNIPPET = `{
+  "mcpServers": {
+    "talonic": {
+      "url": "https://mcp.talonic.com/mcp",
+      "headers": {
+        "Authorization": "Bearer tlnc_your_key_here"
+      }
+    }
+  }
+}`;
+
 const MCP_CONFIG_SNIPPET = `{
   "mcpServers": {
     "talonic": {
@@ -20,20 +31,28 @@ export const sections: RawSection[] = [
     seoTitle: 'Install Talonic MCP — Talonic Docs',
     description: 'Install the Talonic MCP server with a one-line npx invocation. No clone, no build. Works with every MCP client.',
     content: [
-      { type: 'paragraph', text: 'The package is on npm. Every MCP client launches it the same way: a one-line `npx` invocation with your API key in the `env` block. No clone, no build.' },
-      { type: 'code', language: 'jsonc', title: 'Universal config shape', code: `{
+      { type: 'paragraph', text: 'Two ways to connect. The hosted server at `mcp.talonic.com` requires zero install — paste one URL into any MCP client. Or run locally via `npx` if you prefer.' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'paragraph', text: 'No install, no Node.js required. Works with every MCP client that supports remote servers:' },
+      { type: 'code', language: 'jsonc', title: 'Hosted config', code: `{
+  "url": "https://mcp.talonic.com/mcp",
+  "headers": { "Authorization": "Bearer tlnc_..." }
+}` },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'paragraph', text: 'Runs on your machine. Requires Node.js 18+:' },
+      { type: 'code', language: 'jsonc', title: 'Local config', code: `{
   "command": "npx",
   "args": ["-y", "@talonic/mcp@latest"],
   "env": { "TALONIC_API_KEY": "tlnc_..." }
 }` },
-      { type: 'paragraph', text: 'The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart. To pin to a specific version, replace `@latest` with `@0.1.6`.' },
+      { type: 'paragraph', text: 'The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart.' },
     ],
     related: [
       { label: 'Claude Desktop', slug: 'claude-desktop' },
       { label: 'Cursor', slug: 'cursor' },
     ],
     faq: [
-      { question: 'How do I install the Talonic MCP server?', answer: 'Add a one-line npx invocation to your MCP client config: command "npx", args ["-y", "@talonic/mcp@latest"], with your API key in the env block. No clone or build needed.' },
+      { question: 'How do I install the Talonic MCP server?', answer: 'Use the hosted server at mcp.talonic.com/mcp — just set the URL and your API key in any MCP client config. No install needed. Alternatively, run locally via npx @talonic/mcp.' },
     ],
     mentions: ['npx', 'npm', 'MCP client', 'install'],
   },
@@ -44,7 +63,10 @@ export const sections: RawSection[] = [
     seoTitle: 'Claude Desktop Setup — Talonic MCP',
     description: 'Configure the Talonic MCP server in Claude Desktop on macOS and Windows.',
     content: [
-      { type: 'paragraph', text: 'Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows):' },
+      { type: 'paragraph', text: 'Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows).' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
       { type: 'paragraph', text: 'Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools.' },
     ],
@@ -65,6 +87,9 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Cursor IDE.',
     content: [
       { type: 'paragraph', text: 'Edit `~/.cursor/mcp.json` (or open Cursor settings → MCP → edit config):' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
@@ -83,7 +108,10 @@ export const sections: RawSection[] = [
     seoTitle: 'Cline Setup — Talonic MCP',
     description: 'Configure the Talonic MCP server in the Cline VS Code extension.',
     content: [
-      { type: 'paragraph', text: 'Open the Cline panel → settings (gear icon) → MCP Servers → Edit. Add the standard config entry. Save and restart the panel.' },
+      { type: 'paragraph', text: 'Open the Cline panel → settings (gear icon) → MCP Servers → Edit. Save and restart the panel.' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
@@ -103,6 +131,15 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Continue for VS Code and JetBrains.',
     content: [
       { type: 'paragraph', text: 'Edit `~/.continue/config.json`. Add to the `mcpServers` array:' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'code', language: 'json', code: `{
+  "name": "talonic",
+  "url": "https://mcp.talonic.com/mcp",
+  "headers": {
+    "Authorization": "Bearer tlnc_your_key_here"
+  }
+}` },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
       { type: 'code', language: 'json', code: `{
   "name": "talonic",
   "command": "npx",
@@ -128,7 +165,10 @@ export const sections: RawSection[] = [
     seoTitle: 'Cowork Setup — Talonic MCP',
     description: 'Configure the Talonic MCP server in Cowork.',
     content: [
-      { type: 'paragraph', text: 'Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Desktop above.' },
+      { type: 'paragraph', text: 'Open Cowork settings → MCP Servers → Add.' },
+      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
+      { type: 'heading', level: 3, text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
