@@ -45,8 +45,11 @@ export function derivePrevNext(
   const idx = flat.findIndex((c) => c.id === leafId);
   if (idx === -1) return { prev: null, next: null };
 
+  const prevItem = idx > 0 ? flat[idx - 1] : undefined;
+  const nextItem = idx < flat.length - 1 ? flat[idx + 1] : undefined;
+
   return {
-    prev: idx > 0 ? { slug: flat[idx - 1].id, label: flat[idx - 1].label } : null,
-    next: idx < flat.length - 1 ? { slug: flat[idx + 1].id, label: flat[idx + 1].label } : null,
+    prev: prevItem ? { slug: prevItem.id, label: prevItem.label } : null,
+    next: nextItem ? { slug: nextItem.id, label: nextItem.label } : null,
   };
 }
