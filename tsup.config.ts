@@ -31,4 +31,17 @@ export default defineConfig([
     banner: { js: "#!/usr/bin/env node" },
     external: ["@modelcontextprotocol/sdk", "@talonic/node"],
   },
+  // HTTP server entry: hosted MCP endpoint for Railway / container deploys.
+  // Invoked via `node dist/http-server.js`.
+  {
+    entry: { "http-server": "src/http-server.ts" },
+    format: ["esm"],
+    sourcemap: true,
+    target: "node18",
+    outDir: "dist",
+    splitting: false,
+    treeshake: true,
+    minify: false,
+    external: ["@modelcontextprotocol/sdk", "@talonic/node"],
+  },
 ])
