@@ -5,6 +5,13 @@
  * deployment on Railway (or any container host) behind a custom domain
  * like `mcp.talonic.com`.
  *
+ * Runs in **stateful mode** with in-memory sessions. Each initialize
+ * request creates a new session keyed by a UUID. Subsequent requests
+ * with the same Mcp-Session-Id are routed to the existing session.
+ * If a session is lost (deploy, restart, or edge routing miss), the
+ * server returns 404 and the client re-initializes — standard MCP
+ * reconnection behavior.
+ *
  * Supports two auth modes:
  *   1. Authorization: Bearer tlnc_...
  *   2. ?apiKey=tlnc_... query param (convenience for MCP client configs)
@@ -15,6 +22,7 @@
 import { createServer as createHttpServer } from "node:http"
 import { randomUUID } from "node:crypto"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
+import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { createServer } from "./server-factory.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -81,6 +89,19 @@ const httpServer = createHttpServer(async (req, res) => {
     return
   }
 
+  // ── DELETE: explicit session termination ────────────────────────────
+  if (req.method === "DELETE") {
+    const sid = req.headers["mcp-session-id"] as string | undefined
+    if (sid && sessions.has(sid)) {
+      const session = sessions.get(sid)!
+      await session.transport.close()
+      sessions.delete(sid)
+    }
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
   // ── Auth ───────────────────────────────────────────────────────────
   const apiKey = extractApiKey(req)
   if (!apiKey) {
@@ -89,24 +110,43 @@ const httpServer = createHttpServer(async (req, res) => {
     return
   }
 
-  // ── Session lookup or creation ────────────────────────────────────
+  // ── Session lookup ────────────────────────────────────────────────
   const sessionId = req.headers["mcp-session-id"] as string | undefined
 
   if (sessionId && sessions.has(sessionId)) {
-    // Existing session — route request to its transport.
     const session = sessions.get(sessionId)!
     await session.transport.handleRequest(req, res)
     return
   }
 
-  if (sessionId && !sessions.has(sessionId)) {
-    // Client sent an unknown session ID — reject per spec.
-    res.writeHead(404, { "Content-Type": "application/json" })
-    res.end(JSON.stringify({ error: "session_not_found", message: "Unknown session. Start a new session without the Mcp-Session-Id header." }))
+  // ── New session (or session lost after restart) ───────────────────
+  // Parse the body to check if it's an initialize request. If a client
+  // sends a non-init request with an unknown session ID, return 404 so
+  // it knows to re-initialize.
+  const body = await new Promise<string>((resolve) => {
+    let data = ""
+    req.on("data", (chunk: Buffer) => { data += chunk.toString() })
+    req.on("end", () => resolve(data))
+  })
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(body)
+  } catch {
+    res.writeHead(400, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({ error: "bad_request", message: "Invalid JSON body." }))
     return
   }
 
-  // ── New session (initialization request) ──────────────────────────
+  // If the client sent a session ID we don't know and it's not an init
+  // request, tell it to re-initialize.
+  if (sessionId && !isInitializeRequest(parsed)) {
+    res.writeHead(404, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({ error: "session_not_found", message: "Unknown session. Re-initialize without the Mcp-Session-Id header." }))
+    return
+  }
+
+  // Create a new session.
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: () => randomUUID(),
   })
@@ -114,17 +154,14 @@ const httpServer = createHttpServer(async (req, res) => {
   const mcpServer = createServer({ apiKey })
   await mcpServer.connect(transport)
 
-  // Track the session.
+  // handleRequest processes the init and generates the session ID.
+  // We must call it first, then read the session ID and store it.
+  await transport.handleRequest(req, res, parsed)
+
   const newSessionId = transport.sessionId
   if (newSessionId) {
     sessions.set(newSessionId, { transport })
-
-    transport.onclose = () => {
-      sessions.delete(newSessionId)
-    }
   }
-
-  await transport.handleRequest(req, res)
 })
 
 httpServer.listen(PORT, () => {
