@@ -60,6 +60,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "rm -rf dist coverage",
     "start": "node dist/server.js",
+    "start:http": "node dist/http-server.js",
     "prepublishOnly": "npm run typecheck && npm run build && npm test"
   },
   "dependencies": {
