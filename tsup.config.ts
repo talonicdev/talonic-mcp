@@ -3,8 +3,9 @@ import { defineConfig } from "tsup"
 export default defineConfig([
   // Library entry: lets other code import @talonic/mcp programmatically
   // (e.g. to embed the server in a custom transport).
+  // Content entry: structured doc data consumed by the website.
   {
-    entry: { index: "src/index.ts" },
+    entry: { index: "src/index.ts", content: "src/content/index.ts" },
     format: ["esm"],
     dts: true,
     sourcemap: true,
