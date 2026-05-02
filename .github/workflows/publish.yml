@@ -81,5 +81,5 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.PLATFORM_DISPATCH_TOKEN }}" \
             https://api.github.com/repos/talonicdev/platform/dispatches \
-            -d '{"event_type":"external-docs-updated","client_payload":{"source":"mcp-server","version":"${{ steps.version.outputs.current }}"}}'
+            -d '{"event_type":"external-docs-updated","client_payload":{"source":"mcp-server","version":"${{ steps.version.outputs.version }}"}}'
         continue-on-error: true
