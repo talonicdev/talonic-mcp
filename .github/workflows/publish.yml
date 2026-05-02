@@ -50,12 +50,17 @@ jobs:
             echo "Version ${CURRENT} not yet published — using as-is"
           fi
 
+      - name: Sync server.json version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > tmp.json && mv tmp.json server.json
+
       - name: Commit version bump
         if: steps.version.outputs.bumped == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
+          git add package.json server.json
           git commit -m "chore: bump @talonic/mcp to ${{ steps.version.outputs.version }} [skip ci]"
           git push
 

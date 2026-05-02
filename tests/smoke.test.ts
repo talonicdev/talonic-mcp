@@ -4,8 +4,10 @@ import { SERVER_NAME, VERSION, createServer } from "../src/index"
 import { main } from "../src/server"
 
 describe("@talonic/mcp scaffold", () => {
-  it("exports a stable VERSION and SERVER_NAME", () => {
-    expect(VERSION).toBe("0.1.6")
+  it("exports a stable VERSION and SERVER_NAME", async () => {
+    // @ts-ignore — JSON import
+    const pkg = await import("../package.json")
+    expect(VERSION).toBe(pkg.version)
     expect(SERVER_NAME).toBe("talonic")
   })
 

@@ -12,7 +12,7 @@ export const sections: RawSection[] = [
       { type: 'paragraph', text: 'The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing the config, fully restart the client (not just the conversation).' },
 
       { type: 'heading', level: 3, id: 'server-not-found', text: 'Talonic does not appear in connected servers' },
-      { type: 'paragraph', text: 'Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. Sanity check: run `npx -y @talonic/mcp@latest --version` in any terminal — it should print `talonic 0.1.6` (or newer).' },
+      { type: 'paragraph', text: 'Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. Sanity check: run `npx -y @talonic/mcp@latest --version` in any terminal — it should print a version number.' },
 
       { type: 'heading', level: 3, id: 'extract-500', text: 'talonic_extract returns 500 with auto-discovery' },
       { type: 'paragraph', text: 'Known limitation. Always provide either an inline `schema` or a `schema_id`. The auto-discovery code path is being stabilised.' },

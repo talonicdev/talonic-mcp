@@ -1,10 +1,13 @@
+// @ts-ignore — JSON import resolved by bundler (tsup/esbuild)
+import pkg from "../package.json" with { type: "json" }
+
 /**
  * The current MCP server version. Sent in the server `info` block during
- * the MCP handshake. Kept in sync with package.json by the release process.
+ * the MCP handshake. Derived from package.json at build time.
  *
  * @public
  */
-export const VERSION = "0.1.6"
+export const VERSION: string = pkg.version
 
 /**
  * The MCP server name. Identifies the server to MCP clients (Claude
