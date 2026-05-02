@@ -1,0 +1,374 @@
+[
+  {
+    "slug": "mcp-introduction",
+    "parentSlug": "mcp-overview",
+    "title": "Introduction",
+    "seoTitle": "MCP Server Introduction — Talonic Docs",
+    "description": "Official Talonic MCP server for AI agents. Seven tools and one resource for structured document extraction via the Model Context Protocol.",
+    "content": [
+      { "type": "paragraph", "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents seven tools for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)." },
+      { "type": "paragraph", "text": "When an agent needs to pull structured data out of a PDF, scan, image, or messy document, the usual approach is raw OCR plus an LLM call. Results are unreliable; tables get mangled, dates get misread, totals drift." },
+      { "type": "paragraph", "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls." },
+      { "type": "callout", "text": "Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`." }
+    ],
+    "related": [
+      { "label": "Installation", "slug": "mcp-installation" },
+      { "label": "Tools", "slug": "mcp-talonic-extract" },
+      { "label": "Node SDK", "slug": "sdk-introduction" }
+    ],
+    "faq": [
+      { "question": "What is the Talonic MCP server?", "answer": "An official Model Context Protocol server that gives AI agents seven tools for document extraction, search, filtering, and schema management via the Talonic API." }
+    ],
+    "mentions": ["MCP", "Model Context Protocol", "AI agents", "document extraction"]
+  },
+  {
+    "slug": "mcp-installation",
+    "parentSlug": "mcp-overview",
+    "title": "Installation",
+    "seoTitle": "Install Talonic MCP Server — Talonic Docs",
+    "description": "Install the Talonic MCP server with a one-line npx invocation. No clone, no build required.",
+    "content": [
+      { "type": "paragraph", "text": "The package is on npm. Every MCP client launches it the same way: a one-line `npx` invocation with your API key in the `env` block. No clone, no build." },
+      { "type": "code", "language": "jsonc", "title": "MCP client config", "code": "{\n  \"command\": \"npx\",\n  \"args\": [\"-y\", \"@talonic/mcp@latest\"],\n  \"env\": { \"TALONIC_API_KEY\": \"tlnc_...\" }\n}" },
+      { "type": "paragraph", "text": "The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart. To pin to a specific version, replace `@latest` with e.g. `@0.1.6`." }
+    ],
+    "related": [
+      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
+      { "label": "Cursor", "slug": "mcp-cursor" },
+      { "label": "Authentication", "slug": "mcp-authentication" }
+    ],
+    "faq": [
+      { "question": "How do I install the Talonic MCP server?", "answer": "Add a one-line npx invocation to your MCP client config. No clone or build required. The -y flag skips prompts and @latest picks up new versions on restart." }
+    ],
+    "mentions": ["npx", "npm", "installation"]
+  },
+  {
+    "slug": "mcp-authentication",
+    "parentSlug": "mcp-overview",
+    "title": "Authentication",
+    "seoTitle": "MCP Authentication — Talonic Docs",
+    "description": "Get a Talonic API key for the MCP server. Each workspace is isolated with private documents and schemas.",
+    "content": [
+      { "type": "paragraph", "text": "Each user runs against their own isolated Talonic workspace. Your documents and schemas are private to you." },
+      { "type": "list", "ordered": true, "items": [
+        "Sign up at [https://app.talonic.com](https://app.talonic.com). Free tier: 50 extractions per day, no credit card.",
+        "Settings &rarr; API Keys &rarr; Create New Key.",
+        "Copy the `tlnc_` value into your MCP client config (see client setup pages)."
+      ]}
+    ],
+    "related": [
+      { "label": "Installation", "slug": "mcp-installation" },
+      { "label": "API Authentication", "slug": "authentication" }
+    ],
+    "faq": [],
+    "mentions": ["API key", "workspace", "authentication"]
+  },
+  {
+    "slug": "mcp-claude-desktop",
+    "parentSlug": "mcp-clients",
+    "title": "Claude Desktop",
+    "seoTitle": "MCP Setup for Claude Desktop — Talonic Docs",
+    "description": "Step-by-step setup for the Talonic MCP server in Claude Desktop on macOS and Windows.",
+    "content": [
+      { "type": "paragraph", "text": "Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows):" },
+      { "type": "code", "language": "json", "title": "claude_desktop_config.json", "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@talonic/mcp@latest\"],\n      \"env\": {\n        \"TALONIC_API_KEY\": \"tlnc_your_key_here\"\n      }\n    }\n  }\n}" },
+      { "type": "paragraph", "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools." }
+    ],
+    "related": [
+      { "label": "Cursor", "slug": "mcp-cursor" },
+      { "label": "Tools", "slug": "mcp-talonic-extract" }
+    ],
+    "faq": [],
+    "mentions": ["Claude Desktop", "macOS", "Windows"]
+  },
+  {
+    "slug": "mcp-cursor",
+    "parentSlug": "mcp-clients",
+    "title": "Cursor",
+    "seoTitle": "MCP Setup for Cursor — Talonic Docs",
+    "description": "Configure the Talonic MCP server in Cursor IDE.",
+    "content": [
+      { "type": "paragraph", "text": "Edit `~/.cursor/mcp.json` (or open Cursor settings &rarr; MCP &rarr; edit config):" },
+      { "type": "code", "language": "json", "title": "~/.cursor/mcp.json", "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@talonic/mcp@latest\"],\n      \"env\": {\n        \"TALONIC_API_KEY\": \"tlnc_your_key_here\"\n      }\n    }\n  }\n}" }
+    ],
+    "related": [
+      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
+      { "label": "Cline", "slug": "mcp-cline" }
+    ],
+    "faq": [],
+    "mentions": ["Cursor"]
+  },
+  {
+    "slug": "mcp-cline",
+    "parentSlug": "mcp-clients",
+    "title": "Cline",
+    "seoTitle": "MCP Setup for Cline — Talonic Docs",
+    "description": "Configure the Talonic MCP server in the Cline VS Code extension.",
+    "content": [
+      { "type": "paragraph", "text": "Open the Cline panel &rarr; settings (gear icon) &rarr; MCP Servers &rarr; Edit. Add the standard config entry and save. Restart the panel." }
+    ],
+    "related": [
+      { "label": "Continue", "slug": "mcp-continue" },
+      { "label": "Cursor", "slug": "mcp-cursor" }
+    ],
+    "faq": [],
+    "mentions": ["Cline", "VS Code"]
+  },
+  {
+    "slug": "mcp-continue",
+    "parentSlug": "mcp-clients",
+    "title": "Continue",
+    "seoTitle": "MCP Setup for Continue — Talonic Docs",
+    "description": "Configure the Talonic MCP server in Continue for VS Code and JetBrains.",
+    "content": [
+      { "type": "paragraph", "text": "Edit `~/.continue/config.json`. Add to the `mcpServers` array:" },
+      { "type": "code", "language": "json", "title": "~/.continue/config.json", "code": "{\n  \"name\": \"talonic\",\n  \"command\": \"npx\",\n  \"args\": [\"-y\", \"@talonic/mcp@latest\"],\n  \"env\": {\n    \"TALONIC_API_KEY\": \"tlnc_your_key_here\"\n  }\n}" }
+    ],
+    "related": [
+      { "label": "Cowork", "slug": "mcp-cowork" },
+      { "label": "Cline", "slug": "mcp-cline" }
+    ],
+    "faq": [],
+    "mentions": ["Continue", "VS Code", "JetBrains"]
+  },
+  {
+    "slug": "mcp-cowork",
+    "parentSlug": "mcp-clients",
+    "title": "Cowork",
+    "seoTitle": "MCP Setup for Cowork — Talonic Docs",
+    "description": "Configure the Talonic MCP server in Cowork.",
+    "content": [
+      { "type": "paragraph", "text": "Open Cowork settings &rarr; MCP Servers &rarr; Add. Use the same shape as Claude Desktop above." }
+    ],
+    "related": [
+      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
+      { "label": "Continue", "slug": "mcp-continue" }
+    ],
+    "faq": [],
+    "mentions": ["Cowork"]
+  },
+  {
+    "slug": "mcp-talonic-extract",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_extract",
+    "seoTitle": "talonic_extract MCP Tool — Talonic Docs",
+    "description": "Extract structured, schema-validated data from a document. Accepts file_data, file_path, file_url, or document_id with a schema or schema_id.",
+    "content": [
+      { "type": "paragraph", "text": "Extract structured, schema-validated data from a document. Returns clean JSON with per-field confidence scores." },
+      { "type": "param-table", "title": "Inputs", "params": [
+        { "name": "file_data", "type": "string", "description": "Base64-encoded file bytes. Recommended for chat clients (Claude Desktop, Cursor)." },
+        { "name": "filename", "type": "string", "description": "Original filename. Required with `file_data` for MIME type inference." },
+        { "name": "file_path", "type": "string", "description": "Local filesystem path to the document." },
+        { "name": "file_url", "type": "string", "description": "Public URL to fetch the document from." },
+        { "name": "document_id", "type": "string", "description": "ID of an already-uploaded document in the workspace." },
+        { "name": "schema", "type": "object", "description": "Inline schema definition (JSON Schema or flat key-type map)." },
+        { "name": "schema_id", "type": "string", "description": "ID of a saved schema in the workspace (UUID form)." }
+      ]},
+      { "type": "callout", "variant": "warning", "text": "Always provide either a `schema` or `schema_id`. Auto-discovery (no schema) currently returns 500 on production." }
+    ],
+    "related": [
+      { "label": "SDK Extract", "slug": "sdk-extract" },
+      { "label": "POST /v1/extract", "slug": "post-extract" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_extract", "file_data", "schema", "confidence"]
+  },
+  {
+    "slug": "mcp-talonic-search",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_search",
+    "seoTitle": "talonic_search MCP Tool — Talonic Docs",
+    "description": "Omnisearch across documents, fields, sources, and schemas in the Talonic workspace.",
+    "content": [
+      { "type": "paragraph", "text": "Omnisearch across documents, extracted field values, field names, sources, and schemas in the workspace. Use for conceptual or fuzzy queries." }
+    ],
+    "related": [
+      { "label": "talonic_filter", "slug": "mcp-talonic-filter" },
+      { "label": "Omnisearch", "slug": "omnisearch" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_search", "omnisearch"]
+  },
+  {
+    "slug": "mcp-talonic-filter",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_filter",
+    "seoTitle": "talonic_filter MCP Tool — Talonic Docs",
+    "description": "Filter documents by extracted field values using composable conditions: eq, gt, between, contains, and more.",
+    "content": [
+      { "type": "paragraph", "text": "Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to IDs server-side, or UUIDs directly." },
+      { "type": "callout", "variant": "warning", "text": "The `is_not_empty` operator currently underreports. Use a more specific operator against a known value when possible." }
+    ],
+    "related": [
+      { "label": "talonic_search", "slug": "mcp-talonic-search" },
+      { "label": "Filter & Search API", "slug": "field-autocomplete" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_filter", "filter", "conditions"]
+  },
+  {
+    "slug": "mcp-talonic-get-document",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_document",
+    "seoTitle": "talonic_get_document MCP Tool — Talonic Docs",
+    "description": "Fetch full metadata for a single document by ID, including processing log and link URLs.",
+    "content": [
+      { "type": "paragraph", "text": "Fetch full metadata for a single document by ID, including processing log and link URLs." }
+    ],
+    "related": [
+      { "label": "SDK Documents", "slug": "sdk-documents" },
+      { "label": "Get Document", "slug": "get-document" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_get_document", "metadata"]
+  },
+  {
+    "slug": "mcp-talonic-to-markdown",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_to_markdown",
+    "seoTitle": "talonic_to_markdown MCP Tool — Talonic Docs",
+    "description": "Get OCR-converted markdown for a document. Accepts document_id, file_data, file_path, or file_url.",
+    "content": [
+      { "type": "paragraph", "text": "Get OCR-converted markdown for a document. Accepts `document_id` (cheapest — no re-processing), `file_data` + `filename`, `file_path`, or `file_url`." }
+    ],
+    "related": [
+      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
+      { "label": "SDK getMarkdown", "slug": "sdk-documents" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_to_markdown", "OCR", "markdown"]
+  },
+  {
+    "slug": "mcp-talonic-list-schemas",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_schemas",
+    "seoTitle": "talonic_list_schemas MCP Tool — Talonic Docs",
+    "description": "List all saved schemas with their definitions from the Talonic workspace.",
+    "content": [
+      { "type": "paragraph", "text": "List all saved schemas with their definitions. Use before `talonic_extract` to find an existing `schema_id` instead of defining an inline schema." }
+    ],
+    "related": [
+      { "label": "talonic_save_schema", "slug": "mcp-talonic-save-schema" },
+      { "label": "SDK Schemas", "slug": "sdk-schemas" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_list_schemas", "schemas"]
+  },
+  {
+    "slug": "mcp-talonic-save-schema",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_save_schema",
+    "seoTitle": "talonic_save_schema MCP Tool — Talonic Docs",
+    "description": "Save a schema definition to the workspace for reuse across extractions.",
+    "content": [
+      { "type": "paragraph", "text": "Save a schema definition to the workspace for reuse. Returns the saved schema with its ID." },
+      { "type": "callout", "variant": "warning", "text": "Prefer full JSON Schema format for now. The flat key-type map may return a \"no fields\" error on the current server version." }
+    ],
+    "related": [
+      { "label": "talonic_list_schemas", "slug": "mcp-talonic-list-schemas" },
+      { "label": "Schemas API", "slug": "create-schema" }
+    ],
+    "faq": [],
+    "mentions": ["talonic_save_schema", "schema"]
+  },
+  {
+    "slug": "mcp-schemas-resource",
+    "parentSlug": "mcp-resources",
+    "title": "talonic://schemas",
+    "seoTitle": "talonic://schemas MCP Resource — Talonic Docs",
+    "description": "The MCP resource URI that exposes saved schemas to clients that browse resources separately, like Claude Desktop and Cowork.",
+    "content": [
+      { "type": "paragraph", "text": "The `talonic://schemas` resource exposes the saved-schemas list to clients that browse MCP resources separately. Claude Desktop and Cowork render these in the UI." }
+    ],
+    "related": [
+      { "label": "talonic_list_schemas", "slug": "mcp-talonic-list-schemas" }
+    ],
+    "faq": [],
+    "mentions": ["MCP resource", "talonic://schemas"]
+  },
+  {
+    "slug": "mcp-drag-drop",
+    "parentSlug": "mcp-advanced",
+    "title": "Drag & Drop in Chat",
+    "seoTitle": "MCP Drag and Drop File Handling — Talonic Docs",
+    "description": "How file_data + filename solves the sandboxed file path problem for drag-and-drop in Claude Desktop, Cursor, and Cowork.",
+    "content": [
+      { "type": "paragraph", "text": "When a user drag-drops a file into a chat-style MCP host (Claude Desktop, Cowork, Cursor), the file lands in a host-owned sandbox directory the MCP server cannot read. The path the host hands the agent is meaningless to a separately-running `npx` MCP process." },
+      { "type": "paragraph", "text": "From `@talonic/mcp@0.1.4`, agents can pass **`file_data`** (base64-encoded file bytes) and **`filename`** on `talonic_extract` and `talonic_to_markdown`. The agent reads the file bytes from the conversation, base64-encodes them, and passes them through the MCP tool call. The MCP server decodes, infers MIME type from the filename, and uploads to the Talonic API as a normal multipart request." },
+      { "type": "paragraph", "text": "Tool descriptions advertise `file_data` as the recommended input for chat-style clients, so well-trained agents reach for it automatically. No client-side configuration required." }
+    ],
+    "related": [
+      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
+      { "label": "Installation", "slug": "mcp-installation" }
+    ],
+    "faq": [
+      { "question": "How does file upload work in MCP chat clients?", "answer": "From v0.1.4, agents pass file_data (base64) + filename instead of a file path. This handles drag-and-drop in sandboxed chat clients like Claude Desktop." }
+    ],
+    "mentions": ["drag and drop", "file_data", "base64", "sandbox"]
+  },
+  {
+    "slug": "mcp-architecture",
+    "parentSlug": "mcp-advanced",
+    "title": "Architecture",
+    "seoTitle": "MCP Server Architecture — Talonic Docs",
+    "description": "How the Talonic MCP server connects agents to the Talonic API via the Model Context Protocol over stdio.",
+    "content": [
+      { "type": "paragraph", "text": "The MCP server sits between the AI agent and the Talonic API:" },
+      { "type": "code", "language": "text", "title": "Architecture", "code": "Agent (Claude Desktop / Cursor / Cline / etc.)\n  ↓ MCP protocol over stdio\nTalonic MCP server (this package)\n  ↓ HTTPS, Bearer auth\napi.talonic.com" },
+      { "type": "paragraph", "text": "Each tool call is one HTTP request to the Talonic API using your API key. The server handles auth, retries on transient failures (429, 5xx), MIME-type detection on file uploads, multipart serialisation, and structured error formatting." }
+    ],
+    "related": [
+      { "label": "Configuration", "slug": "mcp-configuration" },
+      { "label": "Introduction", "slug": "mcp-introduction" }
+    ],
+    "faq": [],
+    "mentions": ["architecture", "stdio", "HTTPS"]
+  },
+  {
+    "slug": "mcp-configuration",
+    "parentSlug": "mcp-advanced",
+    "title": "Configuration",
+    "seoTitle": "MCP Server Configuration — Talonic Docs",
+    "description": "Environment variables for the Talonic MCP server: API key and optional base URL override.",
+    "content": [
+      { "type": "paragraph", "text": "Set via the `env` block in your MCP client config:" },
+      { "type": "param-table", "title": "Environment variables", "params": [
+        { "name": "TALONIC_API_KEY", "type": "string", "required": true, "description": "Your Talonic API key. Starts with `tlnc_`." },
+        { "name": "TALONIC_BASE_URL", "type": "string", "description": "Override the API base URL. Default: `https://api.talonic.com`." }
+      ]}
+    ],
+    "related": [
+      { "label": "Installation", "slug": "mcp-installation" },
+      { "label": "Authentication", "slug": "mcp-authentication" }
+    ],
+    "faq": [],
+    "mentions": ["TALONIC_API_KEY", "TALONIC_BASE_URL", "configuration"]
+  },
+  {
+    "slug": "mcp-troubleshooting",
+    "parentSlug": "mcp-advanced",
+    "title": "Troubleshooting",
+    "seoTitle": "MCP Server Troubleshooting — Talonic Docs",
+    "description": "Common issues and fixes for the Talonic MCP server: missing API key, invisible server, 500 errors, and filter problems.",
+    "content": [
+      { "type": "heading", "level": 3, "id": "ts-api-key", "text": "TALONIC_API_KEY environment variable is required" },
+      { "type": "paragraph", "text": "The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing, fully restart the client (not just the conversation)." },
+      { "type": "heading", "level": 3, "id": "ts-not-visible", "text": "Talonic does not appear in connected servers" },
+      { "type": "paragraph", "text": "Make sure the `command` is `npx` and `args` are exactly `[\"-y\", \"@talonic/mcp@latest\"]`. Sanity check: run `npx -y @talonic/mcp@latest --version` in a terminal." },
+      { "type": "heading", "level": 3, "id": "ts-500", "text": "talonic_extract returns 500 with auto-discovery" },
+      { "type": "paragraph", "text": "Always provide either an inline `schema` or a `schema_id`. The auto-discovery code path is not yet stable." },
+      { "type": "heading", "level": 3, "id": "ts-unsupported", "text": "unsupported_file_type error" },
+      { "type": "paragraph", "text": "The MIME type was inferred as `application/octet-stream`. Ensure the filename has a recognized extension (pdf, docx, png, jpg, etc.)." },
+      { "type": "heading", "level": 3, "id": "ts-filter-validation", "text": "talonic_filter: No field matches name" },
+      { "type": "paragraph", "text": "Field names must be canonical names from the field registry (e.g. `vendor.name`). Call `talonic_search` first; canonical names appear in `fields[].canonicalName`." },
+      { "type": "heading", "level": 3, "id": "ts-cached", "text": "Tool descriptions look wrong" },
+      { "type": "paragraph", "text": "Some MCP clients cache tool descriptions. Restart the client after a server update." }
+    ],
+    "related": [
+      { "label": "Installation", "slug": "mcp-installation" },
+      { "label": "Configuration", "slug": "mcp-configuration" }
+    ],
+    "faq": [],
+    "mentions": ["troubleshooting", "debugging", "errors"]
+  }
+]
