@@ -70,6 +70,21 @@ const httpServer = createHttpServer(async (req, res) => {
     return
   }
 
+  // ── Root: service discovery for AI agents ─────────────────────────
+  if (path === "/") {
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(JSON.stringify({
+      name: SERVER_NAME,
+      version: VERSION,
+      description: "Talonic MCP server — extract structured, schema-validated data from any document.",
+      mcp_endpoint: "/mcp",
+      health_endpoint: "/health",
+      auth: "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
+      docs: "https://docs.talonic.com",
+    }))
+    return
+  }
+
   // ── CORS preflight ────────────────────────────────────────────────
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
