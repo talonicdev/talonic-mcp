@@ -145,6 +145,18 @@ describe("talonic_filter handler", () => {
     expect(body.conditions[0]?.fieldId).toBe("vendor.name")
   })
 
+  it("passes fieldId: 'vendor_name' through without modification (M2 requirement)", async () => {
+    const { talonic, fetchFn } = makeTalonic({ documents: [], total: 0 })
+    await handleFilter(talonic, {
+      conditions: [{ field: "vendor_name", operator: "eq", value: "Acme Corp" }],
+    })
+    const body = JSON.parse(lastCall(fetchFn)[1].body as string) as {
+      conditions: Array<{ fieldId: string; operator: string; value: string }>
+    }
+    expect(body.conditions[0]?.fieldId).toBe("vendor_name")
+    expect(body.conditions[0]?.value).toBe("Acme Corp")
+  })
+
   it("forwards search, sort, page, limit, source as source_id", async () => {
     const { talonic, fetchFn } = makeTalonic({ documents: [], total: 0 })
     await handleFilter(talonic, {

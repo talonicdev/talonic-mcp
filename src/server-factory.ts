@@ -1,6 +1,7 @@
 import { Talonic } from "@talonic/node"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { registerSchemasResource } from "./resources/schemas-resource.js"
+import { registerWebhooksResource } from "./resources/webhooks-resource.js"
 import { registerExtract } from "./tools/extract.js"
 import { registerFilter } from "./tools/filter.js"
 import { registerGetDocument } from "./tools/get-document.js"
@@ -95,6 +96,7 @@ export function createServer(options: CreateServerOptions): McpServer {
 
   // Resource registrations.
   registerSchemasResource(server, talonic)
+  registerWebhooksResource(server, options.apiKey, options.baseUrl)
 
   return server
 }

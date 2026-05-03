@@ -32,13 +32,13 @@ export const sections: RawSection[] = [
     description: 'Install the Talonic MCP server with a one-line npx invocation. No clone, no build. Works with every MCP client.',
     content: [
       { type: 'paragraph', text: 'Two ways to connect. The hosted server at `mcp.talonic.com` requires zero install — paste one URL into any MCP client. Or run locally via `npx` if you prefer.' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'hosted-recommended', text: 'Hosted (recommended)' },
       { type: 'paragraph', text: 'No install, no Node.js required. Works with every MCP client that supports remote servers:' },
       { type: 'code', language: 'jsonc', title: 'Hosted config', code: `{
   "url": "https://mcp.talonic.com/mcp",
   "headers": { "Authorization": "Bearer tlnc_..." }
 }` },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'local-npx', text: 'Local (npx)' },
       { type: 'paragraph', text: 'Runs on your machine. Requires Node.js 18+:' },
       { type: 'code', language: 'jsonc', title: 'Local config', code: `{
   "command": "npx",
@@ -64,9 +64,9 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Claude Desktop on macOS and Windows.',
     content: [
       { type: 'paragraph', text: 'Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows).' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'claude-desktop-hosted', text: 'Hosted (recommended)' },
       { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'claude-desktop-local', text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
       { type: 'paragraph', text: 'Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools.' },
     ],
@@ -87,9 +87,9 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Cursor IDE.',
     content: [
       { type: 'paragraph', text: 'Edit `~/.cursor/mcp.json` (or open Cursor settings → MCP → edit config):' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'cursor-hosted', text: 'Hosted (recommended)' },
       { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'cursor-local', text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
@@ -109,9 +109,9 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in the Cline VS Code extension.',
     content: [
       { type: 'paragraph', text: 'Open the Cline panel → settings (gear icon) → MCP Servers → Edit. Save and restart the panel.' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'cline-hosted', text: 'Hosted (recommended)' },
       { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'cline-local', text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
@@ -131,7 +131,7 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Continue for VS Code and JetBrains.',
     content: [
       { type: 'paragraph', text: 'Edit `~/.continue/config.json`. Add to the `mcpServers` array:' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'continue-hosted', text: 'Hosted (recommended)' },
       { type: 'code', language: 'json', code: `{
   "name": "talonic",
   "url": "https://mcp.talonic.com/mcp",
@@ -139,7 +139,7 @@ export const sections: RawSection[] = [
     "Authorization": "Bearer tlnc_your_key_here"
   }
 }` },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'continue-local', text: 'Local (npx)' },
       { type: 'code', language: 'json', code: `{
   "name": "talonic",
   "command": "npx",
@@ -166,9 +166,9 @@ export const sections: RawSection[] = [
     description: 'Configure the Talonic MCP server in Cowork.',
     content: [
       { type: 'paragraph', text: 'Open Cowork settings → MCP Servers → Add.' },
-      { type: 'heading', level: 3, text: 'Hosted (recommended)' },
+      { type: 'heading', level: 3, id: 'cowork-hosted', text: 'Hosted (recommended)' },
       { type: 'code', language: 'json', code: MCP_HOSTED_SNIPPET },
-      { type: 'heading', level: 3, text: 'Local (npx)' },
+      { type: 'heading', level: 3, id: 'cowork-local', text: 'Local (npx)' },
       { type: 'code', language: 'json', code: MCP_CONFIG_SNIPPET },
     ],
     related: [
