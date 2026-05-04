@@ -96,28 +96,42 @@ export const sections: RawSection[] = [
         language: "json",
         title: "Tool response",
         code: `{
-  "document_id": "doc_8f3a...",
+  "extraction_id": "ext_8f3a...",
+  "request_id": "req_2c91...",
+  "status": "complete",
+  "document": {
+    "id": "doc_8f3a...",
+    "filename": "invoice-2026-001.pdf",
+    "pages": 2,
+    "type_detected": "invoice",
+    "language_detected": "de"
+  },
   "data": {
     "vendor_name": "Meridian Energy AG",
     "invoice_number": "INV-2026-001",
     "total_amount": 1500.00,
     "due_date": "2026-06-15",
     "line_items": [
-      { "description": "Consulting — April", "amount": 1200.00 },
+      { "description": "Consulting, April", "amount": 1200.00 },
       { "description": "Travel expenses", "amount": 300.00 }
     ]
   },
-  "confidence": {
-    "vendor_name": 0.98,
-    "invoice_number": 0.95,
-    "total_amount": 0.99,
-    "due_date": 0.97
+  "schema": {
+    "source": "inline"
   },
-  "document": {
-    "filename": "invoice-2026-001.pdf",
-    "pages": 2,
-    "type_detected": "Invoice",
-    "language_detected": "de"
+  "confidence": {
+    "overall": 0.97,
+    "fields": {
+      "vendor_name": 0.98,
+      "invoice_number": 0.95,
+      "total_amount": 0.99,
+      "due_date": 0.97
+    }
+  },
+  "processing": {
+    "duration_ms": 2840,
+    "pages_processed": 2,
+    "region": "eu-central-1"
   }
 }`,
       },
@@ -129,6 +143,51 @@ export const sections: RawSection[] = [
         code: `{
   "file_path": "./contracts/lease-agreement.pdf",
   "schema_id": "SCH-A1B2C3D4"
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "extraction_id": "ext_b29f...",
+  "request_id": "req_4c81...",
+  "status": "complete",
+  "document": {
+    "id": "doc_91ad...",
+    "filename": "lease-agreement.pdf",
+    "pages": 8,
+    "type_detected": "lease_agreement",
+    "language_detected": "en"
+  },
+  "data": {
+    "lessor": "Acme Holdings Ltd.",
+    "lessee": "Meridian Energy AG",
+    "premises_address": "12 Hauptstrasse, 10115 Berlin",
+    "term_start": "2026-07-01",
+    "term_end": "2031-06-30",
+    "monthly_rent_eur": 4250.00
+  },
+  "schema": {
+    "source": "saved",
+    "id": "SCH-A1B2C3D4"
+  },
+  "confidence": {
+    "overall": 0.94,
+    "fields": {
+      "lessor": 0.97,
+      "lessee": 0.97,
+      "premises_address": 0.92,
+      "term_start": 0.95,
+      "term_end": 0.95,
+      "monthly_rent_eur": 0.91
+    }
+  },
+  "processing": {
+    "duration_ms": 4380,
+    "pages_processed": 8,
+    "region": "eu-central-1"
+  }
 }`,
       },
     ],
@@ -266,7 +325,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "The `is_not_empty` operator currently underreports. Use specific operators (`eq`, `gt`, `contains`, etc.) against known values when possible.",
+        text: "`is_not_empty` is intentionally not exposed in v0.1 because it underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.",
       },
       { type: "heading", level: 3, id: "filter-example", text: "Example" },
       {

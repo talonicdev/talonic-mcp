@@ -105,15 +105,49 @@ Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Deskt
 
 Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT USE WHEN sections. Agents pick the right tool reliably without further prompting. Briefly:
 
-- **`talonic_extract`** — Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.
-- **`talonic_search`** — Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
-- **`talonic_filter`** — Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.). Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to ids server-side, or UUIDs directly. The `is_not_empty` operator currently underreports; see [Known limitations](#known-limitations-v01).
-- **`talonic_get_document`** — Fetch full metadata for a single document by id, including processing log and link URLs.
-- **`talonic_to_markdown`** — Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`.
-- **`talonic_list_schemas`** — List all saved schemas with their definitions.
-- **`talonic_save_schema`** — Save a schema definition to the workspace for reuse.
+- **`talonic_extract`**, status: stable. Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` or `schema_id`. Returns JSON with `data`, per-field `confidence`, and document metadata. Schema is required; the MCP layer rejects schema-less calls.
+- **`talonic_search`**, status: stable. Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
+- **`talonic_filter`**, status: stable. Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, `is_empty`, etc.). Accepts canonical field names (e.g. `vendor.name`) which the Talonic API resolves to ids server-side, or UUIDs directly. `is_not_empty` is intentionally not exposed in v0.1; see [Known limitations](#known-limitations-v01).
+- **`talonic_get_document`**, status: stable. Fetch full metadata for a single document by id, including processing log and link URLs.
+- **`talonic_to_markdown`**, status: stable. Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`.
+- **`talonic_list_schemas`**, status: stable. List all saved schemas with their definitions. Returns both UUID and SCH-XXXXXXXX short id; either is accepted by `talonic_extract`.
+- **`talonic_save_schema`**, status: stable. Save a schema definition to the workspace for reuse.
 
-The `talonic://schemas` resource exposes the saved-schemas list to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).
+Two resources are also exposed for clients that browse them separately (Claude Desktop and Cowork render these in the UI):
+- `talonic://schemas`: saved-schemas list.
+- `talonic://webhooks/reference`: webhook event types, delivery behavior, signature verification algorithms, and retry policies. Use this when an agent needs to set up or troubleshoot a webhook integration without leaving the MCP context.
+
+## Agent decision guide
+
+Pick the right tool before you call. The wrong tool returns the wrong data, costs unnecessary credits, and slows the conversation.
+
+**User has a file (or just dropped one in)**
+- They want specific fields (vendor, total, dates, parties): `talonic_extract` with `schema` or `schema_id`.
+- They want full text content for summarisation, translation, or analysis: `talonic_to_markdown`.
+- They want both: `talonic_extract` with `include_markdown: true`, one upload.
+
+**User is asking about existing documents**
+- Conceptual or fuzzy ("any docs about indemnification"): `talonic_search`.
+- Value-based on extracted fields ("invoices over 1000 EUR"): `talonic_filter`.
+- They reference a `document_id`: `talonic_get_document` for metadata, `talonic_to_markdown` for text, `talonic_extract` to re-extract with a new schema. Re-using a `document_id` is cheaper than re-uploading.
+
+**User is working with schemas**
+- One-off extraction: pass schema inline.
+- Same schema across many documents: `talonic_save_schema` once, then `talonic_extract` with `schema_id`.
+- Discover existing schemas first: `talonic_list_schemas`.
+- Iterate inline before saving. Avoid clutter.
+
+**Confidence and human review**
+- `confidence.overall` below ~0.7: tell the user the extraction may be unreliable, surface low-confidence fields, confirm before any downstream action.
+- Per-field confidence below ~0.7: mark as "needs review", do not use silently in calculations or external API calls.
+- Critical fields (amounts, legal terms, names, dates): confirm with user before acting, even at high confidence.
+- Per-field provenance (page, bbox) is not surfaced in v0.1. Send users to `links.dashboard` to verify against the source.
+
+**When not to call Talonic**
+- General-knowledge or chat questions. Do not pre-emptively extract.
+- The data is already in conversation history from a previous tool call. Re-use it.
+- The user wants to discuss or revise an extraction you already produced. Reason over the previous result instead of re-extracting.
+- Cost, EUR price, and remaining balance are not surfaced in v0.1 tool responses. If the user asks about cost or credit balance, point them to https://app.talonic.com.
 
 ## Drag-and-drop in chat clients
 

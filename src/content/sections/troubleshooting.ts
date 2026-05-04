@@ -34,12 +34,12 @@ export const sections: RawSection[] = [
       {
         type: "heading",
         level: 3,
-        id: "extract-500",
-        text: "talonic_extract returns 500 with auto-discovery",
+        id: "extract-no-schema",
+        text: "talonic_extract returns a validation error when no schema is given",
       },
       {
         type: "paragraph",
-        text: "Known limitation. Always provide either an inline `schema` or a `schema_id`. The auto-discovery code path is being stabilised.",
+        text: "By design in v0.1. Schema-less extraction is unreliable, so the MCP layer rejects calls that omit both `schema` and `schema_id` before they reach the API. Provide either an inline `schema` (full JSON Schema recommended) or a `schema_id` from `talonic_list_schemas`.",
       },
 
       {
@@ -94,15 +94,16 @@ export const sections: RawSection[] = [
     title: "Known Limitations",
     seoTitle: "Known Limitations — Talonic MCP",
     description:
-      "Current limitations in the Talonic MCP server v0.1: auto-discovery, schema format, filter operators, and schema_id format.",
+      "Current limitations in the Talonic MCP server v0.1: schema requirement, filter operators, cost surfacing, and provenance.",
     content: [
       {
         type: "list",
         items: [
-          "**Auto-discovery extract (no schema) is not reliable on production.** Always pass a `schema` or `schema_id` to `talonic_extract`.",
-          "**Schema definition: prefer full JSON Schema for now.** The flat key-type map is documented as supported but the server-side normaliser does not translate it yet.",
-          "**`is_not_empty` filter currently underreports.** Use specific operators (`eq`, `gt`, `contains`, etc.) against known values instead.",
-          "**`schema_id` on `talonic_extract` requires the UUID form.** Other endpoints accept either UUID or `SCH-XXXXXXXX`, but `/v1/extract` currently only accepts UUIDs. Pass the UUID from `talonic_list_schemas`.",
+          "**Schema is required on `talonic_extract`.** Schema-less extraction is unreliable in v0.1 and is rejected at the MCP layer with a validation error. Always pass a `schema` (full JSON Schema recommended) or a `schema_id`.",
+          "**Schema definition: prefer full JSON Schema.** The flat key-type map is documented as accepted; if you get a 'no fields' error from the API, fall back to JSON Schema.",
+          "**`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.",
+          "**Cost, EUR price, and remaining balance are not surfaced.** The API does not return them yet. Tool responses include rate-limit info via the SDK's `WithRateLimit<T>` wrapper, but credit balance must be checked in the Talonic dashboard.",
+          "**Per-field source provenance (page, bounding box) is not surfaced.** Confidence scores per field are returned in `confidence.fields`. Treat fields below ~0.7 as needing human review.",
         ],
       },
     ],
@@ -114,10 +115,10 @@ export const sections: RawSection[] = [
       {
         question: "What are the known limitations of Talonic MCP?",
         answer:
-          "Auto-discovery extract without a schema is unreliable, flat key-type schema maps are not yet translated, is_not_empty filter underreports, and schema_id on extract requires UUID format.",
+          "Schema is required on talonic_extract (schema-less mode is disabled at the MCP layer). Flat key-type schema maps may need a JSON Schema fallback. is_not_empty filter is not exposed in v0.1. Cost and per-field provenance are not surfaced in tool responses yet.",
       },
     ],
-    mentions: ["limitations", "auto-discovery", "is_not_empty", "schema_id"],
+    mentions: ["limitations", "schema", "is_not_empty", "confidence", "rate limits"],
   },
   {
     slug: "upgrading",
