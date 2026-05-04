@@ -6,14 +6,23 @@ This document captures the live state of the four Talonic developer surfaces ahe
 
 ## TL;DR
 
-All four surfaces are working. Seven MCP tools verified end-to-end against production. Hosted MCP at `mcp.talonic.com` is operational with both Bearer and apiKey query auth. The package versions, the website's package-lock, and the auto-discovery endpoints are in sync.
+All four developer surfaces are working at the plumbing level: hosted MCP at `mcp.talonic.com` is live and reachable from Claude.ai's custom-connector UI; all 7 tools are exposed and respond; versions are in sync across npm, server.json, registry, website. The package-pipeline-and-distribution layer is solid for v1.
 
-Two real follow-ups, none of which block launch:
+The Claude.ai connector test surfaced three new API-side bugs that materially degrade what agents can actually do with the tools. None block launch on the deployment side; all degrade real-world usefulness:
 
-1. The SDK's `WithRateLimit<T>` wrapper returns sentinel zeros instead of real rate-limit headers. Either the API isn't sending `X-RateLimit-*` or the SDK transport isn't parsing them.
-2. The hosted MCP root endpoint advertises `https://docs.talonic.com`, which I'm not aware of as a real subdomain. Verify and update.
+1. **`talonic_list_schemas`** silently truncates `data[]`: pagination reports `total: 7` with `has_more: false`, but `data[]` returns 2. Five schemas are missing.
+2. **`talonic_filter`** is effectively unusable for natural agent flows. Three sub-issues: schema-defined field names with `documentCount: 0` are rejected as unresolvable; `fieldMatches[].resolvedFieldId` returns document UUIDs instead of field UUIDs; valid pipeline-field UUIDs with known matches return zero results without error.
+3. **`talonic_search`** doesn't tokenize on word boundaries. `"test invoice"` (space) returns zero matches against `test_invoice.pdf` while `"invoice"` alone finds it. Multi-word natural-language queries silently fail.
 
-A third follow-up flagged at the time of audit (registry stale at 0.1.6) was resolved in the same session. The registry now lists 0.1.12 with `isLatest: true`.
+Two earlier follow-ups also remain open:
+
+4. SDK's `WithRateLimit<T>` wrapper returns sentinel zeros (`{limit:0, remaining:0, resetAt:1970-01-01}`) instead of real `X-RateLimit-*` header values.
+5. Hosted MCP root endpoint advertises `https://docs.talonic.com`, which may not be a real subdomain.
+
+Two earlier follow-ups have been resolved during the audit:
+
+- Registry stale at 0.1.6: now lists 0.1.12 with `isLatest: true` (resolved during audit).
+- `/.well-known/mcp.json` missing `talonic://webhooks/reference`: added in commit `455889d` (resolved during audit).
 
 ## Surfaces
 
@@ -90,24 +99,78 @@ All 7 MCP tools, called through the hosted endpoint with a real `tlnc_` key:
 
 | Tool | Result | Notes |
 |---|---|---|
-| `talonic_list_schemas` | works | returned 6 saved schemas |
-| `talonic_search` | works | returned ranked results across documents, fields, sources, schemas |
-| `talonic_filter` | works | API correctly returned `VALIDATION_ERROR` on a non-existent field |
+| `talonic_list_schemas` | plumbing works, **API bug** | call succeeds; pagination reports `total: 7` but `data[]` returns 2 silently |
+| `talonic_search` | plumbing works, **API bug** | call succeeds; word-boundary tokenization missing (space-separated multi-word queries fail) |
+| `talonic_filter` | plumbing works, **API bug (3x)** | call succeeds and rejects unknown fields cleanly; discoverability broken in three ways (see below) |
 | `talonic_extract` | works | full response shape, `confidence.overall`, `confidence.fields`, `processing.region` etc. |
 | `talonic_get_document` | works | returned full metadata, processing log, links |
 | `talonic_to_markdown` | works | returned markdown for the document |
 | `talonic_save_schema` | works | created `AUDIT_TEST_SCHEMA` (`SCH-DC88ABBB`); delete from dashboard after |
 
+## Claude.ai connector test (live, with real key)
+
+Workflow: Claude.ai > Settings > Connectors > Add custom connector. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_REDACTED`. **Bearer header in a custom-header field is not supported by Claude.ai's connector UI; only the URL-with-apiKey form works.** This is the documented v1 install pattern for Claude.ai users.
+
+Once added, the connector loads all 7 tools with their STATUS: stable descriptions and per-tool permission toggles (default: Needs approval).
+
+### Per-tool test results
+
+**Test 1: `talonic_list_schemas` via "List all the schemas I have in my Talonic workspace"**
+- Tool called correctly. Raw response shows `pagination.total: 7, has_more: false, data: [2 items]`.
+- **Bug confirmed:** silent truncation. The dashboard at `app.talonic.com/schemas` shows all 7 schemas; the API only returns 2 in `data[]`.
+- Claude itself flagged the discrepancy in Test 2 when search returned a schema (`Invoice to CSV`) that wasn't in Test 1's list.
+
+**Test 2: `talonic_search` via "Search my Talonic workspace for invoice documents"**
+- Tool called with `query: "invoice"`. Returned 10 documents, related fields, sources, schemas.
+- **Bug observation:** `fieldMatches[].resolvedFieldId` for filename matches returns the corresponding document UUIDs, not field UUIDs.
+- Claude correctly cross-referenced and noted the missing schema from Test 1.
+
+**Test 3: `talonic_filter` via "Show me three invoices with totals over 100 EUR"**
+- Three sub-issues uncovered:
+  1. `field: "invoice_total"` (canonical name from search results) → `VALIDATION_ERROR: No field matches name`. The schema-defined field has `documentCount: 0` so it isn't in the registry.
+  2. `field: "filename"` and `field: "Invoice Total"` → same validation error. Filename is a document property, not a registry field.
+  3. `field_id: "5c729ee8-..."` (a real pipeline field UUID with `documentCount: 1` per the search response) → 0 results, no error, despite known matching documents.
+- Claude correctly stopped after multiple failed attempts and asked the user for help, rather than hallucinating field names. Decision-guide behavior working as designed.
+- Net: filter is plumbing-correct but discoverability and resolution logic make it unusable in real agent flows without the user manually providing field UUIDs.
+
+**Test 4: `talonic_get_document` via four input variants**
+- Variant A: explicit UUID. Single tool call, full metadata returned. **Pass.**
+- Variant B: filename with extension (`test_invoice.pdf`). Claude searched, picked the doc_id, called get_document. Two tool calls. **Pass.**
+- Variant C: filename without extension (`test_invoice`). Same flow as B. **Pass.**
+- Variant D: natural language with space (`"test invoice"`). Search returned zero matches (word-boundary tokenization gap), Claude reported "workspace appears empty" despite 10 invoices being indexed.
+- Net: tool is correct; the failure in Variant D is a `talonic_search` bug, not a `get_document` bug.
+
+### UX theme observations
+
+- Users naturally type spaces, not underscores. Canonical names use underscores. The space-vs-underscore mismatch silently breaks searches.
+- Users do not know UUIDs. Tutorials, install docs, and tool descriptions should never present "type a UUID" as the primary user input. Agents should resolve user-spoken filenames or document references to UUIDs internally.
+- Claude consistently behaved well throughout: chose the right tool, made the right call, did not hallucinate field names or invented document IDs, and asked for help when the API returned empty or rejected. The MCP server's tool descriptions and the agent decision guide produced the desired agent behavior. The failures captured in Tests 1 to 3 are all on the API side; the MCP layer correctly passed inputs through and returned what the API returned.
+
 ## Follow-ups (ordered by leverage)
 
-1. **Fix the `WithRateLimit<T>` payload.** SDK currently returns `{limit:0, remaining:0, resetAt:1970-01-01}`. Verify whether `api.talonic.com` actually emits `X-RateLimit-*` response headers and confirm the SDK's transport layer is reading them.
-2. **Verify or fix `docs.talonic.com`.** The hosted MCP root advertises this as the docs URL. If the subdomain doesn't exist, agents pointed at it land on a dead URL. Either set up the redirect or update the discovery payload to `https://talonic.com/docs/mcp`.
-3. **Test in Claude.ai connectors.** The hosted MCP works in raw curl with both auth modes. We have not confirmed it works inside Claude.ai's "Add custom connector" flow. If Claude.ai's UI requires OAuth, this becomes a post-launch unlock with a real OAuth layer in front of `mcp.talonic.com`.
-4. **Add `triage` and `mime_type` to the SDK's `Document` type.** The API returns these fields on `talonic_get_document`; the SDK passes them through but our type definitions are incomplete.
-5. **Engineering API issues still open**: `is_not_empty` filter underreports (currently hidden at the MCP layer), cost/EUR/balance not surfaced in any tool response, per-field provenance (page, bbox) not surfaced. None of these block launch; all are documented honestly in the v1 surface.
-6. **Wire `mcp-publisher publish` into the release pipeline** so the official MCP Registry tracks the latest npm version automatically. Manual run required for now after each `chore: bump` commit.
-7. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; unknown whether the release was published. Low priority per latest direction.
-8. **Other directory submissions**: Smithery, Cursor, Cline, Continue, mcp.so, Cowork plugins. Workstream 2.
+### API-side (engineering owns; high impact on real agent usefulness)
+
+1. **`talonic_list_schemas` silent truncation.** Returns `data[]` shorter than `pagination.total` claims, with `has_more: false`. Reproduces in SDK CLI and hosted MCP. Bug report sent to engineering. Workaround: agents should not promise users a complete count; route them to the dashboard if they need certainty.
+2. **`talonic_filter` discoverability triple bug.** (a) Schema-defined fields with `documentCount: 0` aren't in the registry and are rejected; (b) `fieldMatches[].resolvedFieldId` returns document UUIDs in place of field UUIDs; (c) valid pipeline field UUIDs with known matches return zero results without error. Bug report sent to engineering. Possible mitigations include a new `/v1/fields` discovery endpoint that returns only registry-resolved fields with `documentCount > 0`.
+3. **`talonic_search` word-boundary tokenization.** Multi-word natural-language queries fail to match underscore-named records. `_`, `-`, and space should be equivalent for matching. Bug report sent to engineering.
+4. **`is_not_empty` filter operator (existing).** Underreports against fields known to be populated. Currently hidden at the MCP layer. Engineering team has not yet shipped a fix.
+5. **Cost / EUR / balance and per-field provenance (existing).** Not surfaced in any tool response. Documented honestly in v1; nothing blocks launch but agents cannot reason about budget or trace per-field source coordinates.
+
+### MCP / SDK / docs (we own; lower impact, easy to ship in 0.1.13)
+
+6. **Update tool descriptions and known-limitations for the three new bugs.** Specifically: `talonic_list_schemas`, `talonic_filter`, `talonic_search` need KNOWN LIMITATION blocks. `content/sections/troubleshooting.ts` needs the three new entries. **Deferred:** batch with end-of-audit changes into one 0.1.13 release.
+7. **`WithRateLimit<T>` returns sentinel zeros.** SDK currently returns `{limit:0, remaining:0, resetAt:1970-01-01}`. Either the API isn't emitting `X-RateLimit-*` or the SDK transport isn't parsing them. Verify and fix.
+8. **`docs.talonic.com` discovery URL.** The hosted MCP root advertises this URL. Confirm whether the subdomain resolves; if not, change the discovery payload to `https://talonic.com/docs/mcp`.
+9. **Add `triage` and `mime_type` to the SDK's `Document` type.** API returns them; SDK type doesn't declare them.
+
+### Operational / pipeline
+
+10. **Wire `mcp-publisher publish` into the release pipeline** so the MCP Registry tracks the latest npm version automatically. Manual run currently needed after each `chore: bump` commit.
+
+### Distribution (Workstream 2 territory)
+
+11. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority.
+12. **Other directory submissions**: Smithery, Cursor, Cline, Continue, mcp.so, Cowork plugins.
 
 ## Test artifact note
 
