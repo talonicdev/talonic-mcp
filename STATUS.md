@@ -8,11 +8,12 @@ This document captures the live state of the four Talonic developer surfaces ahe
 
 All four surfaces are working. Seven MCP tools verified end-to-end against production. Hosted MCP at `mcp.talonic.com` is operational with both Bearer and apiKey query auth. The package versions, the website's package-lock, and the auto-discovery endpoints are in sync.
 
-Three real follow-ups, none of which block launch:
+Two real follow-ups, none of which block launch:
 
-1. The MCP Registry listing at `registry.modelcontextprotocol.io` is stale at v0.1.6. Needs a one-shot `mcp-publisher publish` to bring it to 0.1.12.
-2. The SDK's `WithRateLimit<T>` wrapper returns sentinel zeros instead of real rate-limit headers. Either the API isn't sending `X-RateLimit-*` or the SDK transport isn't parsing them.
-3. The hosted MCP root endpoint advertises `https://docs.talonic.com`, which I'm not aware of as a real subdomain. Verify and update.
+1. The SDK's `WithRateLimit<T>` wrapper returns sentinel zeros instead of real rate-limit headers. Either the API isn't sending `X-RateLimit-*` or the SDK transport isn't parsing them.
+2. The hosted MCP root endpoint advertises `https://docs.talonic.com`, which I'm not aware of as a real subdomain. Verify and update.
+
+A third follow-up flagged at the time of audit (registry stale at 0.1.6) was resolved in the same session. The registry now lists 0.1.12 with `isLatest: true`.
 
 ## Surfaces
 
@@ -67,11 +68,11 @@ Audit fix during this run: `talonic://webhooks/reference` was missing from `/.we
 |---|---|
 | Listing URL | `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp` |
 | Listed name | `io.github.talonicdev/talonic-mcp` |
-| Listed version | **0.1.6 (stale)** |
-| `_meta` | active, latest, last updated 2026-04-30 |
+| Listed version | 0.1.12 |
+| `_meta` | active, `isLatest: true`, published 2026-05-04 |
 | Install instructions | npx command and `TALONIC_API_KEY` env var, both correct |
 
-Action required: run `mcp-publisher publish` from the talonic-mcp repo so the registry advances from 0.1.6 to 0.1.12. The `server.json` in the repo is already at 0.1.12; it just needs to be pushed to the registry. The auto-bump pipeline does not currently chain into `mcp-publisher publish`.
+Standing maintenance task: the auto-bump pipeline that publishes new versions to npm does not currently chain into `mcp-publisher publish`. Whoever cuts a release should run `mcp-publisher publish` from the talonic-mcp repo afterwards (or wire it into CI). Without that, the registry will lag npm.
 
 ## Live end-to-end tests against production
 
@@ -99,12 +100,12 @@ All 7 MCP tools, called through the hosted endpoint with a real `tlnc_` key:
 
 ## Follow-ups (ordered by leverage)
 
-1. **Refresh the MCP Registry listing.** One-shot `mcp-publisher publish` from `talonic-mcp/`. Long-term, wire this into the auto-bump pipeline so server.json on the registry tracks server.json in the repo.
-2. **Fix the `WithRateLimit<T>` payload.** SDK currently returns `{limit:0, remaining:0, resetAt:1970-01-01}`. Verify whether `api.talonic.com` actually emits `X-RateLimit-*` response headers and confirm the SDK's transport layer is reading them.
-3. **Verify or fix `docs.talonic.com`.** The hosted MCP root advertises this as the docs URL. If the subdomain doesn't exist, agents pointed at it land on a dead URL. Either set up the redirect or update the discovery payload to `https://talonic.com/docs/mcp`.
-4. **Test in Claude.ai connectors.** The hosted MCP works in raw curl with both auth modes. We have not confirmed it works inside Claude.ai's "Add custom connector" flow. If Claude.ai's UI requires OAuth, this becomes a post-launch unlock with a real OAuth layer in front of `mcp.talonic.com`.
-5. **Add `triage` and `mime_type` to the SDK's `Document` type.** The API returns these fields on `talonic_get_document`; the SDK passes them through but our type definitions are incomplete.
-6. **Engineering API issues still open**: `is_not_empty` filter underreports (currently hidden at the MCP layer), cost/EUR/balance not surfaced in any tool response, per-field provenance (page, bbox) not surfaced. None of these block launch; all are documented honestly in the v1 surface.
+1. **Fix the `WithRateLimit<T>` payload.** SDK currently returns `{limit:0, remaining:0, resetAt:1970-01-01}`. Verify whether `api.talonic.com` actually emits `X-RateLimit-*` response headers and confirm the SDK's transport layer is reading them.
+2. **Verify or fix `docs.talonic.com`.** The hosted MCP root advertises this as the docs URL. If the subdomain doesn't exist, agents pointed at it land on a dead URL. Either set up the redirect or update the discovery payload to `https://talonic.com/docs/mcp`.
+3. **Test in Claude.ai connectors.** The hosted MCP works in raw curl with both auth modes. We have not confirmed it works inside Claude.ai's "Add custom connector" flow. If Claude.ai's UI requires OAuth, this becomes a post-launch unlock with a real OAuth layer in front of `mcp.talonic.com`.
+4. **Add `triage` and `mime_type` to the SDK's `Document` type.** The API returns these fields on `talonic_get_document`; the SDK passes them through but our type definitions are incomplete.
+5. **Engineering API issues still open**: `is_not_empty` filter underreports (currently hidden at the MCP layer), cost/EUR/balance not surfaced in any tool response, per-field provenance (page, bbox) not surfaced. None of these block launch; all are documented honestly in the v1 surface.
+6. **Wire `mcp-publisher publish` into the release pipeline** so the official MCP Registry tracks the latest npm version automatically. Manual run required for now after each `chore: bump` commit.
 7. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; unknown whether the release was published. Low priority per latest direction.
 8. **Other directory submissions**: Smithery, Cursor, Cline, Continue, mcp.so, Cowork plugins. Workstream 2.
 
