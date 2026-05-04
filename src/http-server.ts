@@ -32,7 +32,10 @@ const PORT = Number(process.env["PORT"] ?? 3000)
  * Extract the Talonic API key from the request. Checks the Authorization
  * header first, then falls back to the `apiKey` query parameter.
  */
-function extractApiKey(req: { url?: string; headers: Record<string, string | string[] | undefined> }): string | undefined {
+function extractApiKey(req: {
+  url?: string
+  headers: Record<string, string | string[] | undefined>
+}): string | undefined {
   // 1. Authorization: Bearer tlnc_...
   const authHeader = req.headers["authorization"]
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
@@ -73,15 +76,18 @@ const httpServer = createHttpServer(async (req, res) => {
   // ── Root: service discovery for AI agents ─────────────────────────
   if (path === "/") {
     res.writeHead(200, { "Content-Type": "application/json" })
-    res.end(JSON.stringify({
-      name: SERVER_NAME,
-      version: VERSION,
-      description: "Talonic MCP server — extract structured, schema-validated data from any document.",
-      mcp_endpoint: "/mcp",
-      health_endpoint: "/health",
-      auth: "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
-      docs: "https://docs.talonic.com",
-    }))
+    res.end(
+      JSON.stringify({
+        name: SERVER_NAME,
+        version: VERSION,
+        description:
+          "Talonic MCP server — extract structured, schema-validated data from any document.",
+        mcp_endpoint: "/mcp",
+        health_endpoint: "/health",
+        auth: "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
+        docs: "https://docs.talonic.com",
+      }),
+    )
     return
   }
 
@@ -100,7 +106,12 @@ const httpServer = createHttpServer(async (req, res) => {
   // ── Only serve /mcp ───────────────────────────────────────────────
   if (path !== "/mcp") {
     res.writeHead(404, { "Content-Type": "application/json" })
-    res.end(JSON.stringify({ error: "not_found", message: `No route for ${path}. Use /mcp for the MCP endpoint or /health for status.` }))
+    res.end(
+      JSON.stringify({
+        error: "not_found",
+        message: `No route for ${path}. Use /mcp for the MCP endpoint or /health for status.`,
+      }),
+    )
     return
   }
 
@@ -121,7 +132,13 @@ const httpServer = createHttpServer(async (req, res) => {
   const apiKey = extractApiKey(req)
   if (!apiKey) {
     res.writeHead(401, { "Content-Type": "application/json" })
-    res.end(JSON.stringify({ error: "unauthorized", message: "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param." }))
+    res.end(
+      JSON.stringify({
+        error: "unauthorized",
+        message:
+          "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
+      }),
+    )
     return
   }
 
@@ -140,7 +157,9 @@ const httpServer = createHttpServer(async (req, res) => {
   // it knows to re-initialize.
   const body = await new Promise<string>((resolve) => {
     let data = ""
-    req.on("data", (chunk: Buffer) => { data += chunk.toString() })
+    req.on("data", (chunk: Buffer) => {
+      data += chunk.toString()
+    })
     req.on("end", () => resolve(data))
   })
 
@@ -157,7 +176,12 @@ const httpServer = createHttpServer(async (req, res) => {
   // request, tell it to re-initialize.
   if (sessionId && !isInitializeRequest(parsed)) {
     res.writeHead(404, { "Content-Type": "application/json" })
-    res.end(JSON.stringify({ error: "session_not_found", message: "Unknown session. Re-initialize without the Mcp-Session-Id header." }))
+    res.end(
+      JSON.stringify({
+        error: "session_not_found",
+        message: "Unknown session. Re-initialize without the Mcp-Session-Id header.",
+      }),
+    )
     return
   }
 

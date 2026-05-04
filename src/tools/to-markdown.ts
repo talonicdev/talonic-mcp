@@ -4,6 +4,8 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable.",
+  "",
   "Get the OCR-converted markdown for a document. Accepts an existing document_id,",
   "raw file bytes (base64), a local file path, or a URL. When given a raw file, the",
   "tool ingests it via extract first and then returns the markdown.",
@@ -68,13 +70,25 @@ export interface ToMarkdownArgs {
 }
 
 /**
- * Minimal schema used when we need to ingest a raw file just to obtain
- * a document_id. Auto-discovery extract works on production; we keep
- * this empty so Talonic discovers the schema itself.
+ * Minimal but valid JSON Schema used when we need to ingest a raw file
+ * solely to obtain a document_id (to feed into the markdown call).
+ *
+ * Why a single throwaway field instead of `{}`: schema-less extraction
+ * is unreliable, and we explicitly disable that path at the MCP layer
+ * via `talonic_extract`'s validation guard. To stay consistent and
+ * reliable in this internal call, we send a trivially valid schema.
+ * The API performs a no-op extraction (likely returning a null
+ * `document_title` with confidence 0), which we discard. We only need
+ * `result.document.id`. The document is still uploaded and ingested.
  *
  * @internal
  */
-const INGEST_ONLY_SCHEMA: Record<string, unknown> = {}
+const INGEST_ONLY_SCHEMA: Record<string, unknown> = {
+  type: "object",
+  properties: {
+    document_title: { type: "string" },
+  },
+}
 
 export async function handleToMarkdown(
   talonic: Talonic,

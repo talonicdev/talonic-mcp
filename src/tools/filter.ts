@@ -4,6 +4,8 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable. Field-name resolution is server-side. The `is_not_empty` operator is intentionally not exposed in v0.1; see workaround below.",
+  "",
   "Filter the user's Talonic documents by extracted field values using composable conditions.",
   "Conditions accept either a canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type')",
   "or a field UUID. The Talonic API resolves names to ids server-side.",
@@ -20,13 +22,14 @@ const DESCRIPTION = [
   "- The user wants extracted data from a new document (use talonic_extract).",
   "",
   "OPERATORS:",
-  "- eq, neq: equality / inequality",
-  "- gt, gte, lt, lte: numeric or date comparisons",
-  "- between: requires both `value` and `value_to`",
-  "- contains: substring match on string fields",
-  "- is_empty: presence check (no value needed)",
-  "- is_not_empty: presence check (no value needed). Note: currently underreports;",
-  "  use `eq` / `gt` / `contains` etc. against a known value when possible.",
+  "- eq, neq: equality / inequality.",
+  "- gt, gte, lt, lte: numeric or date comparisons.",
+  "- between: requires both `value` and `value_to`.",
+  "- contains: substring match on string fields.",
+  "- is_empty: presence check, no value needed. Returns documents where the field is null or missing.",
+  "",
+  "NOT SUPPORTED IN v0.1:",
+  "- is_not_empty: underreports against fields known to be populated. Removed from the supported operator list to keep filter results trustworthy. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` then invert the result client-side. Tracked for a later release.",
   "",
   "TIPS:",
   "- To discover available field names, call talonic_search first with a related query.",
@@ -44,7 +47,8 @@ const operatorEnum = z.enum([
   "between",
   "contains",
   "is_empty",
-  "is_not_empty",
+  // is_not_empty intentionally omitted in v0.1: it underreports against
+  // fields known to be populated. See description for the workaround.
 ])
 
 const conditionSchema = z.object({
@@ -96,17 +100,7 @@ export interface FilterArgs {
   conditions: Array<{
     field?: string
     field_id?: string
-    operator:
-      | "eq"
-      | "neq"
-      | "gt"
-      | "gte"
-      | "lt"
-      | "lte"
-      | "between"
-      | "contains"
-      | "is_empty"
-      | "is_not_empty"
+    operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "between" | "contains" | "is_empty"
     value?: unknown
     value_to?: unknown
   }>

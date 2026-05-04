@@ -11,9 +11,12 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
  * @internal
  */
 const DESCRIPTION = [
+  "STATUS: stable.",
+  "",
   "List all saved schemas in the user's Talonic workspace.",
-  "Returns each schema with its id, name, description, version,",
-  "field count, and full JSON Schema definition.",
+  "Returns each schema with its id (UUID), short_id (SCH-XXXXXXXX), name, description,",
+  "version, field count, and full JSON Schema definition. Either id form is accepted by",
+  "talonic_extract's `schema_id` parameter.",
   "",
   "USE WHEN:",
   "- The user asks what schemas they have, or asks to see existing schemas.",

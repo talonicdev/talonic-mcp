@@ -30,7 +30,11 @@ The package is on npm. Every MCP client launches it the same way: a one-line `np
 }
 ```
 
-The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart. To pin to a specific version, replace `@latest` with the version number (e.g. `@0.1.10`).
+The `-y` flag skips the npm install prompt.
+
+**Version pinning.** `@latest` is fine for trying things out and for personal use. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.10`) so a future release cannot silently change tool descriptions, validation rules, or the response shape your agent depends on. Bump the pin manually after reviewing the CHANGELOG.
+
+Talonic uses a single API key per workspace. The same key authorises all tools. There is no scoping mechanism in v0.1; treat the key like any other secret and store it in your client's secret store rather than in version control.
 
 Per-client snippets are below.
 

@@ -4,6 +4,8 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable.",
+  "",
   "Fetch full metadata for a single document already in the user's Talonic workspace.",
   "Returns id, filename, page count, detected document type, language, processing log,",
   "and link URLs (self, extractions, dashboard).",

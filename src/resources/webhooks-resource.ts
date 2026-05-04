@@ -6,9 +6,21 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
  */
 const WEBHOOK_INFO_ENDPOINTS = [
   { path: "/v1/webhooks/events", key: "events", description: "Available webhook event types" },
-  { path: "/v1/webhooks/delivery", key: "delivery", description: "Delivery behavior and retry policy" },
-  { path: "/v1/webhooks/signatures", key: "signatures", description: "Signature verification algorithms" },
-  { path: "/v1/webhooks/retries", key: "retries", description: "Retry schedule and backoff policy" },
+  {
+    path: "/v1/webhooks/delivery",
+    key: "delivery",
+    description: "Delivery behavior and retry policy",
+  },
+  {
+    path: "/v1/webhooks/signatures",
+    key: "signatures",
+    description: "Signature verification algorithms",
+  },
+  {
+    path: "/v1/webhooks/retries",
+    key: "retries",
+    description: "Retry schedule and backoff policy",
+  },
 ] as const
 
 /**
@@ -20,7 +32,11 @@ const WEBHOOK_INFO_ENDPOINTS = [
  *
  * @internal
  */
-export function registerWebhooksResource(server: McpServer, apiKey: string, baseUrl?: string): void {
+export function registerWebhooksResource(
+  server: McpServer,
+  apiKey: string,
+  baseUrl?: string,
+): void {
   const base = baseUrl ?? "https://api.talonic.com"
 
   server.registerResource(
@@ -47,10 +63,16 @@ export function registerWebhooksResource(server: McpServer, apiKey: string, base
             if (res.ok) {
               results[key] = await res.json()
             } else {
-              results[key] = { error: `HTTP ${res.status}`, message: await res.text().catch(() => "") }
+              results[key] = {
+                error: `HTTP ${res.status}`,
+                message: await res.text().catch(() => ""),
+              }
             }
           } catch (err) {
-            results[key] = { error: "fetch_failed", message: err instanceof Error ? err.message : String(err) }
+            results[key] = {
+              error: "fetch_failed",
+              message: err instanceof Error ? err.message : String(err),
+            }
           }
         }),
       )

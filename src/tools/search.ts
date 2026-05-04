@@ -4,6 +4,8 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable.",
+  "",
   "Search the user's Talonic workspace for documents, fields, sources, or schemas",
   "matching a query. Returns ranked results across all entity types in one call.",
   "",

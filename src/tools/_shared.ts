@@ -47,6 +47,22 @@ export function jsonOk(value: unknown): ToolSuccessResult {
 }
 
 /**
+ * Build a tool error result for input-validation failures detected at
+ * the MCP layer, before any API call. Use this for fast-fail checks
+ * such as required arguments missing or mutually exclusive flags
+ * provided together. The agent gets a clear, structured message
+ * instead of an unintelligible API error.
+ *
+ * @internal
+ */
+export function validationError(message: string): ToolErrorResult {
+  return {
+    isError: true,
+    content: [{ type: "text", text: `Validation error: ${message}` }],
+  }
+}
+
+/**
  * Convert any thrown error into a tool error result with stable
  * formatting. Talonic API errors include `code`, `status`, and
  * `request_id` so the user (or another tool call) can act on them.

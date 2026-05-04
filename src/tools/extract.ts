@@ -1,9 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { ExtractParams, Talonic } from "@talonic/node"
 import { z } from "zod"
-import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { jsonOk, toolError, validationError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable. Production-safe when called with a schema. Schema-less extraction is disabled at the MCP layer.",
+  "",
   "Extract structured, schema-validated data from a document using Talonic.",
   "Returns clean JSON matching the schema, with per-field confidence scores and",
   "metadata about the document (detected type, language, page count).",
@@ -31,13 +33,24 @@ const DESCRIPTION = [
   "  the public web.",
   "- document_id: re-extract a document already in the workspace.",
   "",
-  "SCHEMA FORMATS (provide at most one of `schema` or `schema_id`):",
-  '- JSON Schema (most reliable): { type: "object", properties: { vendor_name: { type: "string" } } }',
-  '- Flat key-type map: { vendor_name: "string", invoice_total: "number" } -- API normalises server-side. If you get a "no fields" error, fall back to JSON Schema.',
-  "- schema_id: id of a saved schema from talonic_list_schemas. Accepts the UUID or the SCH-XXXXXXXX short id.",
+  "SCHEMA (REQUIRED, provide exactly one of `schema` or `schema_id`):",
+  '- JSON Schema (RECOMMENDED): { type: "object", properties: { vendor_name: { type: "string" } } }.',
+  '- Flat key-type map: { vendor_name: "string", invoice_total: "number" }. Accepted, but if you get a "no fields" error, fall back to JSON Schema.',
+  "- schema_id: id of a saved schema from talonic_list_schemas. Accepts UUID or SCH-XXXXXXXX short id.",
   "",
-  "IMPORTANT: production currently rejects requests with no schema. Always provide either",
-  "an inline `schema` or a `schema_id`.",
+  "Calls without `schema` or `schema_id` are rejected with a validation error before they hit the API,",
+  "to prevent unreliable schema-free extractions reaching production.",
+  "",
+  "RESPONSE SHAPE (key fields):",
+  "- data: the structured extracted JSON, shaped by your schema.",
+  "- confidence.overall: 0..1 confidence for the extraction as a whole.",
+  "- confidence.fields: per-field confidence map. Treat fields below ~0.7 as needing human review.",
+  "- document.id, document.filename, document.pages, document.type_detected, document.language_detected.",
+  "- extraction_id, request_id: stable identifiers for support and re-fetch.",
+  "- processing.duration_ms, processing.region: useful for debugging and capacity planning.",
+  "- markdown: present only when `include_markdown: true`.",
+  "Cost, EUR price, and remaining credit balance are not surfaced in v0.1 and may appear in a later version.",
+  "Per-field source provenance (page, bounding box) is not surfaced in v0.1.",
 ].join("\n")
 
 const inputSchema = {
@@ -73,13 +86,13 @@ const inputSchema = {
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      "Inline schema definition. Most reliable: full JSON Schema {type:'object', properties:{...}}. Also accepted: a flat key-type map {field_name:'string', amount:'number'} which the API normalises. Mutually exclusive with `schema_id`.",
+      "Inline schema definition. REQUIRED unless `schema_id` is provided. Recommended: full JSON Schema {type:'object', properties:{...}}. Also accepted: flat key-type map {field_name:'string', amount:'number'}. Mutually exclusive with `schema_id`.",
     ),
   schema_id: z
     .string()
     .optional()
     .describe(
-      "ID of a saved schema. Accepts UUID or SCH-XXXXXXXX short id. Mutually exclusive with `schema`.",
+      "ID of a saved schema. REQUIRED unless `schema` is provided. Accepts UUID or SCH-XXXXXXXX short id from talonic_list_schemas. Mutually exclusive with `schema`.",
     ),
   instructions: z
     .string()
@@ -106,6 +119,19 @@ export interface ExtractArgs {
 }
 
 export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promise<ToolResult> {
+  // Schema is required at the MCP layer. Schema-less extraction is not
+  // reliable in v0.1 and is explicitly disabled here so agents get a
+  // fast, clear error instead of a slow, opaque API failure or, worse,
+  // a quietly-empty result. Items 1 and 7 of the v1 priority list.
+  if (args.schema === undefined && args.schema_id === undefined) {
+    return validationError(
+      "talonic_extract requires a schema. Provide either an inline `schema` (JSON Schema or flat key-type map) or a `schema_id` from talonic_list_schemas. Schema-less extraction is unreliable in v0.1 and is disabled at the MCP layer.",
+    )
+  }
+  if (args.schema !== undefined && args.schema_id !== undefined) {
+    return validationError("talonic_extract accepts `schema` OR `schema_id`, not both. Pick one.")
+  }
+
   try {
     const params: ExtractParams = {}
     if (args.file_data !== undefined) {

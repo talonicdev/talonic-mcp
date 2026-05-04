@@ -4,6 +4,8 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
+  "STATUS: stable.",
+  "",
   "Save a schema definition to the user's Talonic workspace so it can be reused",
   "across future extractions. Returns the saved schema with its newly assigned id and short_id.",
   "",

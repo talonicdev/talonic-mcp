@@ -309,10 +309,28 @@ describe("talonic_extract handler", () => {
     expect(fd.get("include_markdown")).toBe("true")
   })
 
+  it("returns isError when no schema or schema_id is provided", async () => {
+    const result = await handleExtract(client.talonic, { document_id: "doc_1" })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/requires a schema/)
+  })
+
   it("returns isError when no file source provided", async () => {
-    const result = await handleExtract(client.talonic, {})
+    const result = await handleExtract(client.talonic, {
+      schema: { type: "object", properties: { x: { type: "string" } } },
+    })
     expect((result as { isError?: boolean }).isError).toBe(true)
     expect(result.content[0]?.text).toMatch(/file source/)
+  })
+
+  it("returns isError when both schema and schema_id are provided", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      schema: { type: "object", properties: { x: { type: "string" } } },
+      schema_id: "sch_1",
+    })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/schema.*OR.*schema_id|not both/)
   })
 
   it("decodes file_data + filename and uploads as multipart with inferred MIME", async () => {

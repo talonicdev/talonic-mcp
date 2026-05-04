@@ -1,29 +1,72 @@
-import type { RawSection } from '../types';
+import type { RawSection } from "../types"
 
 export const sections: RawSection[] = [
   {
-    slug: 'talonic-extract',
-    parentSlug: 'tools',
-    title: 'talonic_extract',
-    seoTitle: 'talonic_extract Tool — Talonic MCP',
-    description: 'Extract structured, schema-validated data from a document. Returns clean JSON with per-field confidence scores.',
+    slug: "talonic-extract",
+    parentSlug: "tools",
+    title: "talonic_extract",
+    seoTitle: "talonic_extract Tool — Talonic MCP",
+    description:
+      "Extract structured, schema-validated data from a document. Returns clean JSON with per-field confidence scores.",
     content: [
-      { type: 'paragraph', text: 'Extract structured, schema-validated data from a document.' },
-      { type: 'paragraph', text: 'Inputs: one of `file_data` + `filename` (recommended for chat clients), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.' },
-      { type: 'param-table', params: [
-        { name: 'file_data', type: 'string', description: 'Base64-encoded file bytes. Recommended for chat clients (drag-and-drop).' },
-        { name: 'filename', type: 'string', description: 'Original filename (used for MIME type inference when using `file_data`).' },
-        { name: 'file_path', type: 'string', description: 'Local file path.' },
-        { name: 'file_url', type: 'string', description: 'Remote file URL.' },
-        { name: 'document_id', type: 'string', description: 'ID of a previously uploaded document.' },
-        { name: 'schema', type: 'object', description: 'Inline schema definition (JSON Schema or flat key-type map).' },
-        { name: 'schema_id', type: 'string', description: 'UUID or SCH-XXXXXXXX short ID of a saved schema.' },
-        { name: 'instructions', type: 'string', description: 'Natural-language guidance for the extractor.' },
-        { name: 'include_markdown', type: 'boolean', description: 'Include OCR markdown alongside structured data.' },
-      ]},
-      { type: 'callout', variant: 'warning', text: 'Always provide a `schema` or `schema_id`. Auto-discovery extract (no schema) is not reliable in v0.1.' },
-      { type: 'heading', level: 3, id: 'extract-inline-schema', text: 'Example: inline schema' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      { type: "paragraph", text: "Extract structured, schema-validated data from a document." },
+      {
+        type: "paragraph",
+        text: "Inputs: one of `file_data` + `filename` (recommended for chat clients), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "file_data",
+            type: "string",
+            description: "Base64-encoded file bytes. Recommended for chat clients (drag-and-drop).",
+          },
+          {
+            name: "filename",
+            type: "string",
+            description: "Original filename (used for MIME type inference when using `file_data`).",
+          },
+          { name: "file_path", type: "string", description: "Local file path." },
+          { name: "file_url", type: "string", description: "Remote file URL." },
+          {
+            name: "document_id",
+            type: "string",
+            description: "ID of a previously uploaded document.",
+          },
+          {
+            name: "schema",
+            type: "object",
+            description: "Inline schema definition (JSON Schema or flat key-type map).",
+          },
+          {
+            name: "schema_id",
+            type: "string",
+            description: "UUID or SCH-XXXXXXXX short ID of a saved schema.",
+          },
+          {
+            name: "instructions",
+            type: "string",
+            description: "Natural-language guidance for the extractor.",
+          },
+          {
+            name: "include_markdown",
+            type: "boolean",
+            description: "Include OCR markdown alongside structured data.",
+          },
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "Always provide a `schema` or `schema_id`. Auto-discovery extract (no schema) is not reliable in v0.1.",
+      },
+      { type: "heading", level: 3, id: "extract-inline-schema", text: "Example: inline schema" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "file_url": "https://example.com/invoice-2026-001.pdf",
   "schema": {
     "type": "object",
@@ -46,8 +89,13 @@ export const sections: RawSection[] = [
     "required": ["vendor_name", "total_amount"]
   },
   "instructions": "Amounts are in EUR. Focus on the billing section."
-}` },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "document_id": "doc_8f3a...",
   "data": {
     "vendor_name": "Meridian Energy AG",
@@ -71,41 +119,76 @@ export const sections: RawSection[] = [
     "type_detected": "Invoice",
     "language_detected": "de"
   }
-}` },
-      { type: 'heading', level: 3, id: 'extract-schema-id', text: 'Example: saved schema' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+}`,
+      },
+      { type: "heading", level: 3, id: "extract-schema-id", text: "Example: saved schema" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "file_path": "./contracts/lease-agreement.pdf",
   "schema_id": "SCH-A1B2C3D4"
-}` },
+}`,
+      },
     ],
     related: [
-      { label: 'talonic_to_markdown', slug: 'talonic-to-markdown' },
-      { label: 'talonic_save_schema', slug: 'talonic-save-schema' },
-      { label: 'Drag & Drop Files', slug: 'drag-and-drop' },
+      { label: "talonic_to_markdown", slug: "talonic-to-markdown" },
+      { label: "talonic_save_schema", slug: "talonic-save-schema" },
+      { label: "Drag & Drop Files", slug: "drag-and-drop" },
     ],
     faq: [
-      { question: 'How does talonic_extract work?', answer: 'Send a document (file_data, file_path, file_url, or document_id) with a schema or schema_id. The tool returns schema-validated JSON with per-field confidence scores.' },
+      {
+        question: "How does talonic_extract work?",
+        answer:
+          "Send a document (file_data, file_path, file_url, or document_id) with a schema or schema_id. The tool returns schema-validated JSON with per-field confidence scores.",
+      },
     ],
-    mentions: ['extract', 'schema', 'confidence scores', 'file_data'],
+    mentions: ["extract", "schema", "confidence scores", "file_data"],
   },
   {
-    slug: 'talonic-search',
-    parentSlug: 'tools',
-    title: 'talonic_search',
-    seoTitle: 'talonic_search Tool — Talonic MCP',
-    description: 'Omnisearch across documents, fields, sources, and schemas in the workspace. Supports conceptual and fuzzy queries.',
+    slug: "talonic-search",
+    parentSlug: "tools",
+    title: "talonic_search",
+    seoTitle: "talonic_search Tool — Talonic MCP",
+    description:
+      "Omnisearch across documents, fields, sources, and schemas in the workspace. Supports conceptual and fuzzy queries.",
     content: [
-      { type: 'paragraph', text: 'Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.' },
-      { type: 'param-table', params: [
-        { name: 'query', type: 'string', required: true, description: 'The search query. Supports fuzzy and conceptual matching.' },
-        { name: 'limit', type: 'integer', description: 'Maximum results per entity type. Default: 5.' },
-      ]},
-      { type: 'heading', level: 3, id: 'search-example', text: 'Example' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      {
+        type: "paragraph",
+        text: "Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "query",
+            type: "string",
+            required: true,
+            description: "The search query. Supports fuzzy and conceptual matching.",
+          },
+          {
+            name: "limit",
+            type: "integer",
+            description: "Maximum results per entity type. Default: 5.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "search-example", text: "Example" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "query": "indemnification clauses Acme",
   "limit": 10
-}` },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "documents": [
     {
       "id": "doc_4e7b...",
@@ -127,43 +210,83 @@ export const sections: RawSection[] = [
   "fields": [
     { "canonicalName": "indemnification.cap_amount", "type": "string" }
   ]
-}` },
+}`,
+      },
     ],
-    related: [
-      { label: 'talonic_filter', slug: 'talonic-filter' },
-    ],
+    related: [{ label: "talonic_filter", slug: "talonic-filter" }],
     faq: [
-      { question: 'What does talonic_search do?', answer: 'It searches across documents, fields, sources, and schemas in the workspace using fuzzy and conceptual matching.' },
+      {
+        question: "What does talonic_search do?",
+        answer:
+          "It searches across documents, fields, sources, and schemas in the workspace using fuzzy and conceptual matching.",
+      },
     ],
-    mentions: ['search', 'omnisearch', 'fuzzy'],
+    mentions: ["search", "omnisearch", "fuzzy"],
   },
   {
-    slug: 'talonic-filter',
-    parentSlug: 'tools',
-    title: 'talonic_filter',
-    seoTitle: 'talonic_filter Tool — Talonic MCP',
-    description: 'Filter documents by extracted field values using composable conditions like eq, gt, between, and contains.',
+    slug: "talonic-filter",
+    parentSlug: "tools",
+    title: "talonic_filter",
+    seoTitle: "talonic_filter Tool — Talonic MCP",
+    description:
+      "Filter documents by extracted field values using composable conditions like eq, gt, between, and contains.",
     content: [
-      { type: 'paragraph', text: 'Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.).' },
-      { type: 'paragraph', text: 'Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to IDs server-side, or UUIDs directly.' },
-      { type: 'param-table', params: [
-        { name: 'conditions', type: 'array', required: true, description: 'Filter conditions, AND-ed together. Each has `field` or `field_id`, `operator`, and `value`.' },
-        { name: 'search', type: 'string', description: 'Optional free-text search applied alongside filters.' },
-        { name: 'sort', type: 'object', description: 'Sort by a field: `{ field, direction: "asc" | "desc" }`.' },
-        { name: 'page', type: 'integer', description: 'Page number for pagination.' },
-        { name: 'limit', type: 'integer', description: 'Results per page. Default: 50.' },
-      ]},
-      { type: 'callout', variant: 'warning', text: 'The `is_not_empty` operator currently underreports. Use specific operators (`eq`, `gt`, `contains`, etc.) against known values when possible.' },
-      { type: 'heading', level: 3, id: 'filter-example', text: 'Example' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      {
+        type: "paragraph",
+        text: "Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, etc.).",
+      },
+      {
+        type: "paragraph",
+        text: "Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to IDs server-side, or UUIDs directly.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "conditions",
+            type: "array",
+            required: true,
+            description:
+              "Filter conditions, AND-ed together. Each has `field` or `field_id`, `operator`, and `value`.",
+          },
+          {
+            name: "search",
+            type: "string",
+            description: "Optional free-text search applied alongside filters.",
+          },
+          {
+            name: "sort",
+            type: "object",
+            description: 'Sort by a field: `{ field, direction: "asc" | "desc" }`.',
+          },
+          { name: "page", type: "integer", description: "Page number for pagination." },
+          { name: "limit", type: "integer", description: "Results per page. Default: 50." },
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "The `is_not_empty` operator currently underreports. Use specific operators (`eq`, `gt`, `contains`, etc.) against known values when possible.",
+      },
+      { type: "heading", level: 3, id: "filter-example", text: "Example" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "conditions": [
     { "field": "vendor.name", "operator": "eq", "value": "Meridian Energy AG" },
     { "field": "invoice.total_eur", "operator": "gt", "value": 1000 }
   ],
   "sort": { "field": "invoice.total_eur", "direction": "desc" },
   "limit": 20
-}` },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "data": [
     {
       "document_id": "doc_8f3a...",
@@ -186,33 +309,59 @@ export const sections: RawSection[] = [
   ],
   "total": 2,
   "page": 1
-}` },
+}`,
+      },
     ],
     related: [
-      { label: 'talonic_search', slug: 'talonic-search' },
-      { label: 'Known Limitations', slug: 'known-limitations' },
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "Known Limitations", slug: "known-limitations" },
     ],
     faq: [
-      { question: 'How do I filter documents by field value?', answer: 'Use talonic_filter with canonical field names and operators like eq, gt, between, contains. The API resolves field names to IDs server-side.' },
+      {
+        question: "How do I filter documents by field value?",
+        answer:
+          "Use talonic_filter with canonical field names and operators like eq, gt, between, contains. The API resolves field names to IDs server-side.",
+      },
     ],
-    mentions: ['filter', 'canonical field names', 'operators'],
+    mentions: ["filter", "canonical field names", "operators"],
   },
   {
-    slug: 'talonic-get-document',
-    parentSlug: 'tools',
-    title: 'talonic_get_document',
-    seoTitle: 'talonic_get_document Tool — Talonic MCP',
-    description: 'Fetch full metadata for a single document by ID, including processing log and link URLs.',
+    slug: "talonic-get-document",
+    parentSlug: "tools",
+    title: "talonic_get_document",
+    seoTitle: "talonic_get_document Tool — Talonic MCP",
+    description:
+      "Fetch full metadata for a single document by ID, including processing log and link URLs.",
     content: [
-      { type: 'paragraph', text: 'Fetch full metadata for a single document by ID, including processing log and link URLs.' },
-      { type: 'param-table', params: [
-        { name: 'document_id', type: 'string', required: true, description: 'The document UUID.' },
-      ]},
-      { type: 'heading', level: 3, id: 'get-document-example', text: 'Example' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      {
+        type: "paragraph",
+        text: "Fetch full metadata for a single document by ID, including processing log and link URLs.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "document_id",
+            type: "string",
+            required: true,
+            description: "The document UUID.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-document-example", text: "Example" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "document_id": "doc_8f3a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
-}` },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "id": "doc_8f3a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
   "filename": "invoice-2026-001.pdf",
   "status": "completed",
@@ -227,37 +376,70 @@ export const sections: RawSection[] = [
     "extractions": "https://api.talonic.com/v1/documents/doc_8f3a.../extractions",
     "dashboard": "https://app.talonic.com/documents/doc_8f3a..."
   }
-}` },
+}`,
+      },
     ],
     related: [
-      { label: 'talonic_to_markdown', slug: 'talonic-to-markdown' },
-      { label: 'talonic_extract', slug: 'talonic-extract' },
+      { label: "talonic_to_markdown", slug: "talonic-to-markdown" },
+      { label: "talonic_extract", slug: "talonic-extract" },
     ],
     faq: [
-      { question: 'How do I get document metadata via MCP?', answer: 'Call talonic_get_document with the document UUID to get full metadata including processing log and link URLs.' },
+      {
+        question: "How do I get document metadata via MCP?",
+        answer:
+          "Call talonic_get_document with the document UUID to get full metadata including processing log and link URLs.",
+      },
     ],
-    mentions: ['document', 'metadata', 'processing log'],
+    mentions: ["document", "metadata", "processing log"],
   },
   {
-    slug: 'talonic-to-markdown',
-    parentSlug: 'tools',
-    title: 'talonic_to_markdown',
-    seoTitle: 'talonic_to_markdown Tool — Talonic MCP',
-    description: 'Get OCR-converted markdown for a document. Accepts document_id, file_data + filename, file_path, or file_url.',
+    slug: "talonic-to-markdown",
+    parentSlug: "tools",
+    title: "talonic_to_markdown",
+    seoTitle: "talonic_to_markdown Tool — Talonic MCP",
+    description:
+      "Get OCR-converted markdown for a document. Accepts document_id, file_data + filename, file_path, or file_url.",
     content: [
-      { type: 'paragraph', text: 'Get OCR-converted markdown for a document. Accepts `document_id` (cheapest — no re-upload), `file_data` + `filename`, `file_path`, or `file_url`.' },
-      { type: 'param-table', params: [
-        { name: 'document_id', type: 'string', description: 'ID of an already-ingested document (cheapest path).' },
-        { name: 'file_data', type: 'string', description: 'Base64-encoded file bytes. Pair with `filename`.' },
-        { name: 'filename', type: 'string', description: 'Original filename with extension.' },
-        { name: 'file_path', type: 'string', description: 'Local file path.' },
-        { name: 'file_url', type: 'string', description: 'Remote URL the API fetches server-side.' },
-      ]},
-      { type: 'heading', level: 3, id: 'to-markdown-example', text: 'Example' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      {
+        type: "paragraph",
+        text: "Get OCR-converted markdown for a document. Accepts `document_id` (cheapest — no re-upload), `file_data` + `filename`, `file_path`, or `file_url`.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "document_id",
+            type: "string",
+            description: "ID of an already-ingested document (cheapest path).",
+          },
+          {
+            name: "file_data",
+            type: "string",
+            description: "Base64-encoded file bytes. Pair with `filename`.",
+          },
+          { name: "filename", type: "string", description: "Original filename with extension." },
+          { name: "file_path", type: "string", description: "Local file path." },
+          {
+            name: "file_url",
+            type: "string",
+            description: "Remote URL the API fetches server-side.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "to-markdown-example", text: "Example" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "document_id": "doc_8f3a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
-}` },
-      { type: 'code', language: 'markdown', title: 'Tool response', code: `# Invoice INV-2026-001
+}`,
+      },
+      {
+        type: "code",
+        language: "markdown",
+        title: "Tool response",
+        code: `# Invoice INV-2026-001
 
 **Meridian Energy AG**
 Musterstraße 42, 10115 Berlin
@@ -269,29 +451,44 @@ Musterstraße 42, 10115 Berlin
 | **Total**             | **€1,500.00** |
 
 Due date: 15 June 2026
-Payment terms: Net 30` },
+Payment terms: Net 30`,
+      },
     ],
     related: [
-      { label: 'talonic_extract', slug: 'talonic-extract' },
-      { label: 'Drag & Drop Files', slug: 'drag-and-drop' },
+      { label: "talonic_extract", slug: "talonic-extract" },
+      { label: "Drag & Drop Files", slug: "drag-and-drop" },
     ],
     faq: [
-      { question: 'How do I get markdown from a document via MCP?', answer: 'Call talonic_to_markdown with a document_id (cheapest), or provide the file directly via file_data, file_path, or file_url.' },
+      {
+        question: "How do I get markdown from a document via MCP?",
+        answer:
+          "Call talonic_to_markdown with a document_id (cheapest), or provide the file directly via file_data, file_path, or file_url.",
+      },
     ],
-    mentions: ['markdown', 'OCR', 'document_id'],
+    mentions: ["markdown", "OCR", "document_id"],
   },
   {
-    slug: 'talonic-list-schemas',
-    parentSlug: 'tools',
-    title: 'talonic_list_schemas',
-    seoTitle: 'talonic_list_schemas Tool — Talonic MCP',
-    description: 'List all saved schemas with their definitions in the workspace.',
+    slug: "talonic-list-schemas",
+    parentSlug: "tools",
+    title: "talonic_list_schemas",
+    seoTitle: "talonic_list_schemas Tool — Talonic MCP",
+    description: "List all saved schemas with their definitions in the workspace.",
     content: [
-      { type: 'paragraph', text: 'List all saved schemas with their definitions. Returns schema IDs (both UUID and `SCH-XXXXXXXX` short format), names, and field definitions.' },
-      { type: 'paragraph', text: 'The `talonic://schemas` resource exposes the same data to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).' },
-      { type: 'heading', level: 3, id: 'list-schemas-example', text: 'Example' },
-      { type: 'paragraph', text: 'No input parameters required.' },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+      {
+        type: "paragraph",
+        text: "List all saved schemas with their definitions. Returns schema IDs (both UUID and `SCH-XXXXXXXX` short format), names, and field definitions.",
+      },
+      {
+        type: "paragraph",
+        text: "The `talonic://schemas` resource exposes the same data to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).",
+      },
+      { type: "heading", level: 3, id: "list-schemas-example", text: "Example" },
+      { type: "paragraph", text: "No input parameters required." },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "schemas": [
     {
       "id": "sch_7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
@@ -323,33 +520,66 @@ Payment terms: Net 30` },
       "definition": { "type": "object", "properties": { "..." : {} } }
     }
   ]
-}` },
+}`,
+      },
     ],
     related: [
-      { label: 'talonic_save_schema', slug: 'talonic-save-schema' },
-      { label: 'talonic_extract', slug: 'talonic-extract' },
+      { label: "talonic_save_schema", slug: "talonic-save-schema" },
+      { label: "talonic_extract", slug: "talonic-extract" },
     ],
     faq: [
-      { question: 'How do I list schemas via MCP?', answer: 'Call talonic_list_schemas to get all saved schemas with their definitions. The talonic://schemas resource also exposes this data.' },
+      {
+        question: "How do I list schemas via MCP?",
+        answer:
+          "Call talonic_list_schemas to get all saved schemas with their definitions. The talonic://schemas resource also exposes this data.",
+      },
     ],
-    mentions: ['schemas', 'list', 'SCH-XXXXXXXX'],
+    mentions: ["schemas", "list", "SCH-XXXXXXXX"],
   },
   {
-    slug: 'talonic-save-schema',
-    parentSlug: 'tools',
-    title: 'talonic_save_schema',
-    seoTitle: 'talonic_save_schema Tool — Talonic MCP',
-    description: 'Save a schema definition to the workspace for reuse across extractions.',
+    slug: "talonic-save-schema",
+    parentSlug: "tools",
+    title: "talonic_save_schema",
+    seoTitle: "talonic_save_schema Tool — Talonic MCP",
+    description: "Save a schema definition to the workspace for reuse across extractions.",
     content: [
-      { type: 'paragraph', text: 'Save a schema definition to the workspace for reuse. Returns a `schema_id` that can be passed to `talonic_extract`.' },
-      { type: 'param-table', params: [
-        { name: 'name', type: 'string', required: true, description: 'Human-readable schema name.' },
-        { name: 'definition', type: 'object', required: true, description: 'Schema definition. Full JSON Schema `{type: "object", properties: {...}}` recommended.' },
-        { name: 'description', type: 'string', description: 'What this schema extracts and when to use it.' },
-      ]},
-      { type: 'callout', text: 'Prefer full JSON Schema format with `type: "object"` and `properties`. The flat key-type map format is not fully supported server-side yet.' },
-      { type: 'heading', level: 3, id: 'save-schema-example', text: 'Example' },
-      { type: 'code', language: 'json', title: 'Tool input', code: `{
+      {
+        type: "paragraph",
+        text: "Save a schema definition to the workspace for reuse. Returns a `schema_id` that can be passed to `talonic_extract`.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "name",
+            type: "string",
+            required: true,
+            description: "Human-readable schema name.",
+          },
+          {
+            name: "definition",
+            type: "object",
+            required: true,
+            description:
+              'Schema definition. Full JSON Schema `{type: "object", properties: {...}}` recommended.',
+          },
+          {
+            name: "description",
+            type: "string",
+            description: "What this schema extracts and when to use it.",
+          },
+        ],
+      },
+      {
+        type: "callout",
+        text: 'Prefer full JSON Schema format with `type: "object"` and `properties`. The flat key-type map format is not fully supported server-side yet.',
+      },
+      { type: "heading", level: 3, id: "save-schema-example", text: "Example" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
   "name": "Standard Invoice",
   "description": "Extracts vendor, line items, totals, and payment terms from invoices.",
   "definition": {
@@ -372,23 +602,33 @@ Payment terms: Net 30` },
     },
     "required": ["vendor_name", "total_amount"]
   }
-}` },
-      { type: 'code', language: 'json', title: 'Tool response', code: `{
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
   "id": "sch_7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
   "short_id": "SCH-A1B2C3D4",
   "name": "Standard Invoice",
   "description": "Extracts vendor, line items, totals, and payment terms from invoices.",
   "version": 1,
   "field_count": 5
-}` },
+}`,
+      },
     ],
     related: [
-      { label: 'talonic_list_schemas', slug: 'talonic-list-schemas' },
-      { label: 'talonic_extract', slug: 'talonic-extract' },
+      { label: "talonic_list_schemas", slug: "talonic-list-schemas" },
+      { label: "talonic_extract", slug: "talonic-extract" },
     ],
     faq: [
-      { question: 'How do I save a schema via MCP?', answer: 'Call talonic_save_schema with a name and JSON Schema definition. It returns a schema_id for reuse in talonic_extract calls.' },
+      {
+        question: "How do I save a schema via MCP?",
+        answer:
+          "Call talonic_save_schema with a name and JSON Schema definition. It returns a schema_id for reuse in talonic_extract calls.",
+      },
     ],
-    mentions: ['save schema', 'JSON Schema', 'reuse'],
+    mentions: ["save schema", "JSON Schema", "reuse"],
   },
-];
+]
