@@ -108,7 +108,9 @@ const inputSchema = {
   include_provenance: z
     .boolean()
     .optional()
-    .describe("Include per-field provenance (source_text, section, page) showing where each value was found in the document."),
+    .describe(
+      "Include per-field provenance (source_text, section, page) showing where each value was found in the document.",
+    ),
 }
 
 export interface ExtractArgs {
@@ -151,7 +153,8 @@ export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promis
     if (args.schema_id !== undefined) params.schema_id = args.schema_id
     if (args.instructions !== undefined) params.instructions = args.instructions
     if (args.include_markdown !== undefined) params.include_markdown = args.include_markdown
-    if (args.include_provenance !== undefined) (params as any).include_provenance = args.include_provenance
+    if (args.include_provenance !== undefined)
+      (params as any).include_provenance = args.include_provenance
 
     const result = await talonic.extract(params)
     return jsonOk(result)
