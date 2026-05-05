@@ -32,7 +32,7 @@ The package is on npm. Every MCP client launches it the same way: a one-line `np
 
 The `-y` flag skips the npm install prompt.
 
-**Version pinning.** `@latest` is fine for trying things out and for personal use. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.10`) so a future release cannot silently change tool descriptions, validation rules, or the response shape your agent depends on. Bump the pin manually after reviewing the CHANGELOG.
+**Version pinning.** `@latest` is fine for trying things out and for personal use. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.16`) so a future release cannot silently change tool descriptions, validation rules, or the response shape your agent depends on. Bump the pin manually after reviewing the CHANGELOG.
 
 Talonic uses a single API key per workspace. The same key authorises all tools. There is no scoping mechanism in v0.1; treat the key like any other secret and store it in your client's secret store rather than in version control.
 
@@ -101,6 +101,19 @@ Edit `~/.continue/config.json`. Add to the `mcpServers` array:
 
 Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Desktop above.
 
+### Claude.ai (hosted MCP)
+
+Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local stdio process. We host one at `mcp.talonic.com` so Claude.ai users can install Talonic without running anything locally:
+
+1. Open https://claude.ai/settings/connectors.
+2. Click "Add custom connector".
+3. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_your_key_here`
+4. Click Add. The 7 tools appear.
+
+Claude.ai's UI does not currently accept a custom `Authorization` header on connectors, so the API key is passed as a `?apiKey=...` query parameter. Less secure than the Bearer header pattern (the key is persisted in the connector store and may appear in Anthropic-side logs), so rotate the key in your Talonic dashboard if you remove the connector. IDE-style clients (Cursor, Cline, Continue) that accept custom headers should use the Bearer header instead.
+
+**Caveat:** drag-and-drop file uploads through `talonic_extract` currently stall on the hosted endpoint. Use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document) for now. The local stdio install is unaffected.
+
 ## Tool reference
 
 Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT USE WHEN sections. Agents pick the right tool reliably without further prompting. Briefly:
@@ -141,7 +154,7 @@ Pick the right tool before you call. The wrong tool returns the wrong data, cost
 - `confidence.overall` below ~0.7: tell the user the extraction may be unreliable, surface low-confidence fields, confirm before any downstream action.
 - Per-field confidence below ~0.7: mark as "needs review", do not use silently in calculations or external API calls.
 - Critical fields (amounts, legal terms, names, dates): confirm with user before acting, even at high confidence.
-- Per-field provenance (page, bbox) is not surfaced in v0.1. Send users to `links.dashboard` to verify against the source.
+- Per-field source provenance (page, section, source text snippet) is available by passing `include_provenance: true` on `talonic_extract`. Use it when the user wants to cite the source of a value or verify against the original document.
 
 **When not to call Talonic**
 - General-knowledge or chat questions. Do not pre-emptively extract.
@@ -186,25 +199,25 @@ The `env` block in your MCP client config is missing or not being read. Double-c
 **Talonic does not appear in the connected servers list.**
 Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. As a sanity check, in any terminal run `npx -y @talonic/mcp@latest --version`; it should print a version number. If you are on an older `0.1.x` and see no output at all, you are hitting the silent-bin bug fixed in `0.1.3`; upgrade by setting the args to `["-y", "@talonic/mcp@latest"]` and restarting the client.
 
-**`talonic_extract` returns 500 INTERNAL_ERROR with auto-discovery.**
-Known limitation. Always provide either an inline `schema` or a `schema_id`. The platform team is stabilising the auto-discovery code path.
+**`talonic_extract` returns a validation error when no schema is given.**
+By design in v0.1. Schema-less extraction is unreliable, so the MCP layer rejects calls that omit both `schema` and `schema_id` before they reach the API. Provide either an inline `schema` (full JSON Schema recommended) or a `schema_id` from `talonic_list_schemas`.
 
 **`talonic_extract` rejects with `unsupported_file_type`.**
-The MIME type was inferred as `application/octet-stream`. The SDK now infers from common file extensions; if your filename has an unusual extension, pass `content_type` explicitly to the SDK call (the MCP layer does not yet expose this; a future tool version will).
-
-**`talonic_filter` errors with `VALIDATION_ERROR` / "No field matches name".**
-You passed a `field` value the API does not know. Field names must be canonical names from the field registry (e.g. `vendor.name`, `policy.0_term_end`). Call `talonic_search` first; the canonical names appear in `fields[].canonicalName` of the response. You can also pass a UUID via `field_id` if you have one.
+The MIME type was inferred as `application/octet-stream`. The SDK infers from common file extensions; if your filename has an unusual extension, pass `content_type` explicitly to the SDK call (the MCP layer does not yet expose this; a future tool version will).
 
 **`talonic_filter` returns no results when you expect data.**
-The `is_not_empty` operator currently underreports. Use a more specific operator (`eq`, `gt`, `gte`, `lt`, `lte`, `between`, `contains`) against a known value when possible.
+Two common causes. First, the field has not been extracted yet: call `talonic_search` first, then look at `fields[]` and `fieldMatches[]` in the response. Only entries with `filterable: true` are usable with `talonic_filter`. Second, schema-typing mismatch: numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) require the schema field to be typed as `number`. A field typed as `string` that holds numeric content silently returns zero. Re-design the schema with the right type and re-extract.
+
+**`talonic_extract` stalls in Claude.ai when I drag a file in.**
+Known issue with the hosted MCP at `mcp.talonic.com`. The drag-and-drop `file_data` path through Claude.ai's connector currently does not return. Workaround: use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document). The local stdio install (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, Continue, Cowork) is unaffected.
 
 **Tool descriptions look wrong in my client.**
 Some MCP clients cache tool descriptions. Restart the client after a server update.
 
 ## Known limitations (v0.1)
 
-- **Auto-discovery extract (no schema) is not reliable on production.** Always pass a `schema` or `schema_id` to `talonic_extract`.
-- **Schema definition: prefer full JSON Schema for now.** The flat key-type map (`{ vendor_name: "string", ... }`) is documented as supported and the API's own error message lists it as accepted, but as of writing the server-side normaliser does not actually translate it. If a flat-map save returns a "no fields" error, fall back to:
+- **Schema is required on `talonic_extract`.** Schema-less extraction is unreliable in v0.1 and is rejected at the MCP layer with a validation error. Always pass a `schema` (full JSON Schema recommended) or a `schema_id`.
+- **Schema definition: prefer full JSON Schema.** The flat key-type map (`{ vendor_name: "string", ... }`) is documented as accepted, but if you get a "no fields" error from the API, fall back to:
   ```json
   {
     "type": "object",
@@ -215,8 +228,11 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
     "required": ["vendor_name", "total_amount"]
   }
   ```
-- **`is_not_empty` filter currently underreports.** A condition with `operator: "is_not_empty"` may return zero documents even when fields are populated. Use specific operators (`eq`, `gt`, `gte`, `lt`, `lte`, `between`, `contains`) against known values instead.
-- **`schema_id` on `talonic_extract` requires the UUID form.** Other endpoints accept either UUID or `SCH-XXXXXXXX`, but `/v1/extract` currently only accepts UUIDs there. Pass the UUID from `talonic_list_schemas`.
+- **Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.
+- **Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.
+- **`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.
+- **Drag-and-drop file uploads in Claude.ai stall via the hosted MCP.** When a file is dragged into a Claude.ai conversation and `talonic_extract` is invoked through `https://mcp.talonic.com/mcp?apiKey=...`, the call hangs without an error or result. Workaround: use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document) instead. Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) are unaffected. Under investigation.
+- **Cost, EUR price, and remaining balance are not surfaced.** The API does not return them in tool responses yet. Credit balance must be checked in the Talonic dashboard.
 
 ## Upgrading from 0.1.0 / 0.1.1 / 0.1.2
 

@@ -7,6 +7,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-05-05
+
+### Added
+
+- `talonic_filter` description gains a SCHEMA TYPING block: numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. String-typed fields holding numeric content silently return zero matches. Surfaced during the v1 audit and worth flagging at the tool layer so agents avoid the trap.
+
+### Changed
+
+- `Known Limitations` section in `src/content/sections/troubleshooting.ts` rewritten to reflect the post-engineering-fix state. Removed the now-stale "per-field provenance not surfaced" entry (engineering shipped `include_provenance` in 0.1.14). Added entries for `filterable: true` discoverability, schema-type-vs-operator compatibility, and the drag-and-drop file-upload stall in Claude.ai's hosted-MCP path (workaround: use `file_url` or `document_id`, or use the local stdio install).
+- Filter callout in `src/content/sections/tools.ts` updated to highlight the `filterable: true` requirement alongside the `is_not_empty` caveat.
+
+## [0.1.15] - 2026-05-05
+
+### Changed
+
+- Prettier-formatted `src/tools/extract.ts` after the 0.1.14 description update.
+
+## [0.1.14] - 2026-05-05
+
+### Added
+
+- `include_provenance` parameter on `talonic_extract`. When true, response includes per-field source evidence (`source_text`, `section`, `page`) showing where each value was found in the document. Closes the long-standing "provenance not surfaced" gap.
+
+### Changed
+
+- Search and filter tool descriptions further refined for the `filterable` flag pattern; FAQ in `docs/sections.json` updated.
+
+## [0.1.13] - 2026-05-04
+
+### Changed
+
+- `talonic_filter` and `talonic_search` descriptions updated to reflect the upstream API addition of a `filterable` boolean on `fields[]` and `fieldMatches[]` in search responses. Agents are now guided to only use `filterable: true` entries with `talonic_filter`, avoiding the silent zero-result queries that previously came back from non-materialized fields.
+
+## [0.1.12] - 2026-05-04
+
+### Added
+
+- New top-level `agent-decision-guide` section in `src/content/sections/overview.ts`, mirrored as an `Agent decision guide` block in the README. Five sub-sections covering when to use which tool, confidence and human-review handling, and when not to call Talonic at all. FAQ entries for SEO ingestion.
+- Complete tool-input-and-response examples for all 7 tools in `src/content/sections/tools.ts`, including the previously-missing response block on `talonic_extract` with `schema_id`.
+
+### Changed
+
+- `talonic_extract` response example shape aligned with the SDK's canonical `confidence: { overall, fields }` form.
+
+## [0.1.11] - 2026-05-04
+
+### Added
+
+- MCP-layer validation guard on `talonic_extract`. Calls without `schema` or `schema_id` are rejected fast with a clear validation error before reaching the API. Schema-less extraction is no longer reachable through the MCP layer in v0.1; agents get a clean error rather than slow opaque API failures or silently empty results.
+- `talonic_extract` response shape documented in the tool description: `confidence.overall`, `confidence.fields`, `document.*`, `extraction_id`, `request_id`, `processing.*`. Explicit notes about what is not surfaced in v0.1 (cost, EUR price, balance, per-field provenance, since updated by the 0.1.14 release for provenance).
+- `STATUS: stable` line at the top of every tool description.
+- New `validationError` helper in `src/tools/_shared.ts` for fast-fail input checks.
+
+### Changed
+
+- `talonic_extract` description: SCH- caveat removed (the upstream API now accepts both UUID and `SCH-XXXXXXXX` short ids on `/v1/extract`).
+- `talonic_filter`: `is_not_empty` removed from the operator enum and `FilterArgs` union. The description has a NOT SUPPORTED IN v0.1 section with workarounds (`eq`/`gt`/`contains` against a known value, or `is_empty` then invert client-side).
+- `talonic_to_markdown` internal `INGEST_ONLY_SCHEMA` replaced from `{}` to a minimal valid JSON Schema (single throwaway `document_title` field). Keeps the internal ingest call off the unreliable schema-less path that the MCP layer now blocks.
+- README install section recommends version pinning for production, with a note about API key handling.
+- `talonic_list_schemas` description mentions `short_id` (SCH-XXXXXXXX) returned alongside the UUID.
+
+## [0.1.10] - 2026-05-03
+
+### Added
+
+- Webhooks reference resource (`talonic://webhooks/reference`). Aggregates four webhook info endpoints (events, delivery behavior, signature verification algorithms, retry policy) into a single resource so agents can look these up without leaving the MCP context.
+- Root endpoint (`/`) on the hosted Streamable HTTP server returns a service-discovery JSON payload with name, version, MCP endpoint, health endpoint, auth pattern, and docs link.
+- `docs/sections.json` and platform-docs sync workflow: every documentation change in `src/content/sections/` flows automatically into the website at publish time, becoming SEO-friendly doc pages.
+- Complete working examples for all 7 MCP tools in `src/content/sections/tools.ts` (input + response).
+- Hosted MCP install snippets added to all six client install pages (Claude Desktop, Cursor, Cline, Continue, Cowork, generic), leading with the hosted option.
+
+### Changed
+
+- `src/version.ts` derives the version from `package.json` at build time instead of being hardcoded, with a smoke test that asserts they match.
+- Comprehensive rewrite of `docs/sections.json` to reflect the v0.1.10 surface.
+
+### Fixed
+
+- Strict null-check warning in `src/content/helpers.ts`.
+- `install.ts` type errors in the content layer.
+
+## [0.1.9] - 2026-05-02
+
+### Fixed
+
+- Session persistence for the Streamable HTTP transport. Per-session state (transport + MCP server) is now keyed by the `Mcp-Session-Id` header generated at `initialize` time, so multi-call agents on the hosted endpoint maintain context across requests instead of starting a fresh session per call.
+
+## [0.1.8] - 2026-05-02
+
+### Fixed
+
+- Railway deployment now uses the correct entry point (`dist/http-server.js`) for the hosted Streamable HTTP server.
+
+## [0.1.7] - 2026-05-01
+
+### Added
+
+- **Hosted Streamable HTTP transport.** New `src/http-server.ts` entry point hosts the same MCP server over HTTP for remote clients. Two auth modes: `Authorization: Bearer tlnc_...` header or `?apiKey=tlnc_...` query parameter. Designed for deployment on Railway behind `mcp.talonic.com`. The local `npx -y @talonic/mcp@latest` stdio install remains the recommended path for local-development clients (Claude Desktop, Cursor, Cline, Continue, Cowork); the hosted endpoint becomes the recommended path for chat clients that don't run local processes (Claude.ai connectors, etc.).
+- New `src/server-factory.ts` shared `createServer()` so stdio and HTTP entries register the same 7 tools and 2 resources.
+- `Dockerfile` and `railway.toml` for one-step Railway deploys.
+- `/health` healthcheck endpoint.
+- `/content` export from `package.json` so the website can consume the structured docs payload.
+
+### Changed
+
+- README: "Hosted MCP" install path mentioned as a primary option for Claude.ai users (URL plus apiKey query parameter pattern).
+
 ## [0.1.6] - 2026-04-30
 
 ### Added
