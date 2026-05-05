@@ -49,8 +49,9 @@ const DESCRIPTION = [
   "- extraction_id, request_id: stable identifiers for support and re-fetch.",
   "- processing.duration_ms, processing.region: useful for debugging and capacity planning.",
   "- markdown: present only when `include_markdown: true`.",
+  "- provenance: present only when `include_provenance: true`. Per-field source evidence:",
+  "  { field_name: { source_text, section, page } }. Useful for audit trails and citations.",
   "Cost, EUR price, and remaining credit balance are not surfaced in v0.1 and may appear in a later version.",
-  "Per-field source provenance (page, bounding box) is not surfaced in v0.1.",
 ].join("\n")
 
 const inputSchema = {
@@ -104,6 +105,10 @@ const inputSchema = {
     .boolean()
     .optional()
     .describe("Include OCR-converted markdown in the response alongside structured data."),
+  include_provenance: z
+    .boolean()
+    .optional()
+    .describe("Include per-field provenance (source_text, section, page) showing where each value was found in the document."),
 }
 
 export interface ExtractArgs {
@@ -116,6 +121,7 @@ export interface ExtractArgs {
   schema_id?: string
   instructions?: string
   include_markdown?: boolean
+  include_provenance?: boolean
 }
 
 export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promise<ToolResult> {
@@ -145,6 +151,7 @@ export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promis
     if (args.schema_id !== undefined) params.schema_id = args.schema_id
     if (args.instructions !== undefined) params.instructions = args.instructions
     if (args.include_markdown !== undefined) params.include_markdown = args.include_markdown
+    if (args.include_provenance !== undefined) (params as any).include_provenance = args.include_provenance
 
     const result = await talonic.extract(params)
     return jsonOk(result)

@@ -229,7 +229,8 @@
       ]},
       { "type": "param-table", "title": "Options", "params": [
         { "name": "instructions", "type": "string", "description": "Natural-language guidance for the extractor, e.g. `Focus on the billing section. Amounts are in EUR.`" },
-        { "name": "include_markdown", "type": "boolean", "description": "Include OCR-converted markdown alongside structured data in the response." }
+        { "name": "include_markdown", "type": "boolean", "description": "Include OCR-converted markdown alongside structured data in the response." },
+        { "name": "include_provenance", "type": "boolean", "description": "Include per-field provenance showing where each value was found: source_text (the matched text), section (document section), and page (page number)." }
       ]},
       { "type": "heading", "level": 3, "text": "Response shape" },
       { "type": "code", "language": "json", "title": "Example response", "code": "{\n  \"data\": {\n    \"vendor_name\": \"Acme Corp\",\n    \"invoice_number\": \"INV-2024-0847\",\n    \"total_amount\": 14250.00,\n    \"due_date\": \"2024-03-15\"\n  },\n  \"confidence\": {\n    \"vendor_name\": 0.97,\n    \"invoice_number\": 0.99,\n    \"total_amount\": 0.94,\n    \"due_date\": 0.91\n  },\n  \"document\": {\n    \"id\": \"d_abc123\",\n    \"filename\": \"invoice.pdf\",\n    \"documentType\": \"invoice\",\n    \"language\": \"en\",\n    \"pageCount\": 2\n  },\n  \"extraction\": {\n    \"id\": \"ext_xyz789\",\n    \"schemaId\": \"sch_def456\"\n  }\n}" },
@@ -286,8 +287,8 @@
         { "name": "limit", "type": "number", "description": "Maximum results per entity type. Default: 5. Increase for broader exploration." }
       ]},
       { "type": "heading", "level": 3, "text": "Response shape" },
-      { "type": "code", "language": "json", "title": "Example response", "code": "{\n  \"documents\": [\n    {\n      \"id\": \"d_abc123\",\n      \"filename\": \"acme-invoice-q4.pdf\",\n      \"documentType\": \"invoice\",\n      \"score\": 0.92\n    }\n  ],\n  \"fieldMatches\": [\n    {\n      \"documentId\": \"d_abc123\",\n      \"fieldName\": \"vendor.name\",\n      \"canonicalName\": \"vendor.name\",\n      \"value\": \"Acme Corp\",\n      \"score\": 0.88\n    }\n  ],\n  \"sources\": [],\n  \"schemas\": [\n    {\n      \"id\": \"sch_def456\",\n      \"name\": \"Standard Invoice\",\n      \"score\": 0.75\n    }\n  ],\n  \"fields\": [\n    {\n      \"id\": \"f_ghi789\",\n      \"canonicalName\": \"vendor.name\",\n      \"displayName\": \"Vendor Name\",\n      \"score\": 0.85\n    }\n  ]\n}" },
-      { "type": "callout", "text": "The `fields[].canonicalName` values are what you pass to `talonic_filter` as the `field` parameter. Always use search to discover field names before filtering." },
+      { "type": "code", "language": "json", "title": "Example response", "code": "{\n  \"documents\": [\n    {\n      \"id\": \"d_abc123\",\n      \"filename\": \"acme-invoice-q4.pdf\",\n      \"documentType\": \"invoice\",\n      \"score\": 0.92\n    }\n  ],\n  \"fieldMatches\": [\n    {\n      \"resolvedFieldId\": \"f_ghi789\",\n      \"displayName\": \"Vendor Name\",\n      \"matchedValue\": \"Acme Corp\",\n      \"documentCount\": 3,\n      \"filterable\": true\n    }\n  ],\n  \"sources\": [],\n  \"schemas\": [\n    {\n      \"id\": \"sch_def456\",\n      \"name\": \"Standard Invoice\"\n    }\n  ],\n  \"fields\": [\n    {\n      \"id\": \"f_ghi789\",\n      \"canonicalName\": \"vendor.name\",\n      \"displayName\": \"Vendor Name\",\n      \"documentCount\": 12,\n      \"filterable\": true\n    }\n  ]\n}" },
+      { "type": "callout", "text": "Only `fields[]` entries with `filterable: true` can be used with `talonic_filter`. These have extracted data in the workspace. Fields with `filterable: false` exist in a schema definition but have no extracted data yet — they become filterable after documents are processed against their schema." },
       { "type": "heading", "level": 3, "text": "Cost" },
       { "type": "paragraph", "text": "Search calls are **free** — they do not consume extraction credits. Use search liberally to explore before extracting." },
       { "type": "heading", "level": 3, "text": "Errors" },
@@ -372,7 +373,7 @@
     ],
     "faq": [
       { "question": "Does talonic_filter cost credits?", "answer": "No. Filter queries already-extracted data and is free." },
-      { "question": "How do I find field names for filtering?", "answer": "Call talonic_search first. The fields[].canonicalName values from the response are what you pass as the field parameter in filter conditions." }
+      { "question": "How do I find field names for filtering?", "answer": "Call talonic_search first. Use fields[] entries where filterable is true — their canonicalName values are what you pass as the field parameter in filter conditions. Fields with filterable: false have no extracted data yet and cannot be filtered." }
     ],
     "mentions": ["talonic_filter", "filter", "conditions", "operators", "canonical field name"]
   },
