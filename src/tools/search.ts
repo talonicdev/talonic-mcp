@@ -20,7 +20,10 @@ const DESCRIPTION = [
   "- The user wants to apply structured field-value filters like 'amount > 1000' (use talonic_filter).",
   "- The user wants to extract data from a brand-new document (use talonic_extract).",
   "",
-  "TIP: The result includes documents, fieldMatches, sources, schemas, and fields. Pick the entity type the user actually needs.",
+  "TIP: The result includes documents, fieldMatches, sources, schemas, and fields.",
+  "Both fields[] and fieldMatches[] include a `filterable` boolean. Only entries with",
+  "filterable: true can be used with talonic_filter. Fields with filterable: false exist",
+  "in a schema but have no extracted data yet. Pick the entity type the user actually needs.",
 ].join("\n")
 
 const inputSchema = {

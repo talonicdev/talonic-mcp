@@ -33,7 +33,10 @@ const DESCRIPTION = [
   "",
   "TIPS:",
   "- To discover available field names, call talonic_search first with a related query.",
-  "  fields[].canonicalName from the response is what to pass as `field` here.",
+  "  Only use fields[] entries where filterable is true — their canonicalName is what to",
+  "  pass as `field` here. Fields with filterable: false have no extracted data yet.",
+  "- fieldMatches[].resolvedFieldId is only valid when filterable is true. Entries with",
+  "  filterable: false have resolvedFieldId: null and cannot be used for filtering.",
   "- Both `field` (name) and `field_id` (UUID) reach the API as `fieldId`. Either is fine.",
 ].join("\n")
 
