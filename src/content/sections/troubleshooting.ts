@@ -94,16 +94,18 @@ export const sections: RawSection[] = [
     title: "Known Limitations",
     seoTitle: "Known Limitations — Talonic MCP",
     description:
-      "Current limitations in the Talonic MCP server v0.1: schema requirement, filter operators, cost surfacing, and provenance.",
+      "Current limitations in the Talonic MCP server v0.1: schema requirement, filter discoverability and typing, Claude.ai drag-and-drop stall, and unsurfaced cost.",
     content: [
       {
         type: "list",
         items: [
           "**Schema is required on `talonic_extract`.** Schema-less extraction is unreliable in v0.1 and is rejected at the MCP layer with a validation error. Always pass a `schema` (full JSON Schema recommended) or a `schema_id`.",
           "**Schema definition: prefer full JSON Schema.** The flat key-type map is documented as accepted; if you get a 'no fields' error from the API, fall back to JSON Schema.",
+          "**Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.",
+          "**Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.",
           "**`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.",
-          "**Cost, EUR price, and remaining balance are not surfaced.** The API does not return them yet. Tool responses include rate-limit info via the SDK's `WithRateLimit<T>` wrapper, but credit balance must be checked in the Talonic dashboard.",
-          "**Per-field source provenance (page, bounding box) is not surfaced.** Confidence scores per field are returned in `confidence.fields`. Treat fields below ~0.7 as needing human review.",
+          "**Drag-and-drop file uploads in Claude.ai stall via the hosted MCP.** When a file is dragged into a Claude.ai conversation and `talonic_extract` is invoked through `https://mcp.talonic.com/mcp?apiKey=...`, the call hangs without an error or result. Workaround: use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document) instead. Local-stdio installs (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, etc.) are unaffected. Under investigation.",
+          "**Cost, EUR price, and remaining balance are not surfaced.** The API does not return them yet. Credit balance must be checked in the Talonic dashboard.",
         ],
       },
     ],
@@ -115,10 +117,17 @@ export const sections: RawSection[] = [
       {
         question: "What are the known limitations of Talonic MCP?",
         answer:
-          "Schema is required on talonic_extract (schema-less mode is disabled at the MCP layer). Flat key-type schema maps may need a JSON Schema fallback. is_not_empty filter is not exposed in v0.1. Cost and per-field provenance are not surfaced in tool responses yet.",
+          "Schema is required on talonic_extract. Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. is_not_empty filter is not exposed in v0.1. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
       },
     ],
-    mentions: ["limitations", "schema", "is_not_empty", "confidence", "rate limits"],
+    mentions: [
+      "limitations",
+      "schema",
+      "filterable",
+      "is_not_empty",
+      "drag-and-drop",
+      "rate limits",
+    ],
   },
   {
     slug: "upgrading",

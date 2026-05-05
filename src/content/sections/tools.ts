@@ -325,7 +325,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "`is_not_empty` is intentionally not exposed in v0.1 because it underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.",
+        text: "Two limitations: (1) only fields where the search response shows `filterable: true` can be used with `talonic_filter`; entries with `filterable: false` have no extracted data yet. (2) `is_not_empty` is intentionally not exposed in v0.1; use `eq`/`gt`/`contains` against a known value or invert `is_empty` client-side.",
       },
       { type: "heading", level: 3, id: "filter-example", text: "Example" },
       {
