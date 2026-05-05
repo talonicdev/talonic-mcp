@@ -1,6 +1,6 @@
 {
   "name": "@talonic/mcp",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "mcpName": "io.github.talonicdev/talonic-mcp",
   "description": "Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the Model Context Protocol.",
   "license": "MIT",
