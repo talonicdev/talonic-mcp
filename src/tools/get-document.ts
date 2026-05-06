@@ -101,6 +101,11 @@ export function registerGetDocument(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Get Talonic Document",
+        readOnlyHint: true,
+        openWorldHint: true,
+      },
     },
     async (args) => handleGetDocument(talonic, args),
   )

@@ -87,6 +87,12 @@ export function registerSaveSchema(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Save Talonic Schema",
+        readOnlyHint: false,
+        destructiveHint: false,
+        openWorldHint: true,
+      },
     },
     async (args) => handleSaveSchema(talonic, args),
   )

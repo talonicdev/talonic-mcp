@@ -91,6 +91,11 @@ export function registerListSchemas(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema: {},
       outputSchema,
+      annotations: {
+        title: "List Talonic Schemas",
+        readOnlyHint: true,
+        openWorldHint: true,
+      },
     },
     async () => handleListSchemas(talonic),
   )

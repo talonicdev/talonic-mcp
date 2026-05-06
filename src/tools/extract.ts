@@ -243,6 +243,12 @@ export function registerExtract(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Extract Data from Document",
+        readOnlyHint: false,
+        destructiveHint: false,
+        openWorldHint: true,
+      },
     },
     async (args) => handleExtract(talonic, args as ExtractArgs),
   )

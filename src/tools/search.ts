@@ -111,6 +111,11 @@ export function registerSearch(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Search Talonic Workspace",
+        readOnlyHint: true,
+        openWorldHint: true,
+      },
     },
     async (args) => handleSearch(talonic, args),
   )

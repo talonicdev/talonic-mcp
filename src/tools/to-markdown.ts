@@ -151,6 +151,12 @@ export function registerToMarkdown(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Document to Markdown",
+        readOnlyHint: false,
+        destructiveHint: false,
+        openWorldHint: true,
+      },
     },
     async (args) => handleToMarkdown(talonic, args as ToMarkdownArgs),
   )

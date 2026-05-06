@@ -184,6 +184,11 @@ export function registerFilter(server: McpServer, talonic: Talonic): void {
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
+      annotations: {
+        title: "Filter Talonic Documents",
+        readOnlyHint: true,
+        openWorldHint: true,
+      },
     },
     async (args) => handleFilter(talonic, args as FilterArgs),
   )

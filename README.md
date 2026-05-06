@@ -258,6 +258,22 @@ npm test
 node dist/server.js --version
 ```
 
+## Privacy Policy
+
+This MCP server is a thin client. It does not collect, store, log, or transmit any data on its own. Every tool call is forwarded directly to the Talonic API at `api.talonic.com` using your `TALONIC_API_KEY`, and the API response is returned verbatim to the MCP client.
+
+The server does not:
+
+- Persist API keys, tool inputs, tool outputs, document contents, extracted data, or any other information beyond the lifetime of a single tool call.
+- Send analytics, telemetry, crash reports, or usage metrics to Talonic, Anthropic, or any third party.
+- Read or write files on your machine other than the file paths you explicitly pass to `talonic_extract` / `talonic_to_markdown` (`file_path`), and only for the duration of that call.
+
+What Talonic itself does with the data you upload via this server is governed by Talonic's privacy policy at [https://talonic.com/privacy](https://talonic.com/privacy). In summary, Talonic processes documents you submit so it can perform OCR and structured extraction, stores results in your isolated workspace at `app.talonic.com`, and does not share workspace data with third parties. For data retention, deletion requests, and contact information, refer to that policy.
+
+If you uninstall the MCP server (e.g. remove `@talonic/mcp` from your client config), all server-side state is in your Talonic workspace, not on this server. To delete that state, sign in to `app.talonic.com` and remove the documents and schemas via the dashboard, or revoke the API key the server was using.
+
+For privacy questions specific to this MCP integration, contact `info@talonic.ai`.
+
 ## License
 
 MIT (c) Talonic GmbH
