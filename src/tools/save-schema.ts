@@ -38,6 +38,31 @@ const inputSchema = {
     .describe("Optional description of what this schema extracts and when to use it."),
 }
 
+const outputSchema = {
+  id: z.string().describe("UUID of the newly saved schema."),
+  short_id: z.string().optional().describe("Human-readable short id (SCH-XXXXXXXX)."),
+  name: z.string(),
+  description: z.string().optional(),
+  definition: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe("Final schema definition as stored, normalised by the API."),
+  field_count: z.number().optional(),
+  version: z
+    .number()
+    .optional()
+    .describe("Schema version (1 for new schemas; increments on update)."),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  links: z
+    .object({
+      self: z.string().optional(),
+      extractions: z.string().optional(),
+      dashboard: z.string().optional(),
+    })
+    .optional(),
+}
+
 export async function handleSaveSchema(
   talonic: Talonic,
   args: { name: string; definition: Record<string, unknown>; description?: string },
@@ -61,6 +86,7 @@ export function registerSaveSchema(server: McpServer, talonic: Talonic): void {
       title: "Save Talonic Schema",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleSaveSchema(talonic, args),
   )

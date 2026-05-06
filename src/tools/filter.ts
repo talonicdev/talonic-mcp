@@ -102,6 +102,31 @@ const inputSchema = {
     .describe("Optionally scope to a specific source connection."),
 }
 
+const outputSchema = {
+  data: z
+    .array(
+      z
+        .object({
+          document_id: z.string().optional(),
+          filename: z.string().optional(),
+          fields: z.record(z.string(), z.unknown()).optional(),
+        })
+        .passthrough(),
+    )
+    .describe("Documents matching the filter conditions, with their extracted field values."),
+  total: z.number().optional().describe("Total documents matching across all pages."),
+  page: z.number().optional().describe("Current page number."),
+  pagination: z
+    .object({
+      total: z.number().optional(),
+      limit: z.number().optional(),
+      has_more: z.boolean().optional(),
+      next_cursor: z.string().nullable().optional(),
+    })
+    .optional()
+    .describe("Cursor-based pagination metadata."),
+}
+
 export interface FilterArgs {
   conditions: Array<{
     field?: string
@@ -158,6 +183,7 @@ export function registerFilter(server: McpServer, talonic: Talonic): void {
       title: "Filter Talonic Documents",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleFilter(talonic, args as FilterArgs),
   )

@@ -61,6 +61,11 @@ const inputSchema = {
     .describe("URL to a document file. The Talonic API fetches it server-side."),
 }
 
+const outputSchema = {
+  document_id: z.string().describe("ID of the document the markdown was extracted from."),
+  markdown: z.string().describe("OCR-converted markdown text content of the document."),
+}
+
 export interface ToMarkdownArgs {
   document_id?: string
   file_data?: string
@@ -145,6 +150,7 @@ export function registerToMarkdown(server: McpServer, talonic: Talonic): void {
       title: "Document to Markdown",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleToMarkdown(talonic, args as ToMarkdownArgs),
   )

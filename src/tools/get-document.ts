@@ -30,6 +30,57 @@ const inputSchema = {
     ),
 }
 
+const outputSchema = {
+  id: z.string(),
+  filename: z.string().optional(),
+  pages: z.number().optional(),
+  size_bytes: z.number().optional(),
+  mime_type: z.string().optional(),
+  type_detected: z.string().nullable().optional(),
+  language_detected: z.string().nullable().optional(),
+  status: z.string().optional(),
+  source: z
+    .object({
+      id: z.string().optional(),
+      type: z.string().optional(),
+    })
+    .optional(),
+  triage: z
+    .object({
+      sensitivity: z.string().optional(),
+      department: z.string().optional(),
+      jurisdiction: z.string().nullable().optional(),
+      pii_detected: z.boolean().optional(),
+      pii_categories: z.array(z.string()).nullable().optional(),
+      regulated_data: z.boolean().optional(),
+      confidentiality_marking: z.string().nullable().optional(),
+    })
+    .optional(),
+  original_path: z.string().nullable().optional(),
+  extraction_count: z.number().optional(),
+  latest_extraction_id: z.string().nullable().optional(),
+  processing_log: z
+    .array(
+      z.object({
+        step: z.string().optional(),
+        detail: z.string().optional(),
+        status: z.string().optional(),
+        started_at: z.string().optional(),
+        completed_at: z.string().optional(),
+        duration_ms: z.number().optional(),
+      }),
+    )
+    .optional(),
+  created_at: z.string().optional(),
+  links: z
+    .object({
+      self: z.string().optional(),
+      extractions: z.string().optional(),
+      dashboard: z.string().optional(),
+    })
+    .optional(),
+}
+
 export async function handleGetDocument(
   talonic: Talonic,
   args: { document_id: string },
@@ -49,6 +100,7 @@ export function registerGetDocument(server: McpServer, talonic: Talonic): void {
       title: "Get Talonic Document",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleGetDocument(talonic, args),
   )

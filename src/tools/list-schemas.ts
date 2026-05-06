@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
+import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 /**
@@ -30,6 +31,38 @@ const DESCRIPTION = [
   "TIP: Pair this with talonic_extract by passing the chosen schema's id as `schema_id`.",
 ].join("\n")
 
+const schemaItem = z.object({
+  id: z.string().describe("UUID of the schema."),
+  short_id: z.string().optional().describe("Human-readable short id (SCH-XXXXXXXX)."),
+  name: z.string(),
+  description: z.string().optional(),
+  definition: z.record(z.string(), z.unknown()).optional(),
+  field_count: z.number().optional(),
+  version: z.number().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  links: z
+    .object({
+      self: z.string().optional(),
+      extractions: z.string().optional(),
+      dashboard: z.string().optional(),
+    })
+    .optional(),
+})
+
+const outputSchema = {
+  data: z.array(schemaItem).describe("Saved schemas in the workspace."),
+  pagination: z
+    .object({
+      total: z.number().optional(),
+      limit: z.number().optional(),
+      has_more: z.boolean().optional(),
+      next_cursor: z.string().nullable().optional(),
+    })
+    .optional()
+    .describe("Cursor-based pagination metadata."),
+}
+
 /**
  * Pure handler. Invokes the SDK and shapes the result. Exported for
  * unit testing; the public registration is via `register()` below.
@@ -57,6 +90,7 @@ export function registerListSchemas(server: McpServer, talonic: Talonic): void {
       title: "List Talonic Schemas",
       description: DESCRIPTION,
       inputSchema: {},
+      outputSchema,
     },
     async () => handleListSchemas(talonic),
   )

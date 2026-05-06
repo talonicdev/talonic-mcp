@@ -41,6 +41,53 @@ const inputSchema = {
     .describe("Maximum results per entity type. Default: 5. Increase for broader exploration."),
 }
 
+const outputSchema = {
+  documents: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().optional(),
+        sourceId: z.string().optional(),
+        sourceName: z.string().optional(),
+      }),
+    )
+    .describe("Documents matching the query."),
+  fieldMatches: z
+    .array(
+      z.object({
+        resolvedFieldId: z.string().nullable(),
+        displayName: z.string().optional(),
+        matchedValue: z.string().optional(),
+        documentCount: z.number().optional(),
+        filterable: z
+          .boolean()
+          .describe("Only filterable: true entries can be used with talonic_filter."),
+      }),
+    )
+    .describe(
+      "Field-level matches with a filterable flag indicating whether the entry can drive talonic_filter.",
+    ),
+  sources: z
+    .array(z.object({ id: z.string(), name: z.string().optional() }))
+    .describe("Source connections matching the query."),
+  schemas: z
+    .array(z.object({ id: z.string(), name: z.string().optional() }))
+    .describe("Saved schemas matching the query."),
+  fields: z
+    .array(
+      z.object({
+        id: z.string(),
+        canonicalName: z.string().optional(),
+        displayName: z.string().optional(),
+        documentCount: z.number().optional(),
+        filterable: z.boolean().optional(),
+      }),
+    )
+    .describe(
+      "Field-registry entries matching the query. filterable: true entries are usable with talonic_filter.",
+    ),
+}
+
 export async function handleSearch(
   talonic: Talonic,
   args: { query: string; limit?: number },
@@ -63,6 +110,7 @@ export function registerSearch(server: McpServer, talonic: Talonic): void {
       title: "Search Talonic Workspace",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleSearch(talonic, args),
   )

@@ -113,6 +113,78 @@ const inputSchema = {
     ),
 }
 
+const outputSchema = {
+  extraction_id: z.string().describe("Stable identifier for this extraction."),
+  request_id: z
+    .string()
+    .optional()
+    .describe("Server-assigned request ID for support and debugging."),
+  status: z.string().describe("Extraction status (e.g. 'complete')."),
+  document: z
+    .object({
+      id: z.string(),
+      filename: z.string(),
+      pages: z.number().optional(),
+      size_bytes: z.number().optional(),
+      mime_type: z.string().optional(),
+      type_detected: z.string().nullable().optional(),
+      language_detected: z.string().nullable().optional(),
+    })
+    .describe("Metadata about the ingested document."),
+  data: z
+    .record(z.string(), z.unknown())
+    .describe("The extracted structured data, shape determined by the schema."),
+  schema: z
+    .object({
+      source: z.string().optional(),
+      id: z.string().nullable().optional(),
+      definition: z.record(z.string(), z.unknown()).optional(),
+      save_url: z.string().optional(),
+    })
+    .optional()
+    .describe("Schema metadata: which schema was used and how it can be saved."),
+  confidence: z
+    .object({
+      overall: z.number().describe("0..1 confidence for the extraction as a whole."),
+      fields: z.record(z.string(), z.number()).describe("Per-field confidence map (0..1)."),
+    })
+    .optional()
+    .describe("Extraction confidence. Treat fields below ~0.7 as needing human review."),
+  provenance: z
+    .record(
+      z.string(),
+      z.object({
+        source_text: z.string().optional(),
+        section: z.string().optional(),
+        page: z.number().optional(),
+      }),
+    )
+    .optional()
+    .describe(
+      "Per-field source evidence (source_text, section, page). Present only when `include_provenance: true`.",
+    ),
+  processing: z
+    .object({
+      duration_ms: z.number().optional(),
+      pages_processed: z.number().optional(),
+      region: z.string().optional(),
+    })
+    .optional()
+    .describe("Processing metadata: duration, pages processed, region."),
+  links: z
+    .object({
+      self: z.string().optional(),
+      document: z.string().optional(),
+      dashboard: z.string().optional(),
+    })
+    .optional()
+    .describe("URLs for self, document, and human-readable dashboard view."),
+  markdown: z
+    .string()
+    .optional()
+    .describe("OCR-converted markdown. Present only when `include_markdown: true`."),
+}
+
 export interface ExtractArgs {
   file_data?: string
   filename?: string
@@ -170,6 +242,7 @@ export function registerExtract(server: McpServer, talonic: Talonic): void {
       title: "Extract Data from Document",
       description: DESCRIPTION,
       inputSchema,
+      outputSchema,
     },
     async (args) => handleExtract(talonic, args as ExtractArgs),
   )

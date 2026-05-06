@@ -30,13 +30,21 @@ export interface ToolErrorResult {
 export type ToolResult = ToolSuccessResult | ToolErrorResult
 
 /**
- * Wrap a value as a single-text-item tool result. Stable JSON shape so
- * downstream parsing is reliable across tools.
+ * Wrap a value as a tool result. Returns both the legacy text envelope
+ * (`content[0].text`) for clients that parse strings, and the
+ * `structuredContent` field for MCP clients that consume typed JSON
+ * directly. The `structuredContent` shape is what each tool's
+ * `outputSchema` declares.
+ *
+ * Note: `structuredContent` must be a JSON object (record), not an
+ * array or primitive. Tools that would otherwise return an array wrap
+ * it in `{ data: [...] }` (which all our list-style tools already do
+ * via the SDK).
  *
  * @internal
  */
 export function jsonOk(value: unknown): ToolSuccessResult {
-  return {
+  const result: ToolSuccessResult = {
     content: [
       {
         type: "text",
@@ -44,6 +52,10 @@ export function jsonOk(value: unknown): ToolSuccessResult {
       },
     ],
   }
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    result["structuredContent"] = value as Record<string, unknown>
+  }
+  return result
 }
 
 /**
