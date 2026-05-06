@@ -1,0 +1,28 @@
+{
+  "name": "talonic",
+  "description": "Extract structured, schema-validated data from PDFs, scans, images, spreadsheets, and forms. Lets AI agents extract clean JSON from any document via the Model Context Protocol.",
+  "homepage": "https://talonic.com",
+  "repository": "https://github.com/talonicdev/talonic-mcp",
+  "license": "MIT",
+  "command": "npx",
+  "args": ["-y", "@talonic/mcp@latest"],
+  "env": {
+    "TALONIC_API_KEY": {
+      "description": "Your Talonic API key. Starts with tlnc_. Get one at https://app.talonic.com.",
+      "required": true
+    },
+    "TALONIC_BASE_URL": {
+      "description": "Override the Talonic API base URL. Default: https://api.talonic.com.",
+      "required": false
+    }
+  },
+  "tools": [
+    "talonic_extract",
+    "talonic_search",
+    "talonic_filter",
+    "talonic_get_document",
+    "talonic_to_markdown",
+    "talonic_list_schemas",
+    "talonic_save_schema"
+  ]
+}
