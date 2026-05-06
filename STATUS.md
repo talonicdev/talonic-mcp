@@ -37,17 +37,19 @@ The Claude.ai connector audit completed with engineering's three bug fixes confi
 | Item | State |
 |---|---|
 | Repo | clean, on main, pushed |
-| package.json version | 0.1.12 |
-| server.json version | 0.1.12 |
-| npm published version | 0.1.12 |
-| Auto-bump pipeline | working (verified after both v1-hardening commits) |
-| Tests | 32 pass, 2 skipped (symlink tests, expected) |
+| package.json version | 0.1.17 |
+| server.json version | 0.1.17 |
+| npm published version | 0.1.17 (published 2026-05-06 via auto-pipeline after NPM_TOKEN rotation) |
+| Auto-bump pipeline | working; new granular npm token with bypass-2FA in place |
+| Tests | 34 pass (verified 2026-05-06 in /tmp/talonic-mcp-build) |
 | Format check | clean |
 | Typecheck | clean |
 | Build | clean |
 | docs/sections.json | up to date with v1 surface (decision guide, examples, troubleshooting) |
 | Tool descriptions | all 7 carry STATUS: stable; honest known limitations |
+| Tool annotations | all 7 carry `readOnlyHint`, `destructiveHint`, `openWorldHint`; read-only tools (search, filter, list_schemas, get_document) marked `readOnlyHint: true`; write tools (extract, to_markdown, save_schema) marked false |
 | MCP-layer schema validation | enforced; schema-less calls rejected fast |
+| Privacy Policy | live in README |
 
 ### `@talonic/node`
 
@@ -83,9 +85,11 @@ Audit fix during this run: `talonic://webhooks/reference` was missing from `/.we
 |---|---|
 | Listing URL | `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp` |
 | Listed name | `io.github.talonicdev/talonic-mcp` |
-| Listed version | 0.1.12 |
-| `_meta` | active, `isLatest: true`, published 2026-05-04 |
+| Listed version | 0.1.17 (publish acknowledged 2026-05-06; awaiting search-endpoint propagation as of last check) |
+| `_meta` | publish via `mcp-publisher publish` returned `Successfully published`; search endpoint may lag for some minutes after publish |
 | Install instructions | npx command and `TALONIC_API_KEY` env var, both correct |
+| History note | between 0.1.6 and 0.1.17 the auto-pipeline did not chain into `mcp-publisher`, so 0.1.7 through 0.1.16 were never pushed to the registry. 0.1.17 is the first registry push since the original 0.1.6 submission. Earlier STATUS entries that claimed 0.1.12 was on the registry were aspirational and have been corrected here. |
+| Standing follow-up | wire `mcp-publisher publish` into the GitHub Actions publish workflow so future versions land on the registry automatically; requires storing an `MCP_REGISTRY_TOKEN` secret. Owner: us. |
 
 Standing maintenance task: the auto-bump pipeline that publishes new versions to npm does not currently chain into `mcp-publisher publish`. Whoever cuts a release should run `mcp-publisher publish` from the talonic-mcp repo afterwards (or wire it into CI). Without that, the registry will lag npm.
 
