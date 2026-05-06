@@ -1,0 +1,22 @@
+{
+  "name": "talonic",
+  "description": "Extract structured, schema-validated data from PDFs, scans, images, spreadsheets, and forms. Lets AI agents extract clean JSON from any document via the Model Context Protocol.",
+  "version": "0.1.17",
+  "author": {
+    "name": "Talonic GmbH",
+    "url": "https://talonic.com"
+  },
+  "homepage": "https://talonic.com",
+  "repository": "https://github.com/talonicdev/talonic-mcp",
+  "license": "MIT",
+  "keywords": [
+    "talonic",
+    "mcp",
+    "model-context-protocol",
+    "document-extraction",
+    "ocr",
+    "structured-data",
+    "pdf",
+    "forms"
+  ]
+}
