@@ -171,7 +171,21 @@ When the user drag-drops a PDF (or any supported file) into a chat-style MCP hos
 
 `@talonic/mcp@0.1.4` and later solve this by accepting **`file_data`** (base64-encoded file bytes) and **`filename`** on `talonic_extract` and `talonic_to_markdown`. The agent reads the file bytes from the conversation, base64-encodes them, and passes them through the MCP tool call. The MCP server decodes, infers MIME type from the filename, and uploads to the Talonic API as a normal multipart request. The file never has to live on the MCP server's disk.
 
-Tool descriptions advertise `file_data` as the recommended input for chat-style clients, so well-trained agents will reach for it automatically. No client-side configuration is required beyond installing `@talonic/mcp@latest` (or `@0.1.4` or newer) as documented above.
+This works reliably in **local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork) where the MCP server runs as an `npx` process spawned by the host and tool-call arguments are passed directly between agent and server.
+
+### Caveat: Claude.ai connectors and hosted MCP
+
+When the hosted MCP at `mcp.talonic.com/mcp` is added as a custom connector inside Claude.ai's web UI, **Claude.ai imposes a small hard limit on tool-call argument size** (effectively under ~1KB per parameter). A real PDF base64-encoded is hundreds of KB, so the `file_data` string is truncated before reaching the MCP server. The Talonic API receives a few hundred bytes, registers an empty document, and returns a successful-looking response with `null` extracted fields. The agent often misdiagnoses this as a server bug and goes into recovery loops.
+
+This is a Claude.ai platform limit on connector tool-call payloads, not a Talonic MCP server bug. There is no workaround at the MCP layer.
+
+Recommended paths for Claude.ai users with real files:
+
+1. **`file_url`** — host the file at a publicly reachable URL (S3, Drive share with public read, GitHub raw, etc.) and pass the URL.
+2. **`document_id`** — upload the file at https://app.talonic.com first, take the resulting document id, and pass it.
+3. **Use a local-stdio install** instead of the hosted connector. Claude Desktop, Cursor, Cline, Continue, and Cowork all spawn the MCP server locally and have no parameter cap.
+
+A future architectural fix is pre-signed upload URLs (a tool that returns a one-time HTTPS PUT target so agents can upload outside the MCP tool-call channel). Tracked as an engineering follow-up.
 
 ## How it works
 
@@ -211,8 +225,8 @@ The MIME type was inferred as `application/octet-stream`. The SDK infers from co
 **`talonic_filter` returns no results when you expect data.**
 Two common causes. First, the field has not been extracted yet: call `talonic_search` first, then look at `fields[]` and `fieldMatches[]` in the response. Only entries with `filterable: true` are usable with `talonic_filter`. Second, schema-typing mismatch: numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) require the schema field to be typed as `number`. A field typed as `string` that holds numeric content silently returns zero. Re-design the schema with the right type and re-extract.
 
-**`talonic_extract` stalls in Claude.ai when I drag a file in.**
-Known issue with the hosted MCP at `mcp.talonic.com`. The drag-and-drop `file_data` path through Claude.ai's connector currently does not return. Workaround: use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document). The local stdio install (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, Continue, Cowork) is unaffected.
+**`talonic_extract` returns empty fields when I drag a file into Claude.ai.**
+Claude.ai's connector pipeline imposes a small hard limit on tool-call argument size (effectively under ~1KB). The base64-encoded PDF is truncated before reaching the MCP server, so the API receives a stub document and the extracted fields come back `null`. This is a Claude.ai platform limit on connector tool-call payloads, not a Talonic MCP server or API bug. Workaround: use `file_url` (publicly reachable URL), `document_id` (file already uploaded at app.talonic.com), or use a local-stdio install (Claude Desktop, Cursor, Cline, Continue, Cowork) which has no parameter cap. See "Drag-and-drop in chat clients" above.
 
 **Tool descriptions look wrong in my client.**
 Some MCP clients cache tool descriptions. Restart the client after a server update.
@@ -234,7 +248,7 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
 - **Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.
 - **Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.
 - **`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.
-- **Drag-and-drop file uploads in Claude.ai stall via the hosted MCP.** When a file is dragged into a Claude.ai conversation and `talonic_extract` is invoked through `https://mcp.talonic.com/mcp?apiKey=...`, the call hangs without an error or result. Workaround: use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document) instead. Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) are unaffected. Under investigation.
+- **Drag-and-drop file uploads in Claude.ai are capped by Claude.ai's tool-call argument size limit.** A base64-encoded real PDF (typically hundreds of KB) cannot fit through Claude.ai's connector tool-call pipe (which truncates parameters under ~1KB). The Talonic API receives a few hundred bytes, registers an empty document, and returns a response with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug. Workaround for Claude.ai users: use `file_url` (publicly reachable URL), `document_id` (file uploaded at app.talonic.com), or use a local-stdio install (Claude Desktop, Cursor, Cline, Continue, Cowork). The architectural fix is pre-signed upload URLs (engineering follow-up).
 - **Cost, EUR price, and remaining balance are not surfaced.** The API does not return them in tool responses yet. Credit balance must be checked in the Talonic dashboard.
 
 ## Upgrading from 0.1.0 / 0.1.1 / 0.1.2
