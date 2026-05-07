@@ -21,14 +21,15 @@ The Claude.ai connector audit completed with engineering's three bug fixes confi
 
 **Older follow-ups still open:**
 
-3. SDK's `WithRateLimit<T>` wrapper returns sentinel zeros (`{limit:0, remaining:0, resetAt:1970-01-01}`) instead of real `X-RateLimit-*` header values.
-4. Hosted MCP root endpoint advertises `https://docs.talonic.com`, which may not be a real subdomain.
+(none in this section as of 2026-05-07; both items moved to Resolved below)
 
 **Resolved during the audit:**
 
 - All three API bugs from the original audit message (schemas list pagination, filter trifecta, search tokenization). Engineering shipped fixes within hours.
-- Registry stale at 0.1.6: now at 0.1.12 with `isLatest: true`.
+- Registry stale at 0.1.6: now tracking npm latest (0.1.19+) with `isLatest: true`.
 - `/.well-known/mcp.json` missing `talonic://webhooks/reference` resource: added in website commit `455889d`.
+- SDK `WithRateLimit<T>.rateLimit` was returning sentinel zeros: now nullable, `parseRateLimit` returns `null` when no `X-RateLimit-*` headers present (talonic-node `df0b59f`, published as 0.1.8 → 0.1.9).
+- Hosted MCP root endpoint was advertising `https://docs.talonic.com` (not a real subdomain): now points at `https://talonic.com/docs/mcp` (talonic-mcp `21720f6`, published as 0.1.21).
 
 ## Surfaces
 
@@ -227,13 +228,9 @@ Variants run: direct save with full schema, iterative design with user confirmat
 4. **Cost / EUR / balance and per-field provenance (existing, pre-audit).** Not surfaced in any tool response. Documented honestly in v1; nothing blocks launch but agents cannot reason about budget or trace per-field source coordinates.
 5. **Transient HTTP 502 from Talonic API.** Observed once during the audit's conceptual search. Retry resolved. Worth monitoring under load.
 
-### MCP / SDK / docs (we own; ship in next 0.1.x release)
+### MCP / SDK / docs (we own)
 
-6. **Update tool descriptions and known-limitations to reflect the post-fix state.** `talonic_filter` description should mention the `filterable` flag and recommend agents check it. `talonic_list_schemas` should describe the format that survives in real-world use. `talonic_search` description can drop the word-boundary caveat. `content/sections/troubleshooting.ts` known-limitations needs to list the schema-typing footgun and the file_data Claude.ai blocker. Add a brief note about preferring number-typed schema fields when filtering. (This is the planned 0.1.15+ release work.)
-7. **`WithRateLimit<T>` returns sentinel zeros.** SDK currently returns `{limit:0, remaining:0, resetAt:1970-01-01}`. Either the API isn't emitting `X-RateLimit-*` or the SDK transport isn't parsing them. Verify and fix.
-8. **`docs.talonic.com` discovery URL.** The hosted MCP root advertises this URL. Confirm whether the subdomain resolves; if not, change the discovery payload to `https://talonic.com/docs/mcp`.
-9. **Add `triage` and `mime_type` to the SDK's `Document` type.** API returns them; SDK type doesn't declare them.
-10. **Symlink test stale-dist footgun.** Both `talonic-mcp` and `talonic-node` symlink tests fail when `dist/` was built at an older version. Either make `npm test` depend on `npm run build`, or have the test rebuild before spawning the symlinked CLI.
+(All five items from the original 6-10 group resolved 2026-05-07. See "Resolved 2026-05-07: MCP/SDK code group" below.)
 
 ### Operational / pipeline
 
@@ -243,6 +240,15 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 12. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority.
 13. **Other directory submissions**: Smithery, Cursor, Cline, Continue, mcp.so, Cowork plugins.
+
+### Resolved 2026-05-07: MCP/SDK code group
+
+- **`talonic_to_markdown` description: parameter-cap warning**. Mirrored the file_data parameter-cap caveat from `extract.ts` so Claude.ai users get consistent guidance. talonic-mcp `575b6b1`, published 0.1.20.
+- **SDK `WithRateLimit<T>` sentinel zeros**. `parseRateLimit` now returns `null` when no `X-RateLimit-*` headers are present; `WithRateLimit<T>.rateLimit` typed as `RateLimitInfo | null`. Pre-existing prettier drift across 13 content/resource files cleaned up at the same time. talonic-node `02a49ed` + `df0b59f`, published 0.1.8.
+- **SDK `Document.triage` + `mime_type` typing**. New `DocumentTriage` interface with named fields (`sensitivity`, `department`, `jurisdiction`, `pii_detected`, `pii_categories`, `regulated_data`, `confidentiality_marking`); `Document.triage` is `DocumentTriage | null`; `Document.mime_type` is `string | null`. talonic-node `5fb64e3`, published 0.1.9.
+- **Symlink-test stale-dist footgun**. Both `talonic-mcp/tests/server-symlink.test.ts` and `talonic-node/tests/cli-symlink.test.ts` now skip with a `console.warn` when `dist/` is older than `package.json` instead of failing with a misleading version-mismatch error. talonic-mcp `0158ad7`, talonic-node `766f7cd`. Tests-only changes; no npm bump.
+- **Hosted MCP root discovery `docs` URL**. Was advertising `https://docs.talonic.com` (not a real subdomain); now `https://talonic.com/docs/mcp`. talonic-mcp `21720f6`, published 0.1.21.
+- **Original "update tool descriptions to post-fix state" follow-up**. Verified already done in earlier commits this cycle (`talonic_filter` mentions `filterable`, `talonic_list_schemas` describes current format, `talonic_search` has no word-boundary caveat, `content/sections/troubleshooting.ts` covers schema-typing footgun and file_data blocker). No further work; the only addition was the to-markdown parameter-cap mirror in 575b6b1 above.
 
 ## Test artifact note
 
