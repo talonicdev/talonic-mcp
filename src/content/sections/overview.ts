@@ -21,6 +21,19 @@ export const sections: RawSection[] = [
         type: "paragraph",
         text: "Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Verified end-to-end against production.",
       },
+      {
+        type: "paragraph",
+        text: "The MCP server acts as a bridge between your AI agent and the Talonic document extraction API. Instead of writing custom HTTP integration code, agent developers get a standards-compliant MCP interface that any compatible client can discover and invoke automatically. The server handles authentication, file upload serialisation, retry logic, and structured error formatting so the agent can focus on the user's task.",
+      },
+      {
+        type: "paragraph",
+        text: "Installation takes under a minute: paste a JSON snippet into your MCP client config, supply a `tlnc_` API key, and restart the client. The hosted option at `mcp.talonic.com` requires zero local dependencies — no Node.js, no npm, no build step. The local `npx` option is equally simple and runs on any machine with Node.js 18 or later.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub.",
+      },
     ],
     related: [
       { label: "Why Use This", slug: "why-mcp" },
@@ -37,6 +50,11 @@ export const sections: RawSection[] = [
         question: "Is the Talonic MCP server on the official MCP Registry?",
         answer:
           "Yes. It is listed as io.github.talonicdev/talonic-mcp on registry.modelcontextprotocol.io, maintained by Anthropic and the MCP steering group.",
+      },
+      {
+        question: "Do I need to install anything to use the Talonic MCP server?",
+        answer:
+          "Not necessarily. The hosted server at mcp.talonic.com requires zero local installation — just a URL and API key in your MCP client config. Alternatively, the local npx option requires Node.js 18+.",
       },
     ],
     mentions: ["MCP", "Model Context Protocol", "AI agents", "document extraction"],
@@ -57,6 +75,19 @@ export const sections: RawSection[] = [
         type: "paragraph",
         text: "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Seven other tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour.",
       },
+      {
+        type: "paragraph",
+        text: "The extraction pipeline runs server-side on Talonic's infrastructure, which means the agent does not need to manage OCR libraries, prompt engineering for data extraction, or post-processing heuristics. A single tool call replaces what would otherwise be a multi-step chain of OCR, schema validation, and confidence estimation inside the agent's own context window.",
+      },
+      {
+        type: "paragraph",
+        text: "Because each extraction returns **per-field confidence scores**, agents can make informed decisions about when to trust extracted values and when to escalate to the user for review. This is especially valuable for high-stakes fields like financial amounts, legal terms, and dates where silent errors are costly.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Every document processed through the MCP server is stored in your Talonic workspace with a stable `document_id`. Subsequent operations — re-extraction with a different schema, markdown retrieval, metadata lookup — reuse that ID without re-uploading the file, saving both time and credits.",
+      },
     ],
     related: [
       { label: "talonic_extract", slug: "talonic-extract" },
@@ -67,6 +98,16 @@ export const sections: RawSection[] = [
         question: "Why use Talonic MCP instead of OCR + LLM?",
         answer:
           "Raw OCR + LLM calls produce unreliable results — mangled tables, misread dates, drifting totals. Talonic returns schema-validated JSON with per-field confidence scores and stable IDs for follow-up calls.",
+      },
+      {
+        question: "Does the MCP server handle retries and errors automatically?",
+        answer:
+          "Yes. The server retries on transient failures (429 rate limits, 5xx server errors) and returns structured error messages the agent can reason about, rather than raw HTTP status codes.",
+      },
+      {
+        question: "Can I re-extract a document with a different schema without re-uploading?",
+        answer:
+          "Yes. Pass the document_id from a previous extraction to talonic_extract with a new schema. The server reuses the already-ingested document, which is faster and costs fewer credits.",
       },
     ],
     mentions: ["OCR", "schema-validated", "confidence scores", "structured data"],
@@ -82,6 +123,18 @@ export const sections: RawSection[] = [
       {
         type: "paragraph",
         text: "Use this guide to pick the right Talonic tool for the user's request. Match the user's intent to one of the scenarios below before calling a tool. The wrong tool returns the wrong data, costs unnecessary credits, and slows the conversation.",
+      },
+      {
+        type: "paragraph",
+        text: "The seven tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, and the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates.",
+      },
+      {
+        type: "paragraph",
+        text: "A well-built agent should check conversation history before making any tool call. If the user already extracted data from a document in an earlier turn, re-use that result rather than calling `talonic_extract` again. Repeat calls cost credits and add latency without providing new information.",
+      },
+      {
+        type: "paragraph",
+        text: "When in doubt about which tool to use, consider the user's underlying intent: do they want specific field values (extract), the full document text (to_markdown), to find documents (search/filter), or to manage extraction templates (schema tools)? This mental model covers every scenario.",
       },
       {
         type: "heading",
@@ -208,6 +261,23 @@ export const sections: RawSection[] = [
           "Copy the `tlnc_` value into your MCP client config (snippets below).",
         ],
       },
+      {
+        type: "paragraph",
+        text: "The API key authenticates every tool call the MCP server makes on your behalf. It is passed as a `TALONIC_API_KEY` environment variable in the local `npx` setup, or as a `Bearer` token in the `Authorization` header for the hosted server. The key is never sent to the AI agent itself — it stays within the MCP server process.",
+      },
+      {
+        type: "paragraph",
+        text: "Keep your API key private. Do not commit it to version control or share it in public MCP config examples. If a key is compromised, revoke it immediately in the Talonic dashboard under Settings → API Keys and generate a new one.",
+      },
+      {
+        type: "paragraph",
+        text: "The free tier includes 50 extractions per day, which is enough for development and testing. For production workloads or higher volume, upgrade your plan in the Talonic dashboard. All plans share the same API — the key determines your rate limits and quota.",
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "Never hardcode your `tlnc_` key in source code or share it in screenshots. Use environment variables or your MCP client's config file, which is typically stored in a user-specific directory.",
+      },
     ],
     related: [
       { label: "Claude Desktop", slug: "claude-desktop" },
@@ -218,6 +288,16 @@ export const sections: RawSection[] = [
         question: "How do I get a Talonic API key for MCP?",
         answer:
           "Sign up at app.talonic.com (free, no credit card), go to Settings > API Keys > Create New Key, and copy the tlnc_ value into your MCP client config.",
+      },
+      {
+        question: "Is the free tier enough for development?",
+        answer:
+          "Yes. The free tier includes 50 extractions per day with no credit card required, which is sufficient for development and testing. Upgrade in the dashboard for production workloads.",
+      },
+      {
+        question: "What should I do if my API key is compromised?",
+        answer:
+          "Revoke it immediately in the Talonic dashboard under Settings > API Keys, then generate a new one. Update your MCP client config with the new key and restart the client.",
       },
     ],
     mentions: ["API key", "tlnc_", "free tier"],

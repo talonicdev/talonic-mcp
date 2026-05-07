@@ -15,6 +15,14 @@ export const sections: RawSection[] = [
         text: "Inputs: one of `file_data` + `filename` (recommended for chat clients), `file_path`, `file_url`, or `document_id`, plus a `schema` (or `schema_id`). Returns clean JSON with per-field confidence scores.",
       },
       {
+        type: "paragraph",
+        text: "This is the primary tool in the Talonic MCP server. When an agent calls **`talonic_extract`**, the MCP server uploads the document to the Talonic API, runs OCR and field extraction against the provided schema, and returns structured JSON with confidence metadata. The entire pipeline — upload, OCR, extraction, validation — runs server-side in a single request.",
+      },
+      {
+        type: "paragraph",
+        text: "The response includes a `document.id` that persists in your workspace. Subsequent calls can reference this ID via the `document_id` parameter to re-extract with a different schema, retrieve markdown, or fetch metadata — all without re-uploading the file. This is both faster and cheaper than sending the file again.",
+      },
+      {
         type: "param-table",
         params: [
           {
@@ -202,6 +210,16 @@ export const sections: RawSection[] = [
         answer:
           "Send a document (file_data, file_path, file_url, or document_id) with a schema or schema_id. The tool returns schema-validated JSON with per-field confidence scores.",
       },
+      {
+        question: "What is the fastest way to extract data from a document?",
+        answer:
+          "If the document is already in your workspace, pass its document_id instead of re-uploading. For new documents in chat clients, use file_data with base64-encoded bytes. For files on the web, use file_url to avoid downloading locally first.",
+      },
+      {
+        question: "How long does an extraction typically take?",
+        answer:
+          "Processing time depends on document size. A 2-page invoice typically completes in 2-4 seconds. Larger documents (8+ pages) may take 4-8 seconds. The processing.duration_ms field in the response shows the exact server-side duration.",
+      },
     ],
     mentions: ["extract", "schema", "confidence scores", "file_data"],
   },
@@ -218,6 +236,18 @@ export const sections: RawSection[] = [
         text: "Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.",
       },
       {
+        type: "paragraph",
+        text: "**`talonic_search`** is designed for discovery. When a user asks a question like 'do I have any contracts about indemnification?' or 'find documents from Acme', this is the right tool. It searches across document filenames, extracted field values, schema names, and source metadata using semantic and fuzzy matching.",
+      },
+      {
+        type: "paragraph",
+        text: "The response is grouped by entity type: `documents`, `fieldMatches`, `schemas`, `sources`, and `fields`. Each result includes a relevance `score` (0..1) so the agent can assess match quality. Results with scores below 0.5 are typically not relevant and can be omitted when presenting to the user.",
+      },
+      {
+        type: "paragraph",
+        text: "For queries that require exact field-value matching (like 'invoices over 1000 EUR'), use **`talonic_filter`** instead. Search is for exploration and discovery; filter is for precision queries against structured data.",
+      },
+      {
         type: "param-table",
         params: [
           {
@@ -232,6 +262,11 @@ export const sections: RawSection[] = [
             description: "Maximum results per entity type. Default: 5.",
           },
         ],
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Search results include canonical field names in `fields[].canonicalName`. These names can be used directly in `talonic_filter` conditions, making search a good first step before building precise filters.",
       },
       { type: "heading", level: 3, id: "search-example", text: "Example" },
       {
@@ -272,15 +307,29 @@ export const sections: RawSection[] = [
 }`,
       },
     ],
-    related: [{ label: "talonic_filter", slug: "talonic-filter" }],
+    related: [
+      { label: "talonic_filter", slug: "talonic-filter" },
+      { label: "talonic_extract", slug: "talonic-extract" },
+      { label: "Agent Decision Guide", slug: "agent-decision-guide" },
+    ],
     faq: [
       {
         question: "What does talonic_search do?",
         answer:
           "It searches across documents, fields, sources, and schemas in the workspace using fuzzy and conceptual matching.",
       },
+      {
+        question: "When should I use talonic_search vs talonic_filter?",
+        answer:
+          "Use search for discovery and fuzzy queries ('find Acme contracts'). Use filter for precise field-value conditions ('invoices over 1000 EUR'). Search is exploration; filter is precision.",
+      },
+      {
+        question: "What do the search scores mean?",
+        answer:
+          "Each result includes a relevance score from 0 to 1. Scores above 0.7 are strong matches, 0.5-0.7 are partial matches, and below 0.5 are typically not relevant.",
+      },
     ],
-    mentions: ["search", "omnisearch", "fuzzy"],
+    mentions: ["search", "omnisearch", "fuzzy", "discovery"],
   },
   {
     slug: "talonic-filter",
@@ -297,6 +346,14 @@ export const sections: RawSection[] = [
       {
         type: "paragraph",
         text: "Accepts canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) which the Talonic API resolves to IDs server-side, or UUIDs directly.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_filter`** is the precision counterpart to **`talonic_search`**. While search uses fuzzy matching for discovery, filter applies exact conditions against extracted field values. This makes it ideal for queries like 'show me all invoices from vendor X over 1000 EUR' or 'contracts expiring before 2026-12-31'.",
+      },
+      {
+        type: "paragraph",
+        text: "Multiple conditions are AND-ed together, allowing you to build precise queries that narrow results progressively. The optional `search` parameter lets you combine free-text search with structured filters in a single call, and `sort` controls the result ordering.",
       },
       {
         type: "param-table",
@@ -374,6 +431,7 @@ export const sections: RawSection[] = [
     related: [
       { label: "talonic_search", slug: "talonic-search" },
       { label: "Known Limitations", slug: "known-limitations" },
+      { label: "Agent Decision Guide", slug: "agent-decision-guide" },
     ],
     faq: [
       {
@@ -381,8 +439,18 @@ export const sections: RawSection[] = [
         answer:
           "Use talonic_filter with canonical field names and operators like eq, gt, between, contains. The API resolves field names to IDs server-side.",
       },
+      {
+        question: "How do I find the correct canonical field names for filtering?",
+        answer:
+          "Call talonic_search first — canonical field names appear in the fields[].canonicalName array. You can also inspect previously extracted documents to see their field structure.",
+      },
+      {
+        question: "Can I combine free-text search with field filters?",
+        answer:
+          "Yes. Pass the search parameter alongside conditions to combine fuzzy text matching with structured field-value filters in a single call.",
+      },
     ],
-    mentions: ["filter", "canonical field names", "operators"],
+    mentions: ["filter", "canonical field names", "operators", "conditions"],
   },
   {
     slug: "talonic-get-document",
@@ -397,6 +465,18 @@ export const sections: RawSection[] = [
         text: "Fetch full metadata for a single document by ID, including processing log and link URLs.",
       },
       {
+        type: "paragraph",
+        text: "**`talonic_get_document`** retrieves comprehensive information about a document that has already been ingested into your Talonic workspace. This includes the file's status, page count, size, detected document type and language, the source that uploaded it, and direct links to the document in the Talonic dashboard and API.",
+      },
+      {
+        type: "paragraph",
+        text: "This tool is useful when the agent needs to check whether a document has finished processing, verify its detected type, or retrieve the dashboard link so the user can view the original. It does not return extracted data — for that, use **`talonic_extract`** with the same `document_id`.",
+      },
+      {
+        type: "paragraph",
+        text: "The `links.dashboard` URL in the response is particularly valuable for human-in-the-loop workflows. When the agent needs the user to verify an extraction against the original document, it can present this link as a direct way to view the source in the Talonic web interface.",
+      },
+      {
         type: "param-table",
         params: [
           {
@@ -406,6 +486,11 @@ export const sections: RawSection[] = [
             description: "The document UUID.",
           },
         ],
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "The `document_id` returned by `talonic_extract` and other tools is stable. You can call `talonic_get_document` at any time to check the document's current status and metadata.",
       },
       { type: "heading", level: 3, id: "get-document-example", text: "Example" },
       {
@@ -448,8 +533,18 @@ export const sections: RawSection[] = [
         answer:
           "Call talonic_get_document with the document UUID to get full metadata including processing log and link URLs.",
       },
+      {
+        question: "Does talonic_get_document return extracted data?",
+        answer:
+          "No. It returns metadata (filename, status, pages, type, language, links). For extracted field data, use talonic_extract with the same document_id.",
+      },
+      {
+        question: "How can I link the user to the original document?",
+        answer:
+          "The response includes links.dashboard, which is a direct URL to view the document in the Talonic web interface. Present this to the user when they need to verify an extraction.",
+      },
     ],
-    mentions: ["document", "metadata", "processing log"],
+    mentions: ["document", "metadata", "processing log", "dashboard link"],
   },
   {
     slug: "talonic-to-markdown",
@@ -462,6 +557,18 @@ export const sections: RawSection[] = [
       {
         type: "paragraph",
         text: "Get OCR-converted markdown for a document. Accepts `document_id` (cheapest — no re-upload), `file_data` + `filename`, `file_path`, or `file_url`.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_to_markdown`** converts a document's visual content into clean, structured markdown. Tables are rendered as markdown tables, headings are preserved, and the text is ordered to match the visual layout of the original document. This is the right tool when the user wants the full text of a document for summarisation, translation, or general analysis without needing structured field extraction.",
+      },
+      {
+        type: "paragraph",
+        text: "If you have already ingested the document (via a previous `talonic_extract` or `talonic_to_markdown` call), pass the `document_id` to skip re-uploading. This is the cheapest and fastest path because the OCR has already been performed. For new documents, use `file_data` + `filename` in chat clients, `file_path` for local files, or `file_url` for remote files.",
+      },
+      {
+        type: "paragraph",
+        text: "The returned markdown is suitable for feeding into an LLM's context window for downstream tasks. Because the conversion preserves table structure and heading hierarchy, the LLM can reason about the document's content without losing structural information that raw text extraction would discard.",
       },
       {
         type: "param-table",
@@ -484,6 +591,11 @@ export const sections: RawSection[] = [
             description: "Remote URL the API fetches server-side.",
           },
         ],
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "If you need both structured data and markdown, use `talonic_extract` with `include_markdown: true` instead of making two separate calls. This saves one upload and one processing cycle.",
       },
       { type: "heading", level: 3, id: "to-markdown-example", text: "Example" },
       {
@@ -523,8 +635,18 @@ Payment terms: Net 30`,
         answer:
           "Call talonic_to_markdown with a document_id (cheapest), or provide the file directly via file_data, file_path, or file_url.",
       },
+      {
+        question: "Does talonic_to_markdown preserve table structure?",
+        answer:
+          "Yes. Tables are rendered as markdown tables with proper column alignment. Headings and text ordering are also preserved to match the original document layout.",
+      },
+      {
+        question: "Should I use talonic_to_markdown or talonic_extract with include_markdown?",
+        answer:
+          "If you only need the text, use talonic_to_markdown. If you need both structured fields and the full text, use talonic_extract with include_markdown: true to avoid two separate calls.",
+      },
     ],
-    mentions: ["markdown", "OCR", "document_id"],
+    mentions: ["markdown", "OCR", "document_id", "tables"],
   },
   {
     slug: "talonic-list-schemas",
@@ -540,6 +662,19 @@ Payment terms: Net 30`,
       {
         type: "paragraph",
         text: "The `talonic://schemas` resource exposes the same data to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_list_schemas`** is a read-only tool that returns every saved schema in your workspace. Agents should call this before creating a new schema to avoid duplicates, and when the user asks about their available extraction templates. The response includes the full JSON Schema definition for each schema, so the agent can inspect field structures without additional calls.",
+      },
+      {
+        type: "paragraph",
+        text: "Each schema in the response includes both a UUID (`id`) and a human-friendly short ID (`short_id` in `SCH-XXXXXXXX` format). Either can be passed as `schema_id` to `talonic_extract`. The short ID is easier for users to reference in conversation, while the UUID is useful for programmatic workflows.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Call `talonic_list_schemas` before `talonic_save_schema` to check if a similar schema already exists. This prevents cluttering the workspace with near-duplicate schemas.",
       },
       { type: "heading", level: 3, id: "list-schemas-example", text: "Example" },
       { type: "paragraph", text: "No input parameters required." },
@@ -592,8 +727,18 @@ Payment terms: Net 30`,
         answer:
           "Call talonic_list_schemas to get all saved schemas with their definitions. The talonic://schemas resource also exposes this data.",
       },
+      {
+        question: "What is the difference between the UUID and SCH-XXXXXXXX ID?",
+        answer:
+          "Both reference the same schema. The UUID (id) is the full identifier, while SCH-XXXXXXXX (short_id) is a shorter, human-friendly format. Either can be passed as schema_id to talonic_extract.",
+      },
+      {
+        question: "Does talonic_list_schemas require any parameters?",
+        answer:
+          "No. It takes no input parameters and returns all saved schemas in the workspace with their full definitions.",
+      },
     ],
-    mentions: ["schemas", "list", "SCH-XXXXXXXX"],
+    mentions: ["schemas", "list", "SCH-XXXXXXXX", "resource"],
   },
   {
     slug: "talonic-save-schema",
@@ -605,6 +750,18 @@ Payment terms: Net 30`,
       {
         type: "paragraph",
         text: "Save a schema definition to the workspace for reuse. Returns a `schema_id` that can be passed to `talonic_extract`.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_save_schema`** persists an extraction template so it can be referenced by ID in future `talonic_extract` calls. This is useful when the same schema will be applied to many documents — for example, a standard invoice schema used across all vendor invoices, or a contract schema applied to every new agreement.",
+      },
+      {
+        type: "paragraph",
+        text: "The recommended workflow is to iterate on the schema inline first (passing it directly to `talonic_extract`), verify the extraction results with the user, and only call `talonic_save_schema` once the schema design is confirmed. This avoids cluttering the workspace with draft schemas that never get used.",
+      },
+      {
+        type: "paragraph",
+        text: "The response returns both a UUID (`id`) and a short ID (`short_id` in `SCH-XXXXXXXX` format). Either can be used as `schema_id` in subsequent `talonic_extract` calls. The `version` field starts at 1 and increments if the schema is updated through the Talonic dashboard.",
       },
       {
         type: "param-table",
@@ -687,8 +844,18 @@ Payment terms: Net 30`,
         answer:
           "Call talonic_save_schema with a name and JSON Schema definition. It returns a schema_id for reuse in talonic_extract calls.",
       },
+      {
+        question: "When should I save a schema vs use an inline schema?",
+        answer:
+          "Save a schema when you will reuse it across many documents (e.g., a standard invoice template). Use inline schemas for one-off extractions or when iterating on schema design with the user.",
+      },
+      {
+        question: "Can I update a saved schema?",
+        answer:
+          "Schema updates are managed through the Talonic dashboard. The version field in the response tracks changes. Via MCP, you can save a new schema with a different name if the design changes significantly.",
+      },
     ],
-    mentions: ["save schema", "JSON Schema", "reuse"],
+    mentions: ["save schema", "JSON Schema", "reuse", "version"],
   },
   {
     slug: "talonic-get-balance",
