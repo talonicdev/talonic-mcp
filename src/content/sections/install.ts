@@ -97,7 +97,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools.",
+        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all eight tools.",
       },
     ],
     related: [

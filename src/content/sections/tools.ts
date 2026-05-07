@@ -690,4 +690,98 @@ Payment terms: Net 30`,
     ],
     mentions: ["save schema", "JSON Schema", "reuse"],
   },
+  {
+    slug: "talonic-get-balance",
+    parentSlug: "tools",
+    title: "talonic_get_balance",
+    seoTitle: "talonic_get_balance Tool — Talonic MCP",
+    description:
+      "MCP tool that returns the current Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next monthly tier-reset timestamp.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Returns the workspace's current credit balance, EUR value, 30-day burn rate, projected runway in days, API tier, and the timestamp of the next monthly tier reset. Use it for budget-aware behaviour: read the balance before scheduling a large batch, or after a sequence of extractions to track spend.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "use-when",
+        text: "When to use",
+      },
+      {
+        type: "list",
+        items: [
+          "The user asks how many credits or how much budget they have left.",
+          "Before kicking off a large or expensive operation (batch extract, re-extract many documents), to confirm budget headroom.",
+          "The user asks how long the balance will last at the current rate.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "do-not-use",
+        text: "When not to use",
+      },
+      {
+        type: "list",
+        items: [
+          "For per-call cost of a single extraction: that is already on every `talonic_extract` response under `cost`.",
+          "To top up credits: route the user to the dashboard. Auto top-up is guarded by a separate scope and is intentionally not exposed at the MCP layer.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "response-shape",
+        text: "Response shape",
+      },
+      {
+        type: "list",
+        items: [
+          "`balance_credits`: current credit balance (integer).",
+          "`balance_eur`: current balance expressed in EUR (rounded to two decimals).",
+          "`burn_rate_30d_credits`: total credits consumed in the trailing 30 days.",
+          "`projected_runway_days`: days of runway at the current 30-day average burn rate. `-1` indicates no consumption in the trailing window (cannot compute a meaningful runway).",
+          "`tier`: API tier of the workspace (`free`, `pro`, `enterprise`, etc.).",
+          "`tier_resets_at`: ISO 8601 timestamp of the next monthly tier reset.",
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "balance_credits": 1888,
+  "balance_eur": 9.44,
+  "burn_rate_30d_credits": 360,
+  "projected_runway_days": 157,
+  "tier": "pro",
+  "tier_resets_at": "2026-06-01T00:00:00.000Z"
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_extract", slug: "talonic-extract" },
+      { label: "Pricing", slug: "pricing" },
+    ],
+    faq: [
+      {
+        question: "How do I check my Talonic credit balance from an agent?",
+        answer:
+          "Call talonic_get_balance with no arguments. Returns balance_credits, balance_eur, burn_rate_30d_credits, projected_runway_days, tier, and tier_resets_at. Read-only; safe to call at any time.",
+      },
+      {
+        question: "What does projected_runway_days = -1 mean?",
+        answer:
+          "It means the workspace has had zero credit consumption in the trailing 30 days, so a meaningful runway projection cannot be computed. Treat -1 as 'unknown' rather than '0 days'.",
+      },
+    ],
+    mentions: ["credits", "balance", "EUR", "burn rate", "runway", "tier", "budget"],
+  },
 ]

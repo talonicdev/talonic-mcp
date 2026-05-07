@@ -5,13 +5,13 @@ Official Talonic MCP server. Lets AI agents extract structured, schema-validated
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Seven tools and one resource live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, plus the `talonic://schemas` resource. Verified end-to-end against production.
+> **Status:** Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Eight tools and two resources live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, plus the `talonic://schemas` and `talonic://webhooks/reference` resources. Verified end-to-end against production.
 
 ## Why an agent should use this
 
 When an agent needs to pull structured data out of a PDF, scan, image, or messy document, the usual approach is raw OCR plus an LLM call. Results are unreliable; tables get mangled, dates get misread, totals drift.
 
-With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Six other tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing saved schemas, and saving new ones.
+With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Seven other tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour.
 
 ## Get an API key (30 seconds)
 
@@ -61,7 +61,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all seven tools.
+Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all eight tools.
 
 ### Cursor
 
@@ -111,7 +111,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 1. Open https://claude.ai/settings/connectors.
 2. Click "Add custom connector".
 3. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_your_key_here`
-4. Click Add. The 7 tools appear.
+4. Click Add. The 8 tools appear.
 
 Claude.ai's UI does not currently accept a custom `Authorization` header on connectors, so the API key is passed as a `?apiKey=...` query parameter. Less secure than the Bearer header pattern (the key is persisted in the connector store and may appear in Anthropic-side logs), so rotate the key in your Talonic dashboard if you remove the connector. IDE-style clients (Cursor, Cline, Continue) that accept custom headers should use the Bearer header instead.
 
@@ -121,13 +121,14 @@ Claude.ai's UI does not currently accept a custom `Authorization` header on conn
 
 Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT USE WHEN sections. Agents pick the right tool reliably without further prompting. Briefly:
 
-- **`talonic_extract`**, status: stable. Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` or `schema_id`. Returns JSON with `data`, per-field `confidence`, and document metadata. Schema is required; the MCP layer rejects schema-less calls.
+- **`talonic_extract`**, status: stable. Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` or `schema_id`. Returns JSON with `data`, per-field `confidence`, document metadata, and a `cost` block (per-call credits / EUR / post-call balance) parsed from the API's `X-Talonic-Cost-*` response headers. Schema is required; the MCP layer rejects schema-less calls.
 - **`talonic_search`**, status: stable. Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
 - **`talonic_filter`**, status: stable. Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, `is_empty`, etc.). Accepts canonical field names (e.g. `vendor.name`) which the Talonic API resolves to ids server-side, or UUIDs directly. `is_not_empty` is intentionally not exposed in v0.1; see [Known limitations](#known-limitations-v01).
 - **`talonic_get_document`**, status: stable. Fetch full metadata for a single document by id, including processing log and link URLs.
-- **`talonic_to_markdown`**, status: stable. Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`.
+- **`talonic_to_markdown`**, status: stable. Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`. Returns the same `cost` block as `talonic_extract` when an extract step ran (i.e., on the file inputs); `null` on the `document_id` path.
 - **`talonic_list_schemas`**, status: stable. List all saved schemas with their definitions. Returns both UUID and SCH-XXXXXXXX short id; either is accepted by `talonic_extract`.
 - **`talonic_save_schema`**, status: stable. Save a schema definition to the workspace for reuse.
+- **`talonic_get_balance`**, status: stable. Read the workspace credit balance, EUR value, 30-day burn rate, projected runway, tier, and next-tier-reset timestamp. Use it for budget-aware decisions before kicking off large batches.
 
 Two resources are also exposed for clients that browse them separately (Claude Desktop and Cowork render these in the UI):
 - `talonic://schemas`: saved-schemas list.

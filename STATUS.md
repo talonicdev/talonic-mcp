@@ -104,25 +104,26 @@ Hosted MCP at `https://mcp.talonic.com`:
 | `GET /` | curl | 200, service discovery JSON (mcp_endpoint, health_endpoint, auth, docs) |
 | `POST /mcp` (Bearer header) | initialize handshake | 200, valid Mcp-Session-Id, serverInfo `talonic 0.1.12` |
 | `POST /mcp?apiKey=...` | initialize handshake | 200, equivalent shape |
-| `tools/list` | 7 tools advertised | all 7 present with STATUS: stable |
+| `tools/list` | 8 tools advertised | all 8 present with STATUS: stable |
 
-All 7 MCP tools, called through the hosted endpoint with a real `tlnc_` key. Updated post engineering fixes:
+All 8 MCP tools, called through the hosted endpoint with a real `tlnc_` key. Updated post engineering fixes:
 
 | Tool | Result | Notes |
 |---|---|---|
 | `talonic_list_schemas` | verified | pagination fix landed; all 10 schemas returned correctly (was 2 of 7 before fix) |
 | `talonic_search` | verified | tokenization fix landed; `_`, `-`, ` ` equivalent; `filterable` boolean now on fields and field matches |
 | `talonic_filter` | verified | discoverability fixes landed; informative errors when field is unfilterable; agents reliably check `filterable: true` before calling filter |
-| `talonic_extract` | verified for `file_url` and `document_id`; **truncated for `file_data` in Claude.ai** | UUID and SCH-XXXXXXXX both accepted on `schema_id`; MCP-layer schema validation guard active; Claude.ai's tool-call argument size cap truncates base64 file_data before it reaches the MCP server (Claude.ai platform limit, not a server bug); local-stdio installs unaffected (see follow-ups) |
+| `talonic_extract` | verified for `file_url` and `document_id`; **truncated for `file_data` in Claude.ai** | UUID and SCH-XXXXXXXX both accepted on `schema_id`; MCP-layer schema validation guard active; Claude.ai's tool-call argument size cap truncates base64 file_data before it reaches the MCP server (Claude.ai platform limit, not a server bug); local-stdio installs unaffected (see follow-ups). Now surfaces per-call `cost` parsed from `X-Talonic-Cost-*` response headers. |
 | `talonic_get_document` | verified | UUID, filename with extension, filename without extension, and natural-language all work |
-| `talonic_to_markdown` | verified | UUID and chained search-to-markdown via filename or natural language all work |
+| `talonic_to_markdown` | verified | UUID and chained search-to-markdown via filename or natural language all work. Surfaces `cost` on file paths (extract step ran), `null` on the `document_id` path. |
 | `talonic_save_schema` | verified | direct save, iterative design with confirmation, save-and-verify-via-list, and avoid-duplicate (defensive) flows all work |
+| `talonic_get_balance` | shipped 2026-05-07 | New tool wrapping `GET /v1/credits/balance`. Returns balance_credits, balance_eur, burn_rate_30d_credits, projected_runway_days, tier, tier_resets_at. |
 
 ## Claude.ai connector test (live, with real key)
 
 Workflow: Claude.ai > Settings > Connectors > Add custom connector. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_REDACTED`. **Bearer header in a custom-header field is not supported by Claude.ai's connector UI; only the URL-with-apiKey form works.** This is the documented v1 install pattern for Claude.ai users.
 
-Once added, the connector loads all 7 tools with their STATUS: stable descriptions and per-tool permission toggles (default: Needs approval).
+Once added, the connector loads all 8 tools with their STATUS: stable descriptions and per-tool permission toggles (default: Needs approval).
 
 ### Per-tool test results
 

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`talonic_get_balance`** tool. Wraps `GET /v1/credits/balance` from the API and returns the enriched balance (`balance_credits`, `balance_eur`, `burn_rate_30d_credits`, `projected_runway_days`, `tier`, `tier_resets_at`). Lets agents make budget-aware decisions before kicking off large batches. Tool count goes 7 → 8.
+- **`cost` field on `talonic_extract` and `talonic_to_markdown` outputSchemas.** Surfaces the per-call cost (`costCredits`, `costEur`), post-call balance (`balanceCredits`), and the registry-vs-AI cell-resolution split (`cellsResolvedRegistry`, `cellsResolvedAi`). Parsed by `@talonic/node@0.1.10` from the API's `X-Talonic-Cost-*` and `X-Talonic-Balance-*` response headers and threaded through the SDK's `WithRateLimit<T>` wrapper. `null` on the `talonic_to_markdown` `document_id` path because no extract call runs there.
+
+### Fixed
+
+- Three QA-reported MCP `-32602 Output validation error` failures, all with the same shape: outputSchema declared a non-null string where the API legitimately returns `null`. Fixed and locked in with regression tests.
+  - `talonic_list_schemas` and `talonic_save_schema`: `data[].description` / `description` accept `null`.
+  - `talonic_extract` and `talonic_get_document`: `document.mime_type` / `mime_type` accept `null`.
+  - `talonic_search`: `fields[].id` accepts `null` (set by the API for "schema-only" field entries that have not yet been materialized into the field-registry index).
+- Hosted MCP root discovery `docs` URL was advertising `https://docs.talonic.com` (not a live subdomain). Now points at `https://talonic.com/docs/mcp`.
+- `talonic_to_markdown` description now mirrors the Claude.ai parameter-cap warning from `talonic_extract` so chat clients and Claude.ai connector users get consistent guidance on `file_data`.
+- Symlink test in `tests/server-symlink.test.ts` now skips with a console warning when `dist/server.js` is older than `package.json` (avoids confusing "expected '0.1.x' to contain '0.1.y'" failures during local dev).
+
+### Changed
+
+- Hosted MCP (`mcp.talonic.com`) is now token-rotation aware. The bearer token is extracted on every incoming MCP request and the SDK is rebuilt per request when the token changes; previously the credential was captured at session-init time and reused. Required for OAuth 2.1 access-token rotation across requests in the same session.
+- `WWW-Authenticate: Bearer resource_metadata="..."` header on 401 responses, per RFC 9728. Lets OAuth clients (Claude.ai connector, MCP Inspector) discover the authorization server.
+- `/.well-known/oauth-protected-resource` endpoint on the hosted MCP per RFC 9728. Advertises `https://api.talonic.com` as the authorization server and the three scopes the connector actually exercises (`extract:write`, `documents:read`, `schemas:read`).
+- All seven existing tool registrations now take a `() => Talonic` getter rather than a `Talonic` instance. Internal refactor; no consumer-visible change beyond the OAuth token-rotation behaviour above.
+
 ## [0.1.16] - 2026-05-05
 
 ### Added

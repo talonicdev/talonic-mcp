@@ -1,7 +1,7 @@
 {
   "name": "talonic",
   "description": "Extract structured, schema-validated data from PDFs, scans, images, spreadsheets, and forms. Lets AI agents extract clean JSON from any document via the Model Context Protocol.",
-  "version": "0.1.17",
+  "version": "0.1.24",
   "author": {
     "name": "Talonic GmbH",
     "url": "https://talonic.com"
