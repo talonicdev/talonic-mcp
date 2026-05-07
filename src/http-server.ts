@@ -9,12 +9,22 @@
  * request creates a new session keyed by a UUID. Subsequent requests
  * with the same Mcp-Session-Id are routed to the existing session.
  * If a session is lost (deploy, restart, or edge routing miss), the
- * server returns 404 and the client re-initializes — standard MCP
+ * server returns 404 and the client re-initializes, the standard MCP
  * reconnection behavior.
  *
  * Supports two auth modes:
- *   1. Authorization: Bearer tlnc_...
- *   2. ?apiKey=tlnc_... query param (convenience for MCP client configs)
+ *   1. `Authorization: Bearer ...` header
+ *      Accepts a Talonic API key (`tlnc_...`) or an OAuth 2.1 access token
+ *      issued by the Talonic authorization server. The bearer string is
+ *      forwarded unchanged to the Talonic API; the API's dual-auth guard
+ *      decides which path to take.
+ *   2. `?apiKey=tlnc_...` query param
+ *      Convenience for MCP client configs that cannot set custom headers.
+ *      Use only with API keys; never put OAuth tokens in URLs.
+ *
+ * OAuth resource-server metadata is advertised at
+ * `/.well-known/oauth-protected-resource` per RFC 9728 so clients can
+ * discover the authorization server (`api.talonic.com`).
  *
  * @internal
  */
@@ -29,14 +39,62 @@ import { SERVER_NAME, VERSION } from "./version.js"
 const PORT = Number(process.env["PORT"] ?? 3000)
 
 /**
- * Extract the Talonic API key from the request. Checks the Authorization
- * header first, then falls back to the `apiKey` query parameter.
+ * Canonical public URL of this MCP resource. Advertised in the protected
+ * resource metadata so OAuth clients know the audience their tokens are
+ * good for. Defaults to the production hostname; override for staging.
  */
-function extractApiKey(req: {
+const RESOURCE_URL = process.env["MCP_RESOURCE_URL"] ?? "https://mcp.talonic.com"
+
+/**
+ * Base URL of the OAuth 2.1 authorization server. Advertised in the
+ * protected resource metadata so OAuth clients can discover the AS at
+ * `<AUTHORIZATION_SERVER>/.well-known/oauth-authorization-server`.
+ * Defaults to production; override for staging or local dev.
+ */
+const AUTHORIZATION_SERVER = process.env["OAUTH_AUTHORIZATION_SERVER"] ?? "https://api.talonic.com"
+
+/**
+ * RFC 9728 OAuth Protected Resource Metadata.
+ *
+ * Returned at `/.well-known/oauth-protected-resource`. Clients use this
+ * to discover which authorization server issues tokens for this resource
+ * and which scopes are accepted.
+ *
+ * The scopes advertised are the ones our MCP tools actually exercise:
+ * `extract:write` (extract, save_schema, to_markdown), `documents:read`
+ * (filter, get_document, search), and `schemas:read` (list_schemas).
+ * The Talonic authorization server supports more scopes than this; we
+ * advertise only what the connector itself needs so the consent screen
+ * stays tight.
+ */
+function renderProtectedResourceMetadata(): {
+  resource: string
+  authorization_servers: string[]
+  scopes_supported: string[]
+  bearer_methods_supported: string[]
+} {
+  return {
+    resource: RESOURCE_URL,
+    authorization_servers: [AUTHORIZATION_SERVER],
+    scopes_supported: ["extract:write", "documents:read", "schemas:read"],
+    bearer_methods_supported: ["header"],
+  }
+}
+
+/**
+ * Extract the bearer token from the request. Accepts either a Talonic
+ * API key (`tlnc_...`) or an OAuth 2.1 access token; the dual-auth guard
+ * on the Talonic API decides which path to take based on the prefix.
+ *
+ * Checks the `Authorization` header first, then falls back to the
+ * `apiKey` query parameter. The query parameter path is intended for
+ * API keys only. OAuth access tokens should never travel in URLs.
+ */
+function extractBearerToken(req: {
   url?: string
   headers: Record<string, string | string[] | undefined>
 }): string | undefined {
-  // 1. Authorization: Bearer tlnc_...
+  // 1. Authorization: Bearer <token>
   const authHeader = req.headers["authorization"]
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
     return authHeader.slice(7).trim()
@@ -73,6 +131,19 @@ const httpServer = createHttpServer(async (req, res) => {
     return
   }
 
+  // ── RFC 9728: Protected Resource Metadata ─────────────────────────
+  // Lets OAuth clients (Claude.ai connectors, MCP Inspector) discover
+  // which authorization server issues tokens for this resource. Public,
+  // unauthenticated, cacheable. Always returns JSON regardless of method.
+  if (path === "/.well-known/oauth-protected-resource") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=3600",
+    })
+    res.end(JSON.stringify(renderProtectedResourceMetadata()))
+    return
+  }
+
   // ── Root: service discovery for AI agents ─────────────────────────
   if (path === "/") {
     res.writeHead(200, { "Content-Type": "application/json" })
@@ -81,10 +152,11 @@ const httpServer = createHttpServer(async (req, res) => {
         name: SERVER_NAME,
         version: VERSION,
         description:
-          "Talonic MCP server — extract structured, schema-validated data from any document.",
+          "Talonic MCP server. Extract structured, schema-validated data from any document.",
         mcp_endpoint: "/mcp",
         health_endpoint: "/health",
-        auth: "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
+        oauth_protected_resource_endpoint: "/.well-known/oauth-protected-resource",
+        auth: "Provide a Talonic API key (tlnc_...) or an OAuth 2.1 access token via Authorization: Bearer ... header. API keys may also be passed via ?apiKey=tlnc_... query param; never put OAuth tokens in URLs.",
         docs: "https://docs.talonic.com",
       }),
     )
@@ -129,14 +201,14 @@ const httpServer = createHttpServer(async (req, res) => {
   }
 
   // ── Auth ───────────────────────────────────────────────────────────
-  const apiKey = extractApiKey(req)
-  if (!apiKey) {
+  const token = extractBearerToken(req)
+  if (!token) {
     res.writeHead(401, { "Content-Type": "application/json" })
     res.end(
       JSON.stringify({
         error: "unauthorized",
         message:
-          "Provide a Talonic API key via Authorization: Bearer tlnc_... header or ?apiKey=tlnc_... query param.",
+          "Provide a Talonic API key (tlnc_...) or an OAuth 2.1 access token via Authorization: Bearer ... header. API keys may also be passed via ?apiKey=tlnc_... query param; never put OAuth tokens in URLs.",
       }),
     )
     return
@@ -190,7 +262,7 @@ const httpServer = createHttpServer(async (req, res) => {
     sessionIdGenerator: () => randomUUID(),
   })
 
-  const mcpServer = createServer({ apiKey })
+  const mcpServer = createServer({ apiKey: token })
   await mcpServer.connect(transport)
 
   // handleRequest processes the init and generates the session ID.
