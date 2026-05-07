@@ -12,7 +12,7 @@
  * publish.
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdtempSync, rmSync, symlinkSync } from "node:fs"
+import { existsSync, mkdtempSync, rmSync, statSync, symlinkSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -20,14 +20,41 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { SERVER_NAME, VERSION } from "../src/version"
 
 const distServerPath = resolve(fileURLToPath(import.meta.url), "..", "..", "dist", "server.js")
-const distExists = existsSync(distServerPath)
+const pkgJsonPath = resolve(fileURLToPath(import.meta.url), "..", "..", "package.json")
+
+/**
+ * `src/version.ts` reads `pkg.version` from `package.json` and the
+ * bundler inlines that value into `dist/server.js` at build time.
+ * After a version bump in `package.json` but before a rebuild,
+ * `dist/server.js` carries the old version while the test imports the
+ * new one through `src/version.ts`, producing a confusing assertion
+ * mismatch that masquerades as a real regression. Detect that drift up
+ * front and skip with a console warning instead.
+ *
+ * CI is unaffected: the publish workflow runs `npm run build` before
+ * `npm test`, so `dist/` is always fresh by the time these tests run.
+ */
+function isDistFresh(): boolean {
+  if (!existsSync(distServerPath)) return false
+  if (!existsSync(pkgJsonPath)) return false
+  return statSync(distServerPath).mtimeMs >= statSync(pkgJsonPath).mtimeMs
+}
+
+const distAvailable = isDistFresh()
+
+if (existsSync(distServerPath) && !distAvailable) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[symlink test] dist/server.js is older than package.json; symlink tests skipped. Run `npm run build` to enable.",
+  )
+}
 
 describe("MCP server bin via symlink (regression: import.meta.url guard)", () => {
   let workDir: string
   let symlinkPath: string
 
   beforeAll(() => {
-    if (!distExists) return
+    if (!distAvailable) return
     workDir = mkdtempSync(join(tmpdir(), "talonic-mcp-symlink-"))
     symlinkPath = join(workDir, "talonic-mcp")
     symlinkSync(distServerPath, symlinkPath)
@@ -37,7 +64,7 @@ describe("MCP server bin via symlink (regression: import.meta.url guard)", () =>
     if (workDir) rmSync(workDir, { recursive: true, force: true })
   })
 
-  it.skipIf(!distExists)(
+  it.skipIf(!distAvailable)(
     "prints SERVER_NAME and VERSION when the bundled server is invoked through a symlink",
     () => {
       const result = spawnSync(process.execPath, [symlinkPath, "--version"], {
@@ -49,7 +76,7 @@ describe("MCP server bin via symlink (regression: import.meta.url guard)", () =>
     },
   )
 
-  it.skipIf(!distExists)("prints help when the symlinked server is invoked with --help", () => {
+  it.skipIf(!distAvailable)("prints help when the symlinked server is invoked with --help", () => {
     const result = spawnSync(process.execPath, [symlinkPath, "--help"], {
       encoding: "utf8",
     })
