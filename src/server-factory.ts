@@ -18,11 +18,14 @@ import { SERVER_NAME, VERSION } from "./version.js"
  */
 export interface CreateServerOptions {
   /**
-   * Talonic API key. Required. Starts with `tlnc_`.
+   * Talonic API key (`tlnc_...`) or any bearer token to be used for the
+   * lifetime of this server. For local-stdio installs and tests, set this
+   * to your `TALONIC_API_KEY`. For the hosted MCP, see `tokenProvider`,
+   * which lets the server pick up a fresh token on each request.
    *
-   * Each user must provide their own key. Workspaces are isolated.
+   * Required unless `talonic` or `tokenProvider` is provided.
    */
-  apiKey: string
+  apiKey?: string
 
   /**
    * Override the Talonic API base URL. Defaults to `https://api.talonic.com`.
@@ -33,19 +36,37 @@ export interface CreateServerOptions {
   /**
    * Inject a pre-configured Talonic SDK client. Useful for tests and for
    * advanced setups where the SDK has custom retry policies or
-   * instrumentation. When provided, `apiKey` and `baseUrl` are ignored.
+   * instrumentation. When provided, `apiKey` and `tokenProvider` are
+   * ignored for SDK calls; raw-fetch resources (webhook reference) still
+   * fall back to `apiKey` if set.
    */
   talonic?: Talonic
+
+  /**
+   * Per-request bearer-token provider. The function is called on every
+   * tool invocation and resource read; the SDK is rebuilt when the
+   * returned token changes. This is what makes the hosted MCP server
+   * tolerant to OAuth 2.1 access-token rotation across requests in the
+   * same session: the http-server updates a per-session token holder
+   * before forwarding each request, and the provider reads from it.
+   *
+   * Stdio installs do not need this; they should use `apiKey` instead.
+   */
+  tokenProvider?: () => string
 }
 
 /**
  * Build a Talonic MCP server, ready to be connected to a transport
  * (stdio for local installs, HTTP for the hosted endpoint).
  *
- * Tools, resources, and prompts are registered onto the server in
- * subsequent milestones. v0.1 ships a working scaffold so the
- * rest of the protocol surface can be added incrementally without
- * destabilising the connection layer.
+ * Auth resolution priority (highest first):
+ *   1. `talonic`       Pre-built SDK client. Used as-is by tool handlers.
+ *                      Webhook resource still uses `apiKey` for raw fetch.
+ *   2. `tokenProvider` Hosted-MCP path. SDK is reconstructed when the
+ *                      returned token changes; raw-fetch resources resolve
+ *                      the current token at every call.
+ *   3. `apiKey`        Static credential. SDK is built once and reused;
+ *                      raw-fetch resources use it directly.
  *
  * @example Minimal stdio server:
  * ```ts
@@ -59,12 +80,48 @@ export interface CreateServerOptions {
  * @public
  */
 export function createServer(options: CreateServerOptions): McpServer {
-  const talonic =
-    options.talonic ??
-    new Talonic({
-      apiKey: options.apiKey,
-      ...(options.baseUrl ? { baseUrl: options.baseUrl } : {}),
-    })
+  const baseUrl = options.baseUrl
+
+  // Build the token getter. Drives raw-fetch resources (webhook reference)
+  // and is the source of truth for SDK rebuild when using tokenProvider.
+  const getToken: () => string = (() => {
+    if (options.tokenProvider) return options.tokenProvider
+    const fallback = options.apiKey ?? ""
+    return () => fallback
+  })()
+
+  // Build the Talonic SDK getter. Drives every tool and the schemas resource.
+  const getTalonic: () => Talonic = (() => {
+    if (options.talonic) {
+      const t = options.talonic
+      return () => t
+    }
+    if (options.tokenProvider) {
+      const tp = options.tokenProvider
+      let cached: { token: string; client: Talonic } | null = null
+      return () => {
+        const tok = tp()
+        if (!cached || cached.token !== tok) {
+          cached = {
+            token: tok,
+            client: new Talonic({
+              apiKey: tok,
+              ...(baseUrl ? { baseUrl } : {}),
+            }),
+          }
+        }
+        return cached.client
+      }
+    }
+    if (options.apiKey) {
+      const t = new Talonic({
+        apiKey: options.apiKey,
+        ...(baseUrl ? { baseUrl } : {}),
+      })
+      return () => t
+    }
+    throw new Error("createServer: provide one of `apiKey`, `talonic`, or `tokenProvider`")
+  })()
 
   const server = new McpServer(
     {
@@ -86,17 +143,17 @@ export function createServer(options: CreateServerOptions): McpServer {
   )
 
   // Tool registrations.
-  registerListSchemas(server, talonic)
-  registerSaveSchema(server, talonic)
-  registerGetDocument(server, talonic)
-  registerSearch(server, talonic)
-  registerFilter(server, talonic)
-  registerToMarkdown(server, talonic)
-  registerExtract(server, talonic)
+  registerListSchemas(server, getTalonic)
+  registerSaveSchema(server, getTalonic)
+  registerGetDocument(server, getTalonic)
+  registerSearch(server, getTalonic)
+  registerFilter(server, getTalonic)
+  registerToMarkdown(server, getTalonic)
+  registerExtract(server, getTalonic)
 
   // Resource registrations.
-  registerSchemasResource(server, talonic)
-  registerWebhooksResource(server, options.apiKey, options.baseUrl)
+  registerSchemasResource(server, getTalonic)
+  registerWebhooksResource(server, getToken, baseUrl)
 
   return server
 }

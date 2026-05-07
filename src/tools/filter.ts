@@ -176,7 +176,7 @@ export async function handleFilter(talonic: Talonic, args: FilterArgs): Promise<
   }
 }
 
-export function registerFilter(server: McpServer, talonic: Talonic): void {
+export function registerFilter(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_filter",
     {
@@ -190,6 +190,6 @@ export function registerFilter(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleFilter(talonic, args as FilterArgs),
+    async (args) => handleFilter(getTalonic(), args as FilterArgs),
   )
 }

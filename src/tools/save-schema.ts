@@ -79,7 +79,7 @@ export async function handleSaveSchema(
   }
 }
 
-export function registerSaveSchema(server: McpServer, talonic: Talonic): void {
+export function registerSaveSchema(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_save_schema",
     {
@@ -94,6 +94,6 @@ export function registerSaveSchema(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleSaveSchema(talonic, args),
+    async (args) => handleSaveSchema(getTalonic(), args),
   )
 }

@@ -103,7 +103,7 @@ export async function handleSearch(
   }
 }
 
-export function registerSearch(server: McpServer, talonic: Talonic): void {
+export function registerSearch(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_search",
     {
@@ -117,6 +117,6 @@ export function registerSearch(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleSearch(talonic, args),
+    async (args) => handleSearch(getTalonic(), args),
   )
 }

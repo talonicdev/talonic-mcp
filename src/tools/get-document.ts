@@ -93,7 +93,7 @@ export async function handleGetDocument(
   }
 }
 
-export function registerGetDocument(server: McpServer, talonic: Talonic): void {
+export function registerGetDocument(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_get_document",
     {
@@ -107,6 +107,6 @@ export function registerGetDocument(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleGetDocument(talonic, args),
+    async (args) => handleGetDocument(getTalonic(), args),
   )
 }

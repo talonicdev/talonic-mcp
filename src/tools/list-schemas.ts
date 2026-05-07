@@ -83,7 +83,7 @@ export async function handleListSchemas(talonic: Talonic): Promise<ToolResult> {
  *
  * @internal
  */
-export function registerListSchemas(server: McpServer, talonic: Talonic): void {
+export function registerListSchemas(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_list_schemas",
     {
@@ -97,6 +97,6 @@ export function registerListSchemas(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async () => handleListSchemas(talonic),
+    async () => handleListSchemas(getTalonic()),
   )
 }

@@ -34,7 +34,7 @@ const WEBHOOK_INFO_ENDPOINTS = [
  */
 export function registerWebhooksResource(
   server: McpServer,
-  apiKey: string,
+  getToken: () => string,
   baseUrl?: string,
 ): void {
   const base = baseUrl ?? "https://api.talonic.com"
@@ -50,13 +50,16 @@ export function registerWebhooksResource(
     },
     async (uri) => {
       const results: Record<string, unknown> = {}
+      // Resolve the token once per resource read so a token rotated
+      // mid-session (OAuth 2.1 access tokens) is picked up on the next read.
+      const token = getToken()
 
       await Promise.all(
         WEBHOOK_INFO_ENDPOINTS.map(async ({ path, key }) => {
           try {
             const res = await fetch(`${base}${path}`, {
               headers: {
-                Authorization: `Bearer ${apiKey}`,
+                Authorization: `Bearer ${token}`,
                 Accept: "application/json",
               },
             })

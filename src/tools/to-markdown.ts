@@ -143,7 +143,7 @@ export async function handleToMarkdown(
   }
 }
 
-export function registerToMarkdown(server: McpServer, talonic: Talonic): void {
+export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_to_markdown",
     {
@@ -158,6 +158,6 @@ export function registerToMarkdown(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleToMarkdown(talonic, args as ToMarkdownArgs),
+    async (args) => handleToMarkdown(getTalonic(), args as ToMarkdownArgs),
   )
 }

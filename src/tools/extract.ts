@@ -239,7 +239,7 @@ export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promis
   }
 }
 
-export function registerExtract(server: McpServer, talonic: Talonic): void {
+export function registerExtract(server: McpServer, getTalonic: () => Talonic): void {
   server.registerTool(
     "talonic_extract",
     {
@@ -254,6 +254,6 @@ export function registerExtract(server: McpServer, talonic: Talonic): void {
         openWorldHint: true,
       },
     },
-    async (args) => handleExtract(talonic, args as ExtractArgs),
+    async (args) => handleExtract(getTalonic(), args as ExtractArgs),
   )
 }

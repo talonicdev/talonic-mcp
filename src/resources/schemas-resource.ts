@@ -12,7 +12,7 @@ import type { Talonic } from "@talonic/node"
  *
  * @internal
  */
-export function registerSchemasResource(server: McpServer, talonic: Talonic): void {
+export function registerSchemasResource(server: McpServer, getTalonic: () => Talonic): void {
   server.registerResource(
     "talonic-schemas",
     "talonic://schemas",
@@ -23,7 +23,7 @@ export function registerSchemasResource(server: McpServer, talonic: Talonic): vo
       mimeType: "application/json",
     },
     async (uri) => {
-      const result = await talonic.schemas.list()
+      const result = await getTalonic().schemas.list()
       return {
         contents: [
           {

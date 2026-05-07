@@ -111,14 +111,21 @@ function extractBearerToken(req: {
 }
 
 /**
- * Per-session state: one MCP server + one transport per authenticated
- * session. Sessions are keyed by the transport's generated session ID.
+ * Per-session state. The MCP server attached to the transport reads its
+ * bearer token via `tokenHolder` on every tool call and resource read,
+ * so a token rotated mid-session is picked up automatically. This is the
+ * mechanism that keeps an OAuth 2.1 session alive across the 1-hour
+ * access-token rotation without forcing the agent to re-initialize.
  */
 interface Session {
   transport: StreamableHTTPServerTransport
+  tokenHolder: { current: string }
 }
 
 const sessions = new Map<string, Session>()
+
+/** WWW-Authenticate header value for 401 responses, per RFC 9728. */
+const WWW_AUTHENTICATE = `Bearer resource_metadata="${RESOURCE_URL}/.well-known/oauth-protected-resource"`
 
 const httpServer = createHttpServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost")
@@ -203,7 +210,10 @@ const httpServer = createHttpServer(async (req, res) => {
   // ── Auth ───────────────────────────────────────────────────────────
   const token = extractBearerToken(req)
   if (!token) {
-    res.writeHead(401, { "Content-Type": "application/json" })
+    res.writeHead(401, {
+      "Content-Type": "application/json",
+      "WWW-Authenticate": WWW_AUTHENTICATE,
+    })
     res.end(
       JSON.stringify({
         error: "unauthorized",
@@ -219,6 +229,13 @@ const httpServer = createHttpServer(async (req, res) => {
 
   if (sessionId && sessions.has(sessionId)) {
     const session = sessions.get(sessionId)!
+    // Update the per-session token holder so subsequent tool calls in
+    // this request use the credential the client just sent. This is what
+    // makes OAuth access-token rotation transparent: the previous request
+    // may have used an older access token, this one uses the refreshed
+    // one, and the SDK is rebuilt automatically inside createServer when
+    // the token differs from what's cached.
+    session.tokenHolder.current = token
     await session.transport.handleRequest(req, res)
     return
   }
@@ -262,7 +279,13 @@ const httpServer = createHttpServer(async (req, res) => {
     sessionIdGenerator: () => randomUUID(),
   })
 
-  const mcpServer = createServer({ apiKey: token })
+  // Per-session token holder. Read by the SDK provider inside
+  // createServer on every tool call and resource read; updated by the
+  // request handler on every subsequent request in this session so that
+  // a rotated OAuth access token takes effect without re-initialization.
+  const tokenHolder = { current: token }
+
+  const mcpServer = createServer({ tokenProvider: () => tokenHolder.current })
   await mcpServer.connect(transport)
 
   // handleRequest processes the init and generates the session ID.
@@ -271,7 +294,7 @@ const httpServer = createHttpServer(async (req, res) => {
 
   const newSessionId = transport.sessionId
   if (newSessionId) {
-    sessions.set(newSessionId, { transport })
+    sessions.set(newSessionId, { transport, tokenHolder })
   }
 })
 
