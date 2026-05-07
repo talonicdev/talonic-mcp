@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { z } from "zod"
 import { Talonic } from "@talonic/node"
 import { handleSaveSchema } from "../../src/tools/save-schema"
 import { handleGetDocument } from "../../src/tools/get-document"
 import { handleSearch } from "../../src/tools/search"
+import { outputSchema as searchOutputSchema } from "../../src/tools/search"
 import { handleFilter } from "../../src/tools/filter"
 import { handleToMarkdown } from "../../src/tools/to-markdown"
 import { handleExtract } from "../../src/tools/extract"
@@ -373,5 +375,43 @@ describe("talonic_extract handler", () => {
     })
     expect((result as { isError?: boolean }).isError).toBe(true)
     expect(result.content[0]?.text).toMatch(/multiple_file_sources|exactly one/)
+  })
+})
+
+/**
+ * Regression: the API's /v1/search response includes "schema-only" field
+ * entries with `id: null` (declared in a schema but not yet materialized
+ * in the field-registry index). The MCP outputSchema previously declared
+ * `fields[].id: z.string()` and rejected null with `-32602` at the MCP
+ * layer. Fix is `z.string().nullable()`. Test covers both the materialized
+ * (id: string) and the schema-only (id: null) branches.
+ */
+describe("search outputSchema fields[].id nullability (regression: MCP -32602)", () => {
+  it("accepts a mixed result with one materialized field and one schema-only field", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [{ id: "doc-1", name: "invoice.pdf" }],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [
+        { id: "uuid-1", canonicalName: "vendor.name", documentCount: 12, filterable: true },
+        { id: null, canonicalName: "policy.coverage_type", documentCount: 0, filterable: false },
+      ],
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+  })
+
+  it("accepts an empty-search response (all arrays empty)", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
   })
 })

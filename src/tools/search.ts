@@ -41,7 +41,7 @@ const inputSchema = {
     .describe("Maximum results per entity type. Default: 5. Increase for broader exploration."),
 }
 
-const outputSchema = {
+export const outputSchema = {
   documents: z
     .array(
       z.object({
@@ -76,7 +76,12 @@ const outputSchema = {
   fields: z
     .array(
       z.object({
-        id: z.string(),
+        id: z
+          .string()
+          .nullable()
+          .describe(
+            "Field UUID for materialized field-registry entries; `null` for schema-only fields that are declared in a schema but have no extracted values yet. Always non-null when `filterable: true`.",
+          ),
         canonicalName: z.string().optional(),
         displayName: z.string().optional(),
         documentCount: z.number().optional(),
