@@ -69,6 +69,19 @@ const inputSchema = {
 const outputSchema = {
   document_id: z.string().describe("ID of the document the markdown was extracted from."),
   markdown: z.string().describe("OCR-converted markdown text content of the document."),
+  cost: z
+    .object({
+      costCredits: z.number(),
+      costEur: z.number(),
+      balanceCredits: z.number(),
+      cellsResolvedRegistry: z.number(),
+      cellsResolvedAi: z.number(),
+    })
+    .nullable()
+    .optional()
+    .describe(
+      "Per-call cost and post-call balance from the underlying extract step, parsed from the X-Talonic-* response headers. `null` when the document was already ingested (document_id path) and no extract call ran. Not always present on legacy clients.",
+    ),
 }
 
 export interface ToMarkdownArgs {

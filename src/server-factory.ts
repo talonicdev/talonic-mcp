@@ -4,6 +4,7 @@ import { registerSchemasResource } from "./resources/schemas-resource.js"
 import { registerWebhooksResource } from "./resources/webhooks-resource.js"
 import { registerExtract } from "./tools/extract.js"
 import { registerFilter } from "./tools/filter.js"
+import { registerGetBalance } from "./tools/get-balance.js"
 import { registerGetDocument } from "./tools/get-document.js"
 import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
@@ -150,6 +151,7 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerFilter(server, getTalonic)
   registerToMarkdown(server, getTalonic)
   registerExtract(server, getTalonic)
+  registerGetBalance(server, getTalonic)
 
   // Resource registrations.
   registerSchemasResource(server, getTalonic)

@@ -8,6 +8,7 @@ import { outputSchema as searchOutputSchema } from "../../src/tools/search"
 import { handleFilter } from "../../src/tools/filter"
 import { handleToMarkdown } from "../../src/tools/to-markdown"
 import { handleExtract } from "../../src/tools/extract"
+import { handleGetBalance } from "../../src/tools/get-balance"
 
 type MockedFetch = ReturnType<typeof vi.fn>
 
@@ -386,6 +387,47 @@ describe("talonic_extract handler", () => {
  * layer. Fix is `z.string().nullable()`. Test covers both the materialized
  * (id: string) and the schema-only (id: null) branches.
  */
+describe("talonic_get_balance handler", () => {
+  it("calls GET /v1/credits/balance and returns the enriched balance", async () => {
+    const { talonic, fetchFn } = makeTalonic({
+      balance_credits: 1888,
+      balance_eur: 9.44,
+      burn_rate_30d_credits: 360,
+      projected_runway_days: 157,
+      tier: "pro",
+      tier_resets_at: "2026-06-01T00:00:00.000Z",
+    })
+    const result = await handleGetBalance(talonic)
+    const [url, init] = lastCall(fetchFn)
+    expect(url).toContain("/v1/credits/balance")
+    expect(init.method).toBe("GET")
+    const parsed = parsedText(result) as { balance_credits: number; tier: string }
+    expect(parsed.balance_credits).toBe(1888)
+    expect(parsed.tier).toBe("pro")
+  })
+
+  it("returns isError when the API rejects the call", async () => {
+    const fetchFn = vi.fn().mockResolvedValue(
+      jsonResponse(
+        {
+          statusCode: 401,
+          code: "AUTH_REQUIRED",
+          error: "Unauthorized",
+          message: "Invalid API key",
+        },
+        401,
+      ),
+    )
+    const talonic = new Talonic({
+      apiKey: "tlnc_bad",
+      fetch: fetchFn as unknown as typeof fetch,
+      maxRetries: 0,
+    })
+    const result = await handleGetBalance(talonic)
+    expect((result as { isError?: boolean }).isError).toBe(true)
+  })
+})
+
 describe("search outputSchema fields[].id nullability (regression: MCP -32602)", () => {
   it("accepts a mixed result with one materialized field and one schema-only field", () => {
     const Output = z.object(searchOutputSchema)

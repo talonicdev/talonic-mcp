@@ -187,6 +187,21 @@ const outputSchema = {
     .string()
     .optional()
     .describe("OCR-converted markdown. Present only when `include_markdown: true`."),
+  cost: z
+    .object({
+      costCredits: z.number().describe("Credits consumed by this call."),
+      costEur: z.number().describe("Approximate EUR cost of this call."),
+      balanceCredits: z.number().describe("Workspace credit balance after this call settled."),
+      cellsResolvedRegistry: z
+        .number()
+        .describe("Cells resolved from the materialized field-registry (cheap path)."),
+      cellsResolvedAi: z.number().describe("Cells resolved by AI extraction (priced path)."),
+    })
+    .nullable()
+    .optional()
+    .describe(
+      "Per-call cost and post-call balance, parsed from the X-Talonic-* response headers. `null` for non-extract calls; not always present on legacy clients.",
+    ),
 }
 
 export interface ExtractArgs {
