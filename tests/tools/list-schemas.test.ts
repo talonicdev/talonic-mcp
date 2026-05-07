@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { z } from "zod"
 import { Talonic, TalonicAuthError } from "@talonic/node"
-import { handleListSchemas } from "../../src/tools/list-schemas"
+import {
+  handleListSchemas,
+  outputSchema as listSchemasOutputSchema,
+} from "../../src/tools/list-schemas"
+import { outputSchema as saveSchemaOutputSchema } from "../../src/tools/save-schema"
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -89,5 +94,51 @@ describe("talonic_list_schemas handler", () => {
     })
     const result = await handleListSchemas(talonic)
     expect((result as { isError?: boolean }).isError).toBe(true)
+  })
+})
+
+/**
+ * Regression: the MCP layer validates tool results against the registered
+ * outputSchema before returning them to the client. Previously
+ * `data[].description` was typed `z.string().optional()`, which rejected
+ * the API's legitimate `description: null` and produced a confusing
+ * `-32602 Invalid result data` to the client. The fix is
+ * `z.string().nullable().optional()`. The OpenAPI spec declares
+ * `SchemaResponse.description` as `type: ["string", "null"]` and the
+ * REST controller maps the absent case to `null` explicitly.
+ */
+describe("schema-description nullability (regression: MCP -32602)", () => {
+  it("list-schemas outputSchema accepts data[].description: null", () => {
+    const Output = z.object(listSchemasOutputSchema)
+    const apiResponse = {
+      data: [
+        { id: "uuid-1", name: "Invoice", description: null, version: 1, definition: {} },
+        { id: "uuid-2", name: "Receipt", description: "Standard", version: 2, definition: {} },
+      ],
+      pagination: { total: 2, has_more: false },
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+  })
+
+  it("list-schemas outputSchema accepts data[].description omitted", () => {
+    const Output = z.object(listSchemasOutputSchema)
+    const apiResponse = {
+      data: [{ id: "uuid-1", name: "Invoice", version: 1, definition: {} }],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+
+  it("save-schema outputSchema accepts description: null", () => {
+    const Output = z.object(saveSchemaOutputSchema)
+    const apiResponse = {
+      id: "uuid-1",
+      short_id: "SCH-12345678",
+      name: "Invoice",
+      description: null,
+      version: 1,
+      created_at: "2026-05-07T00:00:00Z",
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
   })
 })

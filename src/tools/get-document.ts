@@ -35,7 +35,7 @@ const outputSchema = {
   filename: z.string().optional(),
   pages: z.number().optional(),
   size_bytes: z.number().optional(),
-  mime_type: z.string().optional(),
+  mime_type: z.string().nullable().optional(),
   type_detected: z.string().nullable().optional(),
   language_detected: z.string().nullable().optional(),
   status: z.string().optional(),

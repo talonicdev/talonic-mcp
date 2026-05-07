@@ -31,11 +31,17 @@ const DESCRIPTION = [
   "TIP: Pair this with talonic_extract by passing the chosen schema's id as `schema_id`.",
 ].join("\n")
 
-const schemaItem = z.object({
+export const schemaItem = z.object({
   id: z.string().describe("UUID of the schema."),
   short_id: z.string().optional().describe("Human-readable short id (SCH-XXXXXXXX)."),
   name: z.string(),
-  description: z.string().optional(),
+  description: z
+    .string()
+    .nullable()
+    .optional()
+    .describe(
+      "Schema description, or null when the schema was created without one. The API explicitly maps the absent case to null (see SchemaResponse in openapi.yaml), so the output schema must accept null in addition to undefined.",
+    ),
   definition: z.record(z.string(), z.unknown()).optional(),
   field_count: z.number().optional(),
   version: z.number().optional(),
@@ -50,7 +56,7 @@ const schemaItem = z.object({
     .optional(),
 })
 
-const outputSchema = {
+export const outputSchema = {
   data: z.array(schemaItem).describe("Saved schemas in the workspace."),
   pagination: z
     .object({

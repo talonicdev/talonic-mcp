@@ -38,11 +38,17 @@ const inputSchema = {
     .describe("Optional description of what this schema extracts and when to use it."),
 }
 
-const outputSchema = {
+export const outputSchema = {
   id: z.string().describe("UUID of the newly saved schema."),
   short_id: z.string().optional().describe("Human-readable short id (SCH-XXXXXXXX)."),
   name: z.string(),
-  description: z.string().optional(),
+  description: z
+    .string()
+    .nullable()
+    .optional()
+    .describe(
+      "Schema description, or null when the schema was saved without one. The API explicitly maps the absent case to null (see SchemaResponse in openapi.yaml).",
+    ),
   definition: z
     .record(z.string(), z.unknown())
     .optional()
