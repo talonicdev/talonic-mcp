@@ -164,7 +164,7 @@ const httpServer = createHttpServer(async (req, res) => {
         health_endpoint: "/health",
         oauth_protected_resource_endpoint: "/.well-known/oauth-protected-resource",
         auth: "Provide a Talonic API key (tlnc_...) or an OAuth 2.1 access token via Authorization: Bearer ... header. API keys may also be passed via ?apiKey=tlnc_... query param; never put OAuth tokens in URLs.",
-        docs: "https://docs.talonic.com",
+        docs: "https://talonic.com/docs/mcp",
       }),
     )
     return
