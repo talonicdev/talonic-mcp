@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.25] - 2026-05-07
+
 ### Added
 
 - **`talonic_get_balance`** tool. Wraps `GET /v1/credits/balance` from the API and returns the enriched balance (`balance_credits`, `balance_eur`, `burn_rate_30d_credits`, `projected_runway_days`, `tier`, `tier_resets_at`). Lets agents make budget-aware decisions before kicking off large batches. Tool count goes 7 → 8.
