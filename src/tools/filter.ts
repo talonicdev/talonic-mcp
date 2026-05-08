@@ -4,7 +4,7 @@ import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 const DESCRIPTION = [
-  "STATUS: stable. Field-name resolution is server-side. The `is_not_empty` operator is intentionally not exposed in v0.1; see workaround below.",
+  "STATUS: stable. Field-name resolution is server-side.",
   "",
   "Filter the user's Talonic documents by extracted field values using composable conditions.",
   "Conditions accept either a canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type')",
@@ -27,12 +27,10 @@ const DESCRIPTION = [
   "- between: requires both `value` and `value_to`.",
   "- contains: substring match on string fields.",
   "- is_empty: presence check, no value needed. Returns documents where the field is null or missing.",
+  "- is_not_empty: presence check, no value needed. Returns documents where the field has a materialized value. Results reflect data within seconds of extraction completing.",
   "",
   "SCHEMA TYPING:",
-  "- Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. '€1,500.00') will silently return zero matches even after extraction. Pick the right type at schema design time.",
-  "",
-  "NOT SUPPORTED IN v0.1:",
-  "- is_not_empty: underreports against fields known to be populated. Removed from the supported operator list to keep filter results trustworthy. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` then invert the result client-side. Tracked for a later release.",
+  "- Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. '€1,500.00') will silently return zero matches even after extraction. Pick the right type at schema design time. The API returns a `warnings` array when a numeric operator is applied to a string-typed field.",
   "",
   "TIPS:",
   "- To discover available field names, call talonic_search first with a related query.",
@@ -53,8 +51,7 @@ const operatorEnum = z.enum([
   "between",
   "contains",
   "is_empty",
-  // is_not_empty intentionally omitted in v0.1: it underreports against
-  // fields known to be populated. See description for the workaround.
+  "is_not_empty",
 ])
 
 const conditionSchema = z.object({
@@ -131,7 +128,7 @@ export interface FilterArgs {
   conditions: Array<{
     field?: string
     field_id?: string
-    operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "between" | "contains" | "is_empty"
+    operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "between" | "contains" | "is_empty" | "is_not_empty"
     value?: unknown
     value_to?: unknown
   }>

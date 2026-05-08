@@ -432,7 +432,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "Two limitations: (1) only fields where the search response shows `filterable: true` can be used with `talonic_filter`; entries with `filterable: false` have no extracted data yet. (2) `is_not_empty` is intentionally not exposed in v0.1; use `eq`/`gt`/`contains` against a known value or invert `is_empty` client-side.",
+        text: "Only fields where the search response shows `filterable: true` can be used with `talonic_filter`; entries with `filterable: false` have no extracted data yet. The `is_not_empty` operator checks materialized values, which are updated within seconds of extraction completing.",
       },
       { type: "heading", level: 3, id: "filter-example", text: "Example" },
       {

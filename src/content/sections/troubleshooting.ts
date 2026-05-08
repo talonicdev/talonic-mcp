@@ -209,7 +209,7 @@ export const sections: RawSection[] = [
           "**Schema definition: prefer full JSON Schema.** The flat key-type map is documented as accepted; if you get a 'no fields' error from the API, fall back to JSON Schema.",
           "**Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.",
           "**Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.",
-          "**`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.",
+          "**`is_not_empty` filter checks materialized data.** Results reflect values within seconds of extraction completing. For batch-mode documents, values are materialized after the batch poll cycle completes.",
           "**Drag-and-drop file uploads in Claude.ai are capped by Claude.ai's tool-call argument size limit.** A base64-encoded real PDF (typically hundreds of KB) cannot fit through Claude.ai's connector tool-call pipe, which truncates parameters under ~1KB. The Talonic API receives a few hundred bytes, registers an empty document, and returns a response with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug. Workaround for Claude.ai users: use `file_url` (publicly reachable URL), `document_id` (file uploaded at app.talonic.com), or use a local-stdio install (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, etc.) which has no parameter cap. The architectural fix is pre-signed upload URLs.",
           "**Cost, EUR price, and remaining balance are not surfaced.** The API does not return them yet. Credit balance must be checked in the Talonic dashboard.",
         ],
@@ -220,7 +220,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "For the `is_not_empty` filter gap, the recommended workaround is to use `is_empty` and invert the logic client-side, or filter against a known value with `eq`, `gt`, or `contains`. This is a server-side issue that will be resolved in a future API version.",
+        text: "The `is_not_empty` operator is now available and checks the materialized values index, which updates within seconds of extraction completing. For batch-mode documents, materialization occurs after the batch poll cycle applies results.",
       },
       {
         type: "heading",
@@ -235,8 +235,7 @@ export const sections: RawSection[] = [
         code: `// Schema required on talonic_extract
 // → Always pass schema (JSON Schema) or schema_id
 
-// is_not_empty filter not available
-// → Use is_empty and invert client-side, or filter with eq/contains
+// is_not_empty checks materialized values (updated within seconds of extraction)
 
 // Drag-and-drop stalls on Claude.ai (hosted connector)
 // → Use file_url, document_id, or local stdio install
@@ -258,7 +257,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "Do not rely on schema-less extraction or `is_not_empty` filtering in automated workflows. Both are explicitly disabled in v0.1 and will return errors rather than unreliable results.",
+        text: "Do not rely on schema-less extraction in automated workflows — it is explicitly disabled in v0.1 and will return a validation error. Always provide a `schema` or `schema_id`.",
       },
     ],
     related: [
@@ -270,7 +269,7 @@ export const sections: RawSection[] = [
       {
         question: "What are the known limitations of Talonic MCP?",
         answer:
-          "Schema is required on talonic_extract. Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. is_not_empty filter is not exposed in v0.1. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
+          "Schema is required on talonic_extract. Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
       },
       {
         question: "Will schema-less extraction be supported in the future?",

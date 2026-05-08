@@ -256,7 +256,7 @@ export const sections: RawSection[] = [
         type: "list",
         items: [
           "**Conceptual or fuzzy** (e.g. 'do I have any docs about indemnification?', 'find Acme contracts'): use `talonic_search`.",
-          "**Value-based on extracted fields** (e.g. 'invoices over 1000 EUR', 'contracts expiring before 2026-12-31'): use `talonic_filter`. `is_not_empty` is not exposed in v0.1; for presence checks against populated fields, filter against a known value or use `is_empty` and invert client-side.",
+          "**Value-based on extracted fields** (e.g. 'invoices over 1000 EUR', 'contracts expiring before 2026-12-31'): use `talonic_filter`. Use `is_not_empty` for presence checks and `is_empty` for absence checks.",
           "**They reference a specific document_id**: use `talonic_get_document` for metadata, `talonic_to_markdown` (with `document_id`) for text, or `talonic_extract` (with `document_id`) to re-extract with a new schema. Re-using a document_id is cheaper than re-uploading.",
         ],
       },
