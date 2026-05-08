@@ -457,3 +457,44 @@ describe("search outputSchema fields[].id nullability (regression: MCP -32602)",
     expect(Output.safeParse(apiResponse).success).toBe(true)
   })
 })
+
+describe("search outputSchema documentCount nullability (regression: QA 2026-05-08)", () => {
+  it("accepts fields[].documentCount = null for registry fields with no extractions yet", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [
+        {
+          id: "uuid-1",
+          canonicalName: "condition.invoice_requires_pod",
+          documentCount: null,
+          filterable: true,
+        },
+      ],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+
+  it("accepts fieldMatches[].documentCount = null for registry fields with no extractions yet", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [
+        {
+          resolvedFieldId: "uuid-1",
+          displayName: "Invoice requires POD",
+          matchedValue: "yes",
+          documentCount: null,
+          filterable: true,
+        },
+      ],
+      sources: [],
+      schemas: [],
+      fields: [],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+})

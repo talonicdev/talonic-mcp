@@ -58,7 +58,7 @@ export const outputSchema = {
         resolvedFieldId: z.string().nullable(),
         displayName: z.string().optional(),
         matchedValue: z.string().optional(),
-        documentCount: z.number().optional(),
+        documentCount: z.number().nullable().optional(),
         filterable: z
           .boolean()
           .describe("Only filterable: true entries can be used with talonic_filter."),
@@ -84,7 +84,7 @@ export const outputSchema = {
           ),
         canonicalName: z.string().optional(),
         displayName: z.string().optional(),
-        documentCount: z.number().optional(),
+        documentCount: z.number().nullable().optional(),
         filterable: z.boolean().optional(),
       }),
     )
