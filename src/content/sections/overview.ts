@@ -27,7 +27,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Installation takes under a minute: paste a JSON snippet into your MCP client config, supply a `tlnc_` API key, and restart the client. The hosted option at `mcp.talonic.com` requires zero local dependencies — no Node.js, no npm, no build step. The local `npx` option is equally simple and runs on any machine with Node.js 18 or later.",
+        text: "Installation takes under a minute. The recommended path is the hosted endpoint at `mcp.talonic.com` connected via Claude.ai's custom-connector flow, which uses OAuth 2.1 with PKCE and Dynamic Client Registration so no API key is pasted into config. For IDE-style clients, the local `npx` option uses a `TALONIC_API_KEY` environment variable and runs on any machine with Node.js 18 or later. A third path keeps the hosted endpoint but supplies a `Bearer tlnc_…` header for clients that do not yet handle the OAuth handshake.",
       },
       {
         type: "paragraph",
@@ -347,6 +347,11 @@ export const sections: RawSection[] = [
       {
         type: "paragraph",
         text: "Each user runs against their own isolated Talonic workspace. Your documents and schemas are private to you.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "If you are connecting from Claude.ai's custom-connector flow, you can skip the API-key steps below. The connector launches an OAuth 2.1 sign-in to `app.talonic.com` and the MCP server then uses a short-lived bearer token on your behalf. Get an API key when you want to install locally via `npx`, drive the hosted endpoint from a custom-header client, or use the Node SDK.",
       },
       {
         type: "list",

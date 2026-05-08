@@ -34,28 +34,45 @@ export const sections: RawSection[] = [
     content: [
       {
         type: "paragraph",
-        text: "Two ways to connect. The hosted server at `mcp.talonic.com` requires zero install — paste one URL into any MCP client. Or run locally via `npx` if you prefer.",
-      },
-      { type: "heading", level: 3, id: "hosted-recommended", text: "Hosted (recommended)" },
-      {
-        type: "paragraph",
-        text: "No install, no Node.js required. Works with every MCP client that supports remote servers:",
+        text: "Three ways to connect. The recommended path for Claude.ai users is the hosted MCP via the **OAuth connector flow**: paste one URL into Claude.ai's connector settings, sign in with your Talonic account, approve the consent screen. No API key in your config, ever. For IDE-style clients (Cursor, Cline, Continue, Cowork) and Claude Desktop, the local `npx` install is the canonical path. A third hosted option, with the Talonic API key in an `Authorization` header, exists for clients that support custom headers on remote MCP servers.",
       },
       {
-        type: "code",
-        language: "jsonc",
-        title: "Hosted config",
-        code: `{
-  "url": "https://mcp.talonic.com/mcp",
-  "headers": { "Authorization": "Bearer tlnc_..." }
-}`,
+        type: "heading",
+        level: 3,
+        id: "hosted-claude-ai",
+        text: "Hosted via Claude.ai connector (OAuth, recommended)",
       },
       {
         type: "paragraph",
-        text: "The hosted server is maintained by Talonic and always runs the latest version. It communicates over HTTPS with streamable HTTP transport, so there is no local process to manage. Latency is comparable to the local option because the MCP server still makes the same HTTPS call to `api.talonic.com` either way.",
+        text: "Claude.ai's `Add custom connector` flow does the OAuth 2.1 handshake for you. The MCP server lives at `https://mcp.talonic.com/mcp`; Claude.ai discovers the authorization server, registers itself dynamically (RFC 7591), and runs the PKCE authorization-code flow. The resulting access token is stored by Claude.ai and refreshed automatically (1-hour access token, 30-day refresh).",
       },
-      { type: "heading", level: 3, id: "local-npx", text: "Local (npx)" },
-      { type: "paragraph", text: "Runs on your machine. Requires Node.js 18+:" },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          "Open `https://claude.ai/settings/connectors`.",
+          "Click **Add custom connector**.",
+          "URL: `https://mcp.talonic.com/mcp` — no query string, no headers.",
+          "Click **Connect**. You are redirected to Talonic to sign in.",
+          "Sign in with Google, Microsoft, or your company SSO.",
+          "Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, and `schemas:read`. Pick a workspace if you have multiple.",
+          "You are returned to Claude.ai with the connector live. All eight tools are available in any new conversation.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "No API key appears in the connector config or in any URL the browser navigates to. To revoke access, remove the connector in Claude.ai or revoke the OAuth client from your Talonic dashboard. Your tools and tokens are scoped to the workspace you picked at consent time.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "local-npx",
+        text: "Local stdio (npx)",
+      },
+      {
+        type: "paragraph",
+        text: "Recommended for IDE-style clients (Cursor, Cline, Continue, Cowork) and Claude Desktop, where the MCP host spawns the server as a local child process. Requires Node.js 18+. Your API key lives in the client's `env` block.",
+      },
       {
         type: "code",
         language: "jsonc",
@@ -68,11 +85,30 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart.",
+        text: "The `-y` flag skips the npm install prompt. Pinning to `@latest` means new versions are picked up on the next client restart. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.27`) so a future release cannot silently change tool descriptions, validation rules, or response shapes.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "hosted-bearer",
+        text: "Hosted with a Bearer header (custom-header clients)",
       },
       {
         type: "paragraph",
-        text: "Both options expose the same seven tools and one resource. The hosted option is recommended for most users because it eliminates Node.js as a dependency, simplifies debugging (no local process to inspect), and receives updates without any action on your part.",
+        text: "For MCP clients that support remote servers with custom headers (mcp-inspector, custom integrations), connect to the hosted endpoint with the API key in an `Authorization` header. Claude.ai's connector UI does not currently support custom headers, which is why the OAuth flow above is the recommended path for Claude.ai users.",
+      },
+      {
+        type: "code",
+        language: "jsonc",
+        title: "Hosted config (custom-header clients)",
+        code: `{
+  "url": "https://mcp.talonic.com/mcp",
+  "headers": { "Authorization": "Bearer tlnc_..." }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "All three install paths expose the same eight tools and two resources. The hosted server runs the latest version of `@talonic/mcp` automatically; the local `npx` install picks up the latest version on next client restart when pinned to `@latest`.",
       },
       {
         type: "heading",
@@ -495,7 +531,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Continue's config format uses a `name` field instead of a key in the `mcpServers` object. Make sure to include `\"name\": \"talonic\"` in the entry. The rest of the config — `command`, `args`, `env` for local, or `url` and `headers` for hosted — follows the same pattern as other MCP clients.",
+        text: 'Continue\'s config format uses a `name` field instead of a key in the `mcpServers` object. Make sure to include `"name": "talonic"` in the entry. The rest of the config — `command`, `args`, `env` for local, or `url` and `headers` for hosted — follows the same pattern as other MCP clients.',
       },
       {
         type: "heading",
@@ -554,7 +590,7 @@ export const sections: RawSection[] = [
       {
         question: "Why does Continue use a different config format?",
         answer:
-          "Continue uses an mcpServers array with a name field instead of an object keyed by server name. Include \"name\": \"talonic\" in the entry alongside the standard command/args/env or url/headers fields.",
+          'Continue uses an mcpServers array with a name field instead of an object keyed by server name. Include "name": "talonic" in the entry alongside the standard command/args/env or url/headers fields.',
       },
       {
         question: "Can I run Talonic alongside other MCP servers in Continue?",

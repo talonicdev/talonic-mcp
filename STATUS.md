@@ -35,62 +35,62 @@ The Claude.ai connector audit completed with engineering's three bug fixes confi
 
 ### `@talonic/mcp`
 
-| Item | State |
-|---|---|
-| Repo | clean, on main, pushed |
-| package.json version | 0.1.17 |
-| server.json version | 0.1.17 |
-| npm published version | 0.1.17 (published 2026-05-06 via auto-pipeline after NPM_TOKEN rotation) |
-| Auto-bump pipeline | working; new granular npm token with bypass-2FA in place |
-| Tests | 34 pass (verified 2026-05-06 in /tmp/talonic-mcp-build) |
-| Format check | clean |
-| Typecheck | clean |
-| Build | clean |
-| docs/sections.json | up to date with v1 surface (decision guide, examples, troubleshooting) |
-| Tool descriptions | all 7 carry STATUS: stable; honest known limitations |
-| Tool annotations | all 7 carry `readOnlyHint`, `destructiveHint`, `openWorldHint`; read-only tools (search, filter, list_schemas, get_document) marked `readOnlyHint: true`; write tools (extract, to_markdown, save_schema) marked false |
-| MCP-layer schema validation | enforced; schema-less calls rejected fast |
-| Privacy Policy | live in README |
+| Item                        | State                                                                                                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repo                        | clean, on main, pushed                                                                                                                                                                                                 |
+| package.json version        | 0.1.17                                                                                                                                                                                                                 |
+| server.json version         | 0.1.17                                                                                                                                                                                                                 |
+| npm published version       | 0.1.17 (published 2026-05-06 via auto-pipeline after NPM_TOKEN rotation)                                                                                                                                               |
+| Auto-bump pipeline          | working; new granular npm token with bypass-2FA in place                                                                                                                                                               |
+| Tests                       | 34 pass (verified 2026-05-06 in /tmp/talonic-mcp-build)                                                                                                                                                                |
+| Format check                | clean                                                                                                                                                                                                                  |
+| Typecheck                   | clean                                                                                                                                                                                                                  |
+| Build                       | clean                                                                                                                                                                                                                  |
+| docs/sections.json          | up to date with v1 surface (decision guide, examples, troubleshooting)                                                                                                                                                 |
+| Tool descriptions           | all 7 carry STATUS: stable; honest known limitations                                                                                                                                                                   |
+| Tool annotations            | all 7 carry `readOnlyHint`, `destructiveHint`, `openWorldHint`; read-only tools (search, filter, list_schemas, get_document) marked `readOnlyHint: true`; write tools (extract, to_markdown, save_schema) marked false |
+| MCP-layer schema validation | enforced; schema-less calls rejected fast                                                                                                                                                                              |
+| Privacy Policy              | live in README                                                                                                                                                                                                         |
 
 ### `@talonic/node`
 
-| Item | State |
-|---|---|
-| Repo | clean, on main, pushed |
-| package.json version | 0.1.7 |
-| npm published version | 0.1.7 |
-| Tests | 122 pass, 2 skipped |
-| `npm run check:spec` | passes; 25 SDK call sites match the OpenAPI spec |
-| docs/sections.json | reflects 0.1.7 surface (auto-populate required, rate-limit headers wrapper) |
-| SDK CLI | `npx -y @talonic/node@latest schemas list` works against production |
+| Item                  | State                                                                       |
+| --------------------- | --------------------------------------------------------------------------- |
+| Repo                  | clean, on main, pushed                                                      |
+| package.json version  | 0.1.7                                                                       |
+| npm published version | 0.1.7                                                                       |
+| Tests                 | 122 pass, 2 skipped                                                         |
+| `npm run check:spec`  | passes; 25 SDK call sites match the OpenAPI spec                            |
+| docs/sections.json    | reflects 0.1.7 surface (auto-populate required, rate-limit headers wrapper) |
+| SDK CLI               | `npx -y @talonic/node@latest schemas list` works against production         |
 
 ### Website (`/Users/macman/Downloads/Talonic/website`)
 
-| Item | State |
-|---|---|
-| Repo | clean (after one fix this audit) |
-| `update-docs.yml` workflow | running on every package publish; recent commits visible in main |
-| `package-lock.json` | `@talonic/mcp@0.1.12`, `@talonic/node@0.1.7` |
-| `npm run check:ai-discovery` | passes after this audit's fix |
-| `/.well-known/mcp.json` | tool list now matches @talonic/mcp registrations (9 registered, 9 declared) |
-| `/.well-known/agent.json` | 5 skills declared |
-| `/.well-known/api-catalog` | exists |
-| `/llms-full.txt` | mentions hosted MCP, confidence scores, npx install |
-| Build | not verified in audit (sandbox network restriction); run on dev machine to confirm |
+| Item                         | State                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| Repo                         | clean (after one fix this audit)                                                   |
+| `update-docs.yml` workflow   | running on every package publish; recent commits visible in main                   |
+| `package-lock.json`          | `@talonic/mcp@0.1.12`, `@talonic/node@0.1.7`                                       |
+| `npm run check:ai-discovery` | passes after this audit's fix                                                      |
+| `/.well-known/mcp.json`      | tool list now matches @talonic/mcp registrations (9 registered, 9 declared)        |
+| `/.well-known/agent.json`    | 5 skills declared                                                                  |
+| `/.well-known/api-catalog`   | exists                                                                             |
+| `/llms-full.txt`             | mentions hosted MCP, confidence scores, npx install                                |
+| Build                        | not verified in audit (sandbox network restriction); run on dev machine to confirm |
 
 Audit fix during this run: `talonic://webhooks/reference` was missing from `/.well-known/mcp.json`; added in commit `455889d`.
 
 ### Official MCP Registry
 
-| Item | State |
-|---|---|
-| Listing URL | `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp` |
-| Listed name | `io.github.talonicdev/talonic-mcp` |
-| Listed version | 0.1.17 (publish acknowledged 2026-05-06; awaiting search-endpoint propagation as of last check) |
-| `_meta` | publish via `mcp-publisher publish` returned `Successfully published`; search endpoint may lag for some minutes after publish |
-| Install instructions | npx command and `TALONIC_API_KEY` env var, both correct |
-| History note | between 0.1.6 and 0.1.17 the auto-pipeline did not chain into `mcp-publisher`, so 0.1.7 through 0.1.16 were never pushed to the registry. 0.1.17 is the first registry push since the original 0.1.6 submission. Earlier STATUS entries that claimed 0.1.12 was on the registry were aspirational and have been corrected here. |
-| Standing follow-up | wire `mcp-publisher publish` into the GitHub Actions publish workflow so future versions land on the registry automatically; requires storing an `MCP_REGISTRY_TOKEN` secret. Owner: us. |
+| Item                 | State                                                                                                                                                                                                                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Listing URL          | `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                 |
+| Listed name          | `io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                                                                              |
+| Listed version       | 0.1.17 (publish acknowledged 2026-05-06; awaiting search-endpoint propagation as of last check)                                                                                                                                                                                                                                 |
+| `_meta`              | publish via `mcp-publisher publish` returned `Successfully published`; search endpoint may lag for some minutes after publish                                                                                                                                                                                                   |
+| Install instructions | npx command and `TALONIC_API_KEY` env var, both correct                                                                                                                                                                                                                                                                         |
+| History note         | between 0.1.6 and 0.1.17 the auto-pipeline did not chain into `mcp-publisher`, so 0.1.7 through 0.1.16 were never pushed to the registry. 0.1.17 is the first registry push since the original 0.1.6 submission. Earlier STATUS entries that claimed 0.1.12 was on the registry were aspirational and have been corrected here. |
+| Standing follow-up   | wire `mcp-publisher publish` into the GitHub Actions publish workflow so future versions land on the registry automatically; requires storing an `MCP_REGISTRY_TOKEN` secret. Owner: us.                                                                                                                                        |
 
 Standing maintenance task: the auto-bump pipeline that publishes new versions to npm does not currently chain into `mcp-publisher publish`. Whoever cuts a release should run `mcp-publisher publish` from the talonic-mcp repo afterwards (or wire it into CI). Without that, the registry will lag npm.
 
@@ -98,26 +98,26 @@ Standing maintenance task: the auto-bump pipeline that publishes new versions to
 
 Hosted MCP at `https://mcp.talonic.com`:
 
-| Endpoint | Test | Result |
-|---|---|---|
-| `GET /health` | curl | 200, `{"status":"ok","server":"talonic","version":"0.1.12"}` |
-| `GET /` | curl | 200, service discovery JSON (mcp_endpoint, health_endpoint, auth, docs) |
-| `POST /mcp` (Bearer header) | initialize handshake | 200, valid Mcp-Session-Id, serverInfo `talonic 0.1.12` |
-| `POST /mcp?apiKey=...` | initialize handshake | 200, equivalent shape |
-| `tools/list` | 8 tools advertised | all 8 present with STATUS: stable |
+| Endpoint                    | Test                 | Result                                                                  |
+| --------------------------- | -------------------- | ----------------------------------------------------------------------- |
+| `GET /health`               | curl                 | 200, `{"status":"ok","server":"talonic","version":"0.1.12"}`            |
+| `GET /`                     | curl                 | 200, service discovery JSON (mcp_endpoint, health_endpoint, auth, docs) |
+| `POST /mcp` (Bearer header) | initialize handshake | 200, valid Mcp-Session-Id, serverInfo `talonic 0.1.12`                  |
+| `POST /mcp?apiKey=...`      | initialize handshake | 200, equivalent shape                                                   |
+| `tools/list`                | 8 tools advertised   | all 8 present with STATUS: stable                                       |
 
 All 8 MCP tools, called through the hosted endpoint with a real `tlnc_` key. Updated post engineering fixes:
 
-| Tool | Result | Notes |
-|---|---|---|
-| `talonic_list_schemas` | verified | pagination fix landed; all 10 schemas returned correctly (was 2 of 7 before fix) |
-| `talonic_search` | verified | tokenization fix landed; `_`, `-`, ` ` equivalent; `filterable` boolean now on fields and field matches |
-| `talonic_filter` | verified | discoverability fixes landed; informative errors when field is unfilterable; agents reliably check `filterable: true` before calling filter |
-| `talonic_extract` | verified for `file_url` and `document_id`; **truncated for `file_data` in Claude.ai** | UUID and SCH-XXXXXXXX both accepted on `schema_id`; MCP-layer schema validation guard active; Claude.ai's tool-call argument size cap truncates base64 file_data before it reaches the MCP server (Claude.ai platform limit, not a server bug); local-stdio installs unaffected (see follow-ups). Now surfaces per-call `cost` parsed from `X-Talonic-Cost-*` response headers. |
-| `talonic_get_document` | verified | UUID, filename with extension, filename without extension, and natural-language all work |
-| `talonic_to_markdown` | verified | UUID and chained search-to-markdown via filename or natural language all work. Surfaces `cost` on file paths (extract step ran), `null` on the `document_id` path. |
-| `talonic_save_schema` | verified | direct save, iterative design with confirmation, save-and-verify-via-list, and avoid-duplicate (defensive) flows all work |
-| `talonic_get_balance` | shipped 2026-05-07 | New tool wrapping `GET /v1/credits/balance`. Returns balance_credits, balance_eur, burn_rate_30d_credits, projected_runway_days, tier, tier_resets_at. |
+| Tool                   | Result                                                                                | Notes                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `talonic_list_schemas` | verified                                                                              | pagination fix landed; all 10 schemas returned correctly (was 2 of 7 before fix)                                                                                                                                                                                                                                                                                                |
+| `talonic_search`       | verified                                                                              | tokenization fix landed; `_`, `-`, ` ` equivalent; `filterable` boolean now on fields and field matches                                                                                                                                                                                                                                                                         |
+| `talonic_filter`       | verified                                                                              | discoverability fixes landed; informative errors when field is unfilterable; agents reliably check `filterable: true` before calling filter                                                                                                                                                                                                                                     |
+| `talonic_extract`      | verified for `file_url` and `document_id`; **truncated for `file_data` in Claude.ai** | UUID and SCH-XXXXXXXX both accepted on `schema_id`; MCP-layer schema validation guard active; Claude.ai's tool-call argument size cap truncates base64 file_data before it reaches the MCP server (Claude.ai platform limit, not a server bug); local-stdio installs unaffected (see follow-ups). Now surfaces per-call `cost` parsed from `X-Talonic-Cost-*` response headers. |
+| `talonic_get_document` | verified                                                                              | UUID, filename with extension, filename without extension, and natural-language all work                                                                                                                                                                                                                                                                                        |
+| `talonic_to_markdown`  | verified                                                                              | UUID and chained search-to-markdown via filename or natural language all work. Surfaces `cost` on file paths (extract step ran), `null` on the `document_id` path.                                                                                                                                                                                                              |
+| `talonic_save_schema`  | verified                                                                              | direct save, iterative design with confirmation, save-and-verify-via-list, and avoid-duplicate (defensive) flows all work                                                                                                                                                                                                                                                       |
+| `talonic_get_balance`  | shipped 2026-05-07                                                                    | New tool wrapping `GET /v1/credits/balance`. Returns balance_credits, balance_eur, burn_rate_30d_credits, projected_runway_days, tier, tier_resets_at.                                                                                                                                                                                                                          |
 
 ## Claude.ai connector test (live, with real key)
 
@@ -128,16 +128,19 @@ Once added, the connector loads all 8 tools with their STATUS: stable descriptio
 ### Per-tool test results
 
 **Test 1: `talonic_list_schemas` via "List all the schemas I have in my Talonic workspace"**
+
 - Tool called correctly. Raw response shows `pagination.total: 7, has_more: false, data: [2 items]`.
 - **Bug confirmed:** silent truncation. The dashboard at `app.talonic.com/schemas` shows all 7 schemas; the API only returns 2 in `data[]`.
 - Claude itself flagged the discrepancy in Test 2 when search returned a schema (`Invoice to CSV`) that wasn't in Test 1's list.
 
 **Test 2: `talonic_search` via "Search my Talonic workspace for invoice documents"**
+
 - Tool called with `query: "invoice"`. Returned 10 documents, related fields, sources, schemas.
 - **Bug observation:** `fieldMatches[].resolvedFieldId` for filename matches returns the corresponding document UUIDs, not field UUIDs.
 - Claude correctly cross-referenced and noted the missing schema from Test 1.
 
 **Test 3: `talonic_filter` via "Show me three invoices with totals over 100 EUR"**
+
 - Three sub-issues uncovered:
   1. `field: "invoice_total"` (canonical name from search results) → `VALIDATION_ERROR: No field matches name`. The schema-defined field has `documentCount: 0` so it isn't in the registry.
   2. `field: "filename"` and `field: "Invoice Total"` → same validation error. Filename is a document property, not a registry field.
@@ -146,6 +149,7 @@ Once added, the connector loads all 8 tools with their STATUS: stable descriptio
 - Net: filter is plumbing-correct but discoverability and resolution logic make it unusable in real agent flows without the user manually providing field UUIDs.
 
 **Test 4: `talonic_get_document` via four input variants**
+
 - Variant A: explicit UUID. Single tool call, full metadata returned. **Pass.**
 - Variant B: filename with extension (`test_invoice.pdf`). Claude searched, picked the doc_id, called get_document. Two tool calls. **Pass.**
 - Variant C: filename without extension (`test_invoice`). Same flow as B. **Pass.**
@@ -208,7 +212,7 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 ### Active workstream
 
-**OAuth 2.1 client implementation on `mcp.talonic.com`.** Engineering shipped the OAuth 2.1 authorization server on `api.talonic.com` 2026-05-06 with dual-auth on the API (accepts both `tlnc_` keys and OAuth JWTs through the same guard). MCP-side work outstanding: expose `/.well-known/oauth-protected-resource` (or `WWW-Authenticate` on 401), extract bearer token from the `Authorization` header on each request, forward it to the Talonic SDK per-call, and keep env-var `TALONIC_API_KEY` working as the fallback for local-stdio installs. Seven clarifying questions sent to engineering before scoping (resource-server vs OAuth-client framing, `aud` claim, missing `schemas:write` scope, well-known endpoint location, token validation strategy, refresh handling, `WEB_URL`). Unblocks Anthropic Connectors Directory submission once shipped.
+(none — OAuth 2.1 connector flow shipped end-to-end 2026-05-08; see "Resolved 2026-05-08: OAuth connector flow" below.)
 
 ### Highest-priority unresolved
 
@@ -241,6 +245,39 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 12. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority.
 13. **Other directory submissions**: Smithery, Cursor, Cline, Continue, mcp.so, Cowork plugins.
+
+### Resolved 2026-05-08: OAuth connector flow
+
+End-to-end OAuth 2.1 install path live for the Claude.ai connector. Both authenticated and unauthenticated user paths verified.
+
+**API side (engineering):**
+
+- OAuth 2.1 authorization server on `api.talonic.com` (PKCE + dynamic client registration + revocation). Migration `129-oauth-server.ts` creates the three persistence tables (`oauth_clients`, `oauth_authorization_codes`, `oauth_refresh_tokens`).
+- Dual-auth guard on `/v1/`: accepts both `tlnc_` keys and OAuth JWTs through the same `PublicApiKeyGuard`, with HS256 algorithm allowlist on the OAuth path.
+- Block 1 fix: `tryExtractUser` in `oauth-server.controller.ts` does soft JWT extraction from `?token=` query, `Authorization` header, or form body. Both `GET /oauth/authorize` and `POST /oauth/authorize/consent` use it. Consent POST is `@Public()` so the browser form submit works without an `Authorization` header. Token threaded as a hidden HTML form field (escaped via `escapeHtml`) so it survives the consent round-trip.
+- Block 2 fix (two parts): dashboard `/login/page.tsx` reads `return_to` from `searchParams`, validates it via `isValidOAuthReturnTo` (strict origin + pathname match against `NEXT_PUBLIC_API_URL`), persists in `sessionStorage`. `/auth/callback/page.tsx` reads `oauth_return_to` after SSO completes and redirects to the API authorize endpoint with the dashboard JWT appended as `?token=`. The post-login redirect path now uses `NEXT_PUBLIC_API_URL` as the base URL (was `window.location.origin`, which sent already-authenticated users to `app.talonic.com/oauth/authorize` and 404'd; fix shipped 2026-05-08).
+- `iss` and `aud` claims added to issued JWTs (both set to `resolveApiUrl()`).
+- `SCOPE_TO_LEGACY` mapping documented as intentional v1 coarseness with v2 plan note.
+- Production `WEB_URL=https://app.talonic.com` env var set on Railway API service (initial deploy missed this; fixed post-launch).
+
+**MCP side (we own; shipped earlier in the cycle as PR1 + PR2 in 0.1.18 / 0.1.19):**
+
+- `/.well-known/oauth-protected-resource` endpoint advertising `api.talonic.com` as `authorization_servers` and the three scopes the connector exercises (`extract:write`, `documents:read`, `schemas:read`).
+- `WWW-Authenticate: Bearer resource_metadata="..."` header on 401 responses.
+- Per-request bearer-token extraction with per-session token holder; SDK rebuilds when the token changes (handles 1-hour OAuth access-token rotation transparently).
+- Forward-and-trust validation strategy at the MCP layer; the API's dual-auth guard does the actual JWT verification.
+
+**Verified live 2026-05-08:**
+
+- Connector install with no API key in URL → consent screen renders → SSO completes → consent submitted → Claude.ai exchanges code for OAuth token → all 8 tools available in conversation.
+- Tool calls succeed: `talonic_list_schemas`, `talonic_get_balance`, `talonic_search` all return expected results.
+- Authenticated-user reconnect path (the post-Block-2-second-half-fix scenario) works after the dashboard redeploy.
+
+**Soft concerns filed for v2 (non-blocking):**
+
+- `tryExtractUser` does not pass `algorithms: ['HS256']` to `jwtService.verify`. The `alg: none` attack is blocked by default in modern `jsonwebtoken` and we don't expose RSA public keys, so the practical risk is zero, but the inconsistency with `PublicApiKeyGuard` (which does allowlist) is worth aligning.
+- `tryExtractUser` does not filter `payload.grant_type === 'oauth2'`. A stolen OAuth access token could be used to authorize new clients on the AS itself. Bounded impact (1h token, PKCE on consumer side, consent screen still confirms) but worth a one-line filter.
+- `aud` claim is set to the issuer (`api.talonic.com`), not per-resource (`mcp.talonic.com`). Acceptable because we use forward-and-trust at the MCP layer; should revisit if we ever want strict audience validation per resource server.
 
 ### Resolved 2026-05-07: MCP/SDK code group
 

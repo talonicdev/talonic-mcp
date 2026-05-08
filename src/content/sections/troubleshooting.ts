@@ -98,7 +98,17 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "If every tool call returns an authentication error, the API key is either missing, malformed, or revoked. Verify the key starts with `tlnc_` and has not been revoked in the Talonic dashboard. For the local npx option, check that the `env` block in your config has the correct variable name (`TALONIC_API_KEY`, not `TALONIC_KEY` or `API_KEY`). For the hosted server, verify the `Authorization` header is formatted as `Bearer tlnc_...` with a space after `Bearer`.",
+        text: "If every tool call returns an authentication error, the credential the server is using is missing, malformed, or revoked. For the local npx option, check that the `env` block in your config has the correct variable name (`TALONIC_API_KEY`, not `TALONIC_KEY` or `API_KEY`) and that the value starts with `tlnc_`. For the hosted server with a custom-header client, verify the `Authorization` header is formatted as `Bearer tlnc_...` with a space after `Bearer`. For the Claude.ai connector OAuth flow, see the OAuth-specific entry below.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "oauth-flow",
+        text: "Claude.ai connector: stuck on sign-in or callback",
+      },
+      {
+        type: "paragraph",
+        text: "The Claude.ai custom-connector flow uses OAuth 2.1 with PKCE against `app.talonic.com`. If the sign-in window opens but does not return to Claude.ai, or the connector reports `disconnected` after authorising, walk through these checks. Make sure you are signed in to the same Talonic account in `app.talonic.com` that owns the workspace you want to use. Allow third-party cookies for `app.talonic.com` and `claude.ai`; some browsers block the post-consent redirect otherwise. After granting consent, you should be redirected back to Claude.ai automatically; if the tab stays on `app.talonic.com`, click the Talonic logo or close the tab and reopen the connector to retry. If you have multiple Talonic accounts, sign out of `app.talonic.com` first, then start the connector flow again so the right account is used. As a last resort, remove the connector in Claude.ai and add it again with `https://mcp.talonic.com/mcp` as the URL.",
       },
       {
         type: "heading",

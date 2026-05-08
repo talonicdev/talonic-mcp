@@ -482,7 +482,12 @@ export const sections: RawSection[] = [
         type: "paragraph",
         text: "The following operators are available for filter conditions: `eq` (equals), `neq` (not equals), `gt` (greater than), `gte` (greater than or equal), `lt` (less than), `lte` (less than or equal), `between` (range, requires a two-element array as value), `contains` (substring match), `starts_with`, `ends_with`, and `is_empty` (checks for null or empty values). Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema — using them on string fields silently returns zero results.",
       },
-      { type: "heading", level: 3, id: "filter-combined-example", text: "Example: combined search and filter" },
+      {
+        type: "heading",
+        level: 3,
+        id: "filter-combined-example",
+        text: "Example: combined search and filter",
+      },
       {
         type: "code",
         language: "json",
@@ -610,7 +615,12 @@ export const sections: RawSection[] = [
   }
 }`,
       },
-      { type: "heading", level: 3, id: "get-document-workflow", text: "Example: human-in-the-loop verification" },
+      {
+        type: "heading",
+        level: 3,
+        id: "get-document-workflow",
+        text: "Example: human-in-the-loop verification",
+      },
       {
         type: "code",
         language: "json",
@@ -750,7 +760,12 @@ Musterstraße 42, 10115 Berlin
 Due date: 15 June 2026
 Payment terms: Net 30`,
       },
-      { type: "heading", level: 3, id: "to-markdown-url-example", text: "Example: convert from URL" },
+      {
+        type: "heading",
+        level: 3,
+        id: "to-markdown-url-example",
+        text: "Example: convert from URL",
+      },
       {
         type: "code",
         language: "json",
@@ -893,7 +908,12 @@ Payment terms: Net 30`,
   ]
 }`,
       },
-      { type: "heading", level: 3, id: "list-schemas-workflow", text: "Example: check for duplicates before saving" },
+      {
+        type: "heading",
+        level: 3,
+        id: "list-schemas-workflow",
+        text: "Example: check for duplicates before saving",
+      },
       {
         type: "code",
         language: "json",
@@ -1062,7 +1082,12 @@ Payment terms: Net 30`,
   "field_count": 5
 }`,
       },
-      { type: "heading", level: 3, id: "save-schema-workflow", text: "Example: iterate inline then save" },
+      {
+        type: "heading",
+        level: 3,
+        id: "save-schema-workflow",
+        text: "Example: iterate inline then save",
+      },
       {
         type: "code",
         language: "json",
@@ -1242,7 +1267,12 @@ Payment terms: Net 30`,
   "tier_resets_at": "2026-06-01T00:00:00.000Z"
 }`,
       },
-      { type: "heading", level: 3, id: "balance-budget-check", text: "Example: budget check before batch extraction" },
+      {
+        type: "heading",
+        level: 3,
+        id: "balance-budget-check",
+        text: "Example: budget check before batch extraction",
+      },
       {
         type: "code",
         language: "json",

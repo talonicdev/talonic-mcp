@@ -7,6 +7,12 @@ Official Talonic MCP server. Lets AI agents extract structured, schema-validated
 
 > **Status:** Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Eight tools and two resources live: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, plus the `talonic://schemas` and `talonic://webhooks/reference` resources. Verified end-to-end against production.
 
+## Available on
+
+- [**Official MCP Registry**](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp) as `io.github.talonicdev/talonic-mcp`.
+- [**mcp.so**](https://mcp.so/server/talonic-mcp) directory.
+- [**Glama**](https://glama.ai/mcp/servers/talonicdev/talonic-mcp) MCP server catalogue.
+
 ## Why an agent should use this
 
 When an agent needs to pull structured data out of a PDF, scan, image, or messy document, the usual approach is raw OCR plus an LLM call. Results are unreliable; tables get mangled, dates get misread, totals drift.
@@ -21,6 +27,8 @@ Each user runs against their own isolated Talonic workspace. Your documents and 
 2. Settings → API Keys → Create New Key.
 3. Copy the `tlnc_` value into your MCP client config (snippets below).
 
+> **When you do not need an API key.** If you install the connector on Claude.ai using the [OAuth flow](#claudeai-hosted-mcp), you do not need to copy an API key anywhere. Claude.ai handles authentication via PKCE and stores its own short-lived access tokens. The API key is still required for **local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork) and for the API-key URL fallback on Claude.ai.
+
 ## Install
 
 The package is on npm. Every MCP client launches it the same way: a one-line `npx` invocation with your API key in the `env` block. No clone, no build.
@@ -29,7 +37,7 @@ The package is on npm. Every MCP client launches it the same way: a one-line `np
 {
   "command": "npx",
   "args": ["-y", "@talonic/mcp@latest"],
-  "env": { "TALONIC_API_KEY": "tlnc_..." }
+  "env": { "TALONIC_API_KEY": "tlnc_..." },
 }
 ```
 
@@ -106,16 +114,33 @@ Open Cowork settings → MCP Servers → Add. Use the same shape as Claude Deskt
 
 ### Claude.ai (hosted MCP)
 
-Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local stdio process. We host one at `mcp.talonic.com` so Claude.ai users can install Talonic without running anything locally:
+Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local stdio process. We host one at `mcp.talonic.com`. Two install paths are supported. **OAuth is the recommended path** (no API key needed in the connector config); the API-key URL is kept as an alternative for users who prefer a static credential or cannot complete the consent flow.
+
+#### Recommended: OAuth (no API key in config)
 
 1. Open https://claude.ai/settings/connectors.
 2. Click "Add custom connector".
-3. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_your_key_here`
-4. Click Add. The 8 tools appear.
+3. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
+4. Click **Connect**.
+5. You are redirected to Talonic. Sign in with Google, Microsoft, or your company SSO.
+6. Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, `schemas:read`. Pick a workspace if your account has multiple.
+7. You are returned to Claude.ai. The connector is live and all eight tools appear.
 
-Claude.ai's UI does not currently accept a custom `Authorization` header on connectors, so the API key is passed as a `?apiKey=...` query parameter. Less secure than the Bearer header pattern (the key is persisted in the connector store and may appear in Anthropic-side logs), so rotate the key in your Talonic dashboard if you remove the connector. IDE-style clients (Cursor, Cline, Continue) that accept custom headers should use the Bearer header instead.
+The OAuth flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a short-lived access token (1 hour) and a 30-day refresh token; refresh happens automatically as long as you keep the connector installed. No API key ever appears in the Claude.ai connector config or in any URL the browser navigates to. To revoke access, remove the connector in Claude.ai or revoke the OAuth client from your Talonic dashboard.
 
-**Caveat:** drag-and-drop file uploads through `talonic_extract` currently stall on the hosted endpoint. Use `file_url` (a publicly reachable URL) or `document_id` (an already-uploaded document) for now. The local stdio install is unaffected.
+#### Alternative: API key in URL
+
+If you can't complete the OAuth flow (firewall constraints, account isolation, automation scripts), or prefer a static credential, you can still install the connector with the API key as a query parameter:
+
+1. Get a `tlnc_` API key as described above.
+2. URL: `https://mcp.talonic.com/mcp?apiKey=tlnc_your_key_here`
+3. Click Add.
+
+Trade-offs versus OAuth: the key is persisted in Claude.ai's connector store and may appear in Anthropic-side logs and request URLs. Rotate the key in your Talonic dashboard if you remove or share the connector. The hosted MCP server forwards the key to the Talonic API exactly as it would forward an OAuth bearer; tool surface and behaviour are identical.
+
+#### File uploads in Claude.ai
+
+Drag-and-drop file uploads via `talonic_extract` and `talonic_to_markdown` are subject to a **Claude.ai connector argument-size limit** (effectively under ~1KB per parameter), which truncates `file_data` before it reaches the MCP server. This is a Claude.ai platform limit, not a Talonic bug. Use `file_url` (publicly reachable URL) or `document_id` (file already uploaded at app.talonic.com) for files larger than a trivial test. See [Drag-and-drop in chat clients](#drag-and-drop-in-chat-clients) for the full diagnosis. Local-stdio installs are unaffected.
 
 ## Tool reference
 
@@ -131,6 +156,7 @@ Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT U
 - **`talonic_get_balance`**, status: stable. Read the workspace credit balance, EUR value, 30-day burn rate, projected runway, tier, and next-tier-reset timestamp. Use it for budget-aware decisions before kicking off large batches.
 
 Two resources are also exposed for clients that browse them separately (Claude Desktop and Cowork render these in the UI):
+
 - `talonic://schemas`: saved-schemas list.
 - `talonic://webhooks/reference`: webhook event types, delivery behavior, signature verification algorithms, and retry policies. Use this when an agent needs to set up or troubleshoot a webhook integration without leaving the MCP context.
 
@@ -139,32 +165,37 @@ Two resources are also exposed for clients that browse them separately (Claude D
 Pick the right tool before you call. The wrong tool returns the wrong data, costs unnecessary credits, and slows the conversation.
 
 **User has a file (or just dropped one in)**
+
 - They want specific fields (vendor, total, dates, parties): `talonic_extract` with `schema` or `schema_id`.
 - They want full text content for summarisation, translation, or analysis: `talonic_to_markdown`.
 - They want both: `talonic_extract` with `include_markdown: true`, one upload.
 
 **User is asking about existing documents**
+
 - Conceptual or fuzzy ("any docs about indemnification"): `talonic_search`.
 - Value-based on extracted fields ("invoices over 1000 EUR"): `talonic_filter`.
 - They reference a `document_id`: `talonic_get_document` for metadata, `talonic_to_markdown` for text, `talonic_extract` to re-extract with a new schema. Re-using a `document_id` is cheaper than re-uploading.
 
 **User is working with schemas**
+
 - One-off extraction: pass schema inline.
 - Same schema across many documents: `talonic_save_schema` once, then `talonic_extract` with `schema_id`.
 - Discover existing schemas first: `talonic_list_schemas`.
 - Iterate inline before saving. Avoid clutter.
 
 **Confidence and human review**
+
 - `confidence.overall` below ~0.7: tell the user the extraction may be unreliable, surface low-confidence fields, confirm before any downstream action.
 - Per-field confidence below ~0.7: mark as "needs review", do not use silently in calculations or external API calls.
 - Critical fields (amounts, legal terms, names, dates): confirm with user before acting, even at high confidence.
 - Per-field source provenance (page, section, source text snippet) is available by passing `include_provenance: true` on `talonic_extract`. Use it when the user wants to cite the source of a value or verify against the original document.
 
 **When not to call Talonic**
+
 - General-knowledge or chat questions. Do not pre-emptively extract.
 - The data is already in conversation history from a previous tool call. Re-use it.
 - The user wants to discuss or revise an extraction you already produced. Reason over the previous result instead of re-extracting.
-- Cost, EUR price, and remaining balance are not surfaced in v0.1 tool responses. If the user asks about cost or credit balance, point them to https://app.talonic.com.
+- For cost or balance questions, call `talonic_get_balance` to read the workspace's credit balance, EUR value, 30-day burn rate, projected runway, tier, and next reset. Per-call cost is also surfaced on every `talonic_extract` and `talonic_to_markdown` response under the `cost` field.
 
 ## Drag-and-drop in chat clients
 
@@ -204,10 +235,10 @@ Each tool call is one HTTP request to the Talonic API, using your API key. The s
 
 Set via the `env` block in your MCP client config:
 
-| Variable | Required | Description |
-|---|---|---|
-| `TALONIC_API_KEY` | yes | Your Talonic API key. Starts with `tlnc_`. |
-| `TALONIC_BASE_URL` | no | Override the API base URL. Default: `https://api.talonic.com`. |
+| Variable           | Required | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `TALONIC_API_KEY`  | yes      | Your Talonic API key. Starts with `tlnc_`.                     |
+| `TALONIC_BASE_URL` | no       | Override the API base URL. Default: `https://api.talonic.com`. |
 
 ## Troubleshooting
 
@@ -250,7 +281,7 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
 - **Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.
 - **`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.
 - **Drag-and-drop file uploads in Claude.ai are capped by Claude.ai's tool-call argument size limit.** A base64-encoded real PDF (typically hundreds of KB) cannot fit through Claude.ai's connector tool-call pipe (which truncates parameters under ~1KB). The Talonic API receives a few hundred bytes, registers an empty document, and returns a response with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug. Workaround for Claude.ai users: use `file_url` (publicly reachable URL), `document_id` (file uploaded at app.talonic.com), or use a local-stdio install (Claude Desktop, Cursor, Cline, Continue, Cowork). The architectural fix is pre-signed upload URLs (engineering follow-up).
-- **Cost, EUR price, and remaining balance are not surfaced.** The API does not return them in tool responses yet. Credit balance must be checked in the Talonic dashboard.
+- **Per-call cost surfacing is extract-only.** `talonic_extract` and `talonic_to_markdown` (when an extract step runs) return a `cost` block (`costCredits`, `costEur`, `balanceCredits`, `cellsResolvedRegistry`, `cellsResolvedAi`) parsed from the API's `X-Talonic-Cost-*` response headers. Read endpoints (`talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`) do not consume credits and therefore do not carry a `cost` block; `talonic_to_markdown` on the `document_id` path returns `cost: null` because no extract step ran. To read the workspace credit balance directly at any time, call `talonic_get_balance`.
 
 ## Upgrading from 0.1.0 / 0.1.1 / 0.1.2
 
