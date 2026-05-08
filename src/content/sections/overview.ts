@@ -30,6 +30,48 @@ export const sections: RawSection[] = [
         text: "Installation takes under a minute: paste a JSON snippet into your MCP client config, supply a `tlnc_` API key, and restart the client. The hosted option at `mcp.talonic.com` requires zero local dependencies — no Node.js, no npm, no build step. The local `npx` option is equally simple and runs on any machine with Node.js 18 or later.",
       },
       {
+        type: "paragraph",
+        text: "A typical agent conversation with Talonic starts when the user drops a document into the chat or asks the agent to process a file from a URL. The agent calls `talonic_extract` with a schema describing the fields to pull out, and receives structured JSON within seconds. From there, the agent can present the data, answer follow-up questions, or feed the extracted values into downstream workflows — all without the user leaving the conversation.",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Quick-start: extract an invoice in one tool call",
+        code: `{
+  "file_url": "https://example.com/invoice.pdf",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "vendor": { "type": "string" },
+      "total": { "type": "number" },
+      "due_date": { "type": "string", "format": "date" }
+    },
+    "required": ["vendor", "total"]
+  }
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Response: structured data with confidence",
+        code: `{
+  "status": "complete",
+  "data": {
+    "vendor": "Acme Corp",
+    "total": 2450.00,
+    "due_date": "2026-07-01"
+  },
+  "confidence": {
+    "overall": 0.96,
+    "fields": { "vendor": 0.98, "total": 0.99, "due_date": 0.94 }
+  }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "The MCP server supports every major AI coding and chat client: Claude Desktop, Cursor, Cline, Continue, and Cowork. Each client has its own config format, but the setup pattern is the same — add a JSON entry pointing to the Talonic server (hosted URL or local npx command), supply your API key, and restart the client. The server then registers its tools and resources, which the agent can discover and invoke automatically during conversations.",
+      },
+      {
         type: "callout",
         variant: "info",
         text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub.",
@@ -55,6 +97,16 @@ export const sections: RawSection[] = [
         question: "Do I need to install anything to use the Talonic MCP server?",
         answer:
           "Not necessarily. The hosted server at mcp.talonic.com requires zero local installation — just a URL and API key in your MCP client config. Alternatively, the local npx option requires Node.js 18+.",
+      },
+      {
+        question: "What document types does the Talonic MCP server support?",
+        answer:
+          "The server supports PDF, PNG, JPG, TIFF, DOCX, XLSX, and other common document formats. Documents can be invoices, contracts, receipts, forms, certificates, or any structured or semi-structured document. The extraction pipeline handles OCR, layout analysis, and field extraction server-side.",
+      },
+      {
+        question: "How many tools does the Talonic MCP server expose?",
+        answer:
+          "Eight tools and two resources. The tools are talonic_extract, talonic_search, talonic_filter, talonic_get_document, talonic_to_markdown, talonic_list_schemas, talonic_save_schema, and talonic_get_balance. The resources are talonic://schemas and talonic://webhooks/reference.",
       },
     ],
     mentions: ["MCP", "Model Context Protocol", "AI agents", "document extraction"],
@@ -84,6 +136,40 @@ export const sections: RawSection[] = [
         text: "Because each extraction returns **per-field confidence scores**, agents can make informed decisions about when to trust extracted values and when to escalate to the user for review. This is especially valuable for high-stakes fields like financial amounts, legal terms, and dates where silent errors are costly.",
       },
       {
+        type: "paragraph",
+        text: "Integration effort is minimal compared to building a custom extraction pipeline. A raw OCR + LLM approach requires choosing an OCR library, writing prompts for each document type, parsing unstructured LLM output into typed fields, implementing confidence estimation, and handling edge cases like rotated pages, multi-column layouts, and mixed languages. The Talonic MCP server replaces all of that with a single tool call that returns clean, validated JSON.",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Agent conversation: comparing raw OCR vs Talonic",
+        code: `// Without Talonic — agent must chain multiple steps:
+// 1. OCR the PDF → raw text with layout errors
+// 2. Prompt LLM to extract fields → unstructured output
+// 3. Parse LLM output → fragile regex/JSON parsing
+// 4. Validate types → manual type coercion
+// 5. Estimate confidence → no signal available
+
+// With Talonic — single tool call:
+{
+  "file_url": "https://example.com/contract.pdf",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "parties": { "type": "array", "items": { "type": "string" } },
+      "effective_date": { "type": "string", "format": "date" },
+      "term_months": { "type": "integer" },
+      "governing_law": { "type": "string" }
+    }
+  }
+}
+// → Returns validated JSON + confidence scores in ~3 seconds`,
+      },
+      {
+        type: "paragraph",
+        text: "The workspace model is another key advantage. Every document processed through the MCP server is stored in your Talonic workspace with a stable `document_id`. This means an agent can extract an invoice today, and a week later the user can ask 'what was the total on that Meridian invoice?' — the agent searches the workspace, finds the document, and retrieves the previously extracted data without re-uploading or re-processing. This persistent workspace turns the MCP server from a one-shot tool into a long-term document intelligence layer.",
+      },
+      {
         type: "callout",
         variant: "info",
         text: "Every document processed through the MCP server is stored in your Talonic workspace with a stable `document_id`. Subsequent operations — re-extraction with a different schema, markdown retrieval, metadata lookup — reuse that ID without re-uploading the file, saving both time and credits.",
@@ -108,6 +194,16 @@ export const sections: RawSection[] = [
         question: "Can I re-extract a document with a different schema without re-uploading?",
         answer:
           "Yes. Pass the document_id from a previous extraction to talonic_extract with a new schema. The server reuses the already-ingested document, which is faster and costs fewer credits.",
+      },
+      {
+        question: "What confidence scores does Talonic provide?",
+        answer:
+          "Every extraction includes confidence.overall (0 to 1) and confidence.fields with a per-field score. Agents can use these to decide when to trust values automatically and when to escalate to the user for review. Scores above 0.9 are highly reliable; below 0.7 warrants human verification.",
+      },
+      {
+        question: "How does Talonic handle multi-language documents?",
+        answer:
+          "The extraction pipeline auto-detects the document language and returns it in the language_detected field. OCR and field extraction work across Latin, Cyrillic, CJK, and Arabic scripts. No language configuration is needed — the server handles detection and adaptation automatically.",
       },
     ],
     mentions: ["OCR", "schema-validated", "confidence scores", "structured data"],
@@ -274,6 +370,45 @@ export const sections: RawSection[] = [
         text: "The free tier includes 50 extractions per day, which is enough for development and testing. For production workloads or higher volume, upgrade your plan in the Talonic dashboard. All plans share the same API — the key determines your rate limits and quota.",
       },
       {
+        type: "code",
+        language: "json",
+        title: "Local npx config with API key",
+        code: `{
+  "mcpServers": {
+    "talonic": {
+      "command": "npx",
+      "args": ["-y", "@talonic/mcp@latest"],
+      "env": {
+        "TALONIC_API_KEY": "tlnc_your_key_here"
+      }
+    }
+  }
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Hosted config with API key as Bearer token",
+        code: `{
+  "mcpServers": {
+    "talonic": {
+      "url": "https://mcp.talonic.com/mcp",
+      "headers": {
+        "Authorization": "Bearer tlnc_your_key_here"
+      }
+    }
+  }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "After adding your API key to the config, verify the connection by asking your agent to call `talonic_list_schemas`. If the key is valid, the tool returns your saved schemas (or an empty list if you have not saved any yet). If the key is invalid or missing, the server returns a clear authentication error that tells the agent the key needs to be checked. This is the fastest way to confirm your setup is working end-to-end.",
+      },
+      {
+        type: "paragraph",
+        text: "Each API key is scoped to a single workspace. If you work across multiple Talonic workspaces — for example, separate environments for development and production — you will need a different API key for each. You can create multiple keys within the same workspace for different team members or applications, and revoke them independently without affecting other keys.",
+      },
+      {
         type: "callout",
         variant: "warning",
         text: "Never hardcode your `tlnc_` key in source code or share it in screenshots. Use environment variables or your MCP client's config file, which is typically stored in a user-specific directory.",
@@ -298,6 +433,16 @@ export const sections: RawSection[] = [
         question: "What should I do if my API key is compromised?",
         answer:
           "Revoke it immediately in the Talonic dashboard under Settings > API Keys, then generate a new one. Update your MCP client config with the new key and restart the client.",
+      },
+      {
+        question: "Can I use the same API key across multiple MCP clients?",
+        answer:
+          "Yes. The same tlnc_ key works in Claude Desktop, Cursor, Cline, Continue, Cowork, or any other MCP client simultaneously. The key is tied to your workspace, not to a specific client. Rate limits apply per-key across all clients.",
+      },
+      {
+        question: "How do I verify my API key is working?",
+        answer:
+          "After configuring your MCP client, ask the agent to call talonic_list_schemas. A successful response (even an empty list) confirms the key is valid and the server is connected. An authentication error means the key is missing, malformed, or revoked.",
       },
     ],
     mentions: ["API key", "tlnc_", "free tier"],

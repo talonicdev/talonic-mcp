@@ -91,6 +91,52 @@ export const sections: RawSection[] = [
         text: "Some MCP clients cache tool descriptions. Restart the client after a server update.",
       },
       {
+        type: "heading",
+        level: 3,
+        id: "auth-error",
+        text: "Authentication error on every tool call",
+      },
+      {
+        type: "paragraph",
+        text: "If every tool call returns an authentication error, the API key is either missing, malformed, or revoked. Verify the key starts with `tlnc_` and has not been revoked in the Talonic dashboard. For the local npx option, check that the `env` block in your config has the correct variable name (`TALONIC_API_KEY`, not `TALONIC_KEY` or `API_KEY`). For the hosted server, verify the `Authorization` header is formatted as `Bearer tlnc_...` with a space after `Bearer`.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "timeout-errors",
+        text: "Tool calls time out on large documents",
+      },
+      {
+        type: "paragraph",
+        text: "Large documents (20+ pages) may take longer than some MCP clients' default timeout. The Talonic API processes documents up to 100 pages, but extraction time scales with page count. If you experience timeouts, try splitting large documents into smaller sections before uploading. Alternatively, check if your MCP client has a configurable timeout setting — increasing it to 60 seconds should accommodate most documents.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "debug-checklist",
+        text: "Debug checklist",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Step-by-step debug commands",
+        code: `// 1. Verify the MCP server installs and runs:
+// Terminal: npx -y @talonic/mcp@latest --version
+// Expected: prints version number (e.g., 0.1.6)
+
+// 2. Verify your API key is valid:
+// Terminal: curl -H "Authorization: Bearer tlnc_your_key" https://api.talonic.com/v1/schemas
+// Expected: JSON response (even if empty schemas array)
+
+// 3. Validate your config JSON:
+// Paste your config into https://jsonlint.com
+// Common errors: trailing commas, missing quotes, wrong brackets
+
+// 4. Verify client picked up the config:
+// Check the connected servers list in your MCP client
+// If Talonic is missing, the config is not being read`,
+      },
+      {
         type: "callout",
         variant: "info",
         text: "When reporting issues, include the MCP server version (`npx -y @talonic/mcp@latest --version`), your MCP client name and version, and the full error message. This helps diagnose problems faster.",
@@ -116,6 +162,16 @@ export const sections: RawSection[] = [
         question: "How do I debug MCP server connection issues?",
         answer:
           "First verify the server runs standalone: npx -y @talonic/mcp@latest --version. Then check your config JSON is valid, the API key starts with tlnc_, and you have fully restarted your MCP client.",
+      },
+      {
+        question: "Why do all tool calls return authentication errors?",
+        answer:
+          "The API key is missing, malformed, or revoked. Verify the key starts with tlnc_ in your config. For local setups, check the env block uses TALONIC_API_KEY (exact name). For hosted setups, check the Authorization header format is 'Bearer tlnc_...' with a space after Bearer. Regenerate the key in the dashboard if it was revoked.",
+      },
+      {
+        question: "What should I do if large documents time out?",
+        answer:
+          "Documents over 20 pages may exceed some MCP clients' default timeout. Try splitting the document into smaller sections, or increase your MCP client's timeout setting to 60 seconds. The Talonic API supports documents up to 100 pages but processing time scales with page count.",
       },
     ],
     mentions: ["troubleshooting", "API key", "VALIDATION_ERROR"],
@@ -157,6 +213,39 @@ export const sections: RawSection[] = [
         text: "For the `is_not_empty` filter gap, the recommended workaround is to use `is_empty` and invert the logic client-side, or filter against a known value with `eq`, `gt`, or `contains`. This is a server-side issue that will be resolved in a future API version.",
       },
       {
+        type: "heading",
+        level: 3,
+        id: "limitations-workarounds",
+        text: "Workarounds summary",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Quick reference: limitation → workaround",
+        code: `// Schema required on talonic_extract
+// → Always pass schema (JSON Schema) or schema_id
+
+// is_not_empty filter not available
+// → Use is_empty and invert client-side, or filter with eq/contains
+
+// Drag-and-drop stalls on Claude.ai (hosted connector)
+// → Use file_url, document_id, or local stdio install
+
+// Numeric filter on string-typed field returns zero results
+// → Define numeric fields as type "number" in the schema
+
+// Filter on non-filterable field returns VALIDATION_ERROR
+// → Call talonic_search first, use fields where filterable: true`,
+      },
+      {
+        type: "paragraph",
+        text: "When building agent workflows that will run unattended, design for these limitations explicitly. Check that every `talonic_extract` call includes a schema or schema_id. Validate filter field names against `talonic_search` results before constructing conditions. For file uploads in hosted connectors with size limits, prefer `file_url` or `document_id` over `file_data`. These defensive patterns ensure the agent handles edge cases gracefully instead of failing with cryptic errors.",
+      },
+      {
+        type: "paragraph",
+        text: "The Talonic team actively tracks these limitations and publishes fixes in minor version updates. Subscribe to the `@talonic/mcp` npm package changelog or watch the GitHub repository for release notes. Limitations that are resolved in newer versions are removed from this list. If you encounter a limitation not documented here, report it via GitHub issues with the MCP server version and a minimal reproduction case.",
+      },
+      {
         type: "callout",
         variant: "warning",
         text: "Do not rely on schema-less extraction or `is_not_empty` filtering in automated workflows. Both are explicitly disabled in v0.1 and will return errors rather than unreliable results.",
@@ -182,6 +271,16 @@ export const sections: RawSection[] = [
         question: "How do I check my credit balance or costs?",
         answer:
           "Cost information is not surfaced in v0.1 tool responses. Check your credit balance and usage in the Talonic dashboard at app.talonic.com.",
+      },
+      {
+        question: "How do I report a new limitation or bug?",
+        answer:
+          "Open an issue on the @talonic/mcp GitHub repository with the MCP server version (npx -y @talonic/mcp@latest --version), your MCP client name and version, and a minimal reproduction case. Include the full error message if applicable.",
+      },
+      {
+        question: "How do I work around the Claude.ai drag-and-drop limitation?",
+        answer:
+          "Claude.ai's hosted connector truncates large tool-call arguments, which breaks base64 file uploads. Use file_url with a publicly reachable URL, upload the file via the Talonic dashboard and use document_id, or switch to a local stdio install (Claude Desktop, Cursor, Cline) which has no parameter size cap.",
       },
     ],
     mentions: [
@@ -219,6 +318,37 @@ export const sections: RawSection[] = [
         text: "After updating the `args` in your MCP client config, you must fully restart the client application. Simply starting a new conversation is not enough — the MCP server process must be terminated and re-spawned. On Claude Desktop, use Cmd+Q (macOS) or close from the system tray (Windows). On Cursor and VS Code-based clients, reload the window.",
       },
       {
+        type: "heading",
+        level: 3,
+        id: "upgrade-verify",
+        text: "Verify the upgrade",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Check the installed version after upgrading",
+        code: `// In a terminal, verify the latest version installs:
+// npx -y @talonic/mcp@latest --version
+// Expected output: 0.1.6 (or the latest published version)
+
+// In your MCP client, verify tools are available:
+// Ask the agent: "What version of Talonic MCP are you using?"
+// Or call talonic_list_schemas — a successful response
+// confirms the server is running the updated version.`,
+      },
+      {
+        type: "paragraph",
+        text: "When upgrading between minor versions, tool parameters and response shapes remain backward-compatible. New versions may add optional parameters to existing tools or introduce new tools, but they will not remove or change existing parameters. This means your existing agent workflows and saved schemas continue to work without modification after an upgrade.",
+      },
+      {
+        type: "paragraph",
+        text: "If you are running a pinned version and want to check whether a newer version is available, run `npm view @talonic/mcp version` in a terminal. This shows the latest published version on npm without installing it. Compare this against your pinned version to decide whether to upgrade. The changelog in the npm package description summarises what changed between versions.",
+      },
+      {
+        type: "paragraph",
+        text: "For teams with multiple developers using the Talonic MCP server, coordinate upgrades by updating the shared MCP config file or template. If different team members run different versions, tool descriptions and capabilities may vary, leading to inconsistent agent behaviour. Using `@latest` for all team members ensures everyone has the same tools and avoids version-related debugging sessions.",
+      },
+      {
         type: "callout",
         variant: "info",
         text: "If you are using the hosted server at `mcp.talonic.com`, upgrades are automatic. You do not need to change any configuration — the hosted server always runs the latest version.",
@@ -243,6 +373,16 @@ export const sections: RawSection[] = [
         question: "Should I pin to a specific version or use @latest?",
         answer:
           "Use @latest for development and most use cases — it picks up fixes automatically. Pin to a specific version (e.g., @0.1.6) only if you need strict version stability in production workflows.",
+      },
+      {
+        question: "Are upgrades backward-compatible?",
+        answer:
+          "Yes. Minor version upgrades maintain backward compatibility — existing tool parameters and response shapes are preserved. New versions may add optional parameters or new tools, but will not break existing workflows, schemas, or agent integrations.",
+      },
+      {
+        question: "How do I check if a newer version is available?",
+        answer:
+          "Run npm view @talonic/mcp version in a terminal to see the latest published version on npm. Compare against your pinned version or run npx -y @talonic/mcp@latest --version to see what @latest resolves to.",
       },
     ],
     mentions: ["upgrade", "silent-bin bug", "0.1.3", "@latest"],

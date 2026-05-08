@@ -264,6 +264,14 @@ export const sections: RawSection[] = [
         ],
       },
       {
+        type: "paragraph",
+        text: "A common agent pattern is using `talonic_search` as a first step to orient within a workspace, then following up with more specific tools. For example, an agent might search for 'Acme contracts' to discover relevant documents, note the canonical field names in the response, and then use `talonic_filter` with those field names to narrow down to contracts expiring within a specific date range. This search-then-filter pattern is both efficient and reliable.",
+      },
+      {
+        type: "paragraph",
+        text: "Search results are scoped to the authenticated workspace. The query runs against all documents, extracted field values, schema definitions, and source metadata within that workspace. There is no cross-workspace search — each API key sees only its own data. The `limit` parameter controls how many results are returned per entity type (documents, fields, schemas, sources), with a default of 5. Increase the limit when the user needs a broader view of matching content.",
+      },
+      {
         type: "callout",
         variant: "info",
         text: "Search results include canonical field names in `fields[].canonicalName`. These names can be used directly in `talonic_filter` conditions, making search a good first step before building precise filters.",
@@ -306,6 +314,38 @@ export const sections: RawSection[] = [
   ]
 }`,
       },
+      { type: "heading", level: 3, id: "search-then-filter", text: "Example: search then filter" },
+      {
+        type: "code",
+        language: "json",
+        title: "Step 1: discover field names with search",
+        code: `// Agent calls talonic_search:
+{
+  "query": "vendor invoices total amount",
+  "limit": 5
+}
+
+// Response includes canonical field names:
+{
+  "fields": [
+    { "canonicalName": "vendor.name", "type": "string", "filterable": true },
+    { "canonicalName": "invoice.total_eur", "type": "number", "filterable": true },
+    { "canonicalName": "invoice.due_date", "type": "string", "filterable": true }
+  ]
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Step 2: use discovered field names in talonic_filter",
+        code: `// Agent uses canonical names from search to build a filter:
+{
+  "conditions": [
+    { "field": "invoice.total_eur", "operator": "gt", "value": 500 }
+  ],
+  "sort": { "field": "invoice.total_eur", "direction": "desc" }
+}`,
+      },
     ],
     related: [
       { label: "talonic_filter", slug: "talonic-filter" },
@@ -327,6 +367,16 @@ export const sections: RawSection[] = [
         question: "What do the search scores mean?",
         answer:
           "Each result includes a relevance score from 0 to 1. Scores above 0.7 are strong matches, 0.5-0.7 are partial matches, and below 0.5 are typically not relevant.",
+      },
+      {
+        question: "Can I search for schemas by name?",
+        answer:
+          "Yes. talonic_search includes schemas in its results. If you search for 'invoice', any schema with 'invoice' in its name or description will appear in the schemas array of the response. This is useful for discovering existing templates before creating new ones.",
+      },
+      {
+        question: "How do I use search results to build a filter?",
+        answer:
+          "The fields array in the search response includes canonicalName values with a filterable flag. Use canonicalName values where filterable is true as the field parameter in talonic_filter conditions. This search-then-filter pattern is the recommended workflow for precise queries.",
       },
     ],
     mentions: ["search", "omnisearch", "fuzzy", "discovery"],
@@ -427,6 +477,34 @@ export const sections: RawSection[] = [
   "page": 1
 }`,
       },
+      { type: "heading", level: 3, id: "filter-operators", text: "Available operators" },
+      {
+        type: "paragraph",
+        text: "The following operators are available for filter conditions: `eq` (equals), `neq` (not equals), `gt` (greater than), `gte` (greater than or equal), `lt` (less than), `lte` (less than or equal), `between` (range, requires a two-element array as value), `contains` (substring match), `starts_with`, `ends_with`, and `is_empty` (checks for null or empty values). Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema — using them on string fields silently returns zero results.",
+      },
+      { type: "heading", level: 3, id: "filter-combined-example", text: "Example: combined search and filter" },
+      {
+        type: "code",
+        language: "json",
+        title: "Combining free-text search with field-value filters",
+        code: `{
+  "conditions": [
+    { "field": "invoice.due_date", "operator": "lte", "value": "2026-06-30" },
+    { "field": "invoice.total_eur", "operator": "gte", "value": 500 }
+  ],
+  "search": "consulting services",
+  "sort": { "field": "invoice.due_date", "direction": "asc" },
+  "limit": 10
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Pagination is supported via the `page` and `limit` parameters. The default page size is 50 results. For large workspaces with many matching documents, iterate through pages by incrementing `page` from 1. The response includes a `total` field showing the total number of matches, so the agent can determine how many pages remain and communicate this to the user.",
+      },
+      {
+        type: "paragraph",
+        text: "When building filters dynamically from user requests, agents should validate field names against the workspace's field registry first. The most reliable way is to call `talonic_search` to discover available canonical field names and check the `filterable` flag. Attempting to filter on a field that does not exist or is not yet filterable returns a `VALIDATION_ERROR` with a descriptive message. The agent should catch this error and suggest alternative field names rather than failing silently.",
+      },
     ],
     related: [
       { label: "talonic_search", slug: "talonic-search" },
@@ -448,6 +526,16 @@ export const sections: RawSection[] = [
         question: "Can I combine free-text search with field filters?",
         answer:
           "Yes. Pass the search parameter alongside conditions to combine fuzzy text matching with structured field-value filters in a single call.",
+      },
+      {
+        question: "What operators are available for talonic_filter?",
+        answer:
+          "Supported operators include eq, neq, gt, gte, lt, lte, between, contains, starts_with, ends_with, and is_empty. Numeric operators (gt, gte, lt, lte, between) require the schema field to be typed as number. String operators work on all field types.",
+      },
+      {
+        question: "Why does my filter return zero results even though matching documents exist?",
+        answer:
+          "The most common cause is using a numeric operator (gt, lt, between) on a field that is typed as string in the schema. Currency symbols, commas, or locale formatting in the value also cause mismatches. Ensure the schema defines numeric fields as type number and that values are stored without formatting.",
       },
     ],
     mentions: ["filter", "canonical field names", "operators", "conditions"],
@@ -522,6 +610,34 @@ export const sections: RawSection[] = [
   }
 }`,
       },
+      { type: "heading", level: 3, id: "get-document-workflow", text: "Example: human-in-the-loop verification" },
+      {
+        type: "code",
+        language: "json",
+        title: "Agent uses dashboard link for user verification",
+        code: `// After extracting data with low confidence on a critical field:
+// Agent calls talonic_get_document to get the dashboard link:
+{
+  "document_id": "doc_8f3a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+}
+
+// Agent presents to user:
+// "The total_amount field has confidence 0.68.
+//  Please verify against the original document:
+//  https://app.talonic.com/documents/doc_8f3a..."`,
+      },
+      {
+        type: "paragraph",
+        text: "The `status` field in the response indicates the document's processing state. Common values are `completed` (ready for extraction and markdown retrieval), `processing` (still being ingested), and `failed` (ingestion encountered an error). Agents should check the status before attempting follow-up operations — calling `talonic_extract` on a document that is still `processing` will either wait or fail depending on the API's current behaviour.",
+      },
+      {
+        type: "paragraph",
+        text: "The `source` object in the response tells you how the document was uploaded. A `type` of `api` means it was uploaded via the MCP server or REST API, while `dashboard` means it was uploaded through the Talonic web interface. The `source.id` can be useful for filtering documents by upload source when a workspace has documents from multiple integration points.",
+      },
+      {
+        type: "paragraph",
+        text: "This tool is free to call — it does not consume extraction credits. Agents can call it as often as needed to check document status, retrieve links, or verify metadata without any cost concern. This makes it safe for polling scenarios where an agent needs to wait for a document to finish processing before proceeding with extraction.",
+      },
     ],
     related: [
       { label: "talonic_to_markdown", slug: "talonic-to-markdown" },
@@ -542,6 +658,16 @@ export const sections: RawSection[] = [
         question: "How can I link the user to the original document?",
         answer:
           "The response includes links.dashboard, which is a direct URL to view the document in the Talonic web interface. Present this to the user when they need to verify an extraction.",
+      },
+      {
+        question: "Does talonic_get_document cost any credits?",
+        answer:
+          "No. It is a free metadata lookup that does not consume extraction credits. Agents can call it as often as needed to check document status, retrieve dashboard links, or verify metadata without cost concerns.",
+      },
+      {
+        question: "What document statuses can talonic_get_document return?",
+        answer:
+          "Common statuses include completed (ready for extraction), processing (still being ingested), and failed (ingestion error). Check the status before attempting follow-up operations like extraction or markdown retrieval.",
       },
     ],
     mentions: ["document", "metadata", "processing log", "dashboard link"],
@@ -624,6 +750,47 @@ Musterstraße 42, 10115 Berlin
 Due date: 15 June 2026
 Payment terms: Net 30`,
       },
+      { type: "heading", level: 3, id: "to-markdown-url-example", text: "Example: convert from URL" },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input: convert a remote PDF to markdown",
+        code: `{
+  "file_url": "https://example.com/annual-report-2025.pdf"
+}`,
+      },
+      {
+        type: "code",
+        language: "markdown",
+        title: "Tool response: structured markdown output",
+        code: `# Annual Report 2025
+
+## Financial Highlights
+
+| Metric              | 2025       | 2024       | Change  |
+|---------------------|------------|------------|---------|
+| Revenue             | €12.4M     | €9.8M      | +26.5%  |
+| Net Income          | €2.1M      | €1.4M      | +50.0%  |
+| Employees           | 142        | 98         | +44.9%  |
+
+## Board of Directors
+
+- **Chair**: Dr. Maria Fischer
+- **CEO**: Thomas Bergmann
+- **CFO**: Sarah Lindqvist`,
+      },
+      {
+        type: "paragraph",
+        text: "The markdown output is designed to be LLM-friendly. Agents can feed the returned markdown directly into their context window for summarisation, translation, comparison, or question-answering tasks. Because the conversion preserves semantic structure (headings denote sections, tables retain rows and columns, lists maintain hierarchy), downstream LLM reasoning is significantly more accurate than working with raw OCR text that has lost all formatting cues.",
+      },
+      {
+        type: "paragraph",
+        text: "For multi-page documents, the markdown includes page break indicators and preserves the reading order across pages. Headers, footers, and page numbers are typically stripped or de-duplicated to produce a clean reading experience. If the document contains images with embedded text (like scanned letterheads or stamps), the OCR engine extracts visible text from those regions as well, though image-only content without text is omitted from the markdown output.",
+      },
+      {
+        type: "paragraph",
+        text: "When an agent needs to compare two versions of a document, `talonic_to_markdown` is the right starting point. Convert both documents to markdown, then use standard text diffing within the agent's context to identify changes. This is more reliable than visual comparison because the markdown normalises formatting differences and focuses on content. The stable document IDs make it easy to retrieve markdown for previously processed documents without re-uploading.",
+      },
     ],
     related: [
       { label: "talonic_extract", slug: "talonic-extract" },
@@ -644,6 +811,16 @@ Payment terms: Net 30`,
         question: "Should I use talonic_to_markdown or talonic_extract with include_markdown?",
         answer:
           "If you only need the text, use talonic_to_markdown. If you need both structured fields and the full text, use talonic_extract with include_markdown: true to avoid two separate calls.",
+      },
+      {
+        question: "Can I use talonic_to_markdown for document comparison?",
+        answer:
+          "Yes. Convert both document versions to markdown, then diff the text in the agent's context. Markdown normalises formatting differences and focuses on content, making comparison more reliable than visual methods. Use document_id for previously processed files to avoid re-uploading.",
+      },
+      {
+        question: "Does talonic_to_markdown handle scanned documents?",
+        answer:
+          "Yes. The tool runs OCR on scanned PDFs, images (PNG, JPG, TIFF), and other image-based documents. Text is extracted from all visible regions including headers, stamps, and handwritten annotations where legible. The output is clean markdown regardless of whether the source is digital or scanned.",
       },
     ],
     mentions: ["markdown", "OCR", "document_id", "tables"],
@@ -716,6 +893,48 @@ Payment terms: Net 30`,
   ]
 }`,
       },
+      { type: "heading", level: 3, id: "list-schemas-workflow", text: "Example: check for duplicates before saving" },
+      {
+        type: "code",
+        language: "json",
+        title: "Agent checks existing schemas before creating a new one",
+        code: `// User: "Create a schema for purchase orders"
+// Agent first checks existing schemas:
+// talonic_list_schemas → {}
+
+// Response shows existing schemas:
+{
+  "schemas": [
+    {
+      "id": "sch_7a1b...",
+      "short_id": "SCH-A1B2C3D4",
+      "name": "Standard Invoice",
+      "field_count": 6
+    },
+    {
+      "id": "sch_c3d4...",
+      "short_id": "SCH-C3D4E5F6",
+      "name": "Purchase Order",
+      "field_count": 7
+    }
+  ]
+}
+
+// Agent: "You already have a 'Purchase Order' schema (SCH-C3D4E5F6)
+//  with 7 fields. Would you like to use it, or create a new one?"`,
+      },
+      {
+        type: "paragraph",
+        text: "Agents should call `talonic_list_schemas` proactively in several scenarios: before saving a new schema (to prevent duplicates), when the user asks about available extraction templates, and when starting a session that involves document extraction (to present schema options). The call is free and returns quickly, so there is no cost or latency penalty for checking frequently.",
+      },
+      {
+        type: "paragraph",
+        text: "The `version` field on each schema tracks how many times it has been updated through the Talonic dashboard. A schema at version 1 has never been modified since creation. Higher versions indicate the schema has been refined — potentially adding new fields, changing types, or updating required fields. Agents can use this information to inform the user about schema maturity when choosing between multiple similar schemas.",
+      },
+      {
+        type: "paragraph",
+        text: "The `field_count` in the response is a quick indicator of schema complexity without needing to parse the full definition. Schemas with fewer fields are faster to extract and produce more focused results. Schemas with many fields (10+) cover more ground but may have lower per-field confidence on complex documents. Agents can use field count to help users choose between a detailed schema and a simpler one for quick extractions.",
+      },
     ],
     related: [
       { label: "talonic_save_schema", slug: "talonic-save-schema" },
@@ -736,6 +955,16 @@ Payment terms: Net 30`,
         question: "Does talonic_list_schemas require any parameters?",
         answer:
           "No. It takes no input parameters and returns all saved schemas in the workspace with their full definitions.",
+      },
+      {
+        question: "Is talonic_list_schemas free to call?",
+        answer:
+          "Yes. It is a read-only metadata call that does not consume extraction credits. Agents can call it as often as needed to check for existing schemas, present options to the user, or verify a schema exists before using it in an extraction.",
+      },
+      {
+        question: "How do I know which schema to use for a document?",
+        answer:
+          "Call talonic_list_schemas to see all available schemas with their names, descriptions, and field counts. Match the schema name and description to the document type. For example, use a 'Standard Invoice' schema for invoices and a 'Certificate of Insurance' schema for COIs. When unsure, start with an inline schema and save it after confirming the results.",
       },
     ],
     mentions: ["schemas", "list", "SCH-XXXXXXXX", "resource"],
@@ -833,6 +1062,77 @@ Payment terms: Net 30`,
   "field_count": 5
 }`,
       },
+      { type: "heading", level: 3, id: "save-schema-workflow", text: "Example: iterate inline then save" },
+      {
+        type: "code",
+        language: "json",
+        title: "Step 1: test the schema inline with talonic_extract",
+        code: `// Agent extracts with inline schema first:
+{
+  "file_url": "https://example.com/sample-po.pdf",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "po_number": { "type": "string" },
+      "vendor": { "type": "string" },
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" },
+            "quantity": { "type": "integer" },
+            "unit_price": { "type": "number" }
+          }
+        }
+      },
+      "total": { "type": "number" },
+      "delivery_date": { "type": "string", "format": "date" }
+    },
+    "required": ["po_number", "vendor", "total"]
+  }
+}
+// → User reviews results, confirms the schema looks right`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Step 2: save the confirmed schema for reuse",
+        code: `// Agent calls talonic_save_schema:
+{
+  "name": "Purchase Order",
+  "description": "Extracts PO number, vendor, line items, total, and delivery date.",
+  "definition": {
+    "type": "object",
+    "properties": {
+      "po_number": { "type": "string" },
+      "vendor": { "type": "string" },
+      "items": { "type": "array" },
+      "total": { "type": "number" },
+      "delivery_date": { "type": "string", "format": "date" }
+    },
+    "required": ["po_number", "vendor", "total"]
+  }
+}
+
+// Response:
+{
+  "id": "sch_d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a",
+  "short_id": "SCH-D4E5F6A7",
+  "name": "Purchase Order",
+  "version": 1,
+  "field_count": 5
+}
+// → Future extractions use: { "schema_id": "SCH-D4E5F6A7" }`,
+      },
+      {
+        type: "paragraph",
+        text: "The `description` field is optional but strongly recommended. A clear description helps agents (and users) understand when to use a particular schema. Agents can read schema descriptions from `talonic_list_schemas` to auto-select the right schema based on the document type. For example, if the user drops a purchase order, the agent can scan saved schema descriptions for keywords like 'purchase order' or 'PO' and suggest the matching schema automatically.",
+      },
+      {
+        type: "paragraph",
+        text: "Schema naming conventions matter for discoverability. Use descriptive, consistent names like 'Standard Invoice', 'Certificate of Insurance', or 'Employment Contract' rather than abbreviations or internal codes. These names appear in `talonic_list_schemas` results and the `talonic://schemas` resource, where users and agents browse them to find the right template. A well-named schema library reduces friction across the entire team.",
+      },
     ],
     related: [
       { label: "talonic_list_schemas", slug: "talonic-list-schemas" },
@@ -853,6 +1153,16 @@ Payment terms: Net 30`,
         question: "Can I update a saved schema?",
         answer:
           "Schema updates are managed through the Talonic dashboard. The version field in the response tracks changes. Via MCP, you can save a new schema with a different name if the design changes significantly.",
+      },
+      {
+        question: "What is the recommended workflow for schema design?",
+        answer:
+          "Iterate inline first: pass the schema directly to talonic_extract, review results with the user, adjust fields as needed. Once the user confirms the schema produces good results, call talonic_save_schema to persist it. This prevents cluttering the workspace with draft schemas that never get used.",
+      },
+      {
+        question: "Should I include a description when saving a schema?",
+        answer:
+          "Yes. The description helps agents auto-select the right schema based on document type, and helps team members understand what each schema extracts. Use clear language like 'Extracts vendor, line items, totals, and payment terms from invoices' so both humans and AI agents can match schemas to documents.",
       },
     ],
     mentions: ["save schema", "JSON Schema", "reuse", "version"],
@@ -932,6 +1242,41 @@ Payment terms: Net 30`,
   "tier_resets_at": "2026-06-01T00:00:00.000Z"
 }`,
       },
+      { type: "heading", level: 3, id: "balance-budget-check", text: "Example: budget check before batch extraction" },
+      {
+        type: "code",
+        language: "json",
+        title: "Agent checks balance before processing 50 documents",
+        code: `// User: "Extract data from all 50 invoices in my workspace"
+// Agent first checks budget:
+// talonic_get_balance → {}
+
+// Response:
+{
+  "balance_credits": 120,
+  "balance_eur": 0.60,
+  "burn_rate_30d_credits": 360,
+  "projected_runway_days": 10,
+  "tier": "free",
+  "tier_resets_at": "2026-06-01T00:00:00.000Z"
+}
+
+// Agent: "You have 120 credits remaining. Extracting 50 documents
+//  will cost approximately 50 credits, leaving 70 credits.
+//  Your tier resets on June 1st. Shall I proceed?"`,
+      },
+      {
+        type: "paragraph",
+        text: "Budget-aware agents use `talonic_get_balance` to prevent unexpected credit depletion. Before starting a large batch extraction, the agent checks the remaining balance and estimates whether the batch will exceed available credits. If the balance is low, the agent can warn the user, suggest processing a subset, or recommend upgrading the plan. This proactive approach prevents mid-batch failures due to exhausted credits.",
+      },
+      {
+        type: "paragraph",
+        text: "The `tier` field indicates the workspace's API plan: `free`, `pro`, or `enterprise`. Each tier has different daily extraction limits and credit allowances. The `tier_resets_at` timestamp shows when the monthly credit cycle resets, which helps agents answer questions like 'when will my credits refresh?' or 'should I wait for the reset before processing this batch?'. Agents can use this information to advise users on timing large extraction jobs.",
+      },
+      {
+        type: "paragraph",
+        text: "The `burn_rate_30d_credits` field shows total consumption over the trailing 30 days, not a daily average. Agents can divide by 30 to estimate daily usage. Combined with `balance_credits`, this provides a clear picture of workspace sustainability. A high burn rate with a low balance signals the need for a plan upgrade or reduced usage before the next tier reset.",
+      },
     ],
     related: [
       { label: "talonic_extract", slug: "talonic-extract" },
@@ -947,6 +1292,16 @@ Payment terms: Net 30`,
         question: "What does projected_runway_days = -1 mean?",
         answer:
           "It means the workspace has had zero credit consumption in the trailing 30 days, so a meaningful runway projection cannot be computed. Treat -1 as 'unknown' rather than '0 days'.",
+      },
+      {
+        question: "Should the agent check balance before every extraction?",
+        answer:
+          "Not for single extractions — that would add unnecessary latency. Check the balance before batch operations (10+ documents) or when the user explicitly asks about credits. For single extractions, proceed directly and let the API return a quota error if the balance is exhausted.",
+      },
+      {
+        question: "How does the agent know the cost of an extraction?",
+        answer:
+          "Each talonic_extract response includes a cost field showing credits consumed for that extraction. Use talonic_get_balance before a batch to check available credits, and after to verify the remaining balance. Single extractions typically cost 1 credit each.",
       },
     ],
     mentions: ["credits", "balance", "EUR", "burn rate", "runway", "tier", "budget"],
