@@ -128,7 +128,17 @@ export interface FilterArgs {
   conditions: Array<{
     field?: string
     field_id?: string
-    operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "between" | "contains" | "is_empty" | "is_not_empty"
+    operator:
+      | "eq"
+      | "neq"
+      | "gt"
+      | "gte"
+      | "lt"
+      | "lte"
+      | "between"
+      | "contains"
+      | "is_empty"
+      | "is_not_empty"
     value?: unknown
     value_to?: unknown
   }>
