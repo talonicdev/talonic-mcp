@@ -9,6 +9,7 @@ Official Talonic MCP server. Lets AI agents extract structured, schema-validated
 
 ## Available on
 
+- [**Cursor Directory**](https://cursor.directory/plugins/talonic) plugin listing.
 - [**Official MCP Registry**](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp) as `io.github.talonicdev/talonic-mcp`.
 - [**mcp.so**](https://mcp.so/server/talonic-mcp) directory.
 - [**Glama**](https://glama.ai/mcp/servers/talonicdev/talonic-mcp) MCP server catalogue.
