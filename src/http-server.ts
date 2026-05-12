@@ -34,6 +34,7 @@ import { randomUUID } from "node:crypto"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { createServer } from "./server-factory.js"
+import { isOriginAllowed } from "./origin.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
@@ -131,6 +132,23 @@ const httpServer = createHttpServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost")
   const path = url.pathname
 
+  // ── Origin allowlist (DNS-rebinding mitigation) ───────────────────
+  // Browser clients send an `Origin` header on cross-origin requests;
+  // native and server-to-server clients typically do not. We reject any
+  // request that includes an Origin we don't recognise. See ALLOWED_ORIGINS.
+  const incomingOrigin = req.headers["origin"]
+  const incomingOriginValue = typeof incomingOrigin === "string" ? incomingOrigin : undefined
+  if (!isOriginAllowed(incomingOriginValue)) {
+    res.writeHead(403, { "Content-Type": "application/json" })
+    res.end(
+      JSON.stringify({
+        error: "origin_not_allowed",
+        message: `Origin '${incomingOriginValue}' is not in the allowlist. Contact info@talonic.ai if you believe this is an error.`,
+      }),
+    )
+    return
+  }
+
   // ── Health check ──────────────────────────────────────────────────
   if (path === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" })
@@ -171,7 +189,14 @@ const httpServer = createHttpServer(async (req, res) => {
   }
 
   // ── CORS preflight ────────────────────────────────────────────────
-  res.setHeader("Access-Control-Allow-Origin", "*")
+  // Echo back the validated Origin (we've already rejected disallowed
+  // ones above) and add `Vary: Origin` so caches do not collapse responses
+  // for different Origins. When there is no incoming Origin (native clients),
+  // we omit the header; CORS is a browser-only concept.
+  if (incomingOriginValue) {
+    res.setHeader("Access-Control-Allow-Origin", incomingOriginValue)
+    res.setHeader("Vary", "Origin")
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Mcp-Session-Id")
   res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id")
