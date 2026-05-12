@@ -232,7 +232,7 @@ Variants run: direct save with full schema, iterative design with user confirmat
 - Privacy policy: `https://talonic.com/privacy` (covers MCP-connector data flow and GDPR/DPA).
 - Privacy summary (≤300 chars for the form's short field): "MCP connector data: We process the files, queries, and schemas your AI agent sends to our tools only to perform requested operations against your isolated Talonic workspace. Data is stored at app.talonic.com, never used for AI training, never shared. Delete anytime; details at talonic.com/privacy."
 - Support channels: `info@talonic.ai`, `https://github.com/talonicdev/talonic-mcp/issues`.
-- Security disclosures: `security@talonic.ai` (to be set up; `SECURITY.md` to be added to repo).
+- Security disclosures: `safety@talonic.ai` (to be set up; `SECURITY.md` to be added to repo).
 - Test account: `mcp-reviewer@talonic.ai`, pre-populated with ~15-20 sample docs across invoices, contracts, COIs, receipts, forms, statements; 3-5 saved schemas (Standard Invoice, Service Agreement, COI, Receipt). Hamlet handles population; credentials stored outside this repo.
 - GA: server live since 2026-04, currently `0.1.32` on npm.
 
@@ -255,7 +255,7 @@ Variants run: direct save with full schema, iterative design with user confirmat
 **Open items before submission.**
 
 - [ ] Land Origin-header allowlist validation in `src/http-server.ts`.
-- [ ] Stand up `security@talonic.ai` mailbox; add `SECURITY.md` pointing to it.
+- [ ] Stand up `safety@talonic.ai` mailbox; add `SECURITY.md` pointing to it.
 - [ ] Populate the `mcp-reviewer@talonic.ai` workspace with sample documents and saved schemas.
 - [ ] Confirm the "Demo or short example" form field accepts pasted text (not a URL or screencast).
 - [ ] Fill out and submit the form at `https://clau.de/mcp-directory-submission`.

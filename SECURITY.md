@@ -4,7 +4,7 @@ Thank you for taking the time to investigate and report security issues responsi
 
 ## Reporting a vulnerability
 
-Email **security@talonic.ai** with:
+Email **safety@talonic.ai** with:
 
 - A clear description of the issue.
 - Step-by-step reproduction details (URL, request, payload, expected vs. actual behaviour).
@@ -30,7 +30,7 @@ In scope:
 
 Out of scope:
 
-- The Talonic web dashboard at `https://app.talonic.com` and the Talonic API at `https://api.talonic.com`. Report issues affecting those surfaces to **security@talonic.ai** as well; this policy applies to all Talonic infrastructure.
+- The Talonic web dashboard at `https://app.talonic.com` and the Talonic API at `https://api.talonic.com`. Report issues affecting those surfaces to **safety@talonic.ai** as well; this policy applies to all Talonic infrastructure.
 - Findings that require physical access to a user's device, social-engineering attacks against Talonic staff, or attacks that violate applicable law.
 - Denial-of-service attacks that depend on overwhelming volumes of traffic rather than a specific vulnerability.
 - Reports about missing security best practices (rate-limit headers, HSTS preloading, etc.) without a concrete exploit path. We welcome these as feedback but do not treat them as vulnerabilities.
@@ -44,7 +44,7 @@ We will not pursue legal action against researchers who:
 - Do not exploit the issue beyond the proof-of-concept needed to report it.
 - Give us a reasonable opportunity to investigate and fix before any public disclosure.
 
-If you are unsure whether a particular activity falls within this safe harbour, email **security@talonic.ai** in advance and we will work with you.
+If you are unsure whether a particular activity falls within this safe harbour, email **safety@talonic.ai** in advance and we will work with you.
 
 ## Coordinated disclosure
 
@@ -52,6 +52,6 @@ We follow a coordinated-disclosure model. Once a fix is shipped, we will (with y
 
 ## Contact
 
-- Primary: **security@talonic.ai**
+- Primary: **safety@talonic.ai**
 - Fallback (non-security): info@talonic.ai
 - Public issues (non-security only): https://github.com/talonicdev/talonic-mcp/issues
