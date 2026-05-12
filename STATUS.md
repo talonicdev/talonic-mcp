@@ -212,7 +212,60 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 ### Active workstream
 
-(none — OAuth 2.1 connector flow shipped end-to-end 2026-05-08; see "Resolved 2026-05-08: OAuth connector flow" below.)
+**Claude Connectors Directory submission (started 2026-05-12).** Submitting `@talonic/mcp` as a Remote MCP via the form at `https://clau.de/mcp-directory-submission`. Compliance audited against Anthropic's Software Directory Policy, Software Directory Terms, and the pre-submission checklist at `https://claude.com/docs/connectors/building/review-criteria`.
+
+**Form inputs decided.**
+
+- Company: Talonic, `https://talonic.com`.
+- Primary contact: Hamlet Hayrapetyan, `hamlet@talonic.ai`, Head of Product.
+- Anthropic POC: none.
+- Server name (singular noun shown to users): **Talonic**.
+- Server URL: `https://mcp.talonic.com/mcp`.
+- Tagline (≤30 words): "Extract structured, schema-validated data from any document. Eight tools and two resources for invoice extraction, contract analysis, certificate-of-insurance compliance, expense automation, and batch document processing."
+- Read/Write capability: **Read + Write**.
+- Categories: **Business & Productivity** + **Data & Analytics**.
+- Authentication: OAuth 2.1 with PKCE and Dynamic Client Registration against `app.talonic.com` (primary). API key in `Authorization: Bearer tlnc_…` header for custom-header clients (alternative). `TALONIC_API_KEY` env var for local stdio (alternative).
+- Transport: Streamable HTTP.
+- Allowed link URIs: `https://app.talonic.com`, `https://talonic.com`.
+- MCP documentation URL (primary): `https://github.com/talonicdev/talonic-mcp#readme`.
+- MCP documentation URL (secondary): `https://talonic.com/docs/mcp`.
+- Privacy policy: `https://talonic.com/privacy` (covers MCP-connector data flow and GDPR/DPA).
+- Privacy summary (≤300 chars for the form's short field): "MCP connector data: We process the files, queries, and schemas your AI agent sends to our tools only to perform requested operations against your isolated Talonic workspace. Data is stored at app.talonic.com, never used for AI training, never shared. Delete anytime; details at talonic.com/privacy."
+- Support channels: `info@talonic.ai`, `https://github.com/talonicdev/talonic-mcp/issues`.
+- Security disclosures: `security@talonic.ai` (to be set up; `SECURITY.md` to be added to repo).
+- Test account: `mcp-reviewer@talonic.ai`, pre-populated with ~15-20 sample docs across invoices, contracts, COIs, receipts, forms, statements; 3-5 saved schemas (Standard Invoice, Service Agreement, COI, Receipt). Hamlet handles population; credentials stored outside this repo.
+- GA: server live since 2026-04, currently `0.1.32` on npm.
+
+**Three use-case prompts (Policy 3.E).** Invoice triage (extract); Workspace recall (search → filter); Budget-aware batch (get_balance → filter → extract loop). Full text in the operator log.
+
+**Example for the "Demo or short example" field.** Worked `talonic_extract` round-trip with an invoice URL: schema with `vendor_name`, `total_amount`, `due_date`, `language`; response includes `data`, per-field `confidence`, `document` metadata, and the `cost` block (`costCredits`, `costEur`, `balanceCredits`). Pasted in the form text box.
+
+**Compliance audit findings.**
+
+- Tool annotations (`title` + applicable `readOnlyHint`/`destructiveHint`) on all 8 tools.
+- Tool names all ≤64 chars.
+- Tool descriptions free of prompt-injection patterns (grepped for "always call", "override", "Claude must", "behavioral instructions"; zero hits).
+- API ownership: all endpoints first-party.
+- No unsupported use cases (no crypto, no AI image gen, no ads).
+- Streamable HTTP transport.
+- OAuth 2.1 (superset of OAuth 2.0) with recognised-CA certificates (Cloudflare/Let's Encrypt).
+- **Origin-header validation: gap.** `src/http-server.ts` sets `Access-Control-Allow-Origin: *` but does not validate incoming Origin against an allowlist. The submission compliance checklist asks for Origin-header validation. **Code change required before submission.** Allow `https://claude.ai`, `https://www.claude.ai`, `https://app.claude.ai`, plus empty Origin (for non-browser clients).
+- **`talonic_to_markdown` annotation polymorphism.** Tool is `readOnlyHint: false, destructiveHint: false` because it ingests new documents on the raw-file branch and is read-only on the `document_id` branch. Spec-correct (creates new records, does not modify/delete existing), but a strict reviewer could read the requirement as "exactly one of readOnlyHint/destructiveHint must be true". Decision: leave as-is, polymorphism documented in the tool description.
+
+**Open items before submission.**
+
+- [ ] Land Origin-header allowlist validation in `src/http-server.ts`.
+- [ ] Stand up `security@talonic.ai` mailbox; add `SECURITY.md` pointing to it.
+- [ ] Populate the `mcp-reviewer@talonic.ai` workspace with sample documents and saved schemas.
+- [ ] Confirm the "Demo or short example" form field accepts pasted text (not a URL or screencast).
+- [ ] Fill out and submit the form at `https://clau.de/mcp-directory-submission`.
+
+**References.**
+
+- Policy: `https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy`
+- Terms: `https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms`
+- Pre-submission checklist: `https://claude.com/docs/connectors/building/review-criteria.md`
+- Submission guide: `https://claude.com/docs/connectors/building/submission.md`
 
 ### Highest-priority unresolved
 
