@@ -35,6 +35,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { createServer } from "./server-factory.js"
 import { isOriginAllowed } from "./origin.js"
+import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
@@ -153,6 +154,30 @@ const httpServer = createHttpServer(async (req, res) => {
   if (path === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" })
     res.end(JSON.stringify({ status: "ok", server: SERVER_NAME, version: VERSION }))
+    return
+  }
+
+  // ── Favicon ───────────────────────────────────────────────────────
+  // Served at /favicon.ico for browsers and for Google's favicon scraper,
+  // which Anthropic's Connectors Directory uses to fetch the logo shown
+  // on directory listings and tool-call previews.
+  if (path === "/favicon.ico" || path === "/favicon.png") {
+    if (FAVICON_BYTES.length === 0) {
+      res.writeHead(404, { "Content-Type": "application/json" })
+      res.end(
+        JSON.stringify({
+          error: "not_found",
+          message: "Favicon asset not bundled with this build.",
+        }),
+      )
+      return
+    }
+    res.writeHead(200, {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400, immutable",
+      "Content-Length": String(FAVICON_BYTES.length),
+    })
+    res.end(FAVICON_BYTES)
     return
   }
 
