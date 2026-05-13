@@ -527,7 +527,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's seven tools and one resource automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
+        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's eight tools and two resources automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
       },
       {
         type: "paragraph",
@@ -614,7 +614,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, the seven tools appear in the tool picker and the `talonic://schemas` resource is browseable in the resources panel.",
+        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, the eight tools appear in the tool picker and the `talonic://schemas` and `talonic://webhooks/reference` resources are browseable in the resources panel.",
       },
       {
         type: "paragraph",

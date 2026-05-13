@@ -10,6 +10,7 @@ Official Talonic MCP server. Lets AI agents extract structured, schema-validated
 ## Available on
 
 - [**Cursor Directory**](https://cursor.directory/plugins/talonic) plugin listing.
+- [**Smithery**](https://smithery.ai/servers/talonic/talonic) MCP marketplace.
 - [**Official MCP Registry**](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp) as `io.github.talonicdev/talonic-mcp`.
 - [**mcp.so**](https://mcp.so/server/talonic-mcp) directory.
 - [**Glama**](https://glama.ai/mcp/servers/talonicdev/talonic-mcp) MCP server catalogue.
@@ -44,7 +45,7 @@ The package is on npm. Every MCP client launches it the same way: a one-line `np
 
 The `-y` flag skips the npm install prompt.
 
-**Version pinning.** `@latest` is fine for trying things out and for personal use. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.16`) so a future release cannot silently change tool descriptions, validation rules, or the response shape your agent depends on. Bump the pin manually after reviewing the CHANGELOG.
+**Version pinning.** `@latest` is fine for trying things out and for personal use. For production deployments and CI, pin to a specific version (e.g. `@talonic/mcp@0.1.35`) so a future release cannot silently change tool descriptions, validation rules, or the response shape your agent depends on. Bump the pin manually after reviewing the CHANGELOG.
 
 Talonic uses a single API key per workspace. The same key authorises all tools. There is no scoping mechanism in v0.1; treat the key like any other secret and store it in your client's secret store rather than in version control.
 
@@ -149,7 +150,7 @@ Each tool's description is written for an LLM, with explicit USE WHEN / DO NOT U
 
 - **`talonic_extract`**, status: stable. Extract structured, schema-validated data from a document. Inputs: one of `file_data` + `filename` (recommended for chat clients, see below), `file_path`, `file_url`, or `document_id`, plus a `schema` or `schema_id`. Returns JSON with `data`, per-field `confidence`, document metadata, and a `cost` block (per-call credits / EUR / post-call balance) parsed from the API's `X-Talonic-Cost-*` response headers. Schema is required; the MCP layer rejects schema-less calls.
 - **`talonic_search`**, status: stable. Omnisearch across documents, fields, sources, and schemas in the workspace. Use for conceptual or fuzzy queries.
-- **`talonic_filter`**, status: stable. Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, `is_empty`, etc.). Accepts canonical field names (e.g. `vendor.name`) which the Talonic API resolves to ids server-side, or UUIDs directly. `is_not_empty` is intentionally not exposed in v0.1; see [Known limitations](#known-limitations-v01).
+- **`talonic_filter`**, status: stable. Filter documents by extracted field values using composable conditions (`eq`, `gt`, `between`, `contains`, `is_empty`, `is_not_empty`, etc.). Accepts canonical field names (e.g. `vendor.name`) which the Talonic API resolves to ids server-side, or UUIDs directly. See [Known limitations](#known-limitations-v01) for schema-type compatibility with numeric operators.
 - **`talonic_get_document`**, status: stable. Fetch full metadata for a single document by id, including processing log and link URLs.
 - **`talonic_to_markdown`**, status: stable. Get OCR-converted markdown for a document. Accepts `document_id` (cheapest), `file_data` + `filename`, `file_path`, or `file_url`. Returns the same `cost` block as `talonic_extract` when an extract step ran (i.e., on the file inputs); `null` on the `document_id` path.
 - **`talonic_list_schemas`**, status: stable. List all saved schemas with their definitions. Returns both UUID and SCH-XXXXXXXX short id; either is accepted by `talonic_extract`.
@@ -280,7 +281,7 @@ Some MCP clients cache tool descriptions. Restart the client after a server upda
   ```
 - **Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.
 - **Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.
-- **`is_not_empty` filter is not exposed in v0.1.** It underreports against fields known to be populated. Workaround: filter with `eq`/`gt`/`contains` against a known value, or use `is_empty` and invert the result client-side.
+- **`is_not_empty` filter checks materialized values.** The operator now returns documents where the field has a materialized (extracted) value, refreshed within seconds of extraction completing. For batch-mode extractions, results reflect data after the batch poll cycle applies. If a value is known to be populated but `is_not_empty` does not return it, give the indexer a moment after extraction and retry.
 - **Drag-and-drop file uploads in Claude.ai are capped by Claude.ai's tool-call argument size limit.** A base64-encoded real PDF (typically hundreds of KB) cannot fit through Claude.ai's connector tool-call pipe (which truncates parameters under ~1KB). The Talonic API receives a few hundred bytes, registers an empty document, and returns a response with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug. Workaround for Claude.ai users: use `file_url` (publicly reachable URL), `document_id` (file uploaded at app.talonic.com), or use a local-stdio install (Claude Desktop, Cursor, Cline, Continue, Cowork). The architectural fix is pre-signed upload URLs (engineering follow-up).
 - **Per-call cost surfacing is extract-only.** `talonic_extract` and `talonic_to_markdown` (when an extract step runs) return a `cost` block (`costCredits`, `costEur`, `balanceCredits`, `cellsResolvedRegistry`, `cellsResolvedAi`) parsed from the API's `X-Talonic-Cost-*` response headers. Read endpoints (`talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`) do not consume credits and therefore do not carry a `cost` block; `talonic_to_markdown` on the `document_id` path returns `cost: null` because no extract step ran. To read the workspace credit balance directly at any time, call `talonic_get_balance`.
 

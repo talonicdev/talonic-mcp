@@ -7,6 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.35] - 2026-05-12
+
+### Added
+
+- **`/favicon.ico` and `/favicon.png`** served from the hosted MCP, inlined as base64 in `src/favicon.ts`. Required for the Claude Connectors Directory listing and for browser preview surfaces. `Content-Type: image/png` with a 24-hour `Cache-Control` header.
+- **`SECURITY.md`** at the repo root. Disclosure policy with `safety@talonic.ai` as the primary channel, two-business-day acknowledgement target, ten-business-day substantive response, and a 30-day fix target for confirmed production-affecting issues. Coordinated-disclosure model with a safe-harbour clause.
+
+### Changed
+
+- Disclosure email switched from a placeholder to `safety@talonic.ai` after the mailbox was stood up.
+
+## [0.1.34] - 2026-05-12
+
+### Added
+
+- **Origin-header allowlist** (`src/origin.ts`) on the hosted Streamable HTTP server. DNS-rebinding mitigation. Allows three Claude.ai variants (`https://claude.ai`, `https://claude.com`, `https://www.claude.ai`) plus four MCP-directory surfaces (Cursor Directory, Smithery, mcp.so, `registry.modelcontextprotocol.io`). Empty Origin passes through (native clients and server-to-server traffic). Unknown origins receive a structured 403.
+
+## [0.1.33] - 2026-05-12
+
+### Changed
+
+- README "Available on" section lists Cursor Directory in the first position.
+
+## [0.1.32] - 2026-05-11
+
+### Changed
+
+- `docs/sections.json` refreshed: content brought up to date with the post-OAuth surface, prettier drift across all sections cleared.
+
+## [0.1.31] - 2026-05-11
+
+### Changed
+
+- Prettier re-run on `src/tools/filter.ts` after the `is_not_empty` re-addition in 0.1.29.
+
+## [0.1.30] - 2026-05-10
+
+### Added
+
+- **`is_not_empty` filter operator re-exposed.** Checks the materialized-values index, which the upstream API now updates within seconds of extraction completing. For batch-mode extractions, results reflect data after the batch poll cycle applies. The `talonic_filter` tool description, troubleshooting docs, and README "Known limitations" section have all been updated to reflect the new behavior; the "intentionally not exposed in v0.1" caveat is gone.
+
+### Changed
+
+- `talonic_filter` description gains type-mismatch guidance to complement the existing SCHEMA TYPING block.
+
+## [0.1.29] - 2026-05-10
+
+### Fixed
+
+- `talonic_search` outputSchema: `fieldMatches[].documentCount` and `fields[].documentCount` accept `null`, matching the API's response shape for entries with no materialised data.
+
+## [0.1.28] - 2026-05-09
+
+### Changed
+
+- README reframed around the Claude.ai OAuth connector flow as the primary install path, with the API-key URL kept as an alternative for clients that cannot complete the OAuth handshake.
+
+## [0.1.27] - 2026-05-08
+
+### Changed
+
+- `docs/sections.json` enriched with code examples; per-page content expanded to at least 4 paragraphs each, with a 6K-character target on tool pages. Improves SEO and gives the website's auto-generated docs more substance.
+
+## [0.1.26] - 2026-05-08
+
+### Changed
+
+- `docs/sections.json` enrichment pass: every MCP doc section has at least four paragraphs. Foundation for the further expansion in 0.1.27.
+
 ## [0.1.25] - 2026-05-07
 
 ### Added

@@ -222,7 +222,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The seven tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, and the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates.",
+        text: "The eight tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and **`talonic_get_balance`** lets the agent check the workspace credit balance before kicking off large batches.",
       },
       {
         type: "paragraph",
