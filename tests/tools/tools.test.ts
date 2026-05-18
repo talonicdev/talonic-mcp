@@ -5,7 +5,7 @@ import { handleSaveSchema } from "../../src/tools/save-schema"
 import { handleGetDocument } from "../../src/tools/get-document"
 import { handleSearch } from "../../src/tools/search"
 import { outputSchema as searchOutputSchema } from "../../src/tools/search"
-import { handleFilter } from "../../src/tools/filter"
+import { handleFilter, outputSchema as filterOutputSchema } from "../../src/tools/filter"
 import { handleToMarkdown } from "../../src/tools/to-markdown"
 import { handleExtract } from "../../src/tools/extract"
 import { handleGetBalance } from "../../src/tools/get-balance"
@@ -496,5 +496,68 @@ describe("search outputSchema documentCount nullability (regression: QA 2026-05-
       fields: [],
     }
     expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+})
+
+describe("filter outputSchema warnings passthrough (schema-typing footgun)", () => {
+  // The Talonic API surfaces a `warnings[]` array on the filter response
+  // when a numeric operator is applied to a string-typed field (the
+  // lexicographic-comparison trap documented in the tool description and
+  // STATUS.md). The MCP outputSchema must declare the field so Zod's
+  // default strip-mode does not silently remove it from
+  // `structuredContent` before the agent can read it.
+  it("preserves a warnings array on the response", () => {
+    const Output = z.object(filterOutputSchema)
+    const apiResponse = {
+      data: [],
+      total: 0,
+      warnings: [
+        {
+          code: "numeric_operator_on_string_field",
+          message:
+            "Operator `gt` was applied to field `invoice_total` typed as string. Numeric comparisons against string-typed fields use lexicographic ordering and may return zero matches.",
+          field: "invoice_total",
+          field_id: "fld_inv_total",
+          suggestion: "Change the field's data_type to `number` in the schema definition.",
+        },
+      ],
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const parsed = result.data as { warnings?: Array<Record<string, unknown>> }
+      expect(parsed.warnings).toBeDefined()
+      expect(parsed.warnings).toHaveLength(1)
+      expect(parsed.warnings?.[0]?.["code"]).toBe("numeric_operator_on_string_field")
+      expect(parsed.warnings?.[0]?.["field"]).toBe("invoice_total")
+    }
+  })
+
+  it("accepts unknown keys inside a warning entry (forward-compatibility)", () => {
+    const Output = z.object(filterOutputSchema)
+    const apiResponse = {
+      data: [],
+      total: 0,
+      warnings: [
+        {
+          code: "future_warning_code",
+          message: "Some future warning shape the API may add.",
+          details: { future_key: "future_value" },
+        },
+      ],
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const parsed = result.data as { warnings?: Array<Record<string, unknown>> }
+      expect(parsed.warnings?.[0]?.["details"]).toEqual({ future_key: "future_value" })
+    }
+  })
+
+  it("accepts a response with no warnings (field is optional)", () => {
+    const Output = z.object(filterOutputSchema)
+    const apiResponse = { data: [], total: 0 }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
   })
 })

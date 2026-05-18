@@ -30,7 +30,8 @@ const DESCRIPTION = [
   "- is_not_empty: presence check, no value needed. Returns documents where the field has a materialized value. Results reflect data within seconds of extraction completing.",
   "",
   "SCHEMA TYPING:",
-  "- Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. '€1,500.00') will silently return zero matches even after extraction. Pick the right type at schema design time. The API returns a `warnings` array when a numeric operator is applied to a string-typed field.",
+  "- Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. '€1,500.00') will silently return zero matches even after extraction. Pick the right type at schema design time.",
+  "- If the response contains a `warnings` array, surface its `message` (and `suggestion`, if present) to the user verbatim — these explain *why* a query returned zero or unexpected results and typically suggest a schema-design change (e.g. switching a field's `data_type` from `string` to `number`) that will make subsequent filter calls work correctly. Do not silently retry without flagging the warning.",
   "",
   "TIPS:",
   "- To discover available field names, call talonic_search first with a related query.",
@@ -99,7 +100,7 @@ const inputSchema = {
     .describe("Optionally scope to a specific source connection."),
 }
 
-const outputSchema = {
+export const outputSchema = {
   data: z
     .array(
       z
@@ -122,6 +123,30 @@ const outputSchema = {
     })
     .optional()
     .describe("Cursor-based pagination metadata."),
+  warnings: z
+    .array(
+      z
+        .object({
+          code: z.string().optional().describe("Machine-readable warning code."),
+          message: z.string().optional().describe("Human-readable warning message."),
+          field: z
+            .string()
+            .optional()
+            .describe("Canonical name of the field this warning applies to."),
+          field_id: z.string().optional().describe("UUID of the field this warning applies to."),
+          suggestion: z
+            .string()
+            .optional()
+            .describe(
+              "Suggested mitigation, e.g. a recommended `data_type` change to make the query resolve correctly.",
+            ),
+        })
+        .passthrough(),
+    )
+    .optional()
+    .describe(
+      "API warnings surfaced by the Talonic filter endpoint. Most commonly raised when a numeric operator is applied to a string-typed field, in which case the warning explains the lexicographic-comparison trap and suggests a schema-design change. Agents should surface these to the user rather than silently retrying.",
+    ),
 }
 
 export interface FilterArgs {
