@@ -92,6 +92,24 @@ jobs:
           mcp-publisher publish
         continue-on-error: true
 
+      # GitHub Release is what Glama tracks for its "Recent Releases" panel
+      # (npm publishes are not enough on their own). Gated on the auto-bump
+      # actually firing so a re-run on an unchanged version does not try to
+      # create a duplicate tag. `continue-on-error: true` keeps the downstream
+      # website/platform rebuilds running even if the Release fails (e.g. tag
+      # collision after a manual release was cut for the same version).
+      - name: Create GitHub Release
+        if: success() && steps.version.outputs.bumped == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
       - name: Trigger website rebuild
         if: success()
         run: |

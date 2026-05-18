@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.38] - 2026-05-18
+
+### Added
+
+- **`warnings` field on `talonic_filter`'s outputSchema** (`src/tools/filter.ts`). The Talonic API surfaces a `warnings[]` array on filter responses when a numeric operator is applied to a string-typed field — the schema-typing footgun where `gt`/`gte`/`lt`/`lte`/`between` against a string-typed field like `invoice_total` (with currency symbols mixed in) silently returns zero matches. The MCP outputSchema previously did not declare `warnings`, so Zod's default strip mode dropped the field from `structuredContent` before the agent could read it. The schema now accepts an optional array of permissive (`.passthrough()`) warning objects covering `code`, `message`, `field`, `field_id`, and `suggestion`; all keys are optional and unknown keys forward through.
+
+### Changed
+
+- `talonic_filter` SCHEMA TYPING block extended with a one-line nudge telling agents to surface `warnings[].message` (and `suggestion`, when present) to the user verbatim rather than silently retrying.
+- Internal: `outputSchema` is now `export`ed from `src/tools/filter.ts` so tests can validate it directly via `z.object(filterOutputSchema)`.
+
+## [0.1.37] - 2026-05-18
+
+### Added
+
+- **Hosted MCP now serves Streamable HTTP at both `/` and `/mcp`** (`src/http-server.ts`). Clients that registered the bare origin (`https://mcp.talonic.com`) instead of appending `/mcp` previously received the discovery JSON when they expected a JSON-RPC frame — most visibly in Glama's hosted MCP Inspector. The root path now discriminates by method/Accept: plain `GET /` still returns the discovery JSON (humans, bots, monitors); POST/DELETE and SSE GETs at `/` route through the same auth + session + `StreamableHTTPServerTransport` block that serves `/mcp`. `/mcp` is unchanged; every existing client keeps working byte-for-byte.
+
+### Changed
+
+- Internal: HTTP request handler extracted into an exported `createRequestHandler()` factory with the session map scoped per-call (production builds exactly one; tests spin up isolated instances). `httpServer.listen` gated behind an `isDirectInvocation()` check mirroring `server.ts` so importing the module from a test does not bind to port 3000.
+
+### Tests
+
+- Six new tests in `tests/http-server.test.ts` cover the regression surface (GET `/`, `/health`, unknown paths, POST `/mcp`) plus the fix (POST `/` opens a session; POST `/` without auth returns 401 + `WWW-Authenticate`).
+
+## [0.1.36] - 2026-05-13
+
+### Changed
+
+- Post-submission state refresh in `STATUS.md`: Claude Connectors Directory submission marked as submitted (2026-05-12); Smithery listing recorded at `https://smithery.ai/servers/talonic/talonic`; 8-tool / 2-resource surface re-verified in the surfaces table; documentation tightened in `docs/sections.json` and the corresponding website-sync content sections.
+
 ## [0.1.35] - 2026-05-12
 
 ### Added
