@@ -1,15 +1,17 @@
 # Talonic MCP and SDK Status
 
-**Last audit:** 2026-05-13. **Audited by:** Claude (assisting Hamlet). **Scope:** post-Claude-Connectors-submission state refresh; sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
+**Last audit:** 2026-05-18 (targeted refresh on the MCP Registry / CI work; full audit dates back to 2026-05-13). **Audited by:** Claude (assisting Hamlet). **Scope:** post-Claude-Connectors-submission state refresh; sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
 
 This document captures the live state of the four Talonic developer surfaces ahead of the public v1 push: `@talonic/mcp`, `@talonic/node`, the website, and the official MCP Registry. Update before each release.
 
 ## TL;DR
 
-`@talonic/mcp` is at **0.1.35** on npm, `@talonic/node` is at **0.1.15** on npm. All 8 MCP tools and 2 resources are stable in production via both stdio and the hosted endpoint. OAuth 2.1 connector flow on Claude.ai is live and verified. The Claude Connectors Directory submission was sent on 2026-05-12 and is awaiting Anthropic review. The remaining real-work item is **pre-signed upload URLs** to route around Claude.ai's tool-call argument cap on `file_data`; everything else is either resolved or operational.
+`@talonic/mcp` is at **0.1.37** on npm, `@talonic/node` is at **0.1.15** on npm. All 8 MCP tools and 2 resources are stable in production via both stdio and the hosted endpoint. OAuth 2.1 connector flow on Claude.ai is live and verified. The Claude Connectors Directory submission was sent on 2026-05-12 and is awaiting Anthropic review. As of the 2026-05-18 refresh: the hosted MCP endpoint now serves the Streamable HTTP transport at both `/` and `/mcp` (so directory listings that register the bare origin work transparently), and `mcp-publisher` is wired into the publish workflow via GitHub OIDC so the Registry will auto-track npm from the next bump onwards. The remaining real-work item is **pre-signed upload URLs** to route around Claude.ai's tool-call argument cap on `file_data`; everything else is either resolved or operational.
 
 **Headline changes since the previous audit:**
 
+0. **Hosted MCP now serves Streamable HTTP at `/` and `/mcp`** (0.1.37). The root path discriminates by method/Accept: plain `GET /` still returns the discovery JSON, but POST/DELETE and SSE GETs at `/` route through the same transport that serves `/mcp`. Closes a class of bug where directory listings (Glama's hosted MCP Inspector, etc.) register the bare origin and receive the discovery JSON when they expect a JSON-RPC frame. Verified against an isolated `http.Server` harness in `tests/http-server.test.ts`.
+0. **`mcp-publisher` chained into the publish workflow** (commit `1e87668`). Authenticates via GitHub Actions OIDC (`id-token: write`, `mcp-publisher login github-oidc`); both install + publish steps run with `continue-on-error: true` so a Registry hiccup never blocks the website / platform-docs rebuilds. Pinned to `mcp-publisher v1.7.9`. The chain fires on the next change matching `paths: src/** | docs/** | package.json`; until then, the Registry remains at 0.1.28.
 1. **`talonic_get_balance` tool shipped** (0.1.25). Wraps `GET /v1/credits/balance` so agents can make budget-aware decisions. Tool count: 7 → 8.
 2. **Per-call `cost` block** on `talonic_extract` and `talonic_to_markdown` responses (0.1.25). Parsed from the API's `X-Talonic-Cost-*` headers by `@talonic/node@0.1.10+`.
 3. **`is_not_empty` filter operator re-exposed** (0.1.29). The upstream materialized-values index now updates within seconds of extraction.
@@ -20,11 +22,12 @@ This document captures the live state of the four Talonic developer surfaces ahe
 **Older follow-ups still open:**
 
 - **Pre-signed upload URLs.** Architectural fix for Claude.ai's tool-call argument-size cap on `file_data`. Proposal drafted (tool surface sketch, nine open design questions). Parked pending OAuth; OAuth is now done — resume the proposal pass.
-- **Wire `mcp-publisher publish` into the GitHub Actions release pipeline.** The Registry currently lags npm because the chain stops after `npm publish`.
 - **Cowork directory submission.** Not yet done.
 
 **Resolved since the previous audit:**
 
+- Hosted MCP root-path routing: `POST /` and `DELETE /` (and `GET /` with `Accept: text/event-stream`) now route through the same transport as `/mcp`. Plain `GET /` still returns discovery JSON. Shipped 0.1.37 (commit `2cf0c43`). See [Resolved 2026-05-18: hosted MCP at root + Registry CI chain](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain).
+- `mcp-publisher` chained into `.github/workflows/publish.yml` via GitHub OIDC (commit `1e87668`). Fires on the next code change; Registry catches up to npm without manual intervention from then on. See [Resolved 2026-05-18: hosted MCP at root + Registry CI chain](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain).
 - `talonic_filter` schema-typing footgun: tool description now carries a SCHEMA TYPING block (0.1.16) and the API returns a `warnings` array when a numeric operator is applied to a string-typed field. Surface the `warnings` array in the filter outputSchema as a small follow-up (see [Schema-typing footgun options](#schema-typing-footgun-options)).
 - `is_not_empty` filter operator: re-exposed in 0.1.29; checks the materialized-values index.
 - Cost / EUR / balance and per-field provenance not surfaced: closed by `talonic_get_balance` (0.1.25), per-call `cost` block (0.1.25), and `include_provenance` on `talonic_extract` (0.1.14).
@@ -42,11 +45,11 @@ This document captures the live state of the four Talonic developer surfaces ahe
 | Item                        | State                                                                                                                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Repo                        | clean, on main, pushed                                                                                                                                                                                                 |
-| package.json version        | 0.1.35                                                                                                                                                                                                                 |
-| server.json version         | 0.1.35                                                                                                                                                                                                                 |
-| npm published version       | 0.1.35 (published 2026-05-12 via the auto-bump pipeline; see [Resolved 2026-05-12 onwards](#resolved-2026-05-12-onwards-claude-connectors-directory-hardening))                                                       |
-| Auto-bump pipeline          | working; granular npm token with bypass-2FA in place; auto-bumps patch on every src/docs/package.json change                                                                                                          |
-| Tests                       | 48 pass, 2 skipped (symlink tests skip when `dist/` is older than `package.json`; verified 2026-05-13)                                                                                                                  |
+| package.json version        | 0.1.37                                                                                                                                                                                                                 |
+| server.json version         | 0.1.37                                                                                                                                                                                                                 |
+| npm published version       | 0.1.37 (published 2026-05-18 via the auto-bump pipeline on the hosted MCP root-routing commit; see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain))                                  |
+| Auto-bump pipeline          | working; granular npm token with bypass-2FA in place; auto-bumps patch on every src/docs/package.json change. Now also runs `mcp-publisher publish` after npm publish (OIDC-authenticated, soft-fail).                |
+| Tests                       | 54 pass, 2 skipped (added 6 tests in `tests/http-server.test.ts` exercising the end-to-end `/` and `/mcp` routing; symlink tests still skip when `dist/` is older than `package.json`; verified 2026-05-18)            |
 | Format check                | clean                                                                                                                                                                                                                  |
 | Typecheck                   | clean                                                                                                                                                                                                                  |
 | Build                       | clean                                                                                                                                                                                                                  |
@@ -95,13 +98,13 @@ Audit fix during this run: `talonic://webhooks/reference` was missing from `/.we
 
 | Item                 | State                                                                                                                                                                                                                                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Listing URL          | `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                 |
+| Listing URL          | `https://registry.modelcontextprotocol.io/v0/servers?search=io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                   |
 | Listed name          | `io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                                                                              |
-| Listed version       | 0.1.17 (last `mcp-publisher publish` was 2026-05-06; npm has since published through 0.1.35 without a Registry push, so the Registry is lagging npm by 18 patch versions)                                                                                                                                                       |
+| Listed version       | 0.1.28 (latest, isLatest=true, published 2026-05-08). npm is at 0.1.37; the Registry will catch up automatically on the next workflow run now that `mcp-publisher` is chained in (commit `1e87668`).                                                                                                                            |
 | Install instructions | npx command and `TALONIC_API_KEY` env var, both correct                                                                                                                                                                                                                                                                         |
-| Standing follow-up   | wire `mcp-publisher publish` into `.github/workflows/publish.yml` so every npm publish automatically pushes to the Registry. Details under [Wire `mcp-publisher` into the release pipeline](#wire-mcp-publisher-into-the-release-pipeline). Owner: us.                                                                          |
+| Standing follow-up   | none active. The previous follow-up (wire `mcp-publisher publish` into CI) shipped 2026-05-18; see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain). First verification will happen on the next `chore: bump` commit; if it succeeds, the Registry version moves from 0.1.28 to whatever npm is at. |
 
-Standing maintenance task: the auto-bump pipeline that publishes new versions to npm does not currently chain into `mcp-publisher publish`. Until that is wired in, whoever cuts a release should run `mcp-publisher publish` from the talonic-mcp repo afterwards. Without that, the Registry will continue to lag npm.
+Catch-up note for the gap between 0.1.28 (current Registry latest) and 0.1.37 (current npm): the CI chain only fires on changes matching `paths: src/** | docs/** | package.json`. The wire-up commit itself touched only `.github/workflows/publish.yml` and so did not trigger the workflow. Either the next code change will close the gap automatically, or run a one-shot manual `mcp-publisher publish` against the current `server.json` (already at 0.1.37) to close it now.
 
 ## Live end-to-end tests against production
 
@@ -314,48 +317,60 @@ Lowest-cost mitigation we still have not done, ordered by leverage:
 
 Recommended next step: ship option 1 in the MCP repo (small, additive, no API dependency), then file option 2 with engineering.
 
-### Wire `mcp-publisher` into the release pipeline
-
-**Why.** Today `.github/workflows/publish.yml` ends after `npm publish`, so the Registry only updates when someone runs `mcp-publisher publish` by hand. The Registry is currently lagging npm by 18 patch versions (0.1.17 vs. 0.1.35). Wiring this into CI makes the Registry track npm automatically.
-
-**Dependencies.**
-
-- `mcp-publisher` CLI. Installable from npm as `@modelcontextprotocol/mcp-publisher` (or a single-binary release). Pin the version in the workflow to avoid surprise behavior changes.
-- An auth credential the CLI can use in CI. Two options:
-  - **GitHub OIDC (preferred).** The Registry supports federated identity, so a workflow running on `talonicdev/talonic-mcp` can mint a short-lived token against the Registry without a long-lived secret. This is the recommended path; no secret to rotate, and the publish is bound to a verified GitHub repo identity.
-  - **`MCP_REGISTRY_TOKEN` GitHub secret.** A long-lived token stored as a repo secret. Simpler, but a secret to rotate and to keep out of logs.
-- `server.json` already exists at the repo root with the correct `mcpName` (`io.github.talonicdev/talonic-mcp`) and is kept in sync with `package.json` version by the existing `Sync server.json version` step in the workflow. **No additional manifest work required.**
-
-**Requirements / design.**
-
-- Add a `Publish to MCP Registry` step **after** `Publish to npm` (so the Registry only sees versions that successfully landed on npm), and **before** `Trigger website rebuild` (so the website's docs sync does not race against a half-published state).
-- Step should `continue-on-error: true` so a Registry hiccup does not block the rest of the post-publish chain. Treat a Registry miss as a soft failure; the next `chore: bump` will retry.
-- Verify with a search against `https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.talonicdev/talonic-mcp` that the listed version matches the just-published npm version.
-
-**Sketch.**
-
-```yaml
-- name: Publish to MCP Registry
-  if: success()
-  run: npx -y @modelcontextprotocol/mcp-publisher@latest publish
-  env:
-    MCP_REGISTRY_TOKEN: ${{ secrets.MCP_REGISTRY_TOKEN }} # if OIDC not set up
-  continue-on-error: true
-```
-
-(Replace the package name with the canonical CLI distribution once confirmed; check `mcp-publisher --help` for the exact env var name and whether `--server-json server.json` needs to be passed explicitly.)
-
-**What to verify before merging the workflow change.**
-
-- A dry run against the Registry's staging endpoint, if one exists, or a deliberate `0.1.36` bump to confirm the chain works.
-- Registry search returns the new version within a couple of minutes of `npm publish` succeeding.
-- The workflow log shows `Successfully published` from `mcp-publisher`.
-
 ### Distribution
 
 12. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority.
 13. **Cowork plugin submission.** Not yet done. Submission process: similar to a Cursor / Cline directory entry; needs an install snippet (already in the README), a screenshot or icon (use `Logo 400px.png`), and a short description (use the Connectors Directory tagline: "Extract validated structured data from any doc").
-14. **Done:** Cursor Directory (live), Smithery (live, `https://smithery.ai/servers/talonic/talonic`), mcp.so (live), Glama listing page (live; release status pending), Official MCP Registry (live, lagging — see [Wire `mcp-publisher` into the release pipeline](#wire-mcp-publisher-into-the-release-pipeline)).
+14. **Done:** Cursor Directory (live), Smithery (live, `https://smithery.ai/servers/talonic/talonic`), mcp.so (live), Glama listing page (live; Inspector previously failed at the Glama proxy because clients were hitting `/` instead of `/mcp` — fixed 0.1.37, see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain)), Official MCP Registry (live; CI auto-publish wired 2026-05-18; catches up from 0.1.28 → latest on next workflow run).
+
+### Resolved 2026-05-18: hosted MCP at root + Registry CI chain
+
+Two related items shipped on 2026-05-18 to remove a directory-listing failure mode and to close the standing Registry-lag follow-up.
+
+**Hosted MCP serves Streamable HTTP at both `/` and `/mcp`** (commit `2cf0c43`, published as 0.1.37). Previously the root path always returned a discovery JSON document, so any client that registered `https://mcp.talonic.com` (bare origin) without appending `/mcp` received metadata where it expected a JSON-RPC frame. This surfaced as a Zod validation explosion in tools like Glama's hosted MCP Inspector, which proxies through `glama.ai/endpoints/<id>/mcp` and was hitting our `/` upstream. The fix discriminates at `/` by method and `Accept`:
+
+- `GET /` with no `Accept: text/event-stream` → still the discovery JSON (unchanged for humans, browsers, monitors, bots).
+- `POST /`, `DELETE /`, or `GET /` with `Accept: text/event-stream` → falls through to the same auth + session + `StreamableHTTPServerTransport` block that serves `/mcp`.
+- `/mcp` itself is unchanged; every existing client keeps working byte-for-byte.
+
+The request handler was extracted into an exported `createRequestHandler()` factory, with the session map scoped per-call (production builds exactly one; tests spin up isolated instances against an ephemeral-port `http.Server`). `httpServer.listen` is gated behind an `isDirectInvocation()` check mirroring `server.ts` so `import`-ing the module from a test does not bind port 3000. Six new tests in `tests/http-server.test.ts` cover the regression surface (GET `/`, `/health`, unknown paths, POST `/mcp`) plus the fix (POST `/` opens a session; POST `/` without auth returns 401 + `WWW-Authenticate`).
+
+**`mcp-publisher` chained into the publish workflow** (commit `1e87668`). Two new steps land between `Publish to npm` and `Trigger website rebuild`:
+
+```yaml
+- name: Install mcp-publisher
+  run: |
+    set -euo pipefail
+    MCP_PUBLISHER_VERSION="1.7.9"
+    TMP="$(mktemp -d)"
+    curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" \
+      | tar -xz -C "$TMP"
+    sudo install "$TMP/mcp-publisher" /usr/local/bin/
+    mcp-publisher --version
+  continue-on-error: true
+
+- name: Publish to MCP Registry
+  run: |
+    set -euo pipefail
+    mcp-publisher login github-oidc
+    mcp-publisher publish
+  continue-on-error: true
+```
+
+Design notes:
+
+- **OIDC, not a static token.** `id-token: write` is added to the job's `permissions` block so `mcp-publisher login github-oidc` can mint a short-lived federated token. No `MCP_REGISTRY_TOKEN` secret in the repo; nothing to rotate; the publish identity is bound to the `talonicdev/talonic-mcp` repo at the GitHub level.
+- **Pinned version.** `mcp-publisher v1.7.9` (the linux_amd64 single-binary tarball from `modelcontextprotocol/registry` releases). Bump the pin deliberately when needed; this avoids surprise CLI-behavior changes mid-pipeline.
+- **Direct binary install, not Homebrew.** Linuxbrew on Actions runners takes 30–60s; the tarball install is ~2s and deterministic.
+- **`continue-on-error: true` on both steps.** A Registry hiccup is treated as a soft failure; the next `chore: bump` retries. The website + platform-docs rebuild steps downstream are never blocked by a Registry miss.
+- **No `server.json` changes required.** The existing `Sync server.json version` step in `publish.yml` already keeps the manifest pinned to the npm version at publish time.
+
+**Catch-up.** The wire-up commit touched only `.github/workflows/publish.yml`, which does not match the workflow's `paths:` trigger (`src/** | docs/** | package.json`). The chain therefore did not fire on its own landing commit. Verification is deferred to the first subsequent `chore: bump` (any change matching the trigger). Until then, the Registry remains at 0.1.28 while npm is at 0.1.37; either wait for the next bump to close the gap, or run `mcp-publisher publish` once locally against the current `server.json` (already 0.1.37) to close it now.
+
+**What to verify on first CI run.**
+
+- Workflow log shows `Successfully published` (or equivalent) from `mcp-publisher`.
+- Registry search at `https://registry.modelcontextprotocol.io/v0/servers?search=io.github.talonicdev/talonic-mcp` returns the new version within a couple of minutes; the entry with `_meta.io.modelcontextprotocol.registry/official.isLatest: true` should carry the npm version.
 
 ### Resolved 2026-05-12 onwards: Claude Connectors Directory hardening
 
