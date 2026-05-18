@@ -1,3 +1,4 @@
+// Navigation structure for MCP documentation pages
 import type { NavSection } from "./types"
 
 export const MCP_NAV_SECTIONS: NavSection[] = [
