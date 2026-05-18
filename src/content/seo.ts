@@ -1,6 +1,6 @@
 import type { NavSection } from "./types"
 
-/** MCP documentation navigation — consumed by website docs renderer */
+/** MCP documentation navigation structure — consumed by website docs renderer */
 export const MCP_NAV_SECTIONS: NavSection[] = [
   {
     id: "overview",
