@@ -1,12 +1,12 @@
 # Talonic MCP and SDK Status
 
-**Last audit:** 2026-05-18 (targeted refresh on the MCP Registry / CI work; full audit dates back to 2026-05-13). **Audited by:** Claude (assisting Hamlet). **Scope:** post-Claude-Connectors-submission state refresh; sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
+**Last audit:** 2026-05-19 (targeted refresh on the MCP Registry / CI work and the dispatch-token testing churn from 2026-05-18; full audit dates back to 2026-05-13). **Audited by:** Claude (assisting Hamlet). **Scope:** post-Claude-Connectors-submission state refresh; sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
 
 This document captures the live state of the four Talonic developer surfaces ahead of the public v1 push: `@talonic/mcp`, `@talonic/node`, the website, and the official MCP Registry. Update before each release.
 
 ## TL;DR
 
-`@talonic/mcp` is at **0.1.37** on npm, `@talonic/node` is at **0.1.15** on npm. All 8 MCP tools and 2 resources are stable in production via both stdio and the hosted endpoint. OAuth 2.1 connector flow on Claude.ai is live and verified. The Claude Connectors Directory submission was sent on 2026-05-12 and is awaiting Anthropic review. As of the 2026-05-18 refresh: the hosted MCP endpoint now serves the Streamable HTTP transport at both `/` and `/mcp` (so directory listings that register the bare origin work transparently), and `mcp-publisher` is wired into the publish workflow via GitHub OIDC so the Registry will auto-track npm from the next bump onwards. The remaining real-work item is **pre-signed upload URLs** to route around Claude.ai's tool-call argument cap on `file_data`; everything else is either resolved or operational.
+`@talonic/mcp` is at **0.1.44** on npm, `@talonic/node` is at **0.1.22** on npm. All 8 MCP tools and 2 resources are stable in production via both stdio and the hosted endpoint. OAuth 2.1 connector flow on Claude.ai is live and verified. The Claude Connectors Directory submission was sent on 2026-05-12 and is awaiting Anthropic review (escalation point 2026-05-26 if Anthropic remains silent). The hosted MCP endpoint now serves Streamable HTTP at both `/` and `/mcp`, `mcp-publisher` and `gh release create` are both wired into the publish workflow via GitHub OIDC, and `talonic_filter` now surfaces the API `warnings` array on its outputSchema (schema-typing footgun option 1 shipped in 0.1.38). All three CI sync chains were verified end-to-end on 2026-05-18 by the dispatch-token testing burst: 0.1.39 → 0.1.44 all auto-published to npm, auto-pushed to the Registry (currently at 0.1.44), and auto-cut as GitHub Releases. The remaining real-work item is **pre-signed upload URLs** to route around Claude.ai's tool-call argument cap on `file_data`; everything else is either resolved or operational.
 
 **Headline changes since the previous audit:**
 
@@ -22,12 +22,16 @@ This document captures the live state of the four Talonic developer surfaces ahe
 **Older follow-ups still open:**
 
 - **Pre-signed upload URLs.** Architectural fix for Claude.ai's tool-call argument-size cap on `file_data`. Proposal drafted (tool surface sketch, nine open design questions). Parked pending OAuth; OAuth is now done — resume the proposal pass.
-- **Cowork directory submission.** Not yet done.
+- **Cowork (Claude Cowork) directory submission.** Not yet done.
+- **Wire auto-release CI into `talonic-node`'s publish workflow.** The SDK repo currently has no GitHub Releases (`gh release list --repo talonicdev/talonic-node` returns empty) despite shipping through 0.1.22 on npm. Mirror the `Create GitHub Release` step from `talonic-mcp`'s `publish.yml` so the SDK changelog is visible alongside npm publishes. Low-priority but small; useful for anyone tracking SDK changes via GitHub.
+- **Schema-typing footgun option 2 re-test.** Before filing with the API team, re-test on the current production surface whether `type` is now returned on `talonic_search` fieldMatches and `talonic_list_schemas` entries. If yes, the MCP-side outputSchema work is trivial. If no, file the API request.
 
 **Resolved since the previous audit:**
 
 - Hosted MCP root-path routing: `POST /` and `DELETE /` (and `GET /` with `Accept: text/event-stream`) now route through the same transport as `/mcp`. Plain `GET /` still returns discovery JSON. Shipped 0.1.37 (commit `2cf0c43`). See [Resolved 2026-05-18: hosted MCP at root + Registry CI chain](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain).
-- `mcp-publisher` chained into `.github/workflows/publish.yml` via GitHub OIDC (commit `1e87668`). Fires on the next code change; Registry catches up to npm without manual intervention from then on. See [Resolved 2026-05-18: hosted MCP at root + Registry CI chain](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain).
+- `mcp-publisher` chained into `.github/workflows/publish.yml` via GitHub OIDC (commit `1e87668`). Verified end-to-end on 2026-05-18: Registry now auto-tracks npm; current Registry isLatest is 0.1.44.
+- Auto-create GitHub Releases on bump wired into `publish.yml` (commit `c18f652`). Verified by six successful Releases (v0.1.39 → v0.1.44) cut during the 2026-05-18 dispatch-token testing burst. Glama and other surfaces that track GitHub Releases now stay current automatically.
+- Schema-typing footgun option 1 shipped: `warnings` field added to `talonic_filter`'s outputSchema (`src/tools/filter.ts`), plus a tool-description nudge telling agents to surface `warnings[].message` (and `suggestion`, when present) to the user rather than silently retrying. Shipped 0.1.38 (commit `eedbe11`). The schema-typing trap is now visible to agents that hit it.
 - `talonic_filter` schema-typing footgun: tool description now carries a SCHEMA TYPING block (0.1.16) and the API returns a `warnings` array when a numeric operator is applied to a string-typed field. Surface the `warnings` array in the filter outputSchema as a small follow-up (see [Schema-typing footgun options](#schema-typing-footgun-options)).
 - `is_not_empty` filter operator: re-exposed in 0.1.29; checks the materialized-values index.
 - Cost / EUR / balance and per-field provenance not surfaced: closed by `talonic_get_balance` (0.1.25), per-call `cost` block (0.1.25), and `include_provenance` on `talonic_extract` (0.1.14).
@@ -45,11 +49,11 @@ This document captures the live state of the four Talonic developer surfaces ahe
 | Item                        | State                                                                                                                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Repo                        | clean, on main, pushed                                                                                                                                                                                                 |
-| package.json version        | 0.1.37                                                                                                                                                                                                                 |
-| server.json version         | 0.1.37                                                                                                                                                                                                                 |
-| npm published version       | 0.1.37 (published 2026-05-18 via the auto-bump pipeline on the hosted MCP root-routing commit; see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain))                                  |
-| Auto-bump pipeline          | working; granular npm token with bypass-2FA in place; auto-bumps patch on every src/docs/package.json change. Now also runs `mcp-publisher publish` after npm publish (OIDC-authenticated, soft-fail).                |
-| Tests                       | 54 pass, 2 skipped (added 6 tests in `tests/http-server.test.ts` exercising the end-to-end `/` and `/mcp` routing; symlink tests still skip when `dist/` is older than `package.json`; verified 2026-05-18)            |
+| package.json version        | 0.1.44                                                                                                                                                                                                                 |
+| server.json version         | 0.1.44                                                                                                                                                                                                                 |
+| npm published version       | 0.1.44 (published 2026-05-18 via the auto-bump pipeline; verified end-to-end through the dispatch-token testing burst — see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain))         |
+| Auto-bump pipeline          | working; granular npm token with bypass-2FA in place; auto-bumps patch on every src/docs/package.json change. Also runs `mcp-publisher publish` (OIDC) and `gh release create` (OIDC, default GITHUB_TOKEN) after npm publish; both soft-fail. |
+| Tests                       | 57 pass, 2 skipped (added 6 tests in `tests/http-server.test.ts` for `/` + `/mcp` routing, plus 3 in `tests/tools/tools.test.ts` for the `filter` warnings outputSchema; symlink tests still skip when `dist/` is older than `package.json`; verified 2026-05-19) |
 | Format check                | clean                                                                                                                                                                                                                  |
 | Typecheck                   | clean                                                                                                                                                                                                                  |
 | Build                       | clean                                                                                                                                                                                                                  |
@@ -70,8 +74,8 @@ This document captures the live state of the four Talonic developer surfaces ahe
 | Item                  | State                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Repo                  | clean, on main, pushed                                                                                               |
-| package.json version  | 0.1.15                                                                                                               |
-| npm published version | 0.1.15                                                                                                               |
+| package.json version  | 0.1.22                                                                                                               |
+| npm published version | 0.1.22 (last functional release was 0.1.16 — 2026-05-11; 0.1.17 → 0.1.22 were dispatch-token churn bumps on 2026-05-18 with no source-code changes) |
 | Tests                 | 122 pass, 2 skipped (last verified during the previous audit; re-run on next SDK touch)                              |
 | `npm run check:spec`  | passes; SDK call sites match the OpenAPI spec                                                                        |
 | docs/sections.json    | reflects current surface (`WithRateLimit<T>`, `CostInfo`, `Credits` resource, `DocumentTriage`, `autoPopulateRequired`) |
@@ -100,11 +104,9 @@ Audit fix during this run: `talonic://webhooks/reference` was missing from `/.we
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Listing URL          | `https://registry.modelcontextprotocol.io/v0/servers?search=io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                   |
 | Listed name          | `io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                                                                              |
-| Listed version       | 0.1.28 (latest, isLatest=true, published 2026-05-08). npm is at 0.1.37; the Registry will catch up automatically on the next workflow run now that `mcp-publisher` is chained in (commit `1e87668`).                                                                                                                            |
+| Listed version       | 0.1.44 (latest, isLatest=true, published 2026-05-18). In sync with npm; the Registry now auto-tracks via the wired `mcp-publisher publish` step in CI.                                                                                                                                                                          |
 | Install instructions | npx command and `TALONIC_API_KEY` env var, both correct                                                                                                                                                                                                                                                                         |
-| Standing follow-up   | none active. The previous follow-up (wire `mcp-publisher publish` into CI) shipped 2026-05-18; see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain). First verification will happen on the next `chore: bump` commit; if it succeeds, the Registry version moves from 0.1.28 to whatever npm is at. |
-
-Catch-up note for the gap between 0.1.28 (current Registry latest) and 0.1.37 (current npm): the CI chain only fires on changes matching `paths: src/** | docs/** | package.json`. The wire-up commit itself touched only `.github/workflows/publish.yml` and so did not trigger the workflow. Either the next code change will close the gap automatically, or run a one-shot manual `mcp-publisher publish` against the current `server.json` (already at 0.1.37) to close it now.
+| Standing follow-up   | none.                                                                                                                                                                                                                                                                                                                           |
 
 ## Live end-to-end tests against production
 
@@ -308,14 +310,14 @@ The schema-typing footgun (numeric operators silently no-op against string-typed
 - The upstream API returns a `warnings` array on filter responses when a numeric operator is applied to a string-typed field.
 - `troubleshooting` section in `docs/sections.json` documents the trap.
 
-Lowest-cost mitigation we still have not done, ordered by leverage:
+Mitigation options, ordered by leverage:
 
-1. **Surface the API `warnings` array in `talonic_filter`'s outputSchema** (`src/tools/filter.ts`, lines 102-125). Today the MCP outputSchema does not declare `warnings`, so it is at risk of being filtered out depending on response normalisation. Adding `warnings: z.array(z.object({...})).optional()` would make the API's existing warning visible to the agent verbatim. Lowest-cost, biggest payoff. **Recommended.**
-2. **Surface field type in `talonic_search` and `talonic_list_schemas` outputs** so agents can check `field.type === 'number'` before constructing a `gt`/`lt` condition. Needs upstream API to return `type` on field-registry and schema-field entries (it returns it on schema definitions today but not consistently on `search` fieldMatches). Engineering coordination required.
+1. ~~**Surface the API `warnings` array in `talonic_filter`'s outputSchema**~~ — **Shipped 0.1.38** (commit `eedbe11`). `warnings` is now declared as an optional array of permissive `.passthrough()` objects with `code`/`message`/`field`/`field_id`/`suggestion` keys, so the API's existing warning reaches the agent's `structuredContent` intact. Tool description nudges agents to surface `message` (and `suggestion`) verbatim rather than silently retrying.
+2. **Surface field type in `talonic_search` and `talonic_list_schemas` outputs** so agents can check `field.type === 'number'` before constructing a `gt`/`lt` condition. Needs upstream API to return `type` on field-registry and schema-field entries (it returns it on schema definitions today but not consistently on `search` fieldMatches). **Engineering coordination required; status 2026-05-19: parked pending a re-test pass against the current API before filing.**
 3. **Pre-check in the MCP filter handler.** Before forwarding to the API, look up the schema-field type for the conditions where the operator is numeric. Reject or warn if the type is string. Costs an extra API call per filter (or schema cache). Highest cost, hardest to keep correct as the schema surface evolves. **Not recommended.**
 4. **Schema-creation-time warning at the API layer.** When a user types a numeric-looking field as `string` in `talonic_save_schema`, emit a warning in the response. Pure API-side change. **Engineering owns.**
 
-Recommended next step: ship option 1 in the MCP repo (small, additive, no API dependency), then file option 2 with engineering.
+Next step: re-test option 2's API behavior on the current production surface (`type` field presence in `search` fieldMatches and `list_schemas` entries) before filing with engineering. Until then, option 1 is the user-facing mitigation in flight.
 
 ### Distribution
 
