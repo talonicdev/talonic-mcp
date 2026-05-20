@@ -62,6 +62,13 @@ export const outputSchema = {
         filterable: z
           .boolean()
           .describe("Only filterable: true entries can be used with talonic_filter."),
+        dataType: z
+          .string()
+          .nullable()
+          .optional()
+          .describe(
+            "Field's declared data type (e.g. `string`, `number`, `array`). Use this to guard numeric operators in `talonic_filter` (`gt`/`gte`/`lt`/`lte`/`between`) — they only resolve correctly when `dataType === 'number'`. `null` on non-materialized informational entries.",
+          ),
       }),
     )
     .describe(
@@ -86,6 +93,13 @@ export const outputSchema = {
         displayName: z.string().optional(),
         documentCount: z.number().nullable().optional(),
         filterable: z.boolean().optional(),
+        dataType: z
+          .string()
+          .nullable()
+          .optional()
+          .describe(
+            "Field's declared data type (e.g. `string`, `number`, `array`). Use this to guard numeric operators in `talonic_filter` (`gt`/`gte`/`lt`/`lte`/`between`) — they only resolve correctly when `dataType === 'number'`.",
+          ),
       }),
     )
     .describe(

@@ -561,3 +561,107 @@ describe("filter outputSchema warnings passthrough (schema-typing footgun)", () 
     expect(result.success).toBe(true)
   })
 })
+
+describe("search outputSchema dataType passthrough (schema-typing footgun, preventive)", () => {
+  // The Talonic API began returning `dataType` on every entry of
+  // `fieldMatches[]` and `fields[]` in commit c16f2656 + 0689c1b2
+  // (2026-05-19), mirroring what `autocompleteFields` already does.
+  // The MCP outputSchema must declare the field so Zod's default strip
+  // mode does not drop it from `structuredContent`, otherwise agents
+  // cannot gate `gt`/`gte`/`lt`/`lte`/`between` on
+  // `field.dataType === "number"` before constructing a numeric filter.
+  it("preserves dataType on fieldMatches entries", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [
+        {
+          resolvedFieldId: "84cdf9cc-1d56-48f6-aead-6928b2b596de",
+          displayName: "Invoice Total",
+          matchedValue: "1500",
+          documentCount: 12,
+          filterable: true,
+          dataType: "number",
+        },
+      ],
+      sources: [],
+      schemas: [],
+      fields: [],
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const parsed = result.data as {
+        fieldMatches: Array<{ dataType?: string | null }>
+      }
+      expect(parsed.fieldMatches[0]?.dataType).toBe("number")
+    }
+  })
+
+  it("preserves dataType on fields entries", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [
+        {
+          id: "1413a322-6663-44d2-a482-be9d081bbed0",
+          canonicalName: "invoice_total",
+          displayName: "invoice_total",
+          documentCount: 12,
+          filterable: true,
+          dataType: "number",
+        },
+      ],
+    }
+    const result = Output.safeParse(apiResponse)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const parsed = result.data as { fields: Array<{ dataType?: string | null }> }
+      expect(parsed.fields[0]?.dataType).toBe("number")
+    }
+  })
+
+  it("accepts null dataType on non-materialized entries (informational sources)", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [
+        {
+          resolvedFieldId: null,
+          displayName: "Field Key",
+          matchedValue: "foo",
+          documentCount: 1,
+          filterable: false,
+          dataType: null,
+        },
+      ],
+      sources: [],
+      schemas: [],
+      fields: [],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+
+  it("accepts a response that omits dataType (forward-compatibility for older deploys)", () => {
+    const Output = z.object(searchOutputSchema)
+    const apiResponse = {
+      documents: [],
+      fieldMatches: [
+        {
+          resolvedFieldId: "x",
+          displayName: "n",
+          matchedValue: "v",
+          documentCount: 0,
+          filterable: true,
+        },
+      ],
+      sources: [],
+      schemas: [],
+      fields: [],
+    }
+    expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+})

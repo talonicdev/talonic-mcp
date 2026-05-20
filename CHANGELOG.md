@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`dataType` field on `talonic_search`'s outputSchema** for both `fieldMatches[]` and `fields[]` (`src/tools/search.ts`). Mirrors the API change shipped in platform commits `c16f2656` + `0689c1b2` (2026-05-19) that added `dataType` to the omnisearch response. The MCP outputSchema previously did not declare it, so Zod's default strip mode would have dropped the field from `structuredContent`. Field is `z.string().nullable().optional()` — accepts real values like `"string"`, `"number"`, `"array"`, plus `null` for non-materialized informational entries, plus absent for older deploys.
+
+### Changed
+
+- `talonic_filter` SCHEMA TYPING block restructured into a **preventive / reactive** pair: agents should now call `talonic_search` first and gate numeric operators (`gt`/`gte`/`lt`/`lte`/`between`) on `field.dataType === "number"` before constructing the filter, with the API's `warnings[]` array remaining the reactive safety net. Closes the schema-typing footgun end-to-end (option 1 was reactive only; option 2 adds the preventive surface).
+
 ## [0.1.38] - 2026-05-18
 
 ### Added
