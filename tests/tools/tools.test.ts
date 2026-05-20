@@ -9,6 +9,8 @@ import { handleFilter, outputSchema as filterOutputSchema } from "../../src/tool
 import { handleToMarkdown } from "../../src/tools/to-markdown"
 import { handleExtract } from "../../src/tools/extract"
 import { handleGetBalance } from "../../src/tools/get-balance"
+import { handleDebugEcho } from "../../src/tools/debug-echo"
+import { handleCheckUpload, handleRequestUploadUrl } from "../../src/tools/debug-upload-url"
 
 type MockedFetch = ReturnType<typeof vi.fn>
 
@@ -663,5 +665,72 @@ describe("search outputSchema dataType passthrough (schema-typing footgun, preve
       fields: [],
     }
     expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+})
+
+describe("talonic_debug_echo handler", () => {
+  it("returns the byte length, sha256, and prefix/suffix of file_data", async () => {
+    const bytes = Buffer.from("hello world")
+    const fileData = bytes.toString("base64")
+    const result = await handleDebugEcho({ file_data: fileData, filename: "x.txt" })
+    const parsed = parsedText(result) as {
+      keys_present: string[]
+      byte_lengths: Record<string, number>
+      file_data: {
+        raw_string_byte_length: number
+        decoded_byte_length: number | null
+        base64_valid: boolean
+        prefix_64: string
+        suffix_64: string
+        sha256_of_string: string
+        sha256_of_decoded: string | null
+      } | null
+    }
+    expect(parsed.keys_present.sort()).toEqual(["file_data", "filename"])
+    expect(parsed.byte_lengths["file_data"]).toBe(fileData.length)
+    expect(parsed.file_data).not.toBeNull()
+    expect(parsed.file_data!.decoded_byte_length).toBe(bytes.byteLength)
+    expect(parsed.file_data!.base64_valid).toBe(true)
+    expect(parsed.file_data!.prefix_64).toBe(fileData.slice(0, 64))
+  })
+
+  it("returns null file_data diagnostics when only metadata is provided", async () => {
+    const result = await handleDebugEcho({ file_url: "https://example.com/a.pdf" })
+    const parsed = parsedText(result) as { keys_present: string[]; file_data: unknown }
+    expect(parsed.keys_present).toEqual(["file_url"])
+    expect(parsed.file_data).toBeNull()
+  })
+})
+
+describe("talonic_debug_upload-url handlers", () => {
+  const noEnv: NodeJS.ProcessEnv = {}
+  const fullEnv: NodeJS.ProcessEnv = {
+    S3_REGION: "eu-central-1",
+    S3_BUCKET: "b",
+    S3_ACCESS_KEY_ID: "k",
+    S3_SECRET_ACCESS_KEY: "s",
+  }
+
+  it("request_upload_url returns a configuration error when S3 env vars are missing", async () => {
+    const result = await handleRequestUploadUrl(noEnv, { filename: "test.pdf" })
+    expect((result as { isError?: true }).isError).toBe(true)
+    expect(result.content[0]?.text).toContain("S3_REGION")
+  })
+
+  it("request_upload_url returns a validation error when filename is missing", async () => {
+    const result = await handleRequestUploadUrl(fullEnv, {})
+    expect((result as { isError?: true }).isError).toBe(true)
+    expect(result.content[0]?.text).toContain("filename")
+  })
+
+  it("check_upload returns a configuration error when S3 env vars are missing", async () => {
+    const result = await handleCheckUpload(noEnv, { object_key: "k" })
+    expect((result as { isError?: true }).isError).toBe(true)
+  })
+
+  it("check_upload returns a validation error when object_key is missing", async () => {
+    const result = await handleCheckUpload(fullEnv, {})
+    expect((result as { isError?: true }).isError).toBe(true)
+    expect(result.content[0]?.text).toContain("object_key")
   })
 })

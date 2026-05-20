@@ -10,6 +10,11 @@ import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
+import { registerDebugEcho } from "./tools/debug-echo.js"
+import {
+  registerDebugCheckUpload,
+  registerDebugRequestUploadUrl,
+} from "./tools/debug-upload-url.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -156,6 +161,15 @@ export function createServer(options: CreateServerOptions): McpServer {
   // Resource registrations.
   registerSchemasResource(server, getTalonic)
   registerWebhooksResource(server, getToken, baseUrl)
+
+  // Debug tools, only when explicitly enabled via TALONIC_DEBUG_TOOLS=1.
+  // Used for measuring how hosted connectors (Claude.ai) deliver arguments
+  // and files to the MCP server. Off in production by default.
+  if (process.env["TALONIC_DEBUG_TOOLS"] === "1") {
+    registerDebugEcho(server)
+    registerDebugRequestUploadUrl(server)
+    registerDebugCheckUpload(server)
+  }
 
   return server
 }

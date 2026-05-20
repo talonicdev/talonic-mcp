@@ -64,6 +64,8 @@
     "prepublishOnly": "npm run typecheck && npm run build && npm test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1050.0",
+    "@aws-sdk/s3-request-presigner": "^3.1050.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@talonic/node": "^0.1.10",
     "zod": "^4.0.0"

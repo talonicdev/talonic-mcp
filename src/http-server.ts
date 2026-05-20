@@ -165,6 +165,26 @@ export function createRequestHandler(): (
     const url = new URL(req.url ?? "/", "http://localhost")
     const path = url.pathname
 
+    // ── Debug header dump ─────────────────────────────────────────────
+    // Gated by TALONIC_DEBUG_TOOLS=1. Logs every incoming request's
+    // method, path, content-length, and full header set (Authorization
+    // redacted) to stdout so we can inspect what hosted connectors
+    // actually send. Off in production by default.
+    if (process.env["TALONIC_DEBUG_TOOLS"] === "1") {
+      const headersForLog: Record<string, string | string[]> = {}
+      for (const [k, v] of Object.entries(req.headers)) {
+        if (v === undefined) continue
+        if (k.toLowerCase() === "authorization") {
+          headersForLog[k] = "Bearer [redacted]"
+        } else {
+          headersForLog[k] = v
+        }
+      }
+      console.log(
+        `[debug-http] ${req.method} ${path} content-length=${req.headers["content-length"] ?? "?"} headers=${JSON.stringify(headersForLog)}`,
+      )
+    }
+
     // ── Origin allowlist (DNS-rebinding mitigation) ───────────────────
     // Browser clients send an `Origin` header on cross-origin requests;
     // native and server-to-server clients typically do not. We reject any
