@@ -19,11 +19,75 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # Need history so we can diff the pushed range and inspect commit
+          # messages for the [skip docs] opt-out below.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+
+      # Docs-drift guard.
+      #
+      # talonic.com/docs/mcp is fed by docs/sections.json (via the platform's
+      # sync-external-docs workflow → @talonic/docs → the website). The file
+      # is hand-maintained — it is NOT auto-generated from src/. That used to
+      # mean tool/server changes could ship to npm + the website install
+      # docs without the public docs pages catching up, because the platform
+      # sync detects a no-op diff and skips publishing @talonic/docs.
+      #
+      # Rule: if any "documentable" source path changed in this push but
+      # docs/sections.json did not, fail loudly. Genuinely-non-doc-affecting
+      # changes (refactors, internal-only fixes, CI) can opt out by including
+      # `[skip docs]` anywhere in any commit message in the push.
+      - name: Docs-drift guard
+        run: |
+          set -euo pipefail
+          # Range to inspect: everything new in this push. Fall back to the
+          # last commit if the before-ref is unavailable (e.g. first push).
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE="HEAD~1"
+          fi
+          RANGE="${BEFORE}..HEAD"
+          echo "Inspecting range: $RANGE"
+
+          CHANGED_FILES="$(git diff --name-only "$RANGE")"
+          echo "Changed files:"
+          echo "$CHANGED_FILES" | sed 's/^/  /'
+
+          # Documentable paths — changes here typically need docs updates.
+          DOCUMENTABLE_REGEX='^(src/tools/|src/http-server\.ts$|src/server-factory\.ts$|src/resources/)'
+
+          if ! echo "$CHANGED_FILES" | grep -qE "$DOCUMENTABLE_REGEX"; then
+            echo "No documentable source paths changed. Skipping check."
+            exit 0
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q '^docs/sections.json$'; then
+            echo "docs/sections.json updated alongside source. OK."
+            exit 0
+          fi
+
+          # Allow opt-out via [skip docs] in any commit message in this push.
+          if git log --format=%B "$RANGE" | grep -qiF '[skip docs]'; then
+            echo "Found [skip docs] opt-out in commit message. Skipping check."
+            exit 0
+          fi
+
+          echo "::error::Documentable source paths changed but docs/sections.json was not updated."
+          echo ""
+          echo "talonic.com/docs/mcp is fed by docs/sections.json. Without an"
+          echo "update there, the platform sync will detect no diff and"
+          echo "@talonic/docs will not be republished — the public docs pages"
+          echo "will silently drift behind the actual product."
+          echo ""
+          echo "Either update docs/sections.json with the corresponding content,"
+          echo "or include [skip docs] in a commit message in this push if the"
+          echo "change is genuinely not docs-affecting (refactors, internal-only"
+          echo "fixes, etc.)."
+          exit 1
 
       - name: Install dependencies
         run: npm ci

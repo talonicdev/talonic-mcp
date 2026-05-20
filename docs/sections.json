@@ -24,9 +24,18 @@
       }
     ],
     "related": [
-      { "label": "Installation", "slug": "mcp-installation" },
-      { "label": "Tools", "slug": "mcp-talonic-extract" },
-      { "label": "Node SDK", "slug": "sdk-introduction" }
+      {
+        "label": "Installation",
+        "slug": "mcp-installation"
+      },
+      {
+        "label": "Tools",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "Node SDK",
+        "slug": "sdk-introduction"
+      }
     ],
     "faq": [
       {
@@ -34,7 +43,12 @@
         "answer": "An official Model Context Protocol server that gives AI agents eight tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
-    "mentions": ["MCP", "Model Context Protocol", "AI agents", "document extraction"]
+    "mentions": [
+      "MCP",
+      "Model Context Protocol",
+      "AI agents",
+      "document extraction"
+    ]
   },
   {
     "slug": "mcp-installation",
@@ -46,6 +60,10 @@
       {
         "type": "paragraph",
         "text": "Three install paths. Pick the one that matches your client."
+      },
+      {
+        "type": "callout",
+        "text": "The hosted MCP endpoint accepts both `https://mcp.talonic.com/mcp` and the bare origin `https://mcp.talonic.com` as connector URLs — POST/DELETE/SSE traffic at either path routes through the same Streamable HTTP transport. Plain `GET /` still returns the discovery JSON. Either URL works in any of the install paths below."
       },
       {
         "type": "heading",
@@ -73,7 +91,11 @@
         "type": "callout",
         "text": "The connector does not need an API key in its config. Token rotation is handled by the OAuth flow."
       },
-      { "type": "heading", "level": 3, "text": "Local stdio (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local stdio (npx)"
+      },
       {
         "type": "paragraph",
         "text": "Recommended for IDE-style clients (Claude Desktop, Cursor, Cline, Continue, Cowork). Runs on your machine via stdio; requires Node.js 18 or later. Uses a `TALONIC_API_KEY` from `app.talonic.com`."
@@ -109,9 +131,18 @@
       }
     ],
     "related": [
-      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
-      { "label": "Cursor", "slug": "mcp-cursor" },
-      { "label": "Authentication", "slug": "mcp-authentication" }
+      {
+        "label": "Claude Desktop",
+        "slug": "mcp-claude-desktop"
+      },
+      {
+        "label": "Cursor",
+        "slug": "mcp-cursor"
+      },
+      {
+        "label": "Authentication",
+        "slug": "mcp-authentication"
+      }
     ],
     "faq": [
       {
@@ -145,7 +176,11 @@
         "type": "paragraph",
         "text": "Each user runs against their own isolated Talonic workspace. Your documents and schemas are private to you. There are three authentication paths depending on how you connect."
       },
-      { "type": "heading", "level": 3, "text": "OAuth 2.1 (Claude.ai connector, recommended)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "OAuth 2.1 (Claude.ai connector, recommended)"
+      },
       {
         "type": "paragraph",
         "text": "When you connect via Claude.ai's custom-connector flow, the connector launches an OAuth 2.1 sign-in to `app.talonic.com` (PKCE + Dynamic Client Registration). After consent, the connector exchanges a short-lived bearer token that is rotated automatically; no API key sits in the connector config. The Talonic MCP server validates the token on each request against the API, so revocation propagates immediately."
@@ -176,7 +211,11 @@
           "`?apiKey=tlnc_...` query parameter (only for clients that cannot set custom headers)."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Environment variable (local stdio)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Environment variable (local stdio)"
+      },
       {
         "type": "paragraph",
         "text": "Set `TALONIC_API_KEY` in the `env` block of your MCP client config. The local server reads it at startup."
@@ -192,8 +231,14 @@
       }
     ],
     "related": [
-      { "label": "Installation", "slug": "mcp-installation" },
-      { "label": "API Authentication", "slug": "authentication" }
+      {
+        "label": "Installation",
+        "slug": "mcp-installation"
+      },
+      {
+        "label": "API Authentication",
+        "slug": "authentication"
+      }
     ],
     "faq": [
       {
@@ -222,14 +267,22 @@
         "type": "paragraph",
         "text": "Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows)."
       },
-      { "type": "heading", "level": 3, "text": "Hosted (recommended)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted (recommended)"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "claude_desktop_config.json",
         "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"url\": \"https://mcp.talonic.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer tlnc_your_key_here\"\n      }\n    }\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Local (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local (npx)"
+      },
       {
         "type": "code",
         "language": "json",
@@ -242,8 +295,14 @@
       }
     ],
     "related": [
-      { "label": "Cursor", "slug": "mcp-cursor" },
-      { "label": "Tool Reference", "slug": "mcp-talonic-extract" }
+      {
+        "label": "Cursor",
+        "slug": "mcp-cursor"
+      },
+      {
+        "label": "Tool Reference",
+        "slug": "mcp-talonic-extract"
+      }
     ],
     "faq": [
       {
@@ -251,7 +310,11 @@
         "answer": "Edit claude_desktop_config.json, add the Talonic MCP server config (hosted URL or local npx) with your API key, and fully restart Claude Desktop (Cmd+Q on macOS)."
       }
     ],
-    "mentions": ["Claude Desktop", "macOS", "Windows"]
+    "mentions": [
+      "Claude Desktop",
+      "macOS",
+      "Windows"
+    ]
   },
   {
     "slug": "mcp-cursor",
@@ -264,14 +327,22 @@
         "type": "paragraph",
         "text": "Edit `~/.cursor/mcp.json` (or open Cursor settings → MCP → edit config):"
       },
-      { "type": "heading", "level": 3, "text": "Hosted (recommended)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted (recommended)"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "~/.cursor/mcp.json",
         "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"url\": \"https://mcp.talonic.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer tlnc_your_key_here\"\n      }\n    }\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Local (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local (npx)"
+      },
       {
         "type": "code",
         "language": "json",
@@ -280,8 +351,14 @@
       }
     ],
     "related": [
-      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
-      { "label": "Cline", "slug": "mcp-cline" }
+      {
+        "label": "Claude Desktop",
+        "slug": "mcp-claude-desktop"
+      },
+      {
+        "label": "Cline",
+        "slug": "mcp-cline"
+      }
     ],
     "faq": [
       {
@@ -289,7 +366,10 @@
         "answer": "Edit ~/.cursor/mcp.json and add the Talonic MCP server config with your API key. Hosted or local."
       }
     ],
-    "mentions": ["Cursor", "IDE"]
+    "mentions": [
+      "Cursor",
+      "IDE"
+    ]
   },
   {
     "slug": "mcp-cline",
@@ -302,23 +382,40 @@
         "type": "paragraph",
         "text": "Open the Cline panel → settings (gear icon) → MCP Servers → Edit."
       },
-      { "type": "heading", "level": 3, "text": "Hosted (recommended)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted (recommended)"
+      },
       {
         "type": "code",
         "language": "json",
         "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"url\": \"https://mcp.talonic.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer tlnc_your_key_here\"\n      }\n    }\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Local (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local (npx)"
+      },
       {
         "type": "code",
         "language": "json",
         "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@talonic/mcp@latest\"],\n      \"env\": {\n        \"TALONIC_API_KEY\": \"tlnc_your_key_here\"\n      }\n    }\n  }\n}"
       },
-      { "type": "paragraph", "text": "Save and restart the panel." }
+      {
+        "type": "paragraph",
+        "text": "Save and restart the panel."
+      }
     ],
     "related": [
-      { "label": "Continue", "slug": "mcp-continue" },
-      { "label": "Cursor", "slug": "mcp-cursor" }
+      {
+        "label": "Continue",
+        "slug": "mcp-continue"
+      },
+      {
+        "label": "Cursor",
+        "slug": "mcp-cursor"
+      }
     ],
     "faq": [
       {
@@ -326,7 +423,10 @@
         "answer": "Open the Cline panel settings, go to MCP Servers, click Edit, and add the Talonic config entry."
       }
     ],
-    "mentions": ["Cline", "VS Code"]
+    "mentions": [
+      "Cline",
+      "VS Code"
+    ]
   },
   {
     "slug": "mcp-continue",
@@ -339,14 +439,22 @@
         "type": "paragraph",
         "text": "Edit `~/.continue/config.json`. Add to the `mcpServers` array:"
       },
-      { "type": "heading", "level": 3, "text": "Hosted (recommended)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted (recommended)"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "~/.continue/config.json",
         "code": "{\n  \"name\": \"talonic\",\n  \"url\": \"https://mcp.talonic.com/mcp\",\n  \"headers\": {\n    \"Authorization\": \"Bearer tlnc_your_key_here\"\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Local (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local (npx)"
+      },
       {
         "type": "code",
         "language": "json",
@@ -355,8 +463,14 @@
       }
     ],
     "related": [
-      { "label": "Cowork", "slug": "mcp-cowork" },
-      { "label": "Cline", "slug": "mcp-cline" }
+      {
+        "label": "Cowork",
+        "slug": "mcp-cowork"
+      },
+      {
+        "label": "Cline",
+        "slug": "mcp-cline"
+      }
     ],
     "faq": [
       {
@@ -364,7 +478,11 @@
         "answer": "Edit ~/.continue/config.json and add a Talonic entry to the mcpServers array with your API key."
       }
     ],
-    "mentions": ["Continue", "VS Code", "JetBrains"]
+    "mentions": [
+      "Continue",
+      "VS Code",
+      "JetBrains"
+    ]
   },
   {
     "slug": "mcp-cowork",
@@ -373,14 +491,25 @@
     "seoTitle": "MCP Setup for Cowork — Talonic Docs",
     "description": "Configure the Talonic MCP server in Cowork. Hosted and local configs.",
     "content": [
-      { "type": "paragraph", "text": "Open Cowork settings → MCP Servers → Add." },
-      { "type": "heading", "level": 3, "text": "Hosted (recommended)" },
+      {
+        "type": "paragraph",
+        "text": "Open Cowork settings → MCP Servers → Add."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted (recommended)"
+      },
       {
         "type": "code",
         "language": "json",
         "code": "{\n  \"mcpServers\": {\n    \"talonic\": {\n      \"url\": \"https://mcp.talonic.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer tlnc_your_key_here\"\n      }\n    }\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Local (npx)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local (npx)"
+      },
       {
         "type": "code",
         "language": "json",
@@ -388,8 +517,14 @@
       }
     ],
     "related": [
-      { "label": "Claude Desktop", "slug": "mcp-claude-desktop" },
-      { "label": "Tool Reference", "slug": "mcp-talonic-extract" }
+      {
+        "label": "Claude Desktop",
+        "slug": "mcp-claude-desktop"
+      },
+      {
+        "label": "Tool Reference",
+        "slug": "mcp-talonic-extract"
+      }
     ],
     "faq": [
       {
@@ -397,7 +532,9 @@
         "answer": "Open Cowork settings, go to MCP Servers, click Add, and paste the standard Talonic config with your API key."
       }
     ],
-    "mentions": ["Cowork"]
+    "mentions": [
+      "Cowork"
+    ]
   },
   {
     "slug": "mcp-talonic-extract",
@@ -410,7 +547,11 @@
         "type": "paragraph",
         "text": "Extract structured, schema-validated data from a document. Returns clean JSON matching the schema, with per-field confidence scores and document metadata."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -421,7 +562,11 @@
           "You want validated JSON instead of trying to OCR + parse with raw LLM calls."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -430,7 +575,11 @@
           "The user wants to find documents matching a query → use `talonic_search` or `talonic_filter`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
       {
         "type": "param-table",
         "title": "File source (provide exactly one)",
@@ -499,14 +648,22 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "Example response",
         "code": "{\n  \"data\": {\n    \"vendor_name\": \"Acme Corp\",\n    \"invoice_number\": \"INV-2024-0847\",\n    \"total_amount\": 14250.00,\n    \"due_date\": \"2024-03-15\"\n  },\n  \"confidence\": {\n    \"vendor_name\": 0.97,\n    \"invoice_number\": 0.99,\n    \"total_amount\": 0.94,\n    \"due_date\": 0.91\n  },\n  \"document\": {\n    \"id\": \"d_abc123\",\n    \"filename\": \"invoice.pdf\",\n    \"documentType\": \"invoice\",\n    \"language\": \"en\",\n    \"pageCount\": 2\n  },\n  \"extraction\": {\n    \"id\": \"ext_xyz789\",\n    \"schemaId\": \"sch_def456\"\n  },\n  \"cost\": {\n    \"costCredits\": 1,\n    \"costEur\": 0.05,\n    \"balanceCredits\": 999,\n    \"cellsResolvedRegistry\": 3,\n    \"cellsResolvedAi\": 1\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Confidence scores and human escalation" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Confidence scores and human escalation"
+      },
       {
         "type": "paragraph",
         "text": "Each field in the `confidence` object is a float from 0.0 to 1.0. Values above **0.90** are high confidence. Values between **0.70–0.90** should be treated with caution — flag them to the user for verification. Values below **0.70** indicate low confidence — the agent should ask the user to verify the value or re-extract with more specific instructions."
@@ -516,17 +673,29 @@
         "variant": "warning",
         "text": "Always provide either a `schema` or `schema_id`. The MCP layer rejects schema-less calls with a validation error before they reach the API."
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
       {
         "type": "paragraph",
         "text": "Each `talonic_extract` call with a new file consumes **one extraction credit**. Re-extracting the same `document_id` with a different schema also consumes one credit. The per-call cost is surfaced on the response under `cost` (`costCredits`, `costEur`, `balanceCredits`, plus a breakdown of how many cells were resolved by the registry vs the AI), parsed from the `X-Talonic-Cost-*` and `X-Talonic-Balance-*` response headers. To avoid unnecessary cost, check if a document has already been extracted before calling again — use `talonic_search` or `talonic_filter` to find existing results, and `talonic_get_balance` to check your runway before kicking off a large batch."
       },
-      { "type": "heading", "level": 3, "text": "Errors" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Errors"
+      },
       {
         "type": "param-table",
         "title": "Common errors",
         "params": [
-          { "name": "unauthorized", "type": "401", "description": "Invalid or missing API key." },
+          {
+            "name": "unauthorized",
+            "type": "401",
+            "description": "Invalid or missing API key."
+          },
           {
             "name": "validation_error",
             "type": "422",
@@ -551,9 +720,18 @@
       }
     ],
     "related": [
-      { "label": "SDK Extract", "slug": "sdk-extract" },
-      { "label": "POST /v1/extract", "slug": "post-extract" },
-      { "label": "Cost & Rate Limits", "slug": "mcp-cost-and-limits" }
+      {
+        "label": "SDK Extract",
+        "slug": "sdk-extract"
+      },
+      {
+        "label": "POST /v1/extract",
+        "slug": "post-extract"
+      },
+      {
+        "label": "Cost & Rate Limits",
+        "slug": "mcp-cost-and-limits"
+      }
     ],
     "faq": [
       {
@@ -565,7 +743,13 @@
         "answer": "Scores above 0.90 are reliable. Between 0.70–0.90, flag to the user for verification. Below 0.70, ask the user to verify or re-extract with more specific instructions."
       }
     ],
-    "mentions": ["talonic_extract", "file_data", "schema", "confidence", "extraction"]
+    "mentions": [
+      "talonic_extract",
+      "file_data",
+      "schema",
+      "confidence",
+      "extraction"
+    ]
   },
   {
     "slug": "mcp-talonic-search",
@@ -578,7 +762,11 @@
         "type": "paragraph",
         "text": "Omnisearch across documents, extracted field values, field names, sources, and schemas in the workspace. Returns ranked results across all entity types in one call."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -590,7 +778,11 @@
           "You need to discover canonical field names before using `talonic_filter`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -600,7 +792,11 @@
           "The user wants to extract data from a new document → use `talonic_extract`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
       {
         "type": "param-table",
         "title": "Parameters",
@@ -618,28 +814,48 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "Example response",
-        "code": "{\n  \"documents\": [\n    {\n      \"id\": \"d_abc123\",\n      \"filename\": \"acme-invoice-q4.pdf\",\n      \"documentType\": \"invoice\",\n      \"score\": 0.92\n    }\n  ],\n  \"fieldMatches\": [\n    {\n      \"resolvedFieldId\": \"f_ghi789\",\n      \"displayName\": \"Vendor Name\",\n      \"matchedValue\": \"Acme Corp\",\n      \"documentCount\": 3,\n      \"filterable\": true\n    }\n  ],\n  \"sources\": [],\n  \"schemas\": [\n    {\n      \"id\": \"sch_def456\",\n      \"name\": \"Standard Invoice\"\n    }\n  ],\n  \"fields\": [\n    {\n      \"id\": \"f_ghi789\",\n      \"canonicalName\": \"vendor.name\",\n      \"displayName\": \"Vendor Name\",\n      \"documentCount\": 12,\n      \"filterable\": true\n    }\n  ]\n}"
+        "code": "{\n  \"documents\": [\n    {\n      \"id\": \"d_abc123\",\n      \"filename\": \"acme-invoice-q4.pdf\",\n      \"documentType\": \"invoice\",\n      \"score\": 0.92\n    }\n  ],\n  \"fieldMatches\": [\n    {\n      \"resolvedFieldId\": \"f_ghi789\",\n      \"displayName\": \"Vendor Name\",\n      \"matchedValue\": \"Acme Corp\",\n      \"documentCount\": 3,\n      \"filterable\": true,\n      \"dataType\": \"string\"\n    }\n  ],\n  \"sources\": [],\n  \"schemas\": [\n    {\n      \"id\": \"sch_def456\",\n      \"name\": \"Standard Invoice\"\n    }\n  ],\n  \"fields\": [\n    {\n      \"id\": \"f_total\",\n      \"canonicalName\": \"total_amount\",\n      \"displayName\": \"Total Amount\",\n      \"documentCount\": 14,\n      \"filterable\": true,\n      \"dataType\": \"number\"\n    }\n  ]\n}"
       },
       {
         "type": "callout",
         "text": "Only `fields[]` entries with `filterable: true` can be used with `talonic_filter`. These have extracted data in the workspace. Fields with `filterable: false` exist in a schema definition but have no extracted data yet — they become filterable after documents are processed against their schema."
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
+      {
+        "type": "callout",
+        "text": "Every `fieldMatches[]` and `fields[]` entry carries a `dataType` (`\"string\"`, `\"number\"`, `\"array\"`, etc.). Use it to pick the right `talonic_filter` operator on the first call — numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when `dataType === \"number\"`. See the *Schema typing* section under `talonic_filter` for the full preventive / reactive pattern."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
       {
         "type": "paragraph",
         "text": "Search calls are **free** — they do not consume extraction credits. Use search liberally to explore before extracting."
       },
-      { "type": "heading", "level": 3, "text": "Errors" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Errors"
+      },
       {
         "type": "param-table",
         "title": "Common errors",
         "params": [
-          { "name": "unauthorized", "type": "401", "description": "Invalid or missing API key." },
+          {
+            "name": "unauthorized",
+            "type": "401",
+            "description": "Invalid or missing API key."
+          },
           {
             "name": "validation_error",
             "type": "422",
@@ -649,8 +865,14 @@
       }
     ],
     "related": [
-      { "label": "talonic_filter", "slug": "mcp-talonic-filter" },
-      { "label": "Omnisearch", "slug": "omnisearch" }
+      {
+        "label": "talonic_filter",
+        "slug": "mcp-talonic-filter"
+      },
+      {
+        "label": "Omnisearch",
+        "slug": "omnisearch"
+      }
     ],
     "faq": [
       {
@@ -660,9 +882,21 @@
       {
         "question": "What entities does talonic_search return?",
         "answer": "Documents, field matches (with canonical names and values), sources, schemas, and field definitions — all ranked by relevance score."
+      },
+      {
+        "question": "How do I avoid a `talonic_filter` numeric query returning zero matches?",
+        "answer": "Check `dataType` on the field entry in the search response before constructing the filter. Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve against fields where `dataType === \"number\"`. If the type is `string` (common for monetary or formatted-number fields), suggest the user change the field's data type in the schema before filtering."
       }
     ],
-    "mentions": ["talonic_search", "omnisearch", "canonicalName", "field discovery"]
+    "mentions": [
+      "canonicalName",
+      "dataType",
+      "field discovery",
+      "omnisearch",
+      "preventive guard",
+      "schema typing",
+      "talonic_search"
+    ]
   },
   {
     "slug": "mcp-talonic-filter",
@@ -675,7 +909,11 @@
         "type": "paragraph",
         "text": "Filter documents by extracted field values using composable conditions. Conditions accept canonical field names (e.g. `vendor.name`, `policy.0_coverage_type`) or field UUIDs. The Talonic API resolves names to IDs server-side."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -685,7 +923,11 @@
           "You need a sortable, paginated list filtered by field conditions."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -695,7 +937,11 @@
           "The user wants to extract from a new document → use `talonic_extract`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
       {
         "type": "param-table",
         "title": "Top-level parameters",
@@ -721,7 +967,11 @@
             "type": "number",
             "description": "Page number for pagination (1-based)."
           },
-          { "name": "limit", "type": "number", "description": "Results per page. Default: 50." },
+          {
+            "name": "limit",
+            "type": "number",
+            "description": "Results per page. Default: 50."
+          },
           {
             "name": "source_connection_id",
             "type": "string",
@@ -761,13 +1011,25 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Operator reference" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Operator reference"
+      },
       {
         "type": "param-table",
         "title": "Operators",
         "params": [
-          { "name": "eq", "type": "=", "description": "Exact equality." },
-          { "name": "neq", "type": "!=", "description": "Not equal." },
+          {
+            "name": "eq",
+            "type": "=",
+            "description": "Exact equality."
+          },
+          {
+            "name": "neq",
+            "type": "!=",
+            "description": "Not equal."
+          },
           {
             "name": "gt / gte",
             "type": "> / >=",
@@ -788,7 +1050,11 @@
             "type": "substring",
             "description": "Case-insensitive substring match on string fields."
           },
-          { "name": "is_empty", "type": "null check", "description": "Field has no value." },
+          {
+            "name": "is_empty",
+            "type": "null check",
+            "description": "Field has no value."
+          },
           {
             "name": "is_not_empty",
             "type": "presence",
@@ -796,14 +1062,22 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Example" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Example"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "Find invoices over 1000 from Acme",
         "code": "{\n  \"conditions\": [\n    { \"field\": \"vendor.name\", \"operator\": \"contains\", \"value\": \"Acme\" },\n    { \"field\": \"total_amount\", \"operator\": \"gt\", \"value\": 1000 }\n  ],\n  \"sort\": { \"field\": \"total_amount\", \"direction\": \"desc\" },\n  \"limit\": 10\n}"
       },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "code",
         "language": "json",
@@ -811,20 +1085,61 @@
         "code": "{\n  \"documents\": [\n    {\n      \"id\": \"d_abc123\",\n      \"filename\": \"acme-invoice-q4.pdf\",\n      \"documentType\": \"invoice\",\n      \"extractedFields\": {\n        \"vendor.name\": \"Acme Corp\",\n        \"total_amount\": 14250.00\n      }\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 10\n}"
       },
       {
-        "type": "callout",
-        "text": "Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. `€1,500.00`) will silently return zero matches. The API now returns a `warnings[]` array on the filter response when a numeric operator is applied to a string-typed field, explaining the lexicographic-comparison issue and suggesting a `data_type` change."
+        "type": "heading",
+        "level": 3,
+        "text": "Schema typing (preventive + reactive)"
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
+      {
+        "type": "paragraph",
+        "text": "Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. `€1,500.00`) will silently return zero matches even after extraction. There are two ways to handle this — pick the right one before constructing the call."
+      },
+      {
+        "type": "heading",
+        "level": 4,
+        "text": "Preventive — gate on `dataType`"
+      },
+      {
+        "type": "paragraph",
+        "text": "Call `talonic_search` first and read `dataType` on the field entry. If `dataType !== \"number\"`, do **not** issue a numeric operator on that field. Pick a string-friendly operator (`eq`, `contains`) or warn the user that the field needs a `data_type` change in the schema before the query can succeed. This avoids the silent-zero-matches outcome entirely."
+      },
+      {
+        "type": "heading",
+        "level": 4,
+        "text": "Reactive — handle `warnings[]`"
+      },
+      {
+        "type": "paragraph",
+        "text": "When a numeric operator is applied to a string-typed field, the API attaches a `warnings[]` array to the filter response. Each entry has `code`, `message`, `field`/`field_id`, and a `suggestion`. The MCP tool surfaces this in `structuredContent` — agents should relay the `message` (and `suggestion`, when present) to the user rather than silently retrying."
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Response with a warning",
+        "code": "{\n  \"data\": [],\n  \"total\": 0,\n  \"warnings\": [\n    {\n      \"code\": \"numeric_operator_on_string_field\",\n      \"message\": \"Operator `gt` was applied to field `invoice_total` typed as string. Numeric comparisons against string-typed fields use lexicographic ordering and may return zero matches.\",\n      \"field\": \"invoice_total\",\n      \"field_id\": \"fld_inv_total\",\n      \"suggestion\": \"Change the field's data_type to `number` in the schema definition.\"\n    }\n  ]\n}"
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
       {
         "type": "paragraph",
         "text": "Filter calls are **free** — they query already-extracted data and do not consume extraction credits."
       },
-      { "type": "heading", "level": 3, "text": "Errors" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Errors"
+      },
       {
         "type": "param-table",
         "title": "Common errors",
         "params": [
-          { "name": "unauthorized", "type": "401", "description": "Invalid or missing API key." },
+          {
+            "name": "unauthorized",
+            "type": "401",
+            "description": "Invalid or missing API key."
+          },
           {
             "name": "no_field_match",
             "type": "422",
@@ -839,8 +1154,14 @@
       }
     ],
     "related": [
-      { "label": "talonic_search", "slug": "mcp-talonic-search" },
-      { "label": "Filter & Search API", "slug": "field-autocomplete" }
+      {
+        "label": "talonic_search",
+        "slug": "mcp-talonic-search"
+      },
+      {
+        "label": "Filter & Search API",
+        "slug": "field-autocomplete"
+      }
     ],
     "faq": [
       {
@@ -850,16 +1171,23 @@
       {
         "question": "How do I find field names for filtering?",
         "answer": "Call talonic_search first. Use fields[] entries where filterable is true — their canonicalName values are what you pass as the field parameter in filter conditions. Fields with filterable: false have no extracted data yet and cannot be filtered."
+      },
+      {
+        "question": "Why does my `talonic_filter` query with `gt` return zero matches on a numeric-looking field?",
+        "answer": "The schema field is almost certainly typed as `string`, not `number`. Numeric operators against string-typed fields fall back to lexicographic comparison and silently return zero. Prevention: call `talonic_search` first and check `dataType` before issuing the filter. Recovery: the response's `warnings[]` array explains the issue and suggests a `data_type` change in the schema definition."
       }
     ],
     "mentions": [
-      "talonic_filter",
-      "filter",
-      "conditions",
-      "operators",
       "canonical field name",
-      "warnings",
-      "is_not_empty"
+      "conditions",
+      "dataType",
+      "filter",
+      "is_not_empty",
+      "operators",
+      "preventive guard",
+      "schema typing",
+      "talonic_filter",
+      "warnings"
     ]
   },
   {
@@ -873,7 +1201,11 @@
         "type": "paragraph",
         "text": "Fetch full metadata for a single document by ID. Returns filename, page count, detected document type, language, processing log, and link URLs."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -883,7 +1215,11 @@
           "The user asks 'tell me about document X'."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -893,7 +1229,11 @@
           "The user has a file but no `document_id` yet → call `talonic_extract` first."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
       {
         "type": "param-table",
         "title": "Parameters",
@@ -906,22 +1246,43 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "Example response",
         "code": "{\n  \"id\": \"d_abc123\",\n  \"filename\": \"invoice.pdf\",\n  \"documentType\": \"invoice\",\n  \"language\": \"en\",\n  \"pageCount\": 2,\n  \"processingLog\": [...],\n  \"links\": {\n    \"self\": \"https://api.talonic.com/v1/documents/d_abc123\",\n    \"extractions\": \"https://api.talonic.com/v1/documents/d_abc123/extractions\",\n    \"dashboard\": \"https://app.talonic.com/documents/d_abc123\"\n  }\n}"
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
-      { "type": "paragraph", "text": "Free — metadata lookups do not consume extraction credits." }
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — metadata lookups do not consume extraction credits."
+      }
     ],
     "related": [
-      { "label": "SDK Documents", "slug": "sdk-documents" },
-      { "label": "Get Document", "slug": "get-document" }
+      {
+        "label": "SDK Documents",
+        "slug": "sdk-documents"
+      },
+      {
+        "label": "Get Document",
+        "slug": "get-document"
+      }
     ],
     "faq": [],
-    "mentions": ["talonic_get_document", "metadata", "document_id"]
+    "mentions": [
+      "talonic_get_document",
+      "metadata",
+      "document_id"
+    ]
   },
   {
     "slug": "mcp-talonic-to-markdown",
@@ -934,7 +1295,11 @@
         "type": "paragraph",
         "text": "Get OCR-converted markdown for a document. Accepts an existing `document_id` (cheapest — one API call, no re-processing), or raw file bytes, a local path, or a URL."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -945,7 +1310,11 @@
           "The user has a raw PDF / scan / image and wants markdown directly without designing a schema."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -953,8 +1322,15 @@
           "The user wants specific structured fields → use `talonic_extract` with a schema."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
-      { "type": "paragraph", "text": "Provide **exactly one** of the following:" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "Provide **exactly one** of the following:"
+      },
       {
         "type": "param-table",
         "title": "Parameters",
@@ -986,19 +1362,31 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "code",
         "language": "json",
         "title": "Example response",
         "code": "{\n  \"documentId\": \"d_abc123\",\n  \"markdown\": \"# Invoice INV-2024-0847\\n\\n**Vendor:** Acme Corp\\n**Date:** 2024-01-15\\n\\n| Item | Qty | Unit Price | Total |\\n|------|-----|------------|-------|\\n| Widget A | 100 | 42.50 | 4,250.00 |\\n| Widget B | 200 | 50.00 | 10,000.00 |\\n\\n**Total: 14,250.00 EUR**\"\n}"
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
       {
         "type": "paragraph",
         "text": "**Free when using `document_id`** — the document is already ingested. When passing a raw file (`file_data`, `file_path`, `file_url`), the tool auto-ingests via extract first, consuming **one extraction credit**. To avoid unnecessary cost: if you've already extracted a document, reuse the `document_id` from that response."
       },
-      { "type": "heading", "level": 3, "text": "Errors" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Errors"
+      },
       {
         "type": "param-table",
         "title": "Common errors",
@@ -1027,8 +1415,14 @@
       }
     ],
     "related": [
-      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
-      { "label": "SDK getMarkdown", "slug": "sdk-documents" }
+      {
+        "label": "talonic_extract",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "SDK getMarkdown",
+        "slug": "sdk-documents"
+      }
     ],
     "faq": [
       {
@@ -1040,7 +1434,12 @@
         "answer": "If you already called talonic_extract, reuse the document_id from that response to call talonic_to_markdown for free."
       }
     ],
-    "mentions": ["talonic_to_markdown", "OCR", "markdown", "document_id"]
+    "mentions": [
+      "talonic_to_markdown",
+      "OCR",
+      "markdown",
+      "document_id"
+    ]
   },
   {
     "slug": "mcp-talonic-list-schemas",
@@ -1053,7 +1452,11 @@
         "type": "paragraph",
         "text": "List all saved schemas in the workspace. Returns each schema with its ID, name, description, version, field count, and full JSON Schema definition."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1064,7 +1467,11 @@
           "You need a `schema_id` for `talonic_extract`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1072,17 +1479,41 @@
           "The user wants to extract data and provides an inline schema → call `talonic_extract` directly."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
-      { "type": "paragraph", "text": "No parameters required." },
-      { "type": "heading", "level": 3, "text": "Cost" },
-      { "type": "paragraph", "text": "Free — listing schemas does not consume extraction credits." }
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "No parameters required."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — listing schemas does not consume extraction credits."
+      }
     ],
     "related": [
-      { "label": "talonic_save_schema", "slug": "mcp-talonic-save-schema" },
-      { "label": "SDK Schemas", "slug": "sdk-schemas" }
+      {
+        "label": "talonic_save_schema",
+        "slug": "mcp-talonic-save-schema"
+      },
+      {
+        "label": "SDK Schemas",
+        "slug": "sdk-schemas"
+      }
     ],
     "faq": [],
-    "mentions": ["talonic_list_schemas", "schemas", "schema_id"]
+    "mentions": [
+      "talonic_list_schemas",
+      "schemas",
+      "schema_id"
+    ]
   },
   {
     "slug": "mcp-talonic-save-schema",
@@ -1095,7 +1526,11 @@
         "type": "paragraph",
         "text": "Save a schema definition to the workspace for reuse across future extractions. Returns the saved schema with its assigned `id` (UUID) and `short_id` (`SCH-XXXXXXXX`)."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1105,7 +1540,11 @@
           "The user wants to standardise extraction across many documents of the same type."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1114,7 +1553,11 @@
           "The user has not confirmed the schema design — avoid creating clutter."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
       {
         "type": "param-table",
         "title": "Parameters",
@@ -1138,8 +1581,15 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Schema format guidance" },
-      { "type": "paragraph", "text": "**Full JSON Schema (recommended):**" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Schema format guidance"
+      },
+      {
+        "type": "paragraph",
+        "text": "**Full JSON Schema (recommended):**"
+      },
       {
         "type": "code",
         "language": "json",
@@ -1165,12 +1615,25 @@
         "type": "callout",
         "text": "When you call `talonic_save_schema` (or update an existing schema), the API samples the field's prior extracted values. If 80% or more of a string-typed field's values parse as numbers (with at least 5 samples), the response includes a `warnings[]` suggesting `data_type: \"number\"`. Heed the warning if you plan to filter on that field with numeric operators."
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
-      { "type": "paragraph", "text": "Free — saving a schema does not consume extraction credits." }
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — saving a schema does not consume extraction credits."
+      }
     ],
     "related": [
-      { "label": "talonic_list_schemas", "slug": "mcp-talonic-list-schemas" },
-      { "label": "Schemas API", "slug": "create-schema" }
+      {
+        "label": "talonic_list_schemas",
+        "slug": "mcp-talonic-list-schemas"
+      },
+      {
+        "label": "Schemas API",
+        "slug": "create-schema"
+      }
     ],
     "faq": [
       {
@@ -1178,7 +1641,12 @@
         "answer": "Full JSON Schema ({type: 'object', properties: {...}}) is most reliable. Flat key-type maps ({field: 'type'}) work for simple schemas but are normalized server-side and may produce errors with complex structures."
       }
     ],
-    "mentions": ["talonic_save_schema", "schema", "JSON Schema", "flat key-type"]
+    "mentions": [
+      "talonic_save_schema",
+      "schema",
+      "JSON Schema",
+      "flat key-type"
+    ]
   },
   {
     "slug": "mcp-talonic-get-balance",
@@ -1191,7 +1659,11 @@
         "type": "paragraph",
         "text": "Read the user's current Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next-tier-reset timestamp. Use this to make budget-aware decisions before kicking off large batches or re-extractions."
       },
-      { "type": "heading", "level": 3, "text": "When to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1201,7 +1673,11 @@
           "The user asks how long their balance will last at the current rate."
         ]
       },
-      { "type": "heading", "level": 3, "text": "When NOT to use" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1210,14 +1686,29 @@
           "The user wants to top up credits — route them to the dashboard at `https://app.talonic.com`."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Input schema" },
-      { "type": "paragraph", "text": "No parameters required." },
-      { "type": "heading", "level": 3, "text": "Response shape" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "No parameters required."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
       {
         "type": "param-table",
         "title": "Fields",
         "params": [
-          { "name": "balance_credits", "type": "number", "description": "Current credit balance." },
+          {
+            "name": "balance_credits",
+            "type": "number",
+            "description": "Current credit balance."
+          },
           {
             "name": "balance_eur",
             "type": "number",
@@ -1251,12 +1742,25 @@
         "title": "Example response",
         "code": "{\n  \"balance_credits\": 1000,\n  \"balance_eur\": 50.00,\n  \"burn_rate_30d_credits\": 240,\n  \"projected_runway_days\": 125,\n  \"tier\": \"pro\",\n  \"tier_resets_at\": \"2026-06-01T00:00:00.000Z\"\n}"
       },
-      { "type": "heading", "level": 3, "text": "Cost" },
-      { "type": "paragraph", "text": "Free — balance lookups do not consume extraction credits." }
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — balance lookups do not consume extraction credits."
+      }
     ],
     "related": [
-      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
-      { "label": "Cost & Rate Limits", "slug": "mcp-cost-and-limits" }
+      {
+        "label": "talonic_extract",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "Cost & Rate Limits",
+        "slug": "mcp-cost-and-limits"
+      }
     ],
     "faq": [
       {
@@ -1268,7 +1772,14 @@
         "answer": "Days of runway at the trailing 30-day average burn rate. The value -1 means no consumption in the trailing window, so runway cannot be computed."
       }
     ],
-    "mentions": ["talonic_get_balance", "credits", "balance", "tier", "burn rate", "runway"]
+    "mentions": [
+      "talonic_get_balance",
+      "credits",
+      "balance",
+      "tier",
+      "burn rate",
+      "runway"
+    ]
   },
   {
     "slug": "mcp-schemas-resource",
@@ -1277,25 +1788,43 @@
     "seoTitle": "MCP Resources — Talonic Docs",
     "description": "Two MCP resources exposed by the Talonic server: talonic://schemas (saved schemas) and talonic://webhooks/reference (webhook event reference).",
     "content": [
-      { "type": "heading", "level": 3, "text": "talonic://schemas" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "talonic://schemas"
+      },
       {
         "type": "paragraph",
         "text": "Exposes the saved-schemas list to clients that browse MCP resources separately. Claude Desktop and Cowork render these in the UI. The contents mirror `talonic_list_schemas` but in a browseable form."
       },
-      { "type": "heading", "level": 3, "text": "talonic://webhooks/reference" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "talonic://webhooks/reference"
+      },
       {
         "type": "paragraph",
         "text": "Static reference documenting the webhook events the Talonic API can fire (extraction lifecycle, document classification, etc.), their payload shapes, and how to subscribe. Useful when an agent is helping the user wire Talonic into a backend that needs to react to extraction events."
       }
     ],
-    "related": [{ "label": "talonic_list_schemas", "slug": "mcp-talonic-list-schemas" }],
+    "related": [
+      {
+        "label": "talonic_list_schemas",
+        "slug": "mcp-talonic-list-schemas"
+      }
+    ],
     "faq": [
       {
         "question": "What resources does the Talonic MCP server expose?",
         "answer": "Two resources: talonic://schemas (browseable list of saved schemas) and talonic://webhooks/reference (static reference for the API's webhook events and payloads)."
       }
     ],
-    "mentions": ["MCP resource", "talonic://schemas", "talonic://webhooks/reference", "webhooks"]
+    "mentions": [
+      "MCP resource",
+      "talonic://schemas",
+      "talonic://webhooks/reference",
+      "webhooks"
+    ]
   },
   {
     "slug": "mcp-cost-and-limits",
@@ -1304,7 +1833,11 @@
     "seoTitle": "MCP Cost and Rate Limits — Talonic Docs",
     "description": "Which MCP tool calls cost extraction credits, rate limit behavior, insufficient-credit handling, and how to avoid re-extraction.",
     "content": [
-      { "type": "heading", "level": 3, "text": "What costs credits" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "What costs credits"
+      },
       {
         "type": "paragraph",
         "text": "Only extraction operations consume credits. Everything else is free:"
@@ -1328,14 +1861,26 @@
             "type": "free",
             "description": "Document already ingested — just fetches stored markdown."
           },
-          { "name": "talonic_search", "type": "free", "description": "Queries indexed data." },
+          {
+            "name": "talonic_search",
+            "type": "free",
+            "description": "Queries indexed data."
+          },
           {
             "name": "talonic_filter",
             "type": "free",
             "description": "Queries extracted field values."
           },
-          { "name": "talonic_get_document", "type": "free", "description": "Metadata lookup." },
-          { "name": "talonic_list_schemas", "type": "free", "description": "Lists saved schemas." },
+          {
+            "name": "talonic_get_document",
+            "type": "free",
+            "description": "Metadata lookup."
+          },
+          {
+            "name": "talonic_list_schemas",
+            "type": "free",
+            "description": "Lists saved schemas."
+          },
           {
             "name": "talonic_save_schema",
             "type": "free",
@@ -1352,7 +1897,11 @@
         "type": "callout",
         "text": "The per-call cost of `talonic_extract` (and `talonic_to_markdown` with a raw file) is also surfaced on the response under `cost` (`costCredits`, `costEur`, `balanceCredits`, plus a breakdown of `cellsResolvedRegistry` and `cellsResolvedAi`). Agents can read this immediately after the call rather than calling `talonic_get_balance` again."
       },
-      { "type": "heading", "level": 3, "text": "Avoiding re-extraction" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Avoiding re-extraction"
+      },
       {
         "type": "paragraph",
         "text": "Agents should avoid extracting the same document twice. Best practices:"
@@ -1366,26 +1915,47 @@
           "Use `talonic_filter` to query already-extracted data instead of re-extracting with a different schema when the fields you need are already captured."
         ]
       },
-      { "type": "heading", "level": 3, "text": "Rate limits" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Rate limits"
+      },
       {
         "type": "paragraph",
         "text": "The Talonic API enforces per-key rate limits. When exceeded, the server returns `429 Too Many Requests` with a `X-RateLimit-Reset` header. The MCP server (and the underlying Node SDK) retries automatically with exponential backoff up to `maxRetries` (default: 3). If retries are exhausted, the tool returns an error with the reset timestamp."
       },
-      { "type": "heading", "level": 3, "text": "Insufficient credits" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Insufficient credits"
+      },
       {
         "type": "paragraph",
         "text": "When extraction credits are exhausted, the API returns `402 Payment Required`. The tool surfaces this as an error. The agent should inform the user that their credit balance is depleted and suggest upgrading their plan or waiting for the daily reset (free tier: 50 extractions/day, resets at midnight UTC)."
       },
-      { "type": "heading", "level": 3, "text": "Free tier limits" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Free tier limits"
+      },
       {
         "type": "paragraph",
         "text": "The free tier includes 50 extractions per day (resets at midnight UTC). Search, filter, metadata, and schema operations are unlimited. No credit card required."
       }
     ],
     "related": [
-      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
-      { "label": "Authentication", "slug": "mcp-authentication" },
-      { "label": "SDK Retries", "slug": "sdk-retries" }
+      {
+        "label": "talonic_extract",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "Authentication",
+        "slug": "mcp-authentication"
+      },
+      {
+        "label": "SDK Retries",
+        "slug": "sdk-retries"
+      }
     ],
     "faq": [
       {
@@ -1401,7 +1971,14 @@
         "answer": "The API returns 429 with a reset timestamp. The SDK retries automatically with exponential backoff (up to 3 retries by default)."
       }
     ],
-    "mentions": ["credits", "rate limits", "429", "402", "free tier", "cost"]
+    "mentions": [
+      "credits",
+      "rate limits",
+      "429",
+      "402",
+      "free tier",
+      "cost"
+    ]
   },
   {
     "slug": "mcp-drag-drop",
@@ -1423,13 +2000,20 @@
         "type": "paragraph",
         "text": "From `@talonic/mcp@0.1.4`, agents can pass **`file_data`** (base64-encoded file bytes) and **`filename`** on `talonic_extract` and `talonic_to_markdown`. The agent reads the file bytes from the conversation, base64-encodes them, and passes them through the MCP tool call. The MCP server decodes, infers MIME type from the filename, and uploads to the Talonic API as a normal multipart request. Tool descriptions advertise `file_data` as the recommended input here, so well-trained agents reach for it automatically. No client-side configuration required."
       },
-      { "type": "heading", "level": 3, "text": "Claude.ai hosted connector" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Claude.ai hosted connector"
+      },
       {
         "type": "callout",
         "variant": "warning",
         "text": "Claude.ai's hosted-connector pipeline imposes a hard size limit on tool-call arguments (effectively under ~1 KB). A base64-encoded real PDF (typically hundreds of KB at minimum) gets truncated before reaching the MCP server. The Talonic API receives a few hundred bytes, registers an empty document, and the response comes back with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug."
       },
-      { "type": "paragraph", "text": "**Workarounds for Claude.ai users:**" },
+      {
+        "type": "paragraph",
+        "text": "**Workarounds for Claude.ai users:**"
+      },
       {
         "type": "list",
         "ordered": false,
@@ -1445,8 +2029,14 @@
       }
     ],
     "related": [
-      { "label": "talonic_extract", "slug": "mcp-talonic-extract" },
-      { "label": "Installation", "slug": "mcp-installation" }
+      {
+        "label": "talonic_extract",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "Installation",
+        "slug": "mcp-installation"
+      }
     ],
     "faq": [
       {
@@ -1501,11 +2091,23 @@
       }
     ],
     "related": [
-      { "label": "Configuration", "slug": "mcp-configuration" },
-      { "label": "Introduction", "slug": "mcp-introduction" }
+      {
+        "label": "Configuration",
+        "slug": "mcp-configuration"
+      },
+      {
+        "label": "Introduction",
+        "slug": "mcp-introduction"
+      }
     ],
     "faq": [],
-    "mentions": ["architecture", "stdio", "HTTP", "Streamable HTTP", "session"]
+    "mentions": [
+      "architecture",
+      "stdio",
+      "HTTP",
+      "Streamable HTTP",
+      "session"
+    ]
   },
   {
     "slug": "mcp-configuration",
@@ -1514,8 +2116,15 @@
     "seoTitle": "MCP Server Configuration — Talonic Docs",
     "description": "Environment variables for the local MCP server and header options for the hosted server.",
     "content": [
-      { "type": "heading", "level": 3, "text": "Local server (env vars)" },
-      { "type": "paragraph", "text": "Set via the `env` block in your MCP client config:" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Local server (env vars)"
+      },
+      {
+        "type": "paragraph",
+        "text": "Set via the `env` block in your MCP client config:"
+      },
       {
         "type": "param-table",
         "title": "Environment variables",
@@ -1533,7 +2142,11 @@
           }
         ]
       },
-      { "type": "heading", "level": 3, "text": "Hosted server (headers)" },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Hosted server (headers)"
+      },
       {
         "type": "paragraph",
         "text": "The hosted server at `mcp.talonic.com` is configured entirely via the MCP client config:"
@@ -1549,11 +2162,22 @@
       }
     ],
     "related": [
-      { "label": "Installation", "slug": "mcp-installation" },
-      { "label": "Authentication", "slug": "mcp-authentication" }
+      {
+        "label": "Installation",
+        "slug": "mcp-installation"
+      },
+      {
+        "label": "Authentication",
+        "slug": "mcp-authentication"
+      }
     ],
     "faq": [],
-    "mentions": ["TALONIC_API_KEY", "TALONIC_BASE_URL", "configuration", "headers"]
+    "mentions": [
+      "TALONIC_API_KEY",
+      "TALONIC_BASE_URL",
+      "configuration",
+      "headers"
+    ]
   },
   {
     "slug": "mcp-troubleshooting",
@@ -1642,7 +2266,12 @@
         "type": "paragraph",
         "text": "Extraction credit balance is exhausted. Free tier: 50 extractions/day, resets at midnight UTC. Upgrade plan or wait for reset."
       },
-      { "type": "heading", "level": 3, "id": "ts-cached", "text": "Tool descriptions look wrong" },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "ts-cached",
+        "text": "Tool descriptions look wrong"
+      },
       {
         "type": "paragraph",
         "text": "Some MCP clients cache tool descriptions. Restart the client after a server update."
@@ -1659,11 +2288,27 @@
       }
     ],
     "related": [
-      { "label": "Installation", "slug": "mcp-installation" },
-      { "label": "Configuration", "slug": "mcp-configuration" },
-      { "label": "Cost & Rate Limits", "slug": "mcp-cost-and-limits" }
+      {
+        "label": "Installation",
+        "slug": "mcp-installation"
+      },
+      {
+        "label": "Configuration",
+        "slug": "mcp-configuration"
+      },
+      {
+        "label": "Cost & Rate Limits",
+        "slug": "mcp-cost-and-limits"
+      }
     ],
     "faq": [],
-    "mentions": ["troubleshooting", "debugging", "errors", "401", "402", "500"]
+    "mentions": [
+      "troubleshooting",
+      "debugging",
+      "errors",
+      "401",
+      "402",
+      "500"
+    ]
   }
 ]
