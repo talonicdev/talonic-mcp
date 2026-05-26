@@ -903,7 +903,7 @@
     "parentSlug": "mcp-tools",
     "title": "talonic_filter",
     "seoTitle": "talonic_filter MCP Tool — Talonic Docs",
-    "description": "Filter documents by extracted field values. Full operator reference, input/output schema, and composable condition examples.",
+    "description": "Filter documents by extracted field values. Full operator reference, input/output schema, composable condition examples, and the preventive + reactive pattern for guarding numeric operators against string-typed fields.",
     "content": [
       {
         "type": "paragraph",

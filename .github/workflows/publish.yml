@@ -7,6 +7,11 @@ on:
       - "src/**"
       - "docs/**"
       - "package.json"
+  # Manual trigger as a safety valve. Reach for this when an automated
+  # rerun is stuck in queue or when you need to re-fire the publish chain
+  # without making a code change (e.g. after rotating a secret). From the
+  # CLI: `gh workflow run publish.yml -r main`.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -157,16 +162,21 @@ jobs:
         continue-on-error: true
 
       # GitHub Release is what Glama tracks for its "Recent Releases" panel
-      # (npm publishes are not enough on their own). Gated on the auto-bump
-      # actually firing so a re-run on an unchanged version does not try to
-      # create a duplicate tag. `continue-on-error: true` keeps the downstream
-      # website/platform rebuilds running even if the Release fails (e.g. tag
-      # collision after a manual release was cut for the same version).
+      # (npm publishes are not enough on their own). Fires whenever a publish
+      # succeeds, not just on a fresh bump — the old `bumped == 'true'` gate
+      # caused reruns of a failed publish to silently strand the Release.
+      # `continue-on-error: true` absorbs tag-collision failures (which is
+      # how this step idempotently no-ops when the tag already exists from
+      # a prior successful release of the same version).
       - name: Create GitHub Release
-        if: success() && steps.version.outputs.bumped == 'true'
+        if: success()
         run: |
           set -euo pipefail
           VERSION="${{ steps.version.outputs.version }}"
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            echo "Release v${VERSION} already exists. Skipping create."
+            exit 0
+          fi
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
             --generate-notes
