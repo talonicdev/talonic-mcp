@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { ExtractParams, Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, validationError, type ToolResult } from "./_shared.js"
+import { EXTRACTION_RESULT_WIDGET_URI } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable. Production-safe when called with a schema. Schema-less extraction is disabled at the MCP layer.",
@@ -267,6 +268,9 @@ export function registerExtract(server: McpServer, getTalonic: () => Talonic): v
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": EXTRACTION_RESULT_WIDGET_URI,
       },
     },
     async (args) => handleExtract(getTalonic(), args as ExtractArgs),

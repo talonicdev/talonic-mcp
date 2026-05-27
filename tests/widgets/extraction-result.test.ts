@@ -6,6 +6,7 @@ import {
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { getExtractionResultWidgetHtml } from "../../src/widgets/extraction-result"
 import { registerExtractionResultWidget } from "../../src/widgets/register"
+import { createServer } from "../../src/server-factory"
 
 describe("widget URI constants", () => {
   it("exports the extraction-result widget URI", () => {
@@ -66,5 +67,15 @@ describe("registerExtractionResultWidget", () => {
     expect(result.contents[0].mimeType).toBe(EXTRACTION_RESULT_WIDGET_MIME)
     expect(result.contents[0].uri).toBe(EXTRACTION_RESULT_WIDGET_URI)
     expect(result.contents[0].text).toContain("<!doctype html>")
+  })
+})
+
+describe("talonic_extract widget linkage", () => {
+  it("declares the extraction-result widget as outputTemplate", () => {
+    const server = createServer({ apiKey: "tlnc_test" })
+    const tool = (server as any)._registeredTools["talonic_extract"]
+    expect(tool).toBeDefined()
+    expect(tool._meta).toBeDefined()
+    expect(tool._meta["openai/outputTemplate"]).toBe(EXTRACTION_RESULT_WIDGET_URI)
   })
 })
