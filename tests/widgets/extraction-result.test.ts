@@ -3,7 +3,9 @@ import {
   EXTRACTION_RESULT_WIDGET_URI,
   EXTRACTION_RESULT_WIDGET_MIME,
 } from "../../src/widgets/types"
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { getExtractionResultWidgetHtml } from "../../src/widgets/extraction-result"
+import { registerExtractionResultWidget } from "../../src/widgets/register"
 
 describe("widget URI constants", () => {
   it("exports the extraction-result widget URI", () => {
@@ -48,5 +50,21 @@ describe("getExtractionResultWidgetHtml", () => {
 
   it("matches snapshot (catches unintended layout drift)", () => {
     expect(getExtractionResultWidgetHtml()).toMatchSnapshot()
+  })
+})
+
+describe("registerExtractionResultWidget", () => {
+  it("registers a resource at the widget URI with the Apps SDK MIME type", async () => {
+    const server = new McpServer({ name: "test", version: "0.0.0" })
+    registerExtractionResultWidget(server)
+
+    const result = await (server as any)._registeredResources[
+      EXTRACTION_RESULT_WIDGET_URI
+    ].readCallback(new URL(EXTRACTION_RESULT_WIDGET_URI))
+
+    expect(result.contents).toHaveLength(1)
+    expect(result.contents[0].mimeType).toBe(EXTRACTION_RESULT_WIDGET_MIME)
+    expect(result.contents[0].uri).toBe(EXTRACTION_RESULT_WIDGET_URI)
+    expect(result.contents[0].text).toContain("<!doctype html>")
   })
 })
