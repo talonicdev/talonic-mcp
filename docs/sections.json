@@ -3,12 +3,12 @@
     "slug": "mcp-introduction",
     "parentSlug": "mcp-overview",
     "title": "Introduction",
-    "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. Eight tools and two resources for structured document extraction via the Model Context Protocol.",
+    "seoTitle": "MCP Server Introduction \u2014 Talonic Docs",
+    "description": "Official Talonic MCP server for AI agents. Nine tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
-        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents eight tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
+        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents nine tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
       },
       {
         "type": "paragraph",
@@ -16,7 +16,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other seven tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching document metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour."
+        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other eight tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching document metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour."
       },
       {
         "type": "callout",
@@ -40,7 +40,7 @@
     "faq": [
       {
         "question": "What is the Talonic MCP server?",
-        "answer": "An official Model Context Protocol server that gives AI agents eight tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
+        "answer": "An official Model Context Protocol server that gives AI agents nine tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
     "mentions": [
@@ -54,7 +54,7 @@
     "slug": "mcp-installation",
     "parentSlug": "mcp-overview",
     "title": "Installation",
-    "seoTitle": "Install Talonic MCP Server — Talonic Docs",
+    "seoTitle": "Install Talonic MCP Server \u2014 Talonic Docs",
     "description": "Three install paths: Claude.ai connector via OAuth (recommended), local stdio via npx for IDE clients, or hosted with a Bearer header for custom-header clients.",
     "content": [
       {
@@ -63,7 +63,7 @@
       },
       {
         "type": "callout",
-        "text": "The hosted MCP endpoint accepts both `https://mcp.talonic.com/mcp` and the bare origin `https://mcp.talonic.com` as connector URLs — POST/DELETE/SSE traffic at either path routes through the same Streamable HTTP transport. Plain `GET /` still returns the discovery JSON. Either URL works in any of the install paths below."
+        "text": "The hosted MCP endpoint accepts both `https://mcp.talonic.com/mcp` and the bare origin `https://mcp.talonic.com` as connector URLs \u2014 POST/DELETE/SSE traffic at either path routes through the same Streamable HTTP transport. Plain `GET /` still returns the discovery JSON. Either URL works in any of the install paths below."
       },
       {
         "type": "heading",
@@ -78,13 +78,13 @@
         "type": "list",
         "ordered": true,
         "items": [
-          "In Claude.ai, open Settings → Connectors → Add custom connector.",
+          "In Claude.ai, open Settings \u2192 Connectors \u2192 Add custom connector.",
           "Set the URL to `https://mcp.talonic.com/mcp`.",
           "Save. Claude.ai opens a sign-in window pointing at `app.talonic.com`.",
           "Sign in to your Talonic account (or sign up if you do not have one).",
           "Approve the connector consent screen.",
           "You are redirected back to Claude.ai. The connector shows `connected` and the tools light up in the conversation.",
-          "Verify with a prompt like `What is my Talonic balance?` — it should call `talonic_get_balance` and return your tier and credit count."
+          "Verify with a prompt like `What is my Talonic balance?` \u2014 it should call `talonic_get_balance` and return your tier and credit count."
         ]
       },
       {
@@ -117,7 +117,7 @@
       },
       {
         "type": "paragraph",
-        "text": "For clients that drive a hosted MCP endpoint but do not support OAuth handshakes (`mcp-inspector` and similar). The hosted server at `mcp.talonic.com/mcp` accepts an API key via the `Authorization: Bearer tlnc_…` header."
+        "text": "For clients that drive a hosted MCP endpoint but do not support OAuth handshakes (`mcp-inspector` and similar). The hosted server at `mcp.talonic.com/mcp` accepts an API key via the `Authorization: Bearer tlnc_\u2026` header."
       },
       {
         "type": "code",
@@ -147,7 +147,7 @@
     "faq": [
       {
         "question": "How do I install the Talonic MCP server?",
-        "answer": "Easiest path: Claude.ai → Settings → Connectors → Add custom connector, URL https://mcp.talonic.com/mcp, sign in to app.talonic.com when prompted. No API key in config. For IDE-style clients, install locally via npx -y @talonic/mcp@latest with TALONIC_API_KEY in env."
+        "answer": "Easiest path: Claude.ai \u2192 Settings \u2192 Connectors \u2192 Add custom connector, URL https://mcp.talonic.com/mcp, sign in to app.talonic.com when prompted. No API key in config. For IDE-style clients, install locally via npx -y @talonic/mcp@latest with TALONIC_API_KEY in env."
       },
       {
         "question": "What is the difference between the three install paths?",
@@ -169,7 +169,7 @@
     "slug": "mcp-authentication",
     "parentSlug": "mcp-overview",
     "title": "Authentication",
-    "seoTitle": "MCP Authentication — Talonic Docs",
+    "seoTitle": "MCP Authentication \u2014 Talonic Docs",
     "description": "Three ways to authenticate the Talonic MCP server: OAuth 2.1 via Claude.ai connector (no key in config), Authorization header on hosted, or env var on local stdio.",
     "content": [
       {
@@ -225,7 +225,7 @@
         "ordered": true,
         "items": [
           "Sign up at [https://app.talonic.com](https://app.talonic.com). Free tier: 50 extractions per day, no credit card.",
-          "Settings → API Keys → Create New Key.",
+          "Settings \u2192 API Keys \u2192 Create New Key.",
           "Copy the `tlnc_` value into the `env.TALONIC_API_KEY` of your MCP client config."
         ]
       }
@@ -243,7 +243,7 @@
     "faq": [
       {
         "question": "How do I authenticate with the hosted MCP server?",
-        "answer": "Easiest path is the Claude.ai custom-connector flow, which runs OAuth 2.1 against app.talonic.com and rotates the bearer token automatically — no key in the connector config. For non-OAuth clients, pass an API key via the Authorization: Bearer header, or as a ?apiKey= query parameter on the URL."
+        "answer": "Easiest path is the Claude.ai custom-connector flow, which runs OAuth 2.1 against app.talonic.com and rotates the bearer token automatically \u2014 no key in the connector config. For non-OAuth clients, pass an API key via the Authorization: Bearer header, or as a ?apiKey= query parameter on the URL."
       }
     ],
     "mentions": [
@@ -260,7 +260,7 @@
     "slug": "mcp-claude-desktop",
     "parentSlug": "mcp-clients",
     "title": "Claude Desktop",
-    "seoTitle": "MCP Setup for Claude Desktop — Talonic Docs",
+    "seoTitle": "MCP Setup for Claude Desktop \u2014 Talonic Docs",
     "description": "Step-by-step setup for the Talonic MCP server in Claude Desktop on macOS and Windows. Hosted and local configs.",
     "content": [
       {
@@ -320,12 +320,12 @@
     "slug": "mcp-cursor",
     "parentSlug": "mcp-clients",
     "title": "Cursor",
-    "seoTitle": "MCP Setup for Cursor — Talonic Docs",
+    "seoTitle": "MCP Setup for Cursor \u2014 Talonic Docs",
     "description": "Configure the Talonic MCP server in Cursor IDE. Hosted and local configs.",
     "content": [
       {
         "type": "paragraph",
-        "text": "Edit `~/.cursor/mcp.json` (or open Cursor settings → MCP → edit config):"
+        "text": "Edit `~/.cursor/mcp.json` (or open Cursor settings \u2192 MCP \u2192 edit config):"
       },
       {
         "type": "heading",
@@ -375,12 +375,12 @@
     "slug": "mcp-cline",
     "parentSlug": "mcp-clients",
     "title": "Cline",
-    "seoTitle": "MCP Setup for Cline — Talonic Docs",
+    "seoTitle": "MCP Setup for Cline \u2014 Talonic Docs",
     "description": "Configure the Talonic MCP server in the Cline VS Code extension. Hosted and local configs.",
     "content": [
       {
         "type": "paragraph",
-        "text": "Open the Cline panel → settings (gear icon) → MCP Servers → Edit."
+        "text": "Open the Cline panel \u2192 settings (gear icon) \u2192 MCP Servers \u2192 Edit."
       },
       {
         "type": "heading",
@@ -432,7 +432,7 @@
     "slug": "mcp-continue",
     "parentSlug": "mcp-clients",
     "title": "Continue",
-    "seoTitle": "MCP Setup for Continue — Talonic Docs",
+    "seoTitle": "MCP Setup for Continue \u2014 Talonic Docs",
     "description": "Configure the Talonic MCP server in Continue for VS Code and JetBrains. Hosted and local configs.",
     "content": [
       {
@@ -488,12 +488,12 @@
     "slug": "mcp-cowork",
     "parentSlug": "mcp-clients",
     "title": "Cowork",
-    "seoTitle": "MCP Setup for Cowork — Talonic Docs",
+    "seoTitle": "MCP Setup for Cowork \u2014 Talonic Docs",
     "description": "Configure the Talonic MCP server in Cowork. Hosted and local configs.",
     "content": [
       {
         "type": "paragraph",
-        "text": "Open Cowork settings → MCP Servers → Add."
+        "text": "Open Cowork settings \u2192 MCP Servers \u2192 Add."
       },
       {
         "type": "heading",
@@ -540,7 +540,7 @@
     "slug": "mcp-talonic-extract",
     "parentSlug": "mcp-tools",
     "title": "talonic_extract",
-    "seoTitle": "talonic_extract MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_extract MCP Tool \u2014 Talonic Docs",
     "description": "Extract structured, schema-validated data from a document. Full input schema, output schema, confidence scores, and usage examples.",
     "content": [
       {
@@ -571,8 +571,8 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user just wants full text content → use `talonic_to_markdown`.",
-          "The user wants to find documents matching a query → use `talonic_search` or `talonic_filter`."
+          "The user just wants full text content \u2192 use `talonic_to_markdown`.",
+          "The user wants to find documents matching a query \u2192 use `talonic_search` or `talonic_filter`."
         ]
       },
       {
@@ -597,7 +597,7 @@
           {
             "name": "file_path",
             "type": "string",
-            "description": "Local filesystem path. Only works if the MCP server process can read it — sandboxed clients should use `file_data` instead."
+            "description": "Local filesystem path. Only works if the MCP server process can read it \u2014 sandboxed clients should use `file_data` instead."
           },
           {
             "name": "file_url",
@@ -618,7 +618,7 @@
           {
             "name": "schema",
             "type": "object",
-            "description": "Inline schema definition. **Use full JSON Schema format** (`{type: \"object\", properties: {...}}`) for best results. Flat key-type maps (`{vendor_name: \"string\"}`) are accepted but normalized server-side — if you get a 'no fields' error, switch to full JSON Schema."
+            "description": "Inline schema definition. **Use full JSON Schema format** (`{type: \"object\", properties: {...}}`) for best results. Flat key-type maps (`{vendor_name: \"string\"}`) are accepted but normalized server-side \u2014 if you get a 'no fields' error, switch to full JSON Schema."
           },
           {
             "name": "schema_id",
@@ -666,7 +666,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Each field in the `confidence` object is a float from 0.0 to 1.0. Values above **0.90** are high confidence. Values between **0.70–0.90** should be treated with caution — flag them to the user for verification. Values below **0.70** indicate low confidence — the agent should ask the user to verify the value or re-extract with more specific instructions."
+        "text": "Each field in the `confidence` object is a float from 0.0 to 1.0. Values above **0.90** are high confidence. Values between **0.70\u20130.90** should be treated with caution \u2014 flag them to the user for verification. Values below **0.70** indicate low confidence \u2014 the agent should ask the user to verify the value or re-extract with more specific instructions."
       },
       {
         "type": "callout",
@@ -680,7 +680,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Each `talonic_extract` call with a new file consumes **one extraction credit**. Re-extracting the same `document_id` with a different schema also consumes one credit. The per-call cost is surfaced on the response under `cost` (`costCredits`, `costEur`, `balanceCredits`, plus a breakdown of how many cells were resolved by the registry vs the AI), parsed from the `X-Talonic-Cost-*` and `X-Talonic-Balance-*` response headers. To avoid unnecessary cost, check if a document has already been extracted before calling again — use `talonic_search` or `talonic_filter` to find existing results, and `talonic_get_balance` to check your runway before kicking off a large batch."
+        "text": "Each `talonic_extract` call with a new file consumes **one extraction credit**. Re-extracting the same `document_id` with a different schema also consumes one credit. The per-call cost is surfaced on the response under `cost` (`costCredits`, `costEur`, `balanceCredits`, plus a breakdown of how many cells were resolved by the registry vs the AI), parsed from the `X-Talonic-Cost-*` and `X-Talonic-Balance-*` response headers. To avoid unnecessary cost, check if a document has already been extracted before calling again \u2014 use `talonic_search` or `talonic_filter` to find existing results, and `talonic_get_balance` to check your runway before kicking off a large batch."
       },
       {
         "type": "heading",
@@ -736,11 +736,11 @@
     "faq": [
       {
         "question": "What does talonic_extract return?",
-        "answer": "Structured JSON matching your schema, per-field confidence scores (0.0–1.0), document metadata (type, language, page count), and extraction/schema IDs for follow-up calls."
+        "answer": "Structured JSON matching your schema, per-field confidence scores (0.0\u20131.0), document metadata (type, language, page count), and extraction/schema IDs for follow-up calls."
       },
       {
         "question": "How do I handle low confidence scores?",
-        "answer": "Scores above 0.90 are reliable. Between 0.70–0.90, flag to the user for verification. Below 0.70, ask the user to verify or re-extract with more specific instructions."
+        "answer": "Scores above 0.90 are reliable. Between 0.70\u20130.90, flag to the user for verification. Below 0.70, ask the user to verify or re-extract with more specific instructions."
       }
     ],
     "mentions": [
@@ -755,7 +755,7 @@
     "slug": "mcp-talonic-search",
     "parentSlug": "mcp-tools",
     "title": "talonic_search",
-    "seoTitle": "talonic_search MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_search MCP Tool \u2014 Talonic Docs",
     "description": "Omnisearch across documents, fields, sources, and schemas. Full input/output schema, examples, and usage guidance.",
     "content": [
       {
@@ -787,9 +787,9 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user has a specific `document_id` → use `talonic_get_document`.",
-          "The user wants structured field-value filters like 'amount > 1000' → use `talonic_filter`.",
-          "The user wants to extract data from a new document → use `talonic_extract`."
+          "The user has a specific `document_id` \u2192 use `talonic_get_document`.",
+          "The user wants structured field-value filters like 'amount > 1000' \u2192 use `talonic_filter`.",
+          "The user wants to extract data from a new document \u2192 use `talonic_extract`."
         ]
       },
       {
@@ -827,11 +827,11 @@
       },
       {
         "type": "callout",
-        "text": "Only `fields[]` entries with `filterable: true` can be used with `talonic_filter`. These have extracted data in the workspace. Fields with `filterable: false` exist in a schema definition but have no extracted data yet — they become filterable after documents are processed against their schema."
+        "text": "Only `fields[]` entries with `filterable: true` can be used with `talonic_filter`. These have extracted data in the workspace. Fields with `filterable: false` exist in a schema definition but have no extracted data yet \u2014 they become filterable after documents are processed against their schema."
       },
       {
         "type": "callout",
-        "text": "Every `fieldMatches[]` and `fields[]` entry carries a `dataType` (`\"string\"`, `\"number\"`, `\"array\"`, etc.). Use it to pick the right `talonic_filter` operator on the first call — numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when `dataType === \"number\"`. See the *Schema typing* section under `talonic_filter` for the full preventive / reactive pattern."
+        "text": "Every `fieldMatches[]` and `fields[]` entry carries a `dataType` (`\"string\"`, `\"number\"`, `\"array\"`, etc.). Use it to pick the right `talonic_filter` operator on the first call \u2014 numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when `dataType === \"number\"`. See the *Schema typing* section under `talonic_filter` for the full preventive / reactive pattern."
       },
       {
         "type": "heading",
@@ -840,7 +840,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Search calls are **free** — they do not consume extraction credits. Use search liberally to explore before extracting."
+        "text": "Search calls are **free** \u2014 they do not consume extraction credits. Use search liberally to explore before extracting."
       },
       {
         "type": "heading",
@@ -881,7 +881,7 @@
       },
       {
         "question": "What entities does talonic_search return?",
-        "answer": "Documents, field matches (with canonical names and values), sources, schemas, and field definitions — all ranked by relevance score."
+        "answer": "Documents, field matches (with canonical names and values), sources, schemas, and field definitions \u2014 all ranked by relevance score."
       },
       {
         "question": "How do I avoid a `talonic_filter` numeric query returning zero matches?",
@@ -902,7 +902,7 @@
     "slug": "mcp-talonic-filter",
     "parentSlug": "mcp-tools",
     "title": "talonic_filter",
-    "seoTitle": "talonic_filter MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_filter MCP Tool \u2014 Talonic Docs",
     "description": "Filter documents by extracted field values. Full operator reference, input/output schema, composable condition examples, and the preventive + reactive pattern for guarding numeric operators against string-typed fields.",
     "content": [
       {
@@ -932,9 +932,9 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user wants conceptual / free-text search → use `talonic_search`.",
-          "The user wants a single document by ID → use `talonic_get_document`.",
-          "The user wants to extract from a new document → use `talonic_extract`."
+          "The user wants conceptual / free-text search \u2192 use `talonic_search`.",
+          "The user wants a single document by ID \u2192 use `talonic_get_document`.",
+          "The user wants to extract from a new document \u2192 use `talonic_extract`."
         ]
       },
       {
@@ -1091,12 +1091,12 @@
       },
       {
         "type": "paragraph",
-        "text": "Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. `€1,500.00`) will silently return zero matches even after extraction. There are two ways to handle this — pick the right one before constructing the call."
+        "text": "Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. `\u20ac1,500.00`) will silently return zero matches even after extraction. There are two ways to handle this \u2014 pick the right one before constructing the call."
       },
       {
         "type": "heading",
         "level": 4,
-        "text": "Preventive — gate on `dataType`"
+        "text": "Preventive \u2014 gate on `dataType`"
       },
       {
         "type": "paragraph",
@@ -1105,11 +1105,11 @@
       {
         "type": "heading",
         "level": 4,
-        "text": "Reactive — handle `warnings[]`"
+        "text": "Reactive \u2014 handle `warnings[]`"
       },
       {
         "type": "paragraph",
-        "text": "When a numeric operator is applied to a string-typed field, the API attaches a `warnings[]` array to the filter response. Each entry has `code`, `message`, `field`/`field_id`, and a `suggestion`. The MCP tool surfaces this in `structuredContent` — agents should relay the `message` (and `suggestion`, when present) to the user rather than silently retrying."
+        "text": "When a numeric operator is applied to a string-typed field, the API attaches a `warnings[]` array to the filter response. Each entry has `code`, `message`, `field`/`field_id`, and a `suggestion`. The MCP tool surfaces this in `structuredContent` \u2014 agents should relay the `message` (and `suggestion`, when present) to the user rather than silently retrying."
       },
       {
         "type": "code",
@@ -1124,7 +1124,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Filter calls are **free** — they query already-extracted data and do not consume extraction credits."
+        "text": "Filter calls are **free** \u2014 they query already-extracted data and do not consume extraction credits."
       },
       {
         "type": "heading",
@@ -1170,7 +1170,7 @@
       },
       {
         "question": "How do I find field names for filtering?",
-        "answer": "Call talonic_search first. Use fields[] entries where filterable is true — their canonicalName values are what you pass as the field parameter in filter conditions. Fields with filterable: false have no extracted data yet and cannot be filtered."
+        "answer": "Call talonic_search first. Use fields[] entries where filterable is true \u2014 their canonicalName values are what you pass as the field parameter in filter conditions. Fields with filterable: false have no extracted data yet and cannot be filtered."
       },
       {
         "question": "Why does my `talonic_filter` query with `gt` return zero matches on a numeric-looking field?",
@@ -1194,7 +1194,7 @@
     "slug": "mcp-talonic-get-document",
     "parentSlug": "mcp-tools",
     "title": "talonic_get_document",
-    "seoTitle": "talonic_get_document MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_get_document MCP Tool \u2014 Talonic Docs",
     "description": "Fetch full metadata for a single document by ID, including processing log and link URLs.",
     "content": [
       {
@@ -1224,9 +1224,9 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user wants full text content → use `talonic_to_markdown`.",
-          "The user wants extracted structured data → use `talonic_extract`.",
-          "The user has a file but no `document_id` yet → call `talonic_extract` first."
+          "The user wants full text content \u2192 use `talonic_to_markdown`.",
+          "The user wants extracted structured data \u2192 use `talonic_extract`.",
+          "The user has a file but no `document_id` yet \u2192 call `talonic_extract` first."
         ]
       },
       {
@@ -1264,7 +1264,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Free — metadata lookups do not consume extraction credits."
+        "text": "Free \u2014 metadata lookups do not consume extraction credits."
       }
     ],
     "related": [
@@ -1288,12 +1288,12 @@
     "slug": "mcp-talonic-to-markdown",
     "parentSlug": "mcp-tools",
     "title": "talonic_to_markdown",
-    "seoTitle": "talonic_to_markdown MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_to_markdown MCP Tool \u2014 Talonic Docs",
     "description": "Get OCR-converted markdown for a document. Full input schema, file source options, cost guidance, and usage examples.",
     "content": [
       {
         "type": "paragraph",
-        "text": "Get OCR-converted markdown for a document. Accepts an existing `document_id` (cheapest — one API call, no re-processing), or raw file bytes, a local path, or a URL."
+        "text": "Get OCR-converted markdown for a document. Accepts an existing `document_id` (cheapest \u2014 one API call, no re-processing), or raw file bytes, a local path, or a URL."
       },
       {
         "type": "heading",
@@ -1319,7 +1319,7 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user wants specific structured fields → use `talonic_extract` with a schema."
+          "The user wants specific structured fields \u2192 use `talonic_extract` with a schema."
         ]
       },
       {
@@ -1338,7 +1338,7 @@
           {
             "name": "document_id",
             "type": "string",
-            "description": "ID of an already-ingested document. **Cheapest path** — one API call, no re-processing or credit usage."
+            "description": "ID of an already-ingested document. **Cheapest path** \u2014 one API call, no re-processing or credit usage."
           },
           {
             "name": "file_data",
@@ -1380,7 +1380,7 @@
       },
       {
         "type": "paragraph",
-        "text": "**Free when using `document_id`** — the document is already ingested. When passing a raw file (`file_data`, `file_path`, `file_url`), the tool auto-ingests via extract first, consuming **one extraction credit**. To avoid unnecessary cost: if you've already extracted a document, reuse the `document_id` from that response."
+        "text": "**Free when using `document_id`** \u2014 the document is already ingested. When passing a raw file (`file_data`, `file_path`, `file_url`), the tool auto-ingests via extract first, consuming **one extraction credit**. To avoid unnecessary cost: if you've already extracted a document, reuse the `document_id` from that response."
       },
       {
         "type": "heading",
@@ -1445,7 +1445,7 @@
     "slug": "mcp-talonic-list-schemas",
     "parentSlug": "mcp-tools",
     "title": "talonic_list_schemas",
-    "seoTitle": "talonic_list_schemas MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_list_schemas MCP Tool \u2014 Talonic Docs",
     "description": "List all saved schemas with IDs, names, descriptions, field counts, and full JSON Schema definitions.",
     "content": [
       {
@@ -1463,7 +1463,7 @@
         "items": [
           "The user asks what schemas they have, or wants to see existing schemas.",
           "Before designing a new schema, check if one already covers the use case.",
-          "The user asks to extract from a known document type — find a matching saved schema.",
+          "The user asks to extract from a known document type \u2014 find a matching saved schema.",
           "You need a `schema_id` for `talonic_extract`."
         ]
       },
@@ -1476,7 +1476,7 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user wants to extract data and provides an inline schema → call `talonic_extract` directly."
+          "The user wants to extract data and provides an inline schema \u2192 call `talonic_extract` directly."
         ]
       },
       {
@@ -1495,7 +1495,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Free — listing schemas does not consume extraction credits."
+        "text": "Free \u2014 listing schemas does not consume extraction credits."
       }
     ],
     "related": [
@@ -1519,7 +1519,7 @@
     "slug": "mcp-talonic-save-schema",
     "parentSlug": "mcp-tools",
     "title": "talonic_save_schema",
-    "seoTitle": "talonic_save_schema MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_save_schema MCP Tool \u2014 Talonic Docs",
     "description": "Save a schema definition to the workspace for reuse. Full input schema, definition formats, and examples.",
     "content": [
       {
@@ -1549,8 +1549,8 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user just wants to extract once with an inline schema → call `talonic_extract` directly.",
-          "The user has not confirmed the schema design — avoid creating clutter."
+          "The user just wants to extract once with an inline schema \u2192 call `talonic_extract` directly.",
+          "The user has not confirmed the schema design \u2014 avoid creating clutter."
         ]
       },
       {
@@ -1572,7 +1572,7 @@
             "name": "definition",
             "type": "object",
             "required": true,
-            "description": "Schema definition. **Use full JSON Schema format** (`{type: \"object\", properties: {...}}`) for best results. Flat key-type maps are accepted but normalized server-side — if you get a 'no fields' error, switch to full JSON Schema."
+            "description": "Schema definition. **Use full JSON Schema format** (`{type: \"object\", properties: {...}}`) for best results. Flat key-type maps are accepted but normalized server-side \u2014 if you get a 'no fields' error, switch to full JSON Schema."
           },
           {
             "name": "description",
@@ -1622,7 +1622,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Free — saving a schema does not consume extraction credits."
+        "text": "Free \u2014 saving a schema does not consume extraction credits."
       }
     ],
     "related": [
@@ -1652,7 +1652,7 @@
     "slug": "mcp-talonic-get-balance",
     "parentSlug": "mcp-tools",
     "title": "talonic_get_balance",
-    "seoTitle": "talonic_get_balance MCP Tool — Talonic Docs",
+    "seoTitle": "talonic_get_balance MCP Tool \u2014 Talonic Docs",
     "description": "Read the workspace credit balance, EUR value, 30-day burn rate, projected runway, tier, and next-tier-reset timestamp.",
     "content": [
       {
@@ -1682,8 +1682,8 @@
         "type": "list",
         "ordered": false,
         "items": [
-          "The user just wants the per-call cost of a single extraction — that is already on the `talonic_extract` response under `cost`.",
-          "The user wants to top up credits — route them to the dashboard at `https://app.talonic.com`."
+          "The user just wants the per-call cost of a single extraction \u2014 that is already on the `talonic_extract` response under `cost`.",
+          "The user wants to top up credits \u2014 route them to the dashboard at `https://app.talonic.com`."
         ]
       },
       {
@@ -1749,7 +1749,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Free — balance lookups do not consume extraction credits."
+        "text": "Free \u2014 balance lookups do not consume extraction credits."
       }
     ],
     "related": [
@@ -1782,10 +1782,153 @@
     ]
   },
   {
+    "slug": "mcp-talonic-request-upload",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_request_upload",
+    "seoTitle": "talonic_request_upload MCP Tool \u2014 Talonic Docs",
+    "description": "Request a browser upload link for files too large for tool-call arguments or when running in a sandboxed hosted environment.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Request a browser upload link for the user. Use this when the user wants to extract a file but you cannot deliver it directly \u2014 the file is too large for tool-call arguments (~32 KB cap on hosted connectors), or you're running in a sandboxed environment (Claude.ai, ChatGPT) that blocks outbound file transfers."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "The user has a file to extract but you cannot send it via `file_data` (file larger than ~32 KB, or the environment blocks outbound data).",
+          "You are running in a hosted/sandboxed environment (Claude.ai, ChatGPT) where `file_data` cannot be used reliably.",
+          "The user explicitly asks for an upload link."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "You can deliver the file directly via `file_data` (local stdio installs with small files).",
+          "The file is already accessible via a public URL \u2192 use `file_url` on `talonic_extract`.",
+          "The document is already in the workspace \u2192 use `document_id` on `talonic_extract`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "How the flow works"
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "Call `talonic_request_upload` with the filename. You receive a `document_id`, an `upload_url`, and an `expires_at` timestamp.",
+          "Show the `upload_url` to the user and ask them to open it in their browser.",
+          "The user drops the file on the upload page. The browser uploads directly to Talonic \u2014 no tool-call size cap, no sandbox restriction.",
+          "Poll with `talonic_get_document` using the `document_id` until `status` is `uploaded`.",
+          "Call `talonic_extract` with the `document_id` and a schema to extract structured data."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "filename",
+            "type": "string",
+            "required": true,
+            "description": "The name of the file being uploaded, including extension (e.g. `invoice.pdf`). Used to pre-allocate the document and infer MIME type."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Response shape"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "code": "{\n  \"document_id\": \"d8f3a1b2-...\",\n  \"upload_url\": \"https://app.talonic.com/u/abc12345-...\",\n  \"expires_at\": \"2026-05-27T22:15:00.000Z\"\n}"
+      },
+      {
+        "type": "param-table",
+        "title": "Response fields",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "string",
+            "description": "The pre-allocated document ID. Use with `talonic_get_document` to poll status, and with `talonic_extract` once uploaded."
+          },
+          {
+            "name": "upload_url",
+            "type": "string",
+            "description": "URL the user should open in their browser to drop the file. Expires after 15 minutes."
+          },
+          {
+            "name": "expires_at",
+            "type": "string",
+            "description": "ISO 8601 timestamp when the upload link expires."
+          }
+        ]
+      },
+      {
+        "type": "callout",
+        "text": "Upload links are single-use and expire after 15 minutes. If the user doesn't upload in time, call `talonic_request_upload` again to get a fresh link."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_extract",
+        "slug": "mcp-talonic-extract"
+      },
+      {
+        "label": "talonic_get_document",
+        "slug": "mcp-talonic-get-document"
+      },
+      {
+        "label": "Drag & Drop in Chat",
+        "slug": "mcp-drag-drop"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How do I upload a file through Claude.ai to Talonic?",
+        "answer": "Call talonic_request_upload with the filename. Show the returned upload_url to the user. They open it in their browser and drop the file. Poll talonic_get_document until status is 'uploaded', then call talonic_extract with the document_id."
+      },
+      {
+        "question": "Why can't I just send the file through file_data on Claude.ai?",
+        "answer": "Claude.ai's hosted connector caps tool-call arguments at ~32 KB (decoded). Real documents are typically 100 KB to several MB. The browser-handoff upload bypasses this limit entirely by moving the file transfer to the user's browser."
+      }
+    ],
+    "mentions": [
+      "upload",
+      "browser handoff",
+      "hosted connector",
+      "Claude.ai",
+      "ChatGPT",
+      "file size limit",
+      "sandbox",
+      "upload link"
+    ]
+  },
+  {
     "slug": "mcp-schemas-resource",
     "parentSlug": "mcp-resources",
     "title": "Resources",
-    "seoTitle": "MCP Resources — Talonic Docs",
+    "seoTitle": "MCP Resources \u2014 Talonic Docs",
     "description": "Two MCP resources exposed by the Talonic server: talonic://schemas (saved schemas) and talonic://webhooks/reference (webhook event reference).",
     "content": [
       {
@@ -1830,7 +1973,7 @@
     "slug": "mcp-cost-and-limits",
     "parentSlug": "mcp-advanced",
     "title": "Cost & Rate Limits",
-    "seoTitle": "MCP Cost and Rate Limits — Talonic Docs",
+    "seoTitle": "MCP Cost and Rate Limits \u2014 Talonic Docs",
     "description": "Which MCP tool calls cost extraction credits, rate limit behavior, insufficient-credit handling, and how to avoid re-extraction.",
     "content": [
       {
@@ -1854,12 +1997,12 @@
           {
             "name": "talonic_to_markdown (raw file)",
             "type": "1 credit",
-            "description": "When passing `file_data`, `file_path`, or `file_url` — auto-ingests first."
+            "description": "When passing `file_data`, `file_path`, or `file_url` \u2014 auto-ingests first."
           },
           {
             "name": "talonic_to_markdown (document_id)",
             "type": "free",
-            "description": "Document already ingested — just fetches stored markdown."
+            "description": "Document already ingested \u2014 just fetches stored markdown."
           },
           {
             "name": "talonic_search",
@@ -1984,7 +2127,7 @@
     "slug": "mcp-drag-drop",
     "parentSlug": "mcp-advanced",
     "title": "Drag & Drop in Chat",
-    "seoTitle": "MCP Drag and Drop File Handling — Talonic Docs",
+    "seoTitle": "MCP Drag and Drop File Handling \u2014 Talonic Docs",
     "description": "How file uploads work in MCP chat clients: file_data + filename in local stdio installs, file_url or document_id when using the Claude.ai hosted connector.",
     "content": [
       {
@@ -2008,7 +2151,7 @@
       {
         "type": "callout",
         "variant": "warning",
-        "text": "Claude.ai's hosted-connector pipeline imposes a hard size limit on tool-call arguments (effectively under ~1 KB). A base64-encoded real PDF (typically hundreds of KB at minimum) gets truncated before reaching the MCP server. The Talonic API receives a few hundred bytes, registers an empty document, and the response comes back with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug."
+        "text": "Claude.ai's hosted-connector pipeline imposes a hard size limit on tool-call arguments (effectively ~32 KB decoded). A base64-encoded real PDF (typically hundreds of KB at minimum) gets truncated before reaching the MCP server. The Talonic API receives ~32 KB, registers an empty document, and the response comes back with `null` extracted fields. This is a Claude.ai platform limit on connectors, not a Talonic MCP server bug."
       },
       {
         "type": "paragraph",
@@ -2018,14 +2161,16 @@
         "type": "list",
         "ordered": false,
         "items": [
+          "`talonic_request_upload`: the recommended path. The agent gets an upload link, the user drops the file in their browser, and the agent continues with the `document_id`. Works with any file size the API accepts.",
           "`file_url`: pass a publicly reachable URL; the Talonic API fetches it server-side. Best for files already on the public web.",
           "`document_id`: upload the file once via `app.talonic.com`, then reference the returned id. Best for sensitive files you don't want to expose publicly.",
-          "Switch to a local stdio install (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, etc.) — local stdio has no parameter-size cap and `file_data` works for any file size the API accepts."
-        ]
+          "Switch to a local stdio install (`npx -y @talonic/mcp@latest` in Claude Desktop, Cursor, Cline, etc.) \u2014 local stdio has no parameter-size cap and `file_data` works for any file size the API accepts."
+        ],
+        "text": ""
       },
       {
         "type": "paragraph",
-        "text": "The architectural fix that would unblock drag-and-drop through the Claude.ai connector is a pre-signed upload URL flow: a new MCP tool returns a one-time URL plus a reserved `document_id`, the user uploads from their browser directly to Talonic's storage, and the agent then calls `talonic_extract` with the `document_id`. This bypasses the connector's argument-size pipe entirely."
+        "text": "From `@talonic/mcp@0.1.7`, this is solved by the **`talonic_request_upload`** tool. The agent calls it to get a one-time upload URL plus a reserved `document_id`. The user opens the link in their browser and drops the file \u2014 no tool-call size cap, no sandbox restriction. The agent then polls `talonic_get_document` until the file is ready and proceeds with `talonic_extract` using the `document_id`."
       }
     ],
     "related": [
@@ -2036,6 +2181,10 @@
       {
         "label": "Installation",
         "slug": "mcp-installation"
+      },
+      {
+        "label": "talonic_request_upload",
+        "slug": "mcp-talonic-request-upload"
       }
     ],
     "faq": [
@@ -2045,7 +2194,7 @@
       },
       {
         "question": "Why does drag-and-drop fail on the Claude.ai connector?",
-        "answer": "Claude.ai imposes a hard ~1 KB cap on tool-call argument values. A base64-encoded real PDF cannot fit, so file_data is truncated to a few hundred bytes before the MCP server receives it. Workarounds: file_url (public URL), document_id (upload via app.talonic.com first), or switch to a local stdio install."
+        "answer": "Claude.ai imposes a ~32 KB cap on tool-call argument values. A base64-encoded real PDF cannot fit. Use talonic_request_upload to get a browser upload link \u2014 the user drops the file in their browser, bypassing the cap entirely. Alternatives: file_url (public URL), document_id (upload via app.talonic.com first), or switch to a local stdio install."
       }
     ],
     "mentions": [
@@ -2064,7 +2213,7 @@
     "slug": "mcp-architecture",
     "parentSlug": "mcp-advanced",
     "title": "Architecture",
-    "seoTitle": "MCP Server Architecture — Talonic Docs",
+    "seoTitle": "MCP Server Architecture \u2014 Talonic Docs",
     "description": "How the Talonic MCP server connects agents to the Talonic API. Hosted (HTTP) and local (stdio) transport modes.",
     "content": [
       {
@@ -2075,7 +2224,7 @@
         "type": "code",
         "language": "text",
         "title": "Architecture",
-        "code": "Agent (Claude Desktop / Cursor / Cline / etc.)\n  ↓ MCP protocol (stdio or HTTP)\nTalonic MCP server\n  ↓ HTTPS, Bearer auth\napi.talonic.com"
+        "code": "Agent (Claude Desktop / Cursor / Cline / etc.)\n  \u2193 MCP protocol (stdio or HTTP)\nTalonic MCP server\n  \u2193 HTTPS, Bearer auth\napi.talonic.com"
       },
       {
         "type": "paragraph",
@@ -2083,7 +2232,7 @@
       },
       {
         "type": "paragraph",
-        "text": "**Hosted mode (HTTP):** The server runs at `mcp.talonic.com` using Streamable HTTP transport. Each `initialize` request creates a new session keyed by a UUID (`Mcp-Session-Id` header). Subsequent requests route to the same session. If a session is lost (deploy, restart), the server returns 404 and the client re-initializes — standard MCP reconnection."
+        "text": "**Hosted mode (HTTP):** The server runs at `mcp.talonic.com` using Streamable HTTP transport. Each `initialize` request creates a new session keyed by a UUID (`Mcp-Session-Id` header). Subsequent requests route to the same session. If a session is lost (deploy, restart), the server returns 404 and the client re-initializes \u2014 standard MCP reconnection."
       },
       {
         "type": "paragraph",
@@ -2113,7 +2262,7 @@
     "slug": "mcp-configuration",
     "parentSlug": "mcp-advanced",
     "title": "Configuration",
-    "seoTitle": "MCP Server Configuration — Talonic Docs",
+    "seoTitle": "MCP Server Configuration \u2014 Talonic Docs",
     "description": "Environment variables for the local MCP server and header options for the hosted server.",
     "content": [
       {
@@ -2183,7 +2332,7 @@
     "slug": "mcp-troubleshooting",
     "parentSlug": "mcp-advanced",
     "title": "Troubleshooting",
-    "seoTitle": "MCP Server Troubleshooting — Talonic Docs",
+    "seoTitle": "MCP Server Troubleshooting \u2014 Talonic Docs",
     "description": "Common issues and fixes for the Talonic MCP server: missing API key, invisible server, 500 errors, and filter problems.",
     "content": [
       {
@@ -2234,7 +2383,7 @@
       },
       {
         "type": "paragraph",
-        "text": "The Claude.ai custom-connector flow runs OAuth 2.1 with PKCE against `app.talonic.com`. If the sign-in window opens but does not return to Claude.ai, or the connector reports `disconnected` after authorising: confirm you are signed in to the same Talonic account in `app.talonic.com` that owns the workspace you want to use; allow third-party cookies for `app.talonic.com` and `claude.ai` (some browsers block the post-consent redirect otherwise); after granting consent you should be redirected back to Claude.ai automatically — if the tab stays on `app.talonic.com`, close the tab and reopen the connector to retry; if you have multiple Talonic accounts, sign out of `app.talonic.com` first; as a last resort, remove the connector in Claude.ai and add it again with `https://mcp.talonic.com/mcp` as the URL."
+        "text": "The Claude.ai custom-connector flow runs OAuth 2.1 with PKCE against `app.talonic.com`. If the sign-in window opens but does not return to Claude.ai, or the connector reports `disconnected` after authorising: confirm you are signed in to the same Talonic account in `app.talonic.com` that owns the workspace you want to use; allow third-party cookies for `app.talonic.com` and `claude.ai` (some browsers block the post-consent redirect otherwise); after granting consent you should be redirected back to Claude.ai automatically \u2014 if the tab stays on `app.talonic.com`, close the tab and reopen the connector to retry; if you have multiple Talonic accounts, sign out of `app.talonic.com` first; as a last resort, remove the connector in Claude.ai and add it again with `https://mcp.talonic.com/mcp` as the URL."
       },
       {
         "type": "heading",
@@ -2284,7 +2433,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Sessions are in-memory on the hosted server. After a deploy or restart, existing sessions are lost. The client should re-initialize without the `Mcp-Session-Id` header — most MCP clients handle this automatically."
+        "text": "Sessions are in-memory on the hosted server. After a deploy or restart, existing sessions are lost. The client should re-initialize without the `Mcp-Session-Id` header \u2014 most MCP clients handle this automatically."
       }
     ],
     "related": [
