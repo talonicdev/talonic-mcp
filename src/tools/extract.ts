@@ -57,6 +57,11 @@ const DESCRIPTION = [
   "- provenance: present only when `include_provenance: true`. Per-field source evidence:",
   "  { field_name: { source_text, section, page } }. Useful for audit trails and citations.",
   "Cost, EUR price, and remaining credit balance are not surfaced in v0.1 and may appear in a later version.",
+  "",
+  "LARGE FILES / HOSTED ENVIRONMENTS:",
+  "For files larger than ~32KB, or when running in a hosted/sandboxed environment (Claude.ai, ChatGPT),",
+  "use talonic_request_upload first to get a browser upload link, then use the returned document_id",
+  "with this tool.",
 ].join("\n")
 
 const inputSchema = {

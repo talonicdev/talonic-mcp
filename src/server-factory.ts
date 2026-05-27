@@ -10,6 +10,7 @@ import { registerGetDocument } from "./tools/get-document.js"
 import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
+import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -153,6 +154,7 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerToMarkdown(server, getTalonic)
   registerExtract(server, getTalonic)
   registerGetBalance(server, getTalonic)
+  registerRequestUpload(server, getToken, baseUrl)
 
   // Resource registrations.
   registerSchemasResource(server, getTalonic)
