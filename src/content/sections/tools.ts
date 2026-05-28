@@ -276,6 +276,11 @@ export const sections: RawSection[] = [
         variant: "info",
         text: "Search results include canonical field names in `fields[].canonicalName`. These names can be used directly in `talonic_filter` conditions, making search a good first step before building precise filters.",
       },
+      {
+        type: "callout",
+        variant: "info",
+        text: 'Every `fieldMatches[]` and `fields[]` entry carries a `dataType` (`"string"`, `"number"`, `"array"`, etc.). Use it to pick the right `talonic_filter` operator on the first call — numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when `dataType === "number"`. See the *Schema typing* section under `talonic_filter` for the full preventive / reactive pattern.',
+      },
       { type: "heading", level: 3, id: "search-example", text: "Example" },
       {
         type: "code",
@@ -304,13 +309,16 @@ export const sections: RawSection[] = [
       "fieldName": "indemnification.cap_amount",
       "documentId": "doc_4e7b...",
       "value": "2x annual fees",
+      "documentCount": 3,
+      "filterable": true,
+      "dataType": "string",
       "score": 0.88
     }
   ],
   "schemas": [],
   "sources": [],
   "fields": [
-    { "canonicalName": "indemnification.cap_amount", "type": "string" }
+    { "canonicalName": "indemnification.cap_amount", "dataType": "string", "filterable": true }
   ]
 }`,
       },
@@ -325,12 +333,12 @@ export const sections: RawSection[] = [
   "limit": 5
 }
 
-// Response includes canonical field names:
+// Response includes canonical field names plus dataType:
 {
   "fields": [
-    { "canonicalName": "vendor.name", "type": "string", "filterable": true },
-    { "canonicalName": "invoice.total_eur", "type": "number", "filterable": true },
-    { "canonicalName": "invoice.due_date", "type": "string", "filterable": true }
+    { "canonicalName": "vendor.name", "dataType": "string", "filterable": true },
+    { "canonicalName": "invoice.total_eur", "dataType": "number", "filterable": true },
+    { "canonicalName": "invoice.due_date", "dataType": "string", "filterable": true }
   ]
 }`,
       },
@@ -480,7 +488,55 @@ export const sections: RawSection[] = [
       { type: "heading", level: 3, id: "filter-operators", text: "Available operators" },
       {
         type: "paragraph",
-        text: "The following operators are available for filter conditions: `eq` (equals), `neq` (not equals), `gt` (greater than), `gte` (greater than or equal), `lt` (less than), `lte` (less than or equal), `between` (range, requires a two-element array as value), `contains` (substring match), `starts_with`, `ends_with`, and `is_empty` (checks for null or empty values). Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema — using them on string fields silently returns zero results.",
+        text: "The following operators are available for filter conditions: `eq` (equals), `neq` (not equals), `gt` (greater than), `gte` (greater than or equal), `lt` (less than), `lte` (less than or equal), `between` (range, requires a two-element array as value), `contains` (substring match), `starts_with`, `ends_with`, `is_empty` (checks for null or empty values), and `is_not_empty` (checks for materialized values). Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. The next section explains how to handle that constraint.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "filter-schema-typing",
+        text: "Schema typing (preventive + reactive)",
+      },
+      {
+        type: "paragraph",
+        text: 'A numeric operator on a string-typed field that happens to hold numeric content (e.g. `"€1,500.00"`) silently returns zero matches — the comparison falls back to lexicographic ordering and almost never produces the result the user expects. There are two ways to handle this; pick the right one before constructing the call.',
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "filter-preventive",
+        text: "Preventive — gate on `dataType`",
+      },
+      {
+        type: "paragraph",
+        text: 'Call `talonic_search` first and read `dataType` on the field entry. If `dataType !== "number"`, do not issue a numeric operator on that field. Pick a string-friendly operator (`eq`, `contains`) or warn the user that the field needs a `data_type` change in the schema definition before the query can succeed. This avoids the silent-zero-matches outcome entirely.',
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "filter-reactive",
+        text: "Reactive — handle `warnings[]`",
+      },
+      {
+        type: "paragraph",
+        text: "When a numeric operator is applied to a string-typed field anyway, the API attaches a `warnings[]` array to the filter response. Each entry has `code`, `message`, `field`/`field_id`, and a `suggestion`. The MCP tool surfaces this in `structuredContent` — agents should relay the `message` (and `suggestion`, when present) to the user rather than silently retrying.",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Response with a warning",
+        code: `{
+  "data": [],
+  "total": 0,
+  "warnings": [
+    {
+      "code": "numeric_operator_on_string_field",
+      "message": "Operator \`gt\` was applied to field \`invoice_total\` typed as string. Numeric comparisons against string-typed fields use lexicographic ordering and may return zero matches.",
+      "field": "invoice_total",
+      "field_id": "fld_inv_total",
+      "suggestion": "Change the field's data_type to \`number\` in the schema definition."
+    }
+  ]
+}`,
       },
       {
         type: "heading",
@@ -1335,5 +1391,173 @@ Payment terms: Net 30`,
       },
     ],
     mentions: ["credits", "balance", "EUR", "burn rate", "runway", "tier", "budget"],
+  },
+  {
+    slug: "talonic-request-upload",
+    parentSlug: "tools",
+    title: "talonic_request_upload",
+    seoTitle: "talonic_request_upload Tool — Talonic MCP",
+    description:
+      "Request a browser-handoff upload link for files that can't be delivered via tool-call arguments. Returns a pre-allocated document_id, an upload URL, and an expiry timestamp.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Request a one-time upload link for a file the agent cannot deliver directly. Returns a pre-allocated `document_id`, a browser-openable `upload_url` the user drops the file into, and an `expires_at` timestamp.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_request_upload`** exists to route around the **~32 KB tool-call argument cap** in hosted-connector environments like Claude.ai's web UI. Above that ceiling, `file_data` on `talonic_extract` is silently truncated and the extraction returns null fields. The browser-handoff flow sidesteps the cap entirely: the user opens the upload URL in a separate tab, drops the file, and the agent then references the resulting document by ID.",
+      },
+      {
+        type: "paragraph",
+        text: "Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) do not have this cap and should keep using `file_data` for small-to-medium files. This tool is for the hosted connector path or any sandboxed environment where you can't reliably stream the file through the tool call.",
+      },
+      { type: "heading", level: 3, id: "request-upload-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "The user has a file to extract and you are running in a hosted-connector environment (Claude.ai, ChatGPT) where `file_data` is not reliable.",
+          "The file is larger than ~32 KB (typical for real invoices, contracts, COIs).",
+          "The user explicitly asks for an upload link.",
+        ],
+      },
+      { type: "heading", level: 3, id: "request-upload-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "You can deliver the file directly via `file_data` (local-stdio installs with small files).",
+          "The file is already accessible via a public URL — use `file_url` on `talonic_extract` instead.",
+          "The document is already in the workspace — use `document_id` on `talonic_extract` instead.",
+        ],
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "filename",
+            type: "string",
+            required: true,
+            description:
+              "Filename with extension (e.g. `invoice.pdf`). Used to pre-allocate the document record and infer MIME type.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{
+  "filename": "invoice-2026-001.pdf"
+}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "document_id": "doc_8f3a2b9c-1d4e-5f6a-7b8c-9d0e1f2a3b4c",
+  "upload_url": "https://app.talonic.com/upload/u_3f9d2a1c8b7e6f5d4c3b2a1f0e9d8c7b",
+  "expires_at": "2026-05-28T20:35:00.000Z"
+}`,
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "request-upload-workflow",
+        text: "End-to-end workflow",
+      },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          "Call `talonic_request_upload` with the filename. Capture `document_id`, `upload_url`, and `expires_at` from the response.",
+          "Show the `upload_url` to the user and ask them to open it in a new browser tab and drop the file.",
+          'Poll `talonic_get_document` with the `document_id` until `status` is `completed`. **Do not skip this step** — a user confirmation like "uploaded" only signals that the browser-side upload finished, not that server-side OCR and processing are done.',
+          'Once `status === "completed"`, call `talonic_extract` with the `document_id` and a `schema` or `schema_id` to pull out structured fields.',
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: 'Server-side processing (OCR + classification) typically takes 10–30 seconds after the browser upload completes. The agent must poll `talonic_get_document` until `status === "completed"` before calling `talonic_extract`. Calling extract too early returns errors that look like the file is missing.',
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Full sequence for a Claude.ai hosted-connector chat",
+        code: `// 1. Agent requests an upload link.
+// talonic_request_upload({ filename: "rental-agreement.pdf" })
+{
+  "document_id": "doc_1a2b3c4d-...",
+  "upload_url": "https://app.talonic.com/upload/u_abc123...",
+  "expires_at": "2026-05-28T20:35:00.000Z"
+}
+
+// 2. Agent: "Open this link in a new tab and drop your file:
+//            https://app.talonic.com/upload/u_abc123...
+//            I'll let you know once Talonic is done processing."
+
+// 3. After user drops the file, agent polls:
+// talonic_get_document({ document_id: "doc_1a2b3c4d-..." })
+// → status: "processing"  → wait ~10s, poll again
+// → status: "completed"   → ready to extract
+
+// 4. Agent extracts:
+// talonic_extract({
+//   document_id: "doc_1a2b3c4d-...",
+//   schema_id: "SCH-RENTAL01"
+// })
+// → structured JSON with per-field confidence scores`,
+      },
+      {
+        type: "paragraph",
+        text: "The pre-allocated `document_id` is a real Talonic document from the moment the upload link is minted, but it stays in `pending` status until the user actually uploads. If the user closes the tab or the link expires (`expires_at`) without uploading, the document remains in `pending` and can be cleaned up via the dashboard. Re-issuing a fresh upload link for the same file is safe: the new link creates a new `document_id` with no link to the abandoned one.",
+      },
+      {
+        type: "paragraph",
+        text: "Agents should treat the `upload_url` as user-only information and never attempt to PUT to it themselves from the sandbox. Most sandboxed environments (Claude.ai's web tools, ChatGPT's Code Interpreter) cannot reach arbitrary S3-like endpoints, and even when they can, asking the user to open the link in their own browser preserves the user-agent boundary and avoids surprising the user with a backend upload they did not consent to.",
+      },
+    ],
+    related: [
+      { label: "talonic_extract", slug: "talonic-extract" },
+      { label: "talonic_get_document", slug: "talonic-get-document" },
+      { label: "Drag & Drop Files", slug: "drag-and-drop" },
+      { label: "Known Limitations", slug: "known-limitations" },
+    ],
+    faq: [
+      {
+        question: "When should the agent use `talonic_request_upload` instead of `file_data`?",
+        answer:
+          "In hosted-connector environments (Claude.ai web, ChatGPT) where tool-call arguments are capped around ~32 KB decoded payload. Real-world documents (100 KB+) get silently truncated when sent via file_data. Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) have no such cap and can keep using file_data.",
+      },
+      {
+        question: "Does a user message like 'uploaded' mean the file is ready to extract?",
+        answer:
+          "No. That confirms only the browser-side upload finished. Server-side OCR and extraction typically need another 10–30 seconds. The agent must poll talonic_get_document until status is 'completed' before calling talonic_extract; calling earlier may return errors that look like the file is missing.",
+      },
+      {
+        question: "What happens if the user never opens the upload link?",
+        answer:
+          "The pre-allocated document_id remains in pending status. The expires_at timestamp indicates when the upload URL stops accepting writes — typically a short window (minutes). Past that, request a fresh link with talonic_request_upload again; the new call mints a new document_id and a new URL.",
+      },
+      {
+        question: "Can the agent PUT the file to the upload_url itself?",
+        answer:
+          "It usually cannot — Claude.ai's sandbox and similar hosted environments restrict outbound egress to arbitrary endpoints. Even where it would technically work, you should still hand the link to the user: it preserves the user-agent boundary (the user controls what file gets uploaded) and matches what every other browser-handoff flow looks like.",
+      },
+      {
+        question: "Why a separate tool instead of changing `talonic_extract`?",
+        answer:
+          "Keeping the upload-link step explicit makes the agent's reasoning visible to the user (the user sees an upload link in chat and knows what's happening). Folding it into talonic_extract would either silently change the contract for small files or introduce a hidden mode switch — both bad for predictability.",
+      },
+    ],
+    mentions: [
+      "upload",
+      "browser-handoff",
+      "presigned URL",
+      "document_id",
+      "Claude.ai",
+      "32 KB cap",
+    ],
   },
 ]
