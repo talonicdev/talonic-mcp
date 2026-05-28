@@ -1858,6 +1858,12 @@
         ]
       },
       {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Don't trust the user's 'done' message — poll instead",
+        "text": "When the user types 'uploaded', 'done', or 'I dropped it', that only confirms the browser-side upload completed. Server-side OCR and exhaustive extraction take another 10–30 seconds. Calling `talonic_extract` before `talonic_get_document` reports `status: 'completed'` may return errors. Always poll, regardless of what the user says."
+      },
+      {
         "type": "heading",
         "level": 3,
         "text": "Input schema"

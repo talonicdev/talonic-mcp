@@ -53,20 +53,26 @@ const outputSchema = {
   status: z.string().optional(),
   source: z
     .object({
-      id: z.string().optional(),
-      type: z.string().optional(),
+      // Pre-extraction documents (e.g. fresh browser-handoff uploads) return
+      // null for these until the source linkage is set during ingest. Accept
+      // null so output validation does not block agents polling for status.
+      id: z.string().nullable().optional(),
+      type: z.string().nullable().optional(),
     })
+    .nullable()
     .optional(),
   triage: z
     .object({
-      sensitivity: z.string().optional(),
-      department: z.string().optional(),
+      // Triage fields are populated during ingest; null is normal before that.
+      sensitivity: z.string().nullable().optional(),
+      department: z.string().nullable().optional(),
       jurisdiction: z.string().nullable().optional(),
-      pii_detected: z.boolean().optional(),
+      pii_detected: z.boolean().nullable().optional(),
       pii_categories: z.array(z.string()).nullable().optional(),
-      regulated_data: z.boolean().optional(),
+      regulated_data: z.boolean().nullable().optional(),
       confidentiality_marking: z.string().nullable().optional(),
     })
+    .nullable()
     .optional(),
   original_path: z.string().nullable().optional(),
   extraction_count: z.number().optional(),
