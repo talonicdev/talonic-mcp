@@ -1212,6 +1212,7 @@
         "items": [
           "You need details about a specific document already extracted or uploaded.",
           "You have a `document_id` from a previous extract or search and want more context.",
+          "You called `talonic_request_upload` and need to poll until the user has uploaded the file.",
           "The user asks 'tell me about document X'."
         ]
       },
@@ -1256,6 +1257,26 @@
         "language": "json",
         "title": "Example response",
         "code": "{\n  \"id\": \"d_abc123\",\n  \"filename\": \"invoice.pdf\",\n  \"documentType\": \"invoice\",\n  \"language\": \"en\",\n  \"pageCount\": 2,\n  \"processingLog\": [...],\n  \"links\": {\n    \"self\": \"https://api.talonic.com/v1/documents/d_abc123\",\n    \"extractions\": \"https://api.talonic.com/v1/documents/d_abc123/extractions\",\n    \"dashboard\": \"https://app.talonic.com/documents/d_abc123\"\n  }\n}"
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Status values"
+      },
+      {
+        "type": "paragraph",
+        "text": "The `status` field on the response indicates where the document is in its lifecycle. When polling after `talonic_request_upload`, wait for `status` to reach `completed` before calling `talonic_extract`."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "`pending_upload` \u2014 document slot reserved via `talonic_request_upload`, file not yet received. Poll at ~5 s intervals. The slot expires after 15 min; past `expires_at` from the request, the user did not upload in time.",
+          "`queued` / `extracting` \u2014 file received, OCR and exhaustive extraction in progress. Keep polling.",
+          "`completed` \u2014 extraction is done. This is the state to wait for before calling `talonic_extract` with a schema or schema_id \u2014 the schema-specific LLM pass runs off the cached OCR'd text.",
+          "`uploaded` \u2014 file received but the extraction queue could not be enqueued (rare, e.g. Redis unavailable). `talonic_extract` will trigger processing inline if called.",
+          "`error` / `ocr_failed` / `extraction_failed` \u2014 terminal failures. See `processing_log` for the reason."
+        ]
       },
       {
         "type": "heading",
@@ -1832,7 +1853,7 @@
           "Call `talonic_request_upload` with the filename. You receive a `document_id`, an `upload_url`, and an `expires_at` timestamp.",
           "Show the `upload_url` to the user and ask them to open it in their browser.",
           "The user drops the file on the upload page. The browser uploads directly to Talonic \u2014 no tool-call size cap, no sandbox restriction.",
-          "Poll with `talonic_get_document` using the `document_id` until `status` is `uploaded`.",
+          "Poll with `talonic_get_document` using the `document_id` until `status` is `completed` (the file has been received, OCR'd, and is ready for schema-specific extraction).",
           "Call `talonic_extract` with the `document_id` and a schema to extract structured data."
         ]
       },
@@ -1906,7 +1927,7 @@
     "faq": [
       {
         "question": "How do I upload a file through Claude.ai to Talonic?",
-        "answer": "Call talonic_request_upload with the filename. Show the returned upload_url to the user. They open it in their browser and drop the file. Poll talonic_get_document until status is 'uploaded', then call talonic_extract with the document_id."
+        "answer": "Call talonic_request_upload with the filename. Show the returned upload_url to the user. They open it in their browser and drop the file. Poll talonic_get_document until status is 'completed' (the document has been received and processed), then call talonic_extract with the document_id and a schema."
       },
       {
         "question": "Why can't I just send the file through file_data on Claude.ai?",

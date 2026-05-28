@@ -70,7 +70,7 @@ The investigation found this fits existing patterns, so it is mostly *assembly*,
 **Ownership / sequencing**
 - **API team** owns the two new endpoints + `pending_upload` status + GC. **This is the critical-path dependency** — both web and MCP block on the endpoint contract.
 - **Web team** owns the `/u/[token]` page (low risk — clones `/share/[token]`).
-- **MCP** (Hamlet) owns the new tool + descriptions; blocked only on the API contract.
+- **MCP** owns the new tool + descriptions; blocked only on the API contract.
 
 **Decisions to confirm**
 - Token TTL — suggest **15 min**.

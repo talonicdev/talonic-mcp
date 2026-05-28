@@ -14,7 +14,9 @@ const DESCRIPTION = [
   "plus a document_id to track the upload.",
   "",
   "After showing the URL to the user, poll with talonic_get_document until",
-  "status is 'uploaded', then proceed with talonic_extract using the document_id.",
+  "status is 'completed' (the file has been uploaded, OCR'd, and is ready for",
+  "schema-specific extraction). Then call talonic_extract with the document_id",
+  "and a schema or schema_id.",
   "",
   "USE WHEN:",
   "- The user has a file to extract but you cannot send it via tool-call arguments",
@@ -39,7 +41,11 @@ const inputSchema = {
 }
 
 const outputSchema = {
-  document_id: z.string().describe("The pre-allocated document ID. Use with talonic_get_document to poll status, and with talonic_extract once uploaded."),
+  document_id: z
+    .string()
+    .describe(
+      "The pre-allocated document ID. Use with talonic_get_document to poll status, and with talonic_extract once uploaded.",
+    ),
   upload_url: z.string().describe("URL the user should open in their browser to drop the file."),
   expires_at: z.string().describe("ISO 8601 timestamp when the upload link expires."),
 }

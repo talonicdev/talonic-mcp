@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 import { Talonic } from "@talonic/node"
 import { handleSaveSchema } from "../../src/tools/save-schema"
@@ -9,6 +9,7 @@ import { handleFilter, outputSchema as filterOutputSchema } from "../../src/tool
 import { handleToMarkdown } from "../../src/tools/to-markdown"
 import { handleExtract } from "../../src/tools/extract"
 import { handleGetBalance } from "../../src/tools/get-balance"
+import { handleRequestUpload } from "../../src/tools/request-upload"
 
 type MockedFetch = ReturnType<typeof vi.fn>
 
@@ -663,5 +664,120 @@ describe("search outputSchema dataType passthrough (schema-typing footgun, preve
       fields: [],
     }
     expect(Output.safeParse(apiResponse).success).toBe(true)
+  })
+})
+
+describe("talonic_request_upload handler", () => {
+  let fetchMock: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("posts to /v1/documents/upload-session with the bearer token, filename, and returns the API fields", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          document_id: "doc_123",
+          upload_url: "https://app.talonic.com/u/token-abc",
+          expires_at: "2026-05-28T13:00:00.000Z",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    )
+
+    const result = await handleRequestUpload(() => "tlnc_test_key", undefined, {
+      filename: "invoice.pdf",
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("https://api.talonic.com/v1/documents/upload-session")
+    expect(init.method).toBe("POST")
+    const headers = init.headers as Record<string, string>
+    expect(headers["Authorization"]).toBe("Bearer tlnc_test_key")
+    expect(headers["Content-Type"]).toBe("application/json")
+    expect(headers["Accept"]).toBe("application/json")
+    expect(JSON.parse(init.body as string)).toEqual({ filename: "invoice.pdf" })
+
+    const parsed = parsedText(result) as {
+      document_id: string
+      upload_url: string
+      expires_at: string
+    }
+    expect(parsed.document_id).toBe("doc_123")
+    expect(parsed.upload_url).toBe("https://app.talonic.com/u/token-abc")
+    expect(parsed.expires_at).toBe("2026-05-28T13:00:00.000Z")
+  })
+
+  it("honours a custom baseUrl (e.g., for staging)", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ document_id: "d", upload_url: "u", expires_at: "e" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    )
+
+    await handleRequestUpload(() => "tlnc_x", "https://staging-api.talonic.com", {
+      filename: "x.pdf",
+    })
+
+    const [url] = fetchMock.mock.calls[0] as [string]
+    expect(url).toBe("https://staging-api.talonic.com/v1/documents/upload-session")
+  })
+
+  it("calls getToken() per invocation (so a rotated OAuth token is picked up)", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ document_id: "d", upload_url: "u", expires_at: "e" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    )
+
+    const tokens = ["token-1", "token-2"]
+    const getToken = vi.fn(() => tokens.shift() ?? "")
+
+    await handleRequestUpload(getToken, undefined, { filename: "a.pdf" })
+    await handleRequestUpload(getToken, undefined, { filename: "b.pdf" })
+
+    expect(getToken).toHaveBeenCalledTimes(2)
+    const headers1 = (fetchMock.mock.calls[0] as [string, RequestInit])[1].headers as Record<
+      string,
+      string
+    >
+    const headers2 = (fetchMock.mock.calls[1] as [string, RequestInit])[1].headers as Record<
+      string,
+      string
+    >
+    expect(headers1["Authorization"]).toBe("Bearer token-1")
+    expect(headers2["Authorization"]).toBe("Bearer token-2")
+  })
+
+  it("returns a tool error on non-2xx response, including status code and body", async () => {
+    fetchMock.mockResolvedValue(new Response("Unauthorized", { status: 401 }))
+
+    const result = await handleRequestUpload(() => "bad-key", undefined, {
+      filename: "x.pdf",
+    })
+
+    expect((result as { isError?: true }).isError).toBe(true)
+    expect(result.content[0]?.text).toContain("HTTP 401")
+    expect(result.content[0]?.text).toContain("Unauthorized")
+  })
+
+  it("returns a tool error when fetch itself throws (network failure)", async () => {
+    fetchMock.mockRejectedValue(new Error("ECONNREFUSED"))
+
+    const result = await handleRequestUpload(() => "k", undefined, {
+      filename: "x.pdf",
+    })
+
+    expect((result as { isError?: true }).isError).toBe(true)
+    expect(result.content[0]?.text).toContain("ECONNREFUSED")
   })
 })
