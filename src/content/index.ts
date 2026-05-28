@@ -1,6 +1,13 @@
 // ---------------------------------------------------------------------------
 // Structured content export for @talonic/mcp documentation.
 //
+// ⚠ This module is the source-of-truth for talonic.com/docs/mcp/* pages.
+// The website's <McpContentPage> calls getMcpSection(slug) at render time.
+// docs/sections.json in this repo is a SEPARATE surface that feeds the
+// SDK/API/Platform doc pages on the website, NOT the MCP doc pages.
+// Full architecture, "add a new tool" checklist, and failure modes:
+//   docs/architecture/docs-pipeline.md
+//
 // Usage:
 //   import { getMcpSection, getAllMcpSections, MCP_NAV_SECTIONS } from '@talonic/mcp/content'
 // ---------------------------------------------------------------------------

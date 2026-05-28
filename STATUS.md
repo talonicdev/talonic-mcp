@@ -1,5 +1,8 @@
 # Talonic MCP and SDK Status
 
+> **📐 Architecture map for docs:** `docs/architecture/docs-pipeline.md` is the canonical reference for how content flows from this repo (and from `talonic-node` + platform) into `talonic.com/docs/*`. Read it before any non-trivial doc change — the repo carries two parallel docs surfaces feeding *different* parts of the website, and editing the wrong one is a silent no-op. The doc covers the end-to-end pipeline, the four-file checklist for adding a new MCP tool, the failure-mode table, and the CI token map.
+
+
 > **✅ INVESTIGATION CLOSED 2026-05-27 — Pre-signed upload URLs: design decided, instrumentation removed.**
 > The 2026-05-20→27 measurement burst established two hard, measured limits on Claude.ai's hosted connector: (1) tool-call arguments truncate at **~32 KB decoded / ~43 KB base64** (not the long-documented "~1 KB"); (2) the agent sandbox **cannot PUT out-of-band** — egress is allowlisted, `*.amazonaws.com` returns 403. Both walls are structural and apply to hosted agents generally. **Decision: browser-handoff upload** (user uploads via their own browser through a tokenised page; agent polls then extracts). Full findings + plan for internal teams: `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`. Backing detail: `docs/superpowers/specs/2026-05-20-presigned-upload-urls-design.md`. The debug instrumentation has now been **removed from the codebase** (this commit). Remaining manual teardown by Hamlet: unset the `TALONIC_DEBUG_TOOLS` / `S3_*` env vars in Railway, rotate the test IAM key, delete the `talonic-hamlet-test-bucket`. **Next engineering step:** implementation plan for the two API endpoints (`upload-session` + public file receiver) — API team is critical path.
 
