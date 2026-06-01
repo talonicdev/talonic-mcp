@@ -54,10 +54,17 @@ account (see Demo Account section).
 
 1. **Extract from URL**
    - Prompt: "Extract vendor_name, total_amount, and invoice_date from
-     https://demo.talonic.com/sample-invoice.pdf"
-   - Expected: Card widget renders with the three fields, overall confidence
-     ≥0.9, and document metadata (filename "sample-invoice.pdf", 1 page,
-     type_detected "invoice").
+     <PUBLIC_URL_TO_SAMPLE_INVOICE>"
+     (ChatGPT cannot send a local file to the hosted MCP; the document must
+     be a publicly fetchable URL or already in the workspace by document_id.)
+   - Expected: Card widget renders with the requested fields, an overall
+     confidence bar (~0.85 on the sample invoice), per-field confidence
+     bars, and document metadata (filename + page count). Note:
+     `type_detected` / `language_detected` may come back null and are simply
+     omitted from the card — that is expected, not a failure.
+     Verified against production 2026-06-01: data = {vendor_name "Acme
+     Corporation", invoice_number "INV-2026-0472", total_amount 21428.75,
+     invoice_date "2026-03-15"}, overall confidence 0.85.
 
 2. **List schemas**
    - Prompt: "List the schemas in my Talonic workspace"
