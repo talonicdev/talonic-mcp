@@ -15,9 +15,13 @@ const DESCRIPTION = [
   "STATUS: stable.",
   "",
   "List all saved schemas in the user's Talonic workspace.",
-  "Returns each schema with its id (UUID), short_id (SCH-XXXXXXXX), name, description,",
-  "version, field count, and full JSON Schema definition. Either id form is accepted by",
-  "talonic_extract's `schema_id` parameter.",
+  "Returns a COMPACT SUMMARY of each schema: id (UUID), short_id (SCH-XXXXXXXX), name,",
+  "description, version, and field_count. Either id form is accepted by talonic_extract's",
+  "`schema_id` parameter, so you can extract with a saved schema straight from this list.",
+  "",
+  "The full JSON Schema definition for each field is intentionally NOT included here — for",
+  "many schemas that payload is large and gets truncated by some clients. To inspect a",
+  "schema's full field definitions, read the `talonic://schemas` resource.",
   "",
   "USE WHEN:",
   "- The user asks what schemas they have, or asks to see existing schemas.",
@@ -75,10 +79,30 @@ export const outputSchema = {
  *
  * @internal
  */
+/**
+ * Fields stripped from each list item before returning. The full schema
+ * `definition` is the big one — with a dozen+ schemas, returning every
+ * field definition blows past some clients' tool-result size budget and the
+ * payload gets truncated mid-object. `links` are also dropped as list noise.
+ * Both remain available via the `talonic://schemas` resource.
+ *
+ * @internal
+ */
+const LIST_ITEM_OMIT = new Set(["definition", "links"])
+
 export async function handleListSchemas(talonic: Talonic): Promise<ToolResult> {
   try {
     const result = await talonic.schemas.list()
-    return jsonOk(result)
+    const data = Array.isArray(result?.data)
+      ? result.data.map((schema) => {
+          const summary: Record<string, unknown> = {}
+          for (const [key, value] of Object.entries(schema as unknown as Record<string, unknown>)) {
+            if (!LIST_ITEM_OMIT.has(key)) summary[key] = value
+          }
+          return summary
+        })
+      : result?.data
+    return jsonOk({ ...result, data })
   } catch (err) {
     return toolError(err)
   }

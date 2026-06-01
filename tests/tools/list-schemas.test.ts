@@ -46,6 +46,48 @@ describe("talonic_list_schemas handler", () => {
     expect(parsed.data[1]?.name).toBe("Contract")
   })
 
+  it("omits the heavy `definition` and `links` from each list item", async () => {
+    // The list response previously carried every schema's full JSON Schema
+    // definition. With 12+ schemas this exceeded ChatGPT's tool-result size
+    // budget and got truncated mid-payload. The list now returns compact
+    // summaries; full definitions are available via the talonic://schemas
+    // resource or a single-schema fetch.
+    const talonic = makeTalonic({
+      data: [
+        {
+          id: "sch_1",
+          short_id: "SCH-0001",
+          name: "Invoice",
+          description: "Invoice schema",
+          field_count: 4,
+          version: 2,
+          created_at: "2026-05-01T00:00:00Z",
+          updated_at: "2026-05-02T00:00:00Z",
+          definition: { type: "object", properties: { a: { type: "string" } } },
+          links: { self: "/v1/schemas/sch_1", dashboard: "https://app.talonic.com/x" },
+        },
+      ],
+      pagination: { total: 1, limit: 20, has_more: false, next_cursor: null },
+    })
+
+    const result = await handleListSchemas(talonic)
+    const parsed = JSON.parse(result.content[0]?.text ?? "") as {
+      data: Array<Record<string, unknown>>
+    }
+    const item = parsed.data[0]!
+
+    // Heavy fields dropped.
+    expect(item).not.toHaveProperty("definition")
+    expect(item).not.toHaveProperty("links")
+    // Useful summary fields kept.
+    expect(item.id).toBe("sch_1")
+    expect(item.short_id).toBe("SCH-0001")
+    expect(item.name).toBe("Invoice")
+    expect(item.description).toBe("Invoice schema")
+    expect(item.field_count).toBe(4)
+    expect(item.version).toBe(2)
+  })
+
   it("returns an isError result on auth failure with code/status/request_id", async () => {
     const fetchFn = vi.fn().mockResolvedValue(
       jsonResponse(

@@ -901,19 +901,19 @@ Payment terms: Net 30`,
     parentSlug: "tools",
     title: "talonic_list_schemas",
     seoTitle: "talonic_list_schemas Tool — Talonic MCP",
-    description: "List all saved schemas with their definitions in the workspace.",
+    description: "List all saved schemas in the workspace as compact summaries.",
     content: [
       {
         type: "paragraph",
-        text: "List all saved schemas with their definitions. Returns schema IDs (both UUID and `SCH-XXXXXXXX` short format), names, and field definitions.",
+        text: "List all saved schemas as compact summaries. Returns schema IDs (both UUID and `SCH-XXXXXXXX` short format), names, descriptions, version, and field counts.",
       },
       {
         type: "paragraph",
-        text: "The `talonic://schemas` resource exposes the same data to clients that browse resources separately (Claude Desktop and Cowork render these in the UI).",
+        text: "The full per-field JSON Schema definition is intentionally omitted from the list — across many schemas that payload is large and can get truncated by some clients. To inspect a schema's full field definitions, read the `talonic://schemas` resource, which clients that browse resources separately (Claude Desktop and Cowork) also render in the UI.",
       },
       {
         type: "paragraph",
-        text: "**`talonic_list_schemas`** is a read-only tool that returns every saved schema in your workspace. Agents should call this before creating a new schema to avoid duplicates, and when the user asks about their available extraction templates. The response includes the full JSON Schema definition for each schema, so the agent can inspect field structures without additional calls.",
+        text: "**`talonic_list_schemas`** is a read-only tool that returns every saved schema in your workspace as a summary. Agents should call this before creating a new schema to avoid duplicates, and when the user asks about their available extraction templates. To read the full field structure of a specific schema, use the `talonic://schemas` resource.",
       },
       {
         type: "paragraph",
