@@ -3,6 +3,16 @@ import { getExtractionResultWidgetHtml } from "./extraction-result.js"
 import { EXTRACTION_RESULT_WIDGET_URI, EXTRACTION_RESULT_WIDGET_MIME } from "./types.js"
 
 /**
+ * Unique HTTPS origin for this app's widgets. Required for ChatGPT app
+ * submission; ChatGPT isolates the widget in a sandbox derived from it
+ * (`<domain>.web-sandbox.oaiusercontent.com`). It is an isolation namespace,
+ * not a served endpoint. One value for the whole app (must be unique per app).
+ *
+ * @internal
+ */
+const WIDGET_DOMAIN = "https://talonic.com"
+
+/**
  * Register the extraction-result widget as an MCP resource.
  *
  * Apps SDK clients (ChatGPT) discover widgets by listing resources with the
@@ -35,12 +45,19 @@ export function registerExtractionResultWidget(server: McpServer): void {
           // (legacy ChatGPT compatibility).
           _meta: {
             ui: {
+              // Unique HTTPS origin for this app's widget. Required for app
+              // submission. ChatGPT renders the widget in an isolated sandbox
+              // at <domain>.web-sandbox.oaiusercontent.com. It is an isolation
+              // namespace, not a served endpoint — it need not host anything.
+              domain: WIDGET_DOMAIN,
               csp: {
                 connectDomains: [],
                 resourceDomains: [],
                 frameDomains: [],
               },
             },
+            // OpenAI compatibility aliases for the two fields above.
+            "openai/widgetDomain": WIDGET_DOMAIN,
             "openai/widgetCSP": {
               connect_domains: [],
               resource_domains: [],

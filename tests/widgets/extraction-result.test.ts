@@ -98,6 +98,22 @@ describe("registerExtractionResultWidget", () => {
     expect(meta["openai/widgetCSP"]).toBeDefined()
     expect(meta["openai/widgetCSP"].connect_domains).toEqual([])
   })
+
+  it("declares a unique widget domain (required for app submission)", async () => {
+    const server = new McpServer({ name: "test", version: "0.0.0" })
+    registerExtractionResultWidget(server)
+
+    const result = await (server as any)._registeredResources[
+      EXTRACTION_RESULT_WIDGET_URI
+    ].readCallback(new URL(EXTRACTION_RESULT_WIDGET_URI))
+
+    const meta = result.contents[0]._meta
+    // A unique HTTPS origin is required to submit the app. ChatGPT renders the
+    // widget under <domain>.web-sandbox.oaiusercontent.com for iframe isolation.
+    // Standard key + OpenAI alias, both a full https origin.
+    expect(meta.ui?.domain).toBe("https://talonic.com")
+    expect(meta["openai/widgetDomain"]).toBe("https://talonic.com")
+  })
 })
 
 describe("talonic_extract widget linkage", () => {
