@@ -2,7 +2,7 @@ import { Talonic } from "@talonic/node"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { registerSchemasResource } from "./resources/schemas-resource.js"
 import { registerWebhooksResource } from "./resources/webhooks-resource.js"
-import { registerExtractionResultWidget } from "./widgets/register.js"
+import { registerWidgets } from "./widgets/register.js"
 import { registerExtract } from "./tools/extract.js"
 import { registerFilter } from "./tools/filter.js"
 import { registerGetBalance } from "./tools/get-balance.js"
@@ -160,8 +160,8 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerSchemasResource(server, getTalonic)
   registerWebhooksResource(server, getToken, baseUrl)
 
-  // UI widget resources (Apps SDK).
-  registerExtractionResultWidget(server)
+  // UI widget resources (Apps SDK). One per tool.
+  registerWidgets(server)
 
   return server
 }

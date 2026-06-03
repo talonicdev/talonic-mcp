@@ -1,14 +1,12 @@
+import { buildWidgetHtml } from "./shared.js"
+
 /**
- * Self-contained HTML for the extraction-result widget.
+ * Inline card for `talonic_extract`. Shows document metadata, the extracted
+ * data as a field/value table with per-field confidence bars, an overall
+ * confidence indicator, and copy/download-JSON controls.
  *
- * Rendered inline in ChatGPT when `talonic_extract` returns. The widget
- * receives the tool's structuredContent over postMessage and renders:
- *   - document metadata (filename, pages, type)
- *   - extracted data as a key/value table
- *   - overall confidence and per-field confidence bars
- *   - copy-JSON and download-JSON buttons
- *
- * No external network calls. No secrets. Render-only.
+ * Reads `window.openai.toolOutput` (the tool's structuredContent: `document`,
+ * `data`, `confidence`). Render-only; no secrets.
  *
  * @internal
  */
@@ -16,78 +14,7 @@ export function getExtractionResultWidgetHtml(): string {
   return WIDGET_HTML
 }
 
-const WIDGET_HTML = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Talonic — Extraction Result</title>
-<style>
-  :root {
-    --bg: #ffffff;
-    --fg: #111827;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #4f46e5;
-    --good: #16a34a;
-    --warn: #d97706;
-    --bad: #dc2626;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f1115;
-      --fg: #f3f4f6;
-      --muted: #9ca3af;
-      --border: #1f2937;
-    }
-  }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
-  .root { padding: 16px; }
-  .empty { color: var(--muted); padding: 24px; text-align: center; }
-  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .doc { font-weight: 600; }
-  .doc-meta { color: var(--muted); font-size: 12px; }
-  .confidence { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
-  .bar { width: 60px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .bar > span { display: block; height: 100%; background: var(--good); }
-  .bar.warn > span { background: var(--warn); }
-  .bar.bad > span { background: var(--bad); }
-  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
-  th { color: var(--muted); font-weight: 500; font-size: 12px; }
-  .field-name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); }
-  .field-val { font-variant-numeric: tabular-nums; word-break: break-word; }
-  .actions { margin-top: 12px; display: flex; gap: 8px; }
-  button { background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
-  button:hover { border-color: var(--accent); }
-</style>
-</head>
-<body>
-<div id="root" class="root">
-  <div class="empty">Waiting for extraction result…</div>
-</div>
-<script>
-(function () {
-  var root = document.getElementById("root");
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-
-  function confidenceClass(v) {
-    if (typeof v !== "number") return "";
-    if (v >= 0.85) return "";
-    if (v >= 0.7) return "warn";
-    return "bad";
-  }
-
-  function render(payload) {
-    if (!payload || typeof payload !== "object") {
-      root.innerHTML = '<div class="empty">No data.</div>';
-      return;
-    }
+const RENDER_BODY = `
     var doc = payload.document || {};
     var data = payload.data || {};
     var conf = payload.confidence || {};
@@ -95,102 +22,46 @@ const WIDGET_HTML = `<!doctype html>
     var fields = conf.fields || {};
 
     var rows = Object.keys(data).map(function (k) {
-      var v = data[k];
-      var fc = fields[k];
-      var pct = typeof fc === "number" ? Math.round(fc * 100) + "%" : "—";
-      var cls = confidenceClass(fc);
-      var bar = typeof fc === "number"
-        ? '<div class="bar ' + cls + '"><span style="width:' + Math.round(fc * 100) + '%"></span></div>'
-        : "";
       return '<tr>'
-        + '<td class="field-name">' + escapeHtml(k) + '</td>'
-        + '<td class="field-val">' + escapeHtml(typeof v === "object" ? JSON.stringify(v) : v) + '</td>'
-        + '<td>' + bar + ' <span style="color:var(--muted);font-size:12px">' + pct + '</span></td>'
+        + '<td class="mono muted">' + esc(k) + '</td>'
+        + '<td class="val">' + esc(fmt(data[k])) + '</td>'
+        + '<td>' + confBar(fields[k]) + '</td>'
         + '</tr>';
     }).join("");
 
-    var overallHtml = overall === null
-      ? ""
-      : '<div class="confidence">'
-        + '<span>Overall</span>'
-        + '<div class="bar ' + confidenceClass(overall) + '"><span style="width:' + Math.round(overall * 100) + '%"></span></div>'
-        + '<span>' + Math.round(overall * 100) + '%</span>'
-        + '</div>';
+    var meta = [
+      doc.pages ? doc.pages + (doc.pages === 1 ? " page" : " pages") : "",
+      doc.type_detected ? esc(doc.type_detected) : "",
+      doc.language_detected ? esc(doc.language_detected) : "",
+    ].filter(Boolean).join(" · ");
 
     root.innerHTML = ''
       + '<div class="header">'
-      + '  <div>'
-      + '    <div class="doc">' + escapeHtml(doc.filename || "Document") + '</div>'
-      + '    <div class="doc-meta">'
-      +        (doc.pages ? doc.pages + (doc.pages === 1 ? " page" : " pages") : "")
-      +        (doc.type_detected ? " · " + escapeHtml(doc.type_detected) : "")
-      +        (doc.language_detected ? " · " + escapeHtml(doc.language_detected) : "")
-      + '    </div>'
-      + '  </div>'
-      +    overallHtml
+      + '  <div><div class="title">' + esc(doc.filename || "Document") + '</div>'
+      + '    <div class="subtitle">' + meta + '</div></div>'
+      + (overall === null ? "" : '<div class="subtitle">Overall ' + confBar(overall) + '</div>')
       + '</div>'
-      + '<table>'
-      + '  <thead><tr><th>Field</th><th>Value</th><th>Confidence</th></tr></thead>'
-      + '  <tbody>' + (rows || '<tr><td colspan="3" class="empty">No fields extracted.</td></tr>') + '</tbody>'
-      + '</table>'
+      + '<table><thead><tr><th>Field</th><th>Value</th><th>Confidence</th></tr></thead><tbody>'
+      + (rows || '<tr><td colspan="3" class="empty">No fields extracted.</td></tr>')
+      + '</tbody></table>'
       + '<div class="actions">'
       + '  <button id="copy-json">Copy JSON</button>'
       + '  <button id="download-json">Download JSON</button>'
       + '</div>';
 
     var json = JSON.stringify(data, null, 2);
-    document.getElementById("copy-json").addEventListener("click", function () {
-      navigator.clipboard && navigator.clipboard.writeText(json);
-    });
-    document.getElementById("download-json").addEventListener("click", function () {
+    copyButton("copy-json", json);
+    var dl = document.getElementById("download-json");
+    if (dl) dl.addEventListener("click", function () {
       var blob = new Blob([json], { type: "application/json" });
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
-      a.href = url;
-      a.download = (doc.filename || "extraction") + ".json";
-      a.click();
+      a.href = url; a.download = (doc.filename || "extraction") + ".json"; a.click();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     });
-  }
+`
 
-  // PRIMARY channel: OpenAI Apps SDK injects the tool's structuredContent as
-  // window.openai.toolOutput and fires "openai:set_globals" whenever globals
-  // change. This is the documented widget data API.
-  function payloadFromHost() {
-    return (window.openai && window.openai.toolOutput) || null;
-  }
-
-  function renderFromHost() {
-    render(payloadFromHost());
-  }
-
-  // Initial paint: toolOutput is normally present by the time the iframe runs.
-  renderFromHost();
-
-  // Re-render whenever the host pushes new globals.
-  window.addEventListener(
-    "openai:set_globals",
-    function (event) {
-      var globals = event && event.detail && event.detail.globals;
-      var output = globals && globals.toolOutput;
-      if (output) {
-        window.openai = window.openai || {};
-        window.openai.toolOutput = output;
-      }
-      renderFromHost();
-    },
-    { passive: true }
-  );
-
-  // FALLBACK channel: some host versions also post the raw MCP bridge
-  // notification { method: "ui/notifications/tool-result", params: { structuredContent } }.
-  window.addEventListener("message", function (event) {
-    var msg = event.data;
-    if (!msg || msg.method !== "ui/notifications/tool-result") return;
-    var sc = msg.params && msg.params.structuredContent;
-    if (sc) render(sc);
-  });
-})();
-</script>
-</body>
-</html>`
+const WIDGET_HTML = buildWidgetHtml({
+  title: "Talonic — Extraction Result",
+  renderBody: RENDER_BODY,
+})

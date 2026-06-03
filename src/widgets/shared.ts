@@ -1,14 +1,53 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
+import { WIDGET_MIME } from "./types.js"
 
-exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended layout drift) 1`] = `
-"<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Talonic — Extraction Result</title>
-<style>
+/**
+ * Unique HTTPS origin for this app's widgets. Required for ChatGPT app
+ * submission; ChatGPT isolates the widget in a sandbox derived from it
+ * (`<domain>.web-sandbox.oaiusercontent.com`). It is an isolation namespace,
+ * not a served endpoint, and is shared by every widget in the app.
+ *
+ * @internal
+ */
+export const WIDGET_DOMAIN = "https://talonic.com"
 
+/**
+ * The `_meta` block attached to every widget resource. Declares the widget
+ * domain (required for submission) and an empty Content Security Policy (the
+ * widgets are fully self-contained — no external network, resources, or
+ * frames). Both the modern `ui.*` keys and the `openai/*` aliases are emitted
+ * for host compatibility.
+ *
+ * @internal
+ */
+export function widgetMeta(): Record<string, unknown> {
+  return {
+    ui: {
+      domain: WIDGET_DOMAIN,
+      csp: {
+        connectDomains: [],
+        resourceDomains: [],
+        frameDomains: [],
+      },
+    },
+    "openai/widgetDomain": WIDGET_DOMAIN,
+    "openai/widgetCSP": {
+      connect_domains: [],
+      resource_domains: [],
+      redirect_domains: [],
+    },
+  }
+}
+
+/**
+ * Base CSS shared by every widget. Defines the colour tokens (light + dark),
+ * typography, and the common primitives every card uses: header, key/value
+ * tables, confidence bars, buttons, badges. Per-widget CSS is appended after
+ * this.
+ *
+ * @internal
+ */
+const BASE_CSS = `
   :root {
     --bg: #ffffff; --fg: #111827; --muted: #6b7280; --border: #e5e7eb;
     --accent: #4f46e5; --good: #16a34a; --warn: #d97706; --bad: #dc2626;
@@ -58,15 +97,15 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     padding: 12px; max-height: 360px; overflow: auto; white-space: pre-wrap;
     word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; }
+`
 
-
-</style>
-</head>
-<body>
-<div id="root" class="root"><div class="empty">Waiting for result…</div></div>
-<script>
-(function () {
-
+/**
+ * Helper JS injected into every widget. Defines `root` and a set of small
+ * render utilities. The widget's own `render(payload)` body uses these.
+ *
+ * @internal
+ */
+const HELPERS_JS = `
   var root = document.getElementById("root");
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -95,56 +134,18 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
       if (navigator.clipboard) navigator.clipboard.writeText(text);
     });
   }
+`
 
-  function render(payload) {
-
-    var doc = payload.document || {};
-    var data = payload.data || {};
-    var conf = payload.confidence || {};
-    var overall = typeof conf.overall === "number" ? conf.overall : null;
-    var fields = conf.fields || {};
-
-    var rows = Object.keys(data).map(function (k) {
-      return '<tr>'
-        + '<td class="mono muted">' + esc(k) + '</td>'
-        + '<td class="val">' + esc(fmt(data[k])) + '</td>'
-        + '<td>' + confBar(fields[k]) + '</td>'
-        + '</tr>';
-    }).join("");
-
-    var meta = [
-      doc.pages ? doc.pages + (doc.pages === 1 ? " page" : " pages") : "",
-      doc.type_detected ? esc(doc.type_detected) : "",
-      doc.language_detected ? esc(doc.language_detected) : "",
-    ].filter(Boolean).join(" · ");
-
-    root.innerHTML = ''
-      + '<div class="header">'
-      + '  <div><div class="title">' + esc(doc.filename || "Document") + '</div>'
-      + '    <div class="subtitle">' + meta + '</div></div>'
-      + (overall === null ? "" : '<div class="subtitle">Overall ' + confBar(overall) + '</div>')
-      + '</div>'
-      + '<table><thead><tr><th>Field</th><th>Value</th><th>Confidence</th></tr></thead><tbody>'
-      + (rows || '<tr><td colspan="3" class="empty">No fields extracted.</td></tr>')
-      + '</tbody></table>'
-      + '<div class="actions">'
-      + '  <button id="copy-json">Copy JSON</button>'
-      + '  <button id="download-json">Download JSON</button>'
-      + '</div>';
-
-    var json = JSON.stringify(data, null, 2);
-    copyButton("copy-json", json);
-    var dl = document.getElementById("download-json");
-    if (dl) dl.addEventListener("click", function () {
-      var blob = new Blob([json], { type: "application/json" });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url; a.download = (doc.filename || "extraction") + ".json"; a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    });
-
-  }
-
+/**
+ * Bootstrap JS injected into every widget. Reads the tool output from the
+ * OpenAI Apps SDK channel (`window.openai.toolOutput`), re-renders on
+ * `openai:set_globals`, and keeps the raw MCP-bridge postMessage as a
+ * fallback. The widget's `render(payload)` is only called with a non-null
+ * payload; until one arrives the initial "Waiting…" state stays.
+ *
+ * @internal
+ */
+const BOOTSTRAP_JS = `
   function payloadFromHost() {
     return (window.openai && window.openai.toolOutput) || null;
   }
@@ -166,9 +167,66 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     var sc = msg.params && msg.params.structuredContent;
     if (sc) { window.openai = window.openai || {}; window.openai.toolOutput = sc; renderFromHost(); }
   });
+`
 
+/**
+ * Assemble a complete, self-contained widget HTML document from a per-widget
+ * title, extra CSS, and the body of its `render(payload)` function. The shared
+ * base CSS, helpers, and the window.openai bootstrap are wrapped around it.
+ *
+ * @internal
+ */
+export function buildWidgetHtml(opts: { title: string; css?: string; renderBody: string }): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${opts.title}</title>
+<style>
+${BASE_CSS}
+${opts.css ?? ""}
+</style>
+</head>
+<body>
+<div id="root" class="root"><div class="empty">Waiting for result…</div></div>
+<script>
+(function () {
+${HELPERS_JS}
+  function render(payload) {
+${opts.renderBody}
+  }
+${BOOTSTRAP_JS}
 })();
 </script>
 </body>
-</html>"
-`;
+</html>`
+}
+
+/**
+ * Register a widget as an MCP resource with the shared widget `_meta`
+ * (domain + CSP). Apps SDK clients discover widgets by listing resources with
+ * the `text/html;profile=mcp-app` MIME type.
+ *
+ * @internal
+ */
+export function registerWidget(
+  server: McpServer,
+  opts: { name: string; uri: string; title: string; description: string; html: string },
+): void {
+  server.registerResource(
+    opts.name,
+    opts.uri,
+    { title: opts.title, description: opts.description, mimeType: WIDGET_MIME },
+    async () => ({
+      contents: [
+        {
+          uri: opts.uri,
+          mimeType: WIDGET_MIME,
+          text: opts.html,
+          _meta: widgetMeta(),
+        },
+      ],
+    }),
+  )
+}

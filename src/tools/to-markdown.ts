@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { TalonicError, type Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable.",
@@ -174,6 +175,9 @@ export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic)
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.toMarkdown,
       },
     },
     async (args) => handleToMarkdown(getTalonic(), args as ToMarkdownArgs),

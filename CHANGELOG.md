@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Added
+
+- **Branded inline widgets for every tool.** All nine tools now render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), and `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]` pointing at its widget resource. Non-widget tool calls previously rendered as a generic "api_tool" entry in ChatGPT; now every call is branded.
+
+### Changed
+
+- **Refactored widget scaffolding into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP), and a `registerWidget()` helper. Each widget supplies only its `render(payload)` body via `buildWidgetHtml()`. `registerWidgets()` registers all nine.
 
 ## [0.1.52] - 2026-06-01
 

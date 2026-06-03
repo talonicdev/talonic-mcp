@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable.",
@@ -118,6 +119,9 @@ export function registerRequestUpload(
         title: "Request File Upload",
         readOnlyHint: false,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.requestUpload,
       },
     },
     async (args) => handleRequestUpload(getToken, baseUrl, args as RequestUploadArgs),

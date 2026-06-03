@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable.",
@@ -134,6 +135,9 @@ export function registerSearch(server: McpServer, getTalonic: () => Talonic): vo
         title: "Search Talonic Workspace",
         readOnlyHint: true,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.search,
       },
     },
     async (args) => handleSearch(getTalonic(), args),

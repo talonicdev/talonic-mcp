@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable.",
@@ -123,6 +124,9 @@ export function registerGetDocument(server: McpServer, getTalonic: () => Talonic
         title: "Get Talonic Document",
         readOnlyHint: true,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.getDocument,
       },
     },
     async (args) => handleGetDocument(getTalonic(), args),

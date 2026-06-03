@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable.",
@@ -98,6 +99,9 @@ export function registerSaveSchema(server: McpServer, getTalonic: () => Talonic)
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.saveSchema,
       },
     },
     async (args) => handleSaveSchema(getTalonic(), args),

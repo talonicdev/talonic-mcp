@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic, FilterCondition, FilterSort } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "STATUS: stable. Field-name resolution is server-side.",
@@ -221,6 +222,9 @@ export function registerFilter(server: McpServer, getTalonic: () => Talonic): vo
         title: "Filter Talonic Documents",
         readOnlyHint: true,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.filter,
       },
     },
     async (args) => handleFilter(getTalonic(), args as FilterArgs),

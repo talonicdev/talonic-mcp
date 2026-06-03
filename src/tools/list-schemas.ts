@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 /**
  * LLM-targeted tool description. The first paragraph explains what the
@@ -125,6 +126,9 @@ export function registerListSchemas(server: McpServer, getTalonic: () => Talonic
         title: "List Talonic Schemas",
         readOnlyHint: true,
         openWorldHint: true,
+      },
+      _meta: {
+        "openai/outputTemplate": WIDGET_URIS.listSchemas,
       },
     },
     async () => handleListSchemas(getTalonic()),
