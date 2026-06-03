@@ -28,7 +28,7 @@ and every extraction is auditable via a stable extraction ID.
 - "Show me my Talonic credit balance"
 - "Re-extract document doc_abc123 with my Contract schema"
 
-## Tool list (8)
+## Tool list (9)
 
 1. `talonic_extract` — structured data extraction with schema validation (widget-enabled)
 2. `talonic_search` — search documents by content
@@ -38,6 +38,7 @@ and every extraction is auditable via a stable extraction ID.
 6. `talonic_list_schemas` — list saved schemas in the workspace
 7. `talonic_save_schema` — save a schema for reuse
 8. `talonic_get_balance` — workspace credit balance
+9. `talonic_request_upload` — browser-handoff upload: returns a link the user opens to drop a file (for hosted clients past the tool-arg size cap), plus a document_id to poll
 
 ## MCP server
 
