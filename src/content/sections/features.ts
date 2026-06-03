@@ -80,7 +80,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "For large files (over 10 MB), the base64 encoding increases the payload size by approximately 33%. Most MCP clients handle this transparently, but some hosted connectors (notably Claude.ai's web connector) have payload size limits that can truncate the encoded data. If you encounter issues with large files in a hosted connector, use `file_url` with a publicly reachable URL or upload the document through the Talonic dashboard and reference it by `document_id` instead.",
+        text: "This `file_data` path works without limit in local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork). It does **not** work in the **Claude.ai hosted connector**, which caps tool-call arguments at ~32 KB decoded (~43 KB base64, measured against production) — a real PDF is silently truncated. In hosted connectors, use **`talonic_request_upload`**: it returns a browser link (`https://app.talonic.com/u/<token>`) the user opens to drop the file, after which the agent polls `talonic_get_document` until `status` is `completed` and then calls `talonic_extract` by `document_id`. `file_url` (a publicly reachable URL) and a pre-uploaded `document_id` also work.",
       },
       {
         type: "callout",

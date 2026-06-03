@@ -1456,7 +1456,7 @@ Payment terms: Net 30`,
         title: "Tool response",
         code: `{
   "document_id": "doc_8f3a2b9c-1d4e-5f6a-7b8c-9d0e1f2a3b4c",
-  "upload_url": "https://app.talonic.com/upload/u_3f9d2a1c8b7e6f5d4c3b2a1f0e9d8c7b",
+  "upload_url": "https://app.talonic.com/u/069b8d9a-b05d-41df-8047-129af7c7aad5",
   "expires_at": "2026-05-28T20:35:00.000Z"
 }`,
       },
@@ -1489,12 +1489,12 @@ Payment terms: Net 30`,
 // talonic_request_upload({ filename: "rental-agreement.pdf" })
 {
   "document_id": "doc_1a2b3c4d-...",
-  "upload_url": "https://app.talonic.com/upload/u_abc123...",
+  "upload_url": "https://app.talonic.com/u/069b8d9a-...",
   "expires_at": "2026-05-28T20:35:00.000Z"
 }
 
 // 2. Agent: "Open this link in a new tab and drop your file:
-//            https://app.talonic.com/upload/u_abc123...
+//            https://app.talonic.com/u/069b8d9a-...
 //            I'll let you know once Talonic is done processing."
 
 // 3. After user drops the file, agent polls:

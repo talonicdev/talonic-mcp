@@ -7,15 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No unreleased changes._
+
+## [0.1.52] - 2026-06-01
+
+### Fixed
+
+- **ChatGPT Apps SDK widget** (`src/widgets/`) now reads tool output via `window.openai` and declares a Content-Security-Policy, fixing the extraction-result card rendering inside ChatGPT's iframe sandbox.
+
+## [0.1.51] - 2026-06-01
+
 ### Added
 
-- **ChatGPT Apps SDK widget for `talonic_extract`.** New extraction-result widget (`ui://widget/extraction-result.html`, `src/widgets/`) registered as an MCP resource with MIME `text/html;profile=mcp-app`. `talonic_extract` now declares `_meta["openai/outputTemplate"]` pointing at it, so ChatGPT renders extraction results as an inline card: document metadata, extracted fields, overall + per-field confidence bars, and copy/download-JSON controls. Pure HTML+CSS+vanilla-JS embedded as a string — no bundler, no new runtime dependencies. Render-only; no secrets cross into the iframe (asserted by tests). Other MCP clients (Claude.ai, Claude Desktop, Cursor, Cline, Continue, Cowork) ignore the widget resource and `outputTemplate` hint — no behavior change for them.
-- **Tool-annotation regression test** (`tests/widgets/tool-annotations.test.ts`) locking the Apps-SDK-required hint contract: five pure-lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, and `to_markdown` are `readOnlyHint: false`. (`to_markdown` is intentionally not read-only — its file-input path ingests a document via extract, uploading and consuming credits.)
-- **`dataType` field on `talonic_search`'s outputSchema** for both `fieldMatches[]` and `fields[]` (`src/tools/search.ts`). Mirrors the API change shipped in platform commits `c16f2656` + `0689c1b2` (2026-05-19) that added `dataType` to the omnisearch response. The MCP outputSchema previously did not declare it, so Zod's default strip mode would have dropped the field from `structuredContent`. Field is `z.string().nullable().optional()` — accepts real values like `"string"`, `"number"`, `"array"`, plus `null` for non-materialized informational entries, plus absent for older deploys.
+- **`docs/architecture/docs-pipeline.md`** — canonical reference for the repo's two parallel docs surfaces (`src/content/sections/*.ts` → `/docs/mcp/*` vs `docs/sections.json` → `/docs/{sdk,api,platform}/*`), the four-file checklist for adding a tool, the failure-mode table, and the CI-token map. Agent-discovery surfaces (`AGENTS.md`, `CLAUDE.md`) point here.
 
 ### Changed
 
-- `talonic_filter` SCHEMA TYPING block restructured into a **preventive / reactive** pair: agents should now call `talonic_search` first and gate numeric operators (`gt`/`gte`/`lt`/`lte`/`between`) on `field.dataType === "number"` before constructing the filter, with the API's `warnings[]` array remaining the reactive safety net. Closes the schema-typing footgun end-to-end (option 1 was reactive only; option 2 adds the preventive surface).
+- `talonic_list_schemas` now returns **compact summaries** (id, short_id, name, description, version, field count) and drops the heavy full `definition` blob from the list response. Fetch a single schema's definition on demand instead of paying for every definition on every list call.
+
+## [0.1.50] - 2026-05-31
+
+### Fixed
+
+- Closed the **MCP-docs gap on talonic.com**: `talonic_get_balance` and `talonic_request_upload` were missing from the MCP docs navigation, and the `dataType` / preventive-reactive filter guidance had not propagated to `talonic.com/docs/mcp/*`. Added the nav entries and content so the published MCP docs match the shipped tool surface.
+
+## [0.1.49] - 2026-05-28
+
+### Fixed
+
+- **`talonic_get_document` output validation on pre-extraction documents.** A freshly created browser-handoff document returns `null` for `source.id`, `source.type`, and several `triage` fields until ingest completes. The Zod outputSchema used `.optional()` (accepts `undefined`, not `null`), so hosted clients rejected the response with a `-32602` output-validation error mid-poll. Those fields are now `.nullable().optional()`, so an agent can poll the document immediately after `talonic_request_upload` without tripping validation.
+
+### Changed
+
+- **`talonic_request_upload` polling guidance hardened.** The description now states explicitly that a user message like "done" or "uploaded" confirms only the browser-side upload — the agent must still poll `talonic_get_document` until `status` is `completed` before calling `talonic_extract`. `talonic_get_document`'s description documents the full lifecycle (`pending_upload → queued → extracting → completed`).
+
+## [0.1.47] - 2026-05-28
+
+### Changed
+
+- **Aligned the browser-handoff poll target with the platform fix.** After the platform began enqueuing extraction on upload, the happy-path lifecycle became `pending_upload → queued → extracting → completed` and no longer surfaces `uploaded` in normal operation. `talonic_request_upload` and `talonic_get_document` descriptions now tell agents to poll for `completed`. Added unit tests for `talonic_request_upload` (happy path, custom base URL, per-call token refresh, non-2xx and network-error paths).
+
+## [0.1.46] - 2026-05-27
+
+### Added
+
+- **`talonic_request_upload` — browser-handoff upload for hosted AI agents.** A new tool that routes file delivery around two structural limits of hosted connectors (Claude.ai web, ChatGPT): the ~32 KB tool-call argument cap and the sandbox egress allowlist. It returns a pre-allocated `document_id`, a browser-openable `upload_url` (`https://app.talonic.com/u/<token>`), and an `expires_at`. The user opens the link and drops the file; the agent polls `talonic_get_document` until `status === "completed"`, then calls `talonic_extract` with the `document_id`. Tool count: 8 → 9. `talonic_extract`'s description gained a "large files / hosted environments" note pointing at the new flow. Verified end-to-end against production Claude.ai.
+
+## [0.1.45] - 2026-05-20
+
+### Added
+
+- **ChatGPT Apps SDK widget for `talonic_extract`.** New extraction-result widget (`ui://widget/extraction-result.html`, `src/widgets/`) registered as an MCP resource with MIME `text/html;profile=mcp-app`. `talonic_extract` declares `_meta["openai/outputTemplate"]` pointing at it, so ChatGPT renders extraction results as an inline card: document metadata, extracted fields, overall + per-field confidence bars, and copy/download-JSON controls. Pure HTML+CSS+vanilla-JS embedded as a string — no bundler, no new runtime dependencies. Render-only; no secrets cross into the iframe (asserted by tests). Other MCP clients ignore the widget resource and `outputTemplate` hint — no behavior change for them.
+- **Tool-annotation regression test** (`tests/widgets/tool-annotations.test.ts`) locking the Apps-SDK-required hint contract: five pure-lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, and `to_markdown` are `readOnlyHint: false`. (`to_markdown` is intentionally not read-only — its file-input path ingests a document via extract, uploading and consuming credits.)
+
+### Note
+
+- Versions 0.1.40–0.1.44 were patch bumps from the docs-sync / dispatch-token pipeline verification burst and an env-gated debug-instrumentation pass (added in `3f7fb98`, removed in `4755142`) used to measure the Claude.ai connector argument cap. No public tool-surface changes.
+
+## [0.1.39] - 2026-05-19
+
+### Added
+
+- **`dataType` field on `talonic_search`'s outputSchema** for both `fieldMatches[]` and `fields[]` (`src/tools/search.ts`). Mirrors the API change (platform `c16f2656` + `0689c1b2`) that added `dataType` to the omnisearch response. The MCP outputSchema previously did not declare it, so Zod's strip mode would have dropped it from `structuredContent`. Field is `z.string().nullable().optional()` — accepts `"string"`, `"number"`, `"array"`, plus `null` for non-materialized entries, plus absent for older deploys.
+
+### Changed
+
+- `talonic_filter` SCHEMA TYPING block restructured into a **preventive / reactive** pair: agents call `talonic_search` first and gate numeric operators (`gt`/`gte`/`lt`/`lte`/`between`) on `field.dataType === "number"` before constructing the filter, with the API's `warnings[]` array remaining the reactive safety net. Closes the schema-typing footgun end-to-end.
 
 ## [0.1.38] - 2026-05-18
 

@@ -16,7 +16,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other eight tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching document metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour."
+        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other eight tools cover the rest of the workflow: requesting a browser upload link for files too large to pass through a hosted connector, searching the workspace, filtering by extracted field values, fetching document metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour."
       },
       {
         "type": "callout",
@@ -72,7 +72,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Connect from Claude.ai's custom-connector flow. The connector authenticates against `app.talonic.com` using OAuth 2.1 with PKCE and Dynamic Client Registration, so no API key is pasted into the connector config. Once authorised, all eight Talonic tools and both resources are available to Claude.ai's agent."
+        "text": "Connect from Claude.ai's custom-connector flow. The connector authenticates against `app.talonic.com` using OAuth 2.1 with PKCE and Dynamic Client Registration, so no API key is pasted into the connector config. Once authorised, all nine Talonic tools and both resources are available to Claude.ai's agent."
       },
       {
         "type": "list",
@@ -127,7 +127,7 @@
       },
       {
         "type": "paragraph",
-        "text": "All three install paths expose the same eight tools and two resources."
+        "text": "All three install paths expose the same nine tools and two resources."
       }
     ],
     "related": [
@@ -291,7 +291,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all eight tools and two resources."
+        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all nine tools and two resources."
       }
     ],
     "related": [
@@ -587,7 +587,7 @@
           {
             "name": "file_data",
             "type": "string",
-            "description": "Base64-encoded file bytes. **Recommended for local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork). Pair with `filename` for MIME type inference. **Warning for Claude.ai hosted connector:** Claude.ai imposes a hard size limit on tool-call arguments (effectively under ~1 KB), so `file_data` cannot carry a real PDF through Claude.ai's pipeline. For files larger than a trivial test, use `file_url` or `document_id` instead when running through Claude.ai."
+            "description": "Base64-encoded file bytes. **Recommended for local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork), which have no size cap. Pair with `filename` for MIME type inference. **Warning for the Claude.ai hosted connector:** Claude.ai caps tool-call arguments at ~32 KB decoded, so `file_data` cannot carry a real PDF — it is silently truncated. Use `talonic_request_upload` (browser-handoff upload), `file_url`, or a pre-uploaded `document_id` instead when running through Claude.ai."
           },
           {
             "name": "filename",
@@ -1364,7 +1364,7 @@
           {
             "name": "file_data",
             "type": "string",
-            "description": "Base64-encoded file bytes. **Recommended for local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork). Pair with `filename`. Consumes one extraction credit (auto-ingests the file first). **Warning for Claude.ai hosted connector:** Claude.ai imposes a hard size limit on tool-call arguments (effectively under ~1 KB), so `file_data` cannot carry a real PDF through the Claude.ai pipeline. Use `file_url` or `document_id` instead when running through Claude.ai."
+            "description": "Base64-encoded file bytes. **Recommended for local-stdio installs** (Claude Desktop, Cursor, Cline, Continue, Cowork), which have no size cap. Pair with `filename`. Consumes one extraction credit (auto-ingests the file first). **Warning for the Claude.ai hosted connector:** Claude.ai caps tool-call arguments at ~32 KB decoded, so `file_data` cannot carry a real PDF — it is silently truncated. Use `talonic_request_upload` (browser-handoff upload), `file_url`, or a pre-uploaded `document_id` instead when running through Claude.ai."
           },
           {
             "name": "filename",
