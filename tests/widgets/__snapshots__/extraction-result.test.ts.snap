@@ -138,13 +138,42 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     });
   }
 
-  // Apps SDK delivers tool results via JSON-RPC notifications over postMessage.
-  // The host posts { method: "ui/notifications/tool-result", params: { structuredContent } }.
+  // PRIMARY channel: OpenAI Apps SDK injects the tool's structuredContent as
+  // window.openai.toolOutput and fires "openai:set_globals" whenever globals
+  // change. This is the documented widget data API.
+  function payloadFromHost() {
+    return (window.openai && window.openai.toolOutput) || null;
+  }
+
+  function renderFromHost() {
+    render(payloadFromHost());
+  }
+
+  // Initial paint: toolOutput is normally present by the time the iframe runs.
+  renderFromHost();
+
+  // Re-render whenever the host pushes new globals.
+  window.addEventListener(
+    "openai:set_globals",
+    function (event) {
+      var globals = event && event.detail && event.detail.globals;
+      var output = globals && globals.toolOutput;
+      if (output) {
+        window.openai = window.openai || {};
+        window.openai.toolOutput = output;
+      }
+      renderFromHost();
+    },
+    { passive: true }
+  );
+
+  // FALLBACK channel: some host versions also post the raw MCP bridge
+  // notification { method: "ui/notifications/tool-result", params: { structuredContent } }.
   window.addEventListener("message", function (event) {
     var msg = event.data;
     if (!msg || msg.method !== "ui/notifications/tool-result") return;
     var sc = msg.params && msg.params.structuredContent;
-    render(sc);
+    if (sc) render(sc);
   });
 })();
 </script>

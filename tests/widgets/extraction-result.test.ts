@@ -25,11 +25,22 @@ describe("getExtractionResultWidgetHtml", () => {
     expect(html.length).toBeGreaterThan(500)
   })
 
-  it("listens for the Apps SDK tool-result notification", () => {
+  it("reads tool output from the Apps SDK window.openai channel", () => {
     const html = getExtractionResultWidgetHtml()
-    // The widget bridge sends 'ui/notifications/tool-result' over postMessage.
-    expect(html).toContain("ui/notifications/tool-result")
+    // OpenAI's Apps SDK delivers structuredContent as window.openai.toolOutput
+    // and fires "openai:set_globals" on update. This is the primary, documented
+    // data channel — NOT the raw postMessage path.
+    expect(html).toContain("window.openai")
+    expect(html).toContain("toolOutput")
+    expect(html).toContain("openai:set_globals")
     expect(html).toContain("addEventListener")
+  })
+
+  it("keeps the postMessage bridge as a fallback channel", () => {
+    const html = getExtractionResultWidgetHtml()
+    // Some host versions also post the raw MCP bridge notification; we keep
+    // it as a belt-and-suspenders fallback behind the window.openai path.
+    expect(html).toContain("ui/notifications/tool-result")
   })
 
   it("does not contain any 'tlnc_' API-key-looking strings", () => {
@@ -67,6 +78,25 @@ describe("registerExtractionResultWidget", () => {
     expect(result.contents[0].mimeType).toBe(EXTRACTION_RESULT_WIDGET_MIME)
     expect(result.contents[0].uri).toBe(EXTRACTION_RESULT_WIDGET_URI)
     expect(result.contents[0].text).toContain("<!doctype html>")
+  })
+
+  it("declares a Content Security Policy on the widget resource", async () => {
+    const server = new McpServer({ name: "test", version: "0.0.0" })
+    registerExtractionResultWidget(server)
+
+    const result = await (server as any)._registeredResources[
+      EXTRACTION_RESULT_WIDGET_URI
+    ].readCallback(new URL(EXTRACTION_RESULT_WIDGET_URI))
+
+    const meta = result.contents[0]._meta
+    expect(meta).toBeDefined()
+    // Modern key and legacy ChatGPT key both present. The widget makes no
+    // external calls, so all domain lists are empty — but the CSP must be
+    // declared (ChatGPT shows "CSP off" otherwise, and submission requires it).
+    expect(meta.ui?.csp).toBeDefined()
+    expect(meta.ui.csp.connectDomains).toEqual([])
+    expect(meta["openai/widgetCSP"]).toBeDefined()
+    expect(meta["openai/widgetCSP"].connect_domains).toEqual([])
   })
 })
 

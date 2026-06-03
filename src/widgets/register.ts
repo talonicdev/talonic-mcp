@@ -26,6 +26,27 @@ export function registerExtractionResultWidget(server: McpServer): void {
           uri: EXTRACTION_RESULT_WIDGET_URI,
           mimeType: EXTRACTION_RESULT_WIDGET_MIME,
           text: getExtractionResultWidgetHtml(),
+          // Content Security Policy. The widget is fully self-contained — it
+          // makes no external network calls, loads no external resources, and
+          // embeds no external frames — so every domain list is empty. The CSP
+          // must still be declared: ChatGPT flags the widget "CSP off"
+          // otherwise, and the Apps SDK submission guidelines require it.
+          // Both keys are emitted: `ui.csp` (modern) and `openai/widgetCSP`
+          // (legacy ChatGPT compatibility).
+          _meta: {
+            ui: {
+              csp: {
+                connectDomains: [],
+                resourceDomains: [],
+                frameDomains: [],
+              },
+            },
+            "openai/widgetCSP": {
+              connect_domains: [],
+              resource_domains: [],
+              redirect_domains: [],
+            },
+          },
         },
       ],
     }),
