@@ -30,6 +30,8 @@ const DESCRIPTION = [
   "- is_empty: presence check, no value needed. Returns documents where the field is null or missing.",
   "- is_not_empty: presence check, no value needed. Returns documents where the field has a materialized value. Results reflect data within seconds of extraction completing.",
   "",
+  "CONDITION SHAPE: each condition needs EXACTLY ONE of `field` or `field_id` (not both, not neither), an `operator`, and usually a `value`. Exceptions: `is_empty` / `is_not_empty` take NO value; `between` needs BOTH `value` (lower bound) and `value_to` (upper bound). `value`/`value_to` are a string, number, or boolean matching the field's data type (numbers for numeric fields, ISO 'YYYY-MM-DD' strings for dates).",
+  "",
   "SCHEMA TYPING:",
   "- Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only resolve correctly when the schema field is typed as `number`. A field typed as `string` that holds numeric content (e.g. '€1,500.00') will silently return zero matches even after extraction. Pick the right type at schema design time.",
   "- **Preventive check:** call `talonic_search` first and inspect `fieldMatches[].dataType` / `fields[].dataType` on the field you intend to filter. If `dataType !== 'number'`, do NOT use a numeric operator on it — either pick a different field, switch to a string-friendly operator (`eq`, `contains`), or warn the user that the schema field needs a `data_type` change before the filter can succeed.",
@@ -57,20 +59,32 @@ const operatorEnum = z.enum([
   "is_not_empty",
 ])
 
+const conditionValue = z.union([z.string(), z.number(), z.boolean()])
+
 const conditionSchema = z.object({
   field: z
     .string()
     .optional()
     .describe(
-      "Canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type'). The Talonic API resolves names to ids server-side. Mutually exclusive with `field_id`.",
+      "Canonical field name (e.g. 'vendor.name', 'policy.0_coverage_type'). Provide EXACTLY ONE of `field` or `field_id` per condition — not both, not neither. The Talonic API resolves names to ids server-side.",
     ),
-  field_id: z.string().optional().describe("Talonic field UUID. Mutually exclusive with `field`."),
-  operator: operatorEnum.describe("Comparison operator. See description for the full list."),
-  value: z.unknown().optional().describe("Value to compare against."),
-  value_to: z
-    .unknown()
+  field_id: z
+    .string()
     .optional()
-    .describe("Upper bound for `between` operator; ignored otherwise."),
+    .describe(
+      "Talonic field UUID. Provide EXACTLY ONE of `field` or `field_id` per condition — not both, not neither.",
+    ),
+  operator: operatorEnum.describe("Comparison operator. See description for the full list."),
+  value: conditionValue
+    .optional()
+    .describe(
+      "Comparison value, typed to match the field (number for numeric fields, string for text and ISO 'YYYY-MM-DD' dates, boolean for flags). REQUIRED for every operator EXCEPT `is_empty` / `is_not_empty` (which take no value). For `between`, this is the lower bound — pair it with `value_to`.",
+    ),
+  value_to: conditionValue
+    .optional()
+    .describe(
+      "Upper bound. REQUIRED only for the `between` operator (paired with `value`); same type as `value`. Omit for all other operators.",
+    ),
 })
 
 const sortSchema = z.object({
