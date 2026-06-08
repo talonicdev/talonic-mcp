@@ -70,7 +70,7 @@ const AUTHORIZATION_SERVER = process.env["OAUTH_AUTHORIZATION_SERVER"] ?? "https
  * domain is verified, the value can stay as a no-op.
  */
 const APPS_CHALLENGE_TOKEN =
-  process.env["OPENAI_APPS_CHALLENGE_TOKEN"] ?? "gnHvYDsKH6NV8NIeDkVK1vSt5QKZqsg8AIcXdS1pR_U"
+  process.env["OPENAI_APPS_CHALLENGE_TOKEN"] ?? "gnHvfQsKH6NVBNIeOWVK1vSt5QR2gsgBAIcXdSlpR_U"
 
 /**
  * RFC 9728 OAuth Protected Resource Metadata.

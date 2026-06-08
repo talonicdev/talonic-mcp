@@ -88,7 +88,7 @@ describe("HTTP server routing", () => {
     const body = (await res.text()).trim()
     // Default token (no env override in tests). Non-empty, no JSON wrapping.
     expect(body.length).toBeGreaterThan(0)
-    expect(body).toBe("gnHvYDsKH6NV8NIeDkVK1vSt5QKZqsg8AIcXdS1pR_U")
+    expect(body).toBe("gnHvfQsKH6NVBNIeOWVK1vSt5QR2gsgBAIcXdSlpR_U")
   })
 
   it("POST /mcp with an initialize body opens a session (regression)", async () => {
