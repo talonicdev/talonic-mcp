@@ -134,9 +134,11 @@ export function registerSearch(server: McpServer, getTalonic: () => Talonic): vo
       annotations: {
         title: "Search Talonic Workspace",
         readOnlyHint: true,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.search },
         "openai/outputTemplate": WIDGET_URIS.search,
       },
     },

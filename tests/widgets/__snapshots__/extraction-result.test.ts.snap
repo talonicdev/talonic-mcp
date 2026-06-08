@@ -169,7 +169,9 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     renderFromHost();
   }, { passive: true });
   window.addEventListener("message", function (event) {
+    if (event.source !== window.parent) return;
     var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
     if (!msg || msg.method !== "ui/notifications/tool-result") return;
     var sc = msg.params && msg.params.structuredContent;
     if (sc) { window.openai = window.openai || {}; window.openai.toolOutput = sc; renderFromHost(); }

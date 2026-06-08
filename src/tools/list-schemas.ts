@@ -125,9 +125,11 @@ export function registerListSchemas(server: McpServer, getTalonic: () => Talonic
       annotations: {
         title: "List Talonic Schemas",
         readOnlyHint: true,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.listSchemas },
         "openai/outputTemplate": WIDGET_URIS.listSchemas,
       },
     },

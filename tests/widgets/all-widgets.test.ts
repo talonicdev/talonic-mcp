@@ -25,6 +25,7 @@ describe("every tool declares its widget as outputTemplate", () => {
     const server = buildServer()
     const tool = server._registeredTools[toolName]
     expect(tool, `${toolName} not registered`).toBeDefined()
+    expect(tool._meta?.ui?.resourceUri).toBe(uri)
     expect(tool._meta?.["openai/outputTemplate"]).toBe(uri)
   })
 })
@@ -49,6 +50,8 @@ describe("every widget resource is registered correctly", () => {
     expect(item.text).toContain("window.openai")
     expect(item.text).toContain("toolOutput")
     expect(item.text).toContain("openai:set_globals")
+    expect(item.text).toContain("event.source !== window.parent")
+    expect(item.text).toContain('msg.jsonrpc !== "2.0"')
 
     // No secrets ever cross into the iframe.
     expect(item.text).not.toMatch(/tlnc_[a-z]/i)

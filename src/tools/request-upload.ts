@@ -118,9 +118,11 @@ export function registerRequestUpload(
       annotations: {
         title: "Request File Upload",
         readOnlyHint: false,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.requestUpload },
         "openai/outputTemplate": WIDGET_URIS.requestUpload,
       },
     },

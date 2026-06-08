@@ -98,9 +98,10 @@ export function registerSaveSchema(server: McpServer, getTalonic: () => Talonic)
         title: "Save Talonic Schema",
         readOnlyHint: false,
         destructiveHint: false,
-        openWorldHint: true,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.saveSchema },
         "openai/outputTemplate": WIDGET_URIS.saveSchema,
       },
     },

@@ -177,6 +177,7 @@ export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic)
         openWorldHint: true,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.toMarkdown },
         "openai/outputTemplate": WIDGET_URIS.toMarkdown,
       },
     },

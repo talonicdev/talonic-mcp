@@ -221,9 +221,11 @@ export function registerFilter(server: McpServer, getTalonic: () => Talonic): vo
       annotations: {
         title: "Filter Talonic Documents",
         readOnlyHint: true,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.filter },
         "openai/outputTemplate": WIDGET_URIS.filter,
       },
     },

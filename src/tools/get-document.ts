@@ -123,9 +123,11 @@ export function registerGetDocument(server: McpServer, getTalonic: () => Talonic
       annotations: {
         title: "Get Talonic Document",
         readOnlyHint: true,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.getDocument },
         "openai/outputTemplate": WIDGET_URIS.getDocument,
       },
     },

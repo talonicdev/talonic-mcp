@@ -13,6 +13,13 @@ describe("isOriginAllowed (Origin allowlist for DNS-rebinding mitigation)", () =
     expect(isOriginAllowed("https://app.claude.ai")).toBe(true)
   })
 
+  it("accepts ChatGPT and OpenAI developer/review surfaces", () => {
+    expect(isOriginAllowed("https://chatgpt.com")).toBe(true)
+    expect(isOriginAllowed("https://www.chatgpt.com")).toBe(true)
+    expect(isOriginAllowed("https://chat.openai.com")).toBe(true)
+    expect(isOriginAllowed("https://platform.openai.com")).toBe(true)
+  })
+
   it("accepts each allowlisted MCP-directory surface", () => {
     expect(isOriginAllowed("https://cursor.directory")).toBe(true)
     expect(isOriginAllowed("https://glama.ai")).toBe(true)

@@ -275,6 +275,7 @@ export function registerExtract(server: McpServer, getTalonic: () => Talonic): v
         openWorldHint: true,
       },
       _meta: {
+        ui: { resourceUri: EXTRACTION_RESULT_WIDGET_URI },
         "openai/outputTemplate": EXTRACTION_RESULT_WIDGET_URI,
       },
     },

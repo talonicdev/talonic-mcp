@@ -74,9 +74,11 @@ export function registerGetBalance(server: McpServer, getTalonic: () => Talonic)
       annotations: {
         title: "Get Talonic Credit Balance",
         readOnlyHint: true,
-        openWorldHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
       },
       _meta: {
+        ui: { resourceUri: WIDGET_URIS.getBalance },
         "openai/outputTemplate": WIDGET_URIS.getBalance,
       },
     },

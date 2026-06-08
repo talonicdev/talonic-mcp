@@ -43,8 +43,8 @@ mode enabled — that's outside what the local test suite can cover.
   are amber, <0.7 are red.
 - **Copy/Download buttons** work (copies and downloads the extracted
   `data` JSON).
-- **Plain JSON for other tools:** `list_schemas`, `get_balance`, etc. render
-  as plain JSON — that's intentional for v1.
+- **Tool cards render:** `list_schemas`, `get_balance`, `request_upload`, and
+  the other tools render their matching Talonic cards instead of raw JSON.
 - **OAuth refresh:** Sessions that span more than an hour still work
   without prompting the user to re-auth.
 
