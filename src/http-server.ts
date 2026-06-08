@@ -62,6 +62,17 @@ const RESOURCE_URL = process.env["MCP_RESOURCE_URL"] ?? "https://mcp.talonic.com
 const AUTHORIZATION_SERVER = process.env["OAUTH_AUTHORIZATION_SERVER"] ?? "https://api.talonic.com"
 
 /**
+ * Verification token for the ChatGPT Apps SDK domain check. OpenAI's
+ * submission flow scans `<mcp-host>/.well-known/openai-apps-challenge` and
+ * expects this exact token back as plain text. Read from the environment so
+ * it can be rotated without a code change; defaults to the value issued for
+ * the current submission. Domain verification is a one-time gate — once the
+ * domain is verified, the value can stay as a no-op.
+ */
+const APPS_CHALLENGE_TOKEN =
+  process.env["OPENAI_APPS_CHALLENGE_TOKEN"] ?? "gnHvYDsKH6NV8NIeDkVK1vSt5QKZqsg8AIcXdS1pR_U"
+
+/**
  * RFC 9728 OAuth Protected Resource Metadata.
  *
  * Returned at `/.well-known/oauth-protected-resource`. Clients use this
@@ -223,6 +234,19 @@ export function createRequestHandler(): (
         "Cache-Control": "public, max-age=3600",
       })
       res.end(JSON.stringify(renderProtectedResourceMetadata()))
+      return
+    }
+
+    // ── ChatGPT Apps SDK: domain verification challenge ───────────────
+    // OpenAI's app-submission flow fetches this well-known path on the MCP
+    // origin and expects the issued token back as plain text. Public,
+    // unauthenticated. Paths are ignored by OpenAI — only the origin matters.
+    if (path === "/.well-known/openai-apps-challenge") {
+      res.writeHead(200, {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "public, max-age=300",
+      })
+      res.end(APPS_CHALLENGE_TOKEN)
       return
     }
 

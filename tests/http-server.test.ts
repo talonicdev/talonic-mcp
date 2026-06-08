@@ -81,6 +81,16 @@ describe("HTTP server routing", () => {
     expect(res.status).toBe(404)
   })
 
+  it("GET /.well-known/openai-apps-challenge returns the token as plain text", async () => {
+    const res = await fetch(`${h.baseUrl}/.well-known/openai-apps-challenge`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get("content-type")).toContain("text/plain")
+    const body = (await res.text()).trim()
+    // Default token (no env override in tests). Non-empty, no JSON wrapping.
+    expect(body.length).toBeGreaterThan(0)
+    expect(body).toBe("gnHvYDsKH6NV8NIeDkVK1vSt5QKZqsg8AIcXdS1pR_U")
+  })
+
   it("POST /mcp with an initialize body opens a session (regression)", async () => {
     const res = await fetch(`${h.baseUrl}/mcp`, {
       method: "POST",
