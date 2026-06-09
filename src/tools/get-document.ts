@@ -11,7 +11,7 @@ const DESCRIPTION = [
   "NOT FOR: full text (use talonic_to_markdown) · extracted fields (use talonic_extract).",
   "BY NAME: if the user names a file, call talonic_search first to get its document_id, then call this.",
   "ARGS: document_id.",
-  "RETURNS: filename, pages, type_detected, language, and `status`. Status lifecycle: pending_upload -> queued -> extracting -> completed. Wait for `completed` before calling talonic_extract on a freshly uploaded doc.",
+  "RETURNS: filename, pages, type_detected, language, and `status`. Status lifecycle: pending_upload -> uploading -> queued -> extracting -> completed. Wait for `completed` before calling talonic_extract on a freshly uploaded doc. Terminal failure statuses: ocr_failed, extraction_failed, error — stop polling and report the failure to the user if any of these appear.",
 ].join("\n")
 
 const inputSchema = {
