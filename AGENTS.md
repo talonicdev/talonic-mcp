@@ -55,7 +55,7 @@ This is the most load-bearing concept in the repo. Hosted AI platforms (Claude.a
 
 The fix, shipped and verified live (2026-06-03), is `talonic_request_upload`: it returns a `document_id` + a browser `upload_url` (`https://app.talonic.com/u/<token>`) + `expires_at`. The user opens the link, drops the file; the browser upload triggers the extraction pipeline; the agent polls `talonic_get_document` until `status === "completed"`, then calls `talonic_extract` with the `document_id`.
 
-Lifecycle of a handoff document: `pending_upload → queued → extracting → completed` (terminal failures: `error` / `ocr_failed` / `extraction_failed`). The `uploaded` status is a rare fallback when the extraction queue couldn't be enqueued. **Local-stdio installs don't need any of this** — they have no cap, so `file_data` works directly.
+Lifecycle of a handoff document: `pending_upload → uploading → queued → extracting → completed` (terminal failures: `error` / `ocr_failed` / `extraction_failed`). `uploading` is the transient state between the user opening the upload link and the file being fully stored server-side — it appears during polling and is not a stall. The `uploaded` status is a rare fallback when the extraction queue couldn't be enqueued; the platform's zombie sweep will eventually terminate truly stuck documents with `ocr_failed`. If polling returns a terminal failure status, stop and report the failure to the user. **Local-stdio installs don't need any of this** — they have no cap, so `file_data` works directly.
 
 Background and the full investigation: `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md` and `2026-05-20-presigned-upload-urls-design.md`.
 
