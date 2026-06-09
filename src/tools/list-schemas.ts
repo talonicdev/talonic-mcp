@@ -13,27 +13,12 @@ import { WIDGET_URIS } from "../widgets/types.js"
  * @internal
  */
 const DESCRIPTION = [
-  "STATUS: stable.",
+  "List the saved schemas in the workspace as compact summaries (id, short_id, name, description, version, field_count).",
   "",
-  "List all saved schemas in the user's Talonic workspace.",
-  "Returns a COMPACT SUMMARY of each schema: id (UUID), short_id (SCH-XXXXXXXX), name,",
-  "description, version, and field_count. Either id form is accepted by talonic_extract's",
-  "`schema_id` parameter, so you can extract with a saved schema straight from this list.",
-  "",
-  "The full JSON Schema definition for each field is intentionally NOT included here — for",
-  "many schemas that payload is large and gets truncated by some clients. To inspect a",
-  "schema's full field definitions, read the `talonic://schemas` resource.",
-  "",
-  "USE WHEN:",
-  "- The user asks what schemas they have, or asks to see existing schemas.",
-  "- You want to discover existing schemas before designing a new one.",
-  "- Before recommending the user create a schema, check if one already covers the use case.",
-  "- The user asks to extract from a known document type and you want to find a matching schema.",
-  "",
-  "DO NOT USE WHEN:",
-  "- The user just wants to extract data from a document and provides an inline schema (call talonic_extract directly).",
-  "",
-  "TIP: Pair this with talonic_extract by passing the chosen schema's id as `schema_id`.",
+  "USE WHEN: 'what schemas do I have', or to find a reusable schema before extracting.",
+  "NOT FOR: a one-off extraction with an inline schema (call talonic_extract directly).",
+  "ARGS: none.",
+  "RETURNS: data[] of schema summaries. Full field definitions are omitted here — read the talonic://schemas resource for those. Pass a schema's id/short_id to talonic_extract as `schema_id`.",
 ].join("\n")
 
 export const schemaItem = z.object({

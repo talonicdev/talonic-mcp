@@ -5,32 +5,12 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "STATUS: stable.",
+  "Read the workspace's Talonic credit balance, EUR value, tier, 30-day burn, and projected runway.",
   "",
-  "Read the user's current Talonic credit balance, EUR value, 30-day burn rate,",
-  "projected runway, tier, and next-tier-reset timestamp. Use this to make budget-",
-  "aware decisions before kicking off large batches or re-extractions.",
-  "",
-  "USE WHEN:",
-  "- The user asks how many credits or how much budget they have left.",
-  "- You are about to run a large or expensive operation (batch extract, re-extract",
-  "  many documents) and want to confirm budget headroom first.",
-  "- The user asks how long their balance will last at the current rate.",
-  "",
-  "DO NOT USE WHEN:",
-  "- The user just wants the per-call cost of a single extraction (that is already",
-  "  on the talonic_extract response under `cost`).",
-  "- The user wants to top up credits (route them to the dashboard; auto top-up is",
-  "  guarded by a separate scope).",
-  "",
-  "RESPONSE SHAPE:",
-  "- balance_credits: current credit balance.",
-  "- balance_eur: current balance in EUR (rounded to two decimals).",
-  "- burn_rate_30d_credits: total credits consumed in the trailing 30 days.",
-  "- projected_runway_days: days of runway at the current 30-day average burn.",
-  "  `-1` indicates no consumption in the trailing window (cannot compute runway).",
-  "- tier: API tier of the workspace (`free`, `pro`, `enterprise`, etc.).",
-  "- tier_resets_at: ISO 8601 timestamp of the next monthly tier reset.",
+  "USE WHEN: the user asks about credits/budget, or before a large batch when you want to confirm headroom.",
+  "NOT FOR: the per-call cost of a single extraction (that is on the talonic_extract response).",
+  "ARGS: none.",
+  "RETURNS: balance_credits, balance_eur, tier, burn_rate_30d_credits, projected_runway_days (-1 = no recent usage), tier_resets_at.",
 ].join("\n")
 
 const inputSchema = {}

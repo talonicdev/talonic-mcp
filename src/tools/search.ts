@@ -5,26 +5,12 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "STATUS: stable.",
+  "Find documents, fields, schemas, or sources in the workspace by name or concept. One call returns ranked results across all types.",
   "",
-  "Search the user's Talonic workspace for documents, fields, sources, or schemas",
-  "matching a query. Returns ranked results across all entity types in one call.",
-  "",
-  "USE WHEN:",
-  "- The user wants to find documents but does not know the exact filename or id.",
-  "- The query is conceptual ('contracts mentioning indemnification', 'Acme invoices').",
-  "- You need to narrow a large workspace before calling talonic_extract or talonic_filter.",
-  "- The user asks 'do I have any docs about X' or 'find anything related to X'.",
-  "",
-  "DO NOT USE WHEN:",
-  "- The user has a specific document_id (use talonic_get_document instead).",
-  "- The user wants to apply structured field-value filters like 'amount > 1000' (use talonic_filter).",
-  "- The user wants to extract data from a brand-new document (use talonic_extract).",
-  "",
-  "TIP: The result includes documents, fieldMatches, sources, schemas, and fields.",
-  "Both fields[] and fieldMatches[] include a `filterable` boolean. Only entries with",
-  "filterable: true can be used with talonic_filter. Fields with filterable: false exist",
-  "in a schema but have no extracted data yet. Pick the entity type the user actually needs.",
+  "USE WHEN: the user names or describes a document without an id ('bank-statement.pdf', 'contracts about indemnification'), or you need a document_id before calling extract / to_markdown / get_document.",
+  "NOT FOR: structured field-value filters like 'amount > 1000' (use talonic_filter).",
+  "ARGS: query (natural language); optional limit.",
+  "RETURNS: documents[], fields[]/fieldMatches[] (only `filterable: true` entries work in talonic_filter), schemas[], sources[]. Use the id from documents[] to act on a named file.",
 ].join("\n")
 
 const inputSchema = {

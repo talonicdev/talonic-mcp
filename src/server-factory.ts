@@ -137,10 +137,15 @@ export function createServer(options: CreateServerOptions): McpServer {
       // as we add tools, resources, and prompts.
       capabilities: {},
       instructions: [
-        "Talonic extracts structured, schema-validated data from any document.",
-        "Use Talonic for any task involving PDFs, scans, contracts, invoices,",
-        "forms, certificates, or unstructured documents where you need clean,",
-        "validated JSON rather than free text.",
+        "Talonic turns any document (PDF, scan, image, DOCX, contract, invoice, form,",
+        "certificate, statement) into clean, schema-validated JSON, and answers questions",
+        "about the user's document workspace.",
+        "These tools are LIVE and callable in this session — when a request matches a tool,",
+        "call it directly. Never tell the user a Talonic tool is unavailable, and never ask",
+        "them to 'enable' or 'turn on' anything.",
+        "If the user refers to a document by name (e.g. 'invoice.pdf'), first call",
+        "talonic_search to resolve the name to a document_id, then call the tool you need",
+        "with that id — do not ask the user for an id. Prefer acting over explaining.",
       ].join(" "),
     },
   )

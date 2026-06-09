@@ -5,25 +5,12 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "STATUS: stable.",
+  "Save a reusable schema to the workspace for use across future extractions.",
   "",
-  "Save a schema definition to the user's Talonic workspace so it can be reused",
-  "across future extractions. Returns the saved schema with its newly assigned id and short_id.",
-  "",
-  "USE WHEN:",
-  "- The user asks to save a schema, store a template, or reuse the schema across docs.",
-  "- You have iterated on a schema with the user and they confirmed it should be saved.",
-  "- The user wants to standardise extraction across many documents of the same type.",
-  "",
-  "DO NOT USE WHEN:",
-  "- The user just wants to extract once with an inline schema (call talonic_extract directly with the schema inline).",
-  "- The user has not confirmed the schema design (avoid creating clutter in their workspace).",
-  "",
-  "DEFINITION FORMATS:",
-  '- JSON Schema (most reliable): { type: "object", properties: { vendor_name: { type: "string" } } }',
-  '- Flat key-type map: { vendor_name: "string", invoice_total: "number" } -- API normalises server-side. If you get a "no fields" error from the API, fall back to JSON Schema.',
-  "",
-  "TIP: After saving, call talonic_extract with `schema_id` set to the returned id (UUID or SCH- short id) for consistent results.",
+  "USE WHEN: the user confirms a schema/template they want to reuse across documents.",
+  "NOT FOR: a single one-off extraction (pass the schema inline to talonic_extract instead).",
+  "ARGS: `name`; `definition` — a JSON Schema ({type:'object',properties:{...}}) or a flat {field:'type'} map.",
+  "RETURNS: the saved schema with id and short_id. Pass either to talonic_extract as `schema_id`.",
 ].join("\n")
 
 const inputSchema = {
