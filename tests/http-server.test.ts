@@ -91,26 +91,50 @@ describe("HTTP server routing", () => {
     expect(body).toBe("gnHvfQsKH6NVBNIeOWVK1vSt5QR2gsgBAIcXdSlpR_U")
   })
 
-  it("POST /mcp with an initialize body opens a session (regression)", async () => {
+  it("POST /mcp initialize succeeds with no session id (stateless)", async () => {
     const res = await fetch(`${h.baseUrl}/mcp`, {
       method: "POST",
       headers: MCP_HEADERS,
       body: initializeBody(),
     })
     expect(res.status).toBe(200)
-    expect(res.headers.get("mcp-session-id")).toBeTruthy()
-    await res.body?.cancel()
+    // Stateless: the server must NOT hand out a session id to track.
+    expect(res.headers.get("mcp-session-id")).toBeNull()
+    const text = await res.text()
+    expect(text).toContain("serverInfo")
   })
 
-  it("POST / with an initialize body opens a session (the fix)", async () => {
+  it("POST / initialize succeeds with no session id (stateless)", async () => {
     const res = await fetch(`${h.baseUrl}/`, {
       method: "POST",
       headers: MCP_HEADERS,
       body: initializeBody(),
     })
     expect(res.status).toBe(200)
-    expect(res.headers.get("mcp-session-id")).toBeTruthy()
-    await res.body?.cancel()
+    expect(res.headers.get("mcp-session-id")).toBeNull()
+  })
+
+  it("tools/list works on a fresh request with NO session id (the fix)", async () => {
+    // This is the regression guard for the connector-dies-after-redeploy bug:
+    // a stateless server must answer tool requests without any prior session,
+    // so a client whose old session was wiped never gets stuck.
+    const res = await fetch(`${h.baseUrl}/mcp`, {
+      method: "POST",
+      headers: MCP_HEADERS,
+      body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }),
+    })
+    expect(res.status).toBe(200)
+    const text = await res.text()
+    expect(text).toContain("talonic_extract")
+    expect(text).toContain("talonic_get_balance")
+  })
+
+  it("GET /mcp is 405 in stateless mode", async () => {
+    const res = await fetch(`${h.baseUrl}/mcp`, {
+      method: "GET",
+      headers: { Authorization: "Bearer tlnc_test", Accept: "text/event-stream" },
+    })
+    expect(res.status).toBe(405)
   })
 
   it("POST / without auth returns 401 (the fix preserves auth)", async () => {

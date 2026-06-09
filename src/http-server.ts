@@ -5,12 +5,15 @@
  * deployment on Railway (or any container host) behind a custom domain
  * like `mcp.talonic.com`.
  *
- * Runs in **stateful mode** with in-memory sessions. Each initialize
- * request creates a new session keyed by a UUID. Subsequent requests
- * with the same Mcp-Session-Id are routed to the existing session.
- * If a session is lost (deploy, restart, or edge routing miss), the
- * server returns 404 and the client re-initializes, the standard MCP
- * reconnection behavior.
+ * Runs in **stateless mode**: each POST gets a fresh MCP server + transport
+ * (no `Mcp-Session-Id`, no in-memory session map). This makes the endpoint
+ * immune to container restarts, redeploys, and horizontal scaling — there is
+ * no session state to lose. (Stateful in-memory sessions previously caused
+ * hosted connectors like ChatGPT to go dead after every redeploy: the
+ * client's session id 404'd and the client did not transparently
+ * re-initialize.) Each request carries its own bearer token, so OAuth token
+ * rotation is handled for free. GET (standalone SSE) returns 405; all tools
+ * are request/response over POST.
  *
  * Supports two auth modes:
  *   1. `Authorization: Bearer ...` header
@@ -34,11 +37,9 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http"
-import { randomUUID } from "node:crypto"
 import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { createServer } from "./server-factory.js"
 import { isOriginAllowed } from "./origin.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -129,35 +130,25 @@ function extractBearerToken(req: {
   return undefined
 }
 
-/**
- * Per-session state. The MCP server attached to the transport reads its
- * bearer token via `tokenHolder` on every tool call and resource read,
- * so a token rotated mid-session is picked up automatically. This is the
- * mechanism that keeps an OAuth 2.1 session alive across the 1-hour
- * access-token rotation without forcing the agent to re-initialize.
- */
-interface Session {
-  transport: StreamableHTTPServerTransport
-  tokenHolder: { current: string }
-}
-
 /** WWW-Authenticate header value for 401 responses, per RFC 9728. */
 const WWW_AUTHENTICATE = `Bearer resource_metadata="${RESOURCE_URL}/.well-known/oauth-protected-resource"`
 
 /**
  * Build the HTTP request handler for the Streamable HTTP entry point.
  *
- * The handler is exported as a factory so each call gets a fresh session
- * map. In production the bootstrap at the bottom of this file calls it
- * exactly once; in tests each case constructs its own isolated handler.
+ * The handler is exported as a factory. In production the bootstrap at the
+ * bottom of this file calls it exactly once; in tests each case constructs
+ * its own isolated handler.
  *
  * Routes:
  *  - GET `/`                              discovery JSON (humans, bots, monitors)
  *  - GET `/health`                        health check
  *  - GET `/favicon.{ico,png}`             favicon for directory listings
  *  - GET `/.well-known/oauth-protected-resource`  RFC 9728 metadata
- *  - POST / DELETE `/` or `/mcp`          MCP Streamable HTTP transport
- *  - GET `/` or `/mcp` with `Accept: text/event-stream`  MCP SSE listen
+ *  - GET `/.well-known/openai-apps-challenge`      Apps SDK domain verification
+ *  - POST `/` or `/mcp`                   MCP Streamable HTTP (stateless)
+ *  - DELETE `/` or `/mcp`                 no-op 200 (no session to terminate)
+ *  - GET `/mcp` (SSE)                     405 (stateless: use POST)
  *
  * Serving the MCP protocol at both `/` and `/mcp` keeps the connector
  * working whether a directory entry registers the bare origin or appends
@@ -170,8 +161,6 @@ export function createRequestHandler(): (
   req: IncomingMessage,
   res: ServerResponse,
 ) => Promise<void> {
-  const sessions = new Map<string, Session>()
-
   return async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost")
     const path = url.pathname
@@ -309,19 +298,6 @@ export function createRequestHandler(): (
       return
     }
 
-    // ── DELETE: explicit session termination ────────────────────────────
-    if (req.method === "DELETE") {
-      const sid = req.headers["mcp-session-id"] as string | undefined
-      if (sid && sessions.has(sid)) {
-        const session = sessions.get(sid)!
-        await session.transport.close()
-        sessions.delete(sid)
-      }
-      res.writeHead(200, { "Content-Type": "application/json" })
-      res.end(JSON.stringify({ ok: true }))
-      return
-    }
-
     // ── Auth ───────────────────────────────────────────────────────────
     const token = extractBearerToken(req)
     if (!token) {
@@ -339,26 +315,36 @@ export function createRequestHandler(): (
       return
     }
 
-    // ── Session lookup ────────────────────────────────────────────────
-    const sessionId = req.headers["mcp-session-id"] as string | undefined
+    // ── Stateless MCP ─────────────────────────────────────────────────
+    // Each request gets a fresh server + transport with NO session id. There
+    // is no in-memory session map, so the endpoint is immune to container
+    // restarts, redeploys, and horizontal scaling — there is nothing to lose.
+    // (Stateful in-memory sessions were the cause of connectors going dead
+    // after every redeploy: the client's Mcp-Session-Id 404'd and hosted
+    // clients like ChatGPT did not transparently re-initialize.) The bearer
+    // token on this request authorizes this request, so OAuth rotation is
+    // handled automatically — every request simply carries its own token.
 
-    if (sessionId && sessions.has(sessionId)) {
-      const session = sessions.get(sessionId)!
-      // Update the per-session token holder so subsequent tool calls in
-      // this request use the credential the client just sent. This is what
-      // makes OAuth access-token rotation transparent: the previous request
-      // may have used an older access token, this one uses the refreshed
-      // one, and the SDK is rebuilt automatically inside createServer when
-      // the token differs from what's cached.
-      session.tokenHolder.current = token
-      await session.transport.handleRequest(req, res)
+    // DELETE: no session to terminate in stateless mode.
+    if (req.method === "DELETE") {
+      res.writeHead(200, { "Content-Type": "application/json" })
+      res.end(JSON.stringify({ ok: true }))
       return
     }
 
-    // ── New session (or session lost after restart) ───────────────────
-    // Parse the body to check if it's an initialize request. If a client
-    // sends a non-init request with an unknown session ID, return 404 so
-    // it knows to re-initialize.
+    // GET: stateless servers do not maintain a standalone SSE stream. MCP
+    // clients fall back to POST request/response, which is all our tools need.
+    if (req.method === "GET") {
+      res.writeHead(405, { "Content-Type": "application/json", Allow: "POST, DELETE, OPTIONS" })
+      res.end(
+        JSON.stringify({
+          error: "method_not_allowed",
+          message: "This MCP endpoint is stateless; send JSON-RPC over POST.",
+        }),
+      )
+      return
+    }
+
     const body = await new Promise<string>((resolve) => {
       let data = ""
       req.on("data", (chunk: Buffer) => {
@@ -376,41 +362,16 @@ export function createRequestHandler(): (
       return
     }
 
-    // If the client sent a session ID we don't know and it's not an init
-    // request, tell it to re-initialize.
-    if (sessionId && !isInitializeRequest(parsed)) {
-      res.writeHead(404, { "Content-Type": "application/json" })
-      res.end(
-        JSON.stringify({
-          error: "session_not_found",
-          message: "Unknown session. Re-initialize without the Mcp-Session-Id header.",
-        }),
-      )
-      return
-    }
-
-    // Create a new session.
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
+    // Fresh, stateless transport + server for this single request. The token
+    // is fixed for the request, so a plain provider returning it suffices.
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+    const mcpServer = createServer({ tokenProvider: () => token })
+    res.on("close", () => {
+      void transport.close()
+      void mcpServer.close()
     })
-
-    // Per-session token holder. Read by the SDK provider inside
-    // createServer on every tool call and resource read; updated by the
-    // request handler on every subsequent request in this session so that
-    // a rotated OAuth access token takes effect without re-initialization.
-    const tokenHolder = { current: token }
-
-    const mcpServer = createServer({ tokenProvider: () => tokenHolder.current })
     await mcpServer.connect(transport)
-
-    // handleRequest processes the init and generates the session ID.
-    // We must call it first, then read the session ID and store it.
     await transport.handleRequest(req, res, parsed)
-
-    const newSessionId = transport.sessionId
-    if (newSessionId) {
-      sessions.set(newSessionId, { transport, tokenHolder })
-    }
   }
 }
 
