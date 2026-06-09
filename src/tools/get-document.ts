@@ -43,11 +43,15 @@ const inputSchema = {
     ),
 }
 
-const outputSchema = {
+export const outputSchema = {
   id: z.string(),
-  filename: z.string().optional(),
-  pages: z.number().optional(),
-  size_bytes: z.number().optional(),
+  // Freshly-uploaded / pre-extraction documents (browser-handoff polling) return
+  // null for these until OCR/ingest computes them. They MUST accept null, or the
+  // SDK's outputSchema validation rejects the response with -32602 and the agent
+  // cannot poll talonic_get_document after talonic_request_upload.
+  filename: z.string().nullable().optional(),
+  pages: z.number().nullable().optional(),
+  size_bytes: z.number().nullable().optional(),
   mime_type: z.string().nullable().optional(),
   type_detected: z.string().nullable().optional(),
   language_detected: z.string().nullable().optional(),
@@ -76,7 +80,7 @@ const outputSchema = {
     .nullable()
     .optional(),
   original_path: z.string().nullable().optional(),
-  extraction_count: z.number().optional(),
+  extraction_count: z.number().nullable().optional(),
   latest_extraction_id: z.string().nullable().optional(),
   processing_log: z
     .array(

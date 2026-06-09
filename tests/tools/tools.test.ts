@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 import { Talonic } from "@talonic/node"
 import { handleSaveSchema } from "../../src/tools/save-schema"
-import { handleGetDocument } from "../../src/tools/get-document"
+import {
+  handleGetDocument,
+  outputSchema as getDocumentOutputSchema,
+} from "../../src/tools/get-document"
 import { handleSearch } from "../../src/tools/search"
 import { outputSchema as searchOutputSchema } from "../../src/tools/search"
 import { handleFilter, outputSchema as filterOutputSchema } from "../../src/tools/filter"
@@ -85,6 +88,25 @@ describe("talonic_get_document handler", () => {
     const [url, init] = lastCall(fetchFn)
     expect(url).toContain("/v1/documents/doc_1")
     expect(init.method).toBe("GET")
+  })
+
+  it("outputSchema accepts a pre-processing document with null scalars (regression: -32602 mid-poll)", () => {
+    // A freshly-uploaded browser-handoff doc returns null for size_bytes,
+    // pages, filename, and extraction_count until OCR/ingest computes them.
+    // The output schema MUST accept null or the MCP layer rejects the response
+    // and the agent cannot poll talonic_get_document after talonic_request_upload.
+    const Output = z.object(getDocumentOutputSchema)
+    const preProcessing = {
+      id: "doc_fresh",
+      filename: null,
+      pages: null,
+      size_bytes: null,
+      status: "pending_upload",
+      extraction_count: null,
+      source: null,
+      triage: null,
+    }
+    expect(Output.safeParse(preProcessing).success).toBe(true)
   })
 })
 
