@@ -40,10 +40,21 @@ Generated from the live widgets via `scripts/gen-screenshots.mjs` +
 4. `balance.png` — "What's my Talonic credit balance and projected runway?"
 
 ## Test cases (in `chatgpt-app-submission.json`)
-By-name references resolve via `talonic_search` → tool. **They depend on a
-pre-populated workspace** containing `sample-invoice.pdf`, `bank-statement.pdf`,
-saved schemas, and extracted invoices. See "Reviewer access" below — this is the
-open item.
+
+**v1 (rejected 2026-06-08):** by-name extract / get_document / to_markdown /
+filter / search / request_upload. Failed review — "one or more test cases did
+not produce correct results." Root cause: they referenced pre-existing
+documents/data that did not exist on the reviewer's (fresh) account, plus
+file/URL/OCR fragility.
+
+**v2 (resubmission 2026-06-09):** replaced with three single-tool,
+self-contained cases that work on any authenticated account with NO
+pre-existing data, verified against production:
+1. `talonic_get_balance` — always returns balance/tier.
+2. `talonic_save_schema` — creates an "Invoice" schema, returns it.
+3. `talonic_list_schemas` — lists schemas (incl. the one from case 2; run in order).
+No file upload, no URL fetch, no OCR, deterministic → consistent on web + mobile.
+`request_upload` was dropped (401 on the API-key path + it's an upload flow).
 
 ## Reviewer access / demo account — OPEN ITEM
 The submission form had **no field for demo credentials**. The app is OAuth-gated,
