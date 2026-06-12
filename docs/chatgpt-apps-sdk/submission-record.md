@@ -98,6 +98,17 @@ follow-on testing surfaced four issues — all fixed and live (0.1.64):
    tools are live/callable and that filenames resolve via `talonic_search` first
    — to stop hedging ("isn't exposed") and enable confident by-name chaining.
 
+5. **Widget templates fetchable from the ChatGPT sandbox (0.1.65)** — v2 review
+   failed ONLY test case #4 with "Error loading app, failed to fetch the
+   template" (confirmed by OpenAI reviewer Mia, 2026-06-10). Reproduced: the
+   template fetch died on (a) 403 — Origin allowlist lacked
+   `*.web-sandbox.oaiusercontent.com`, the iframe domain widgets render on,
+   preflight included; (b) 401 if the fetcher omits the OAuth token; (c) 406 if
+   Accept lacks text/event-stream. Fixed: sandbox-origin suffix rule in
+   origin.ts + a public widget-template fast path in http-server.ts (static,
+   secret-free HTML; non-widget resources still require auth). All three
+   verified fixed against prod; auth guard re-verified.
+
 **Operational note:** after any deploy, the connector must be **reconnected** in
 the client (ChatGPT caches `tools/list` at connect time). The stateless transport
 means an unexpected restart no longer breaks an already-connected session, but a
