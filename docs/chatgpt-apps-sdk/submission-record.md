@@ -109,6 +109,18 @@ follow-on testing surfaced four issues — all fixed and live (0.1.64):
    secret-free HTML; non-widget resources still require auth). All three
    verified fixed against prod; auth guard re-verified.
 
+6. **Search query contract + zero-result hint; filter attempt-first (0.1.66)** —
+   full test re-run (2026-06-12) failed #7/#8: the search API matches LITERAL
+   tokens (verified: 'invoice' rich results; 'invoices' junk; sentence queries
+   empty), while our own param doc said "natural-language query". Search now
+   teaches the contract (one short SINGULAR keyword / exact filename) and
+   all-empty results carry a retry `hint` (verified live). Filter now says to
+   attempt text eq/contains with a natural field name (server-side resolution,
+   warnings[] on miss) — discovery only required for numeric ops. #4 (model
+   claimed to_markdown "not in toolset", worked when pushed): instructions now
+   assert all nine tools are callable every turn; get_document carries a
+   to_markdown chain cue. Hedging is model behavior — mitigated, not provable.
+
 **Operational note:** after any deploy, the connector must be **reconnected** in
 the client (ChatGPT caches `tools/list` at connect time). The stateless transport
 means an unexpected restart no longer breaks an already-connected session, but a
