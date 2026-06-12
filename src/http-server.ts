@@ -42,6 +42,8 @@ import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
 import { isOriginAllowed } from "./origin.js"
+import { getWidgetTemplateHtml } from "./widgets/register.js"
+import { widgetMeta } from "./widgets/shared.js"
 import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -132,6 +134,20 @@ function extractBearerToken(req: {
 
 /** WWW-Authenticate header value for 401 responses, per RFC 9728. */
 const WWW_AUTHENTICATE = `Bearer resource_metadata="${RESOURCE_URL}/.well-known/oauth-protected-resource"`
+
+/**
+ * If the parsed JSON-RPC body is a single `resources/read` for a
+ * `ui://widget/*` template, return its uri and request id; otherwise null.
+ * Batched requests fall through to the normal authed path.
+ */
+function asWidgetTemplateRead(parsed: unknown): { uri: string; id: unknown } | null {
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) return null
+  const msg = parsed as { method?: unknown; params?: { uri?: unknown }; id?: unknown }
+  if (msg.method !== "resources/read") return null
+  const uri = msg.params?.uri
+  if (typeof uri !== "string" || !uri.startsWith("ui://widget/")) return null
+  return { uri, id: msg.id ?? null }
+}
 
 /**
  * Build the HTTP request handler for the Streamable HTTP entry point.
@@ -298,23 +314,6 @@ export function createRequestHandler(): (
       return
     }
 
-    // ── Auth ───────────────────────────────────────────────────────────
-    const token = extractBearerToken(req)
-    if (!token) {
-      res.writeHead(401, {
-        "Content-Type": "application/json",
-        "WWW-Authenticate": WWW_AUTHENTICATE,
-      })
-      res.end(
-        JSON.stringify({
-          error: "unauthorized",
-          message:
-            "Provide a Talonic API key (tlnc_...) or an OAuth 2.1 access token via Authorization: Bearer ... header. API keys may also be passed via ?apiKey=tlnc_... query param; never put OAuth tokens in URLs.",
-        }),
-      )
-      return
-    }
-
     // ── Stateless MCP ─────────────────────────────────────────────────
     // Each request gets a fresh server + transport with NO session id. There
     // is no in-memory session map, so the endpoint is immune to container
@@ -359,6 +358,64 @@ export function createRequestHandler(): (
     } catch {
       res.writeHead(400, { "Content-Type": "application/json" })
       res.end(JSON.stringify({ error: "bad_request", message: "Invalid JSON body." }))
+      return
+    }
+
+    // ── Widget-template fast path (public, before auth) ───────────────
+    // ChatGPT's widget renderer fetches `ui://widget/*` templates at render
+    // time, sometimes without the user's OAuth token and sometimes with an
+    // Accept header lacking text/event-stream — either killed the render
+    // ("Error loading app, failed to fetch the template", OpenAI review
+    // rejection 2026-06-10, test case #4). The templates are static,
+    // secret-free HTML (asserted by tests), so a resources/read for one is
+    // answered directly here: no auth, no SDK Accept negotiation, plain JSON.
+    const widgetRead = asWidgetTemplateRead(parsed)
+    if (widgetRead) {
+      const html = getWidgetTemplateHtml(widgetRead.uri)
+      res.writeHead(200, { "Content-Type": "application/json" })
+      if (html === undefined) {
+        res.end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: widgetRead.id,
+            error: { code: -32002, message: `Resource not found: ${widgetRead.uri}` },
+          }),
+        )
+        return
+      }
+      res.end(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: widgetRead.id,
+          result: {
+            contents: [
+              {
+                uri: widgetRead.uri,
+                mimeType: "text/html;profile=mcp-app",
+                text: html,
+                _meta: widgetMeta(),
+              },
+            ],
+          },
+        }),
+      )
+      return
+    }
+
+    // ── Auth ───────────────────────────────────────────────────────────
+    const token = extractBearerToken(req)
+    if (!token) {
+      res.writeHead(401, {
+        "Content-Type": "application/json",
+        "WWW-Authenticate": WWW_AUTHENTICATE,
+      })
+      res.end(
+        JSON.stringify({
+          error: "unauthorized",
+          message:
+            "Provide a Talonic API key (tlnc_...) or an OAuth 2.1 access token via Authorization: Bearer ... header. API keys may also be passed via ?apiKey=tlnc_... query param; never put OAuth tokens in URLs.",
+        }),
+      )
       return
     }
 

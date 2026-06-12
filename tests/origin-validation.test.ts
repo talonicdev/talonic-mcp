@@ -27,6 +27,21 @@ describe("isOriginAllowed (Origin allowlist for DNS-rebinding mitigation)", () =
     expect(isOriginAllowed("https://smithery.ai")).toBe(true)
   })
 
+  it("accepts the ChatGPT widget sandbox (any per-app subdomain)", () => {
+    // Apps SDK widgets render in an iframe on <app>.web-sandbox.oaiusercontent.com.
+    // Template fetches carrying that Origin were 403'd, which surfaced in review
+    // as "Error loading app, failed to fetch the template".
+    expect(isOriginAllowed("https://talonic-com.web-sandbox.oaiusercontent.com")).toBe(true)
+    expect(isOriginAllowed("https://anything-else.web-sandbox.oaiusercontent.com")).toBe(true)
+  })
+
+  it("rejects sandbox look-alikes (missing dot, http, bare domain, spoofed suffix)", () => {
+    expect(isOriginAllowed("https://evilweb-sandbox.oaiusercontent.com")).toBe(false)
+    expect(isOriginAllowed("http://talonic.web-sandbox.oaiusercontent.com")).toBe(false)
+    expect(isOriginAllowed("https://web-sandbox.oaiusercontent.com.evil.com")).toBe(false)
+    expect(isOriginAllowed("https://x.web-sandbox.oaiusercontent.com/path")).toBe(false)
+  })
+
   it("rejects an unknown Origin", () => {
     expect(isOriginAllowed("https://evil.example.com")).toBe(false)
   })
