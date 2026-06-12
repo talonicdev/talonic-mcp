@@ -138,6 +138,41 @@ describe("talonic_search handler", () => {
     const url = lastCall(fetchFn)[0]
     expect(url).not.toContain("limit=")
   })
+
+  it("adds a retry hint when nothing matched (search is literal keyword matching)", async () => {
+    // The search API matches literal tokens: 'invoices' (plural) and sentence
+    // queries return empty even in a workspace full of invoices, and models
+    // then wrongly conclude the workspace has nothing (OpenAI review test #7).
+    // An empty result must carry an actionable hint so the agent retries with
+    // a singular keyword instead of giving up.
+    const { talonic } = makeTalonic({
+      documents: [],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [],
+    })
+    const result = await handleSearch(talonic, { query: "documents related to invoices" })
+    const parsed = parsedText(result) as { hint?: string }
+    expect(parsed.hint).toBeDefined()
+    expect(parsed.hint).toMatch(/singular/i)
+    // The outputSchema must accept the hint (structuredContent validation).
+    const Output = z.object(searchOutputSchema)
+    expect(Output.safeParse(parsed).success).toBe(true)
+  })
+
+  it("does NOT add a hint when there are matches", async () => {
+    const { talonic } = makeTalonic({
+      documents: [{ id: "doc_1", name: "invoice.pdf" }],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [],
+    })
+    const result = await handleSearch(talonic, { query: "invoice" })
+    const parsed = parsedText(result) as { hint?: string }
+    expect(parsed.hint).toBeUndefined()
+  })
 })
 
 describe("talonic_filter handler", () => {

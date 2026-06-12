@@ -34,9 +34,9 @@ describe("tool descriptions are tight and decision-oriented", () => {
 
   it.each(ALL_TOOLS)("%s has a non-empty description under the length budget", (name) => {
     expect(d[name].length).toBeGreaterThan(0)
-    // Tightened template is ~500-1100 chars; 1300 catches a regression to the
+    // Tightened template is ~500-1400 chars; 1500 catches a regression to the
     // old verbose blocks (~2500+).
-    expect(d[name].length).toBeLessThanOrEqual(1300)
+    expect(d[name].length).toBeLessThanOrEqual(1500)
   })
 
   it.each(ALL_TOOLS)("%s redirects to a sibling tool (NOT FOR)", (name) => {
@@ -45,5 +45,18 @@ describe("tool descriptions are tight and decision-oriented", () => {
 
   it.each(DOC_TOOLS)("%s tells the model to resolve a filename via talonic_search", (name) => {
     expect(d[name]).toContain("talonic_search")
+  })
+
+  it("search teaches the literal-keyword query contract (review test #7)", () => {
+    // The search API matches literal tokens; sentence/plural queries return
+    // empty and the model concludes the workspace is empty. The description
+    // must carry the query contract.
+    expect(d["talonic_search"]).toContain("LITERAL")
+    expect(d["talonic_search"]).toContain("SINGULAR")
+  })
+
+  it("filter tells the model to attempt text filters without prior discovery (review test #8)", () => {
+    expect(d["talonic_filter"]).toContain("TEXT FILTERS")
+    expect(d["talonic_filter"]).toContain("warnings[]")
   })
 })
