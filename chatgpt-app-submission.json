@@ -1,0 +1,228 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Talonic",
+    "subtitle": "Extract document data",
+    "description": "Talonic helps users turn documents such as PDFs, scans, invoices, contracts, certificates, statements, and forms into schema-validated JSON. Users can extract structured fields, convert documents to markdown, search and filter their Talonic workspace, manage reusable extraction schemas, check document status, request browser upload links, and view credit balance information.",
+    "category": "PRODUCTIVITY"
+  },
+  "tools": {
+    "talonic_extract": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Ingests or re-extracts a document in the user's Talonic workspace and can consume credits.",
+        "open_world_justification": "Can fetch a user-supplied public document URL through the file_url input.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_request_upload": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private Talonic upload session and pre-allocates a document ID.",
+        "open_world_justification": "Only creates a private upload handoff inside Talonic and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_to_markdown": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Can ingest a new document into the user's Talonic workspace before returning OCR markdown.",
+        "open_world_justification": "Can fetch a user-supplied public document URL through the file_url input.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_save_schema": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a reusable schema record in the user's Talonic workspace.",
+        "open_world_justification": "Only saves schema metadata inside Talonic and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_search": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only searches existing documents, fields, sources, and schemas in the user's Talonic workspace.",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_filter": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves existing workspace documents matching structured field-value conditions.",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_get_document": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves metadata and processing status for an existing Talonic document.",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_list_schemas": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only lists saved schema summaries in the user's Talonic workspace.",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_get_balance": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves the user's Talonic credit balance, tier, burn rate, and runway.",
+        "open_world_justification": "Only reads private Talonic billing and usage data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Extract structured fields from a workspace invoice by name.",
+      "user_prompt": "Extract the vendor name, total amount, and invoice date from sample-invoice.pdf.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_search, talonic_extract",
+      "expected_output": "Finds sample-invoice.pdf and returns schema-validated JSON for vendor name, total amount, and invoice date with per-field confidence.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Convert a workspace document to OCR markdown by name.",
+      "user_prompt": "Show me the text of sample-invoice.pdf as markdown.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_search, talonic_to_markdown",
+      "expected_output": "Finds sample-invoice.pdf and returns its OCR-converted markdown text.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Fetch a workspace document’s metadata and status by name.",
+      "user_prompt": "Show the document details and status for bank-statement.pdf.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_search, talonic_get_document",
+      "expected_output": "Finds bank-statement.pdf and returns its metadata (filename, pages, type) and processing status.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Search the workspace by concept.",
+      "user_prompt": "Search my Talonic workspace for insurance certificates.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_search",
+      "expected_output": "Returns matching documents (the Certificate of Insurance files) with names and source info.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Filter documents by presence of an extracted field that exists in this workspace.",
+      "user_prompt": "Using Talonic, list the documents in my workspace that have an invoice number.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_filter",
+      "expected_output": "Filters with is_not_empty on the invoice_number field and returns the documents that have an extracted invoice number.",
+      "expected_output_url": null
+    },
+    {
+      "description": "List saved extraction schemas.",
+      "user_prompt": "List the extraction schemas saved in my Talonic workspace.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_schemas",
+      "expected_output": "Returns the saved schemas with names, short IDs, and field counts.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Save a reusable schema from a natural-language description.",
+      "user_prompt": "Save a schema named \"Invoice\" with vendor_name (text), total_amount (number), and invoice_date (text).",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_save_schema",
+      "expected_output": "Creates the Invoice schema and returns its name, short ID, version, and field count (3).",
+      "expected_output_url": null
+    },
+    {
+      "description": "Check the workspace credit balance.",
+      "user_prompt": "What is my Talonic credit balance and tier?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_get_balance",
+      "expected_output": "Returns current credits, EUR value, tier, 30-day burn, and projected runway.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Request a browser upload link for a new document.",
+      "user_prompt": "Create a link so I can upload a new document to Talonic.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_request_upload",
+      "expected_output": "Returns an upload URL and a document ID to track the upload.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for unrelated calendar requests.",
+      "user_prompt": "What meetings do I have tomorrow?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because the request is outside Talonic document extraction and workspace workflows.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for generic web search.",
+      "user_prompt": "Search the web for the latest news about electric vehicles.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because Talonic searches only the user's Talonic workspace, not the public web.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for spreadsheet creation without a document extraction workflow.",
+      "user_prompt": "Create a new budget spreadsheet for my household expenses.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because the user is asking to create a spreadsheet rather than extract or inspect Talonic document data.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for destructive workspace actions the app does not support.",
+      "user_prompt": "Delete all documents from my Talonic workspace.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because no Talonic tool supports deleting documents or other destructive admin actions.",
+      "expected_output_url": null
+    }
+  ]
+}
