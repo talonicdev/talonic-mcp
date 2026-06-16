@@ -1,9 +1,27 @@
 # ChatGPT App Directory — Submission Record
 
-**Submitted:** 2026-06-08
+**✅ APPROVED & LIVE — 2026-06-16.** In the ChatGPT App Directory. Approved on the
+3rd submission after a string of distinct, real fixes (see "Post-v1 fixes" below).
+Live at `@talonic/mcp` 0.1.66+, stateless MCP at `https://mcp.talonic.com/mcp`.
+
+**Submitted:** 2026-06-08 (v1) · 2026-06-09 (v2) · 2026-06-12 (v3 — approved)
 **App name:** Talonic — "Extract data and talk to docs"
 **Publishing entity:** Talonic GmbH (business-verified on OpenAI Platform)
 **Category:** Productivity
+
+## Open follow-ups (NOT blocking — app is approved)
+- **Platform — browser-upload pipeline:** docs strand at `status=uploading` →
+  hourly cleanup / `ocr_failed`. Two leads: the `worker:batch` extraction-queue
+  consumer not reliably running in prod, and a `request_upload` anomaly where the
+  returned document_id appears decoupled from the row the upload token writes
+  (repro IDs in this session). Platform-team item; full diagnosis available.
+- **Platform — OCR fallback disabled** (`94b01b89`): image/scanned PDFs 422.
+- **Demo account data is fragmented:** no field has broad filterable coverage
+  (best invoice field `invoice_number` = 2 docs; `invoice_currency` doesn't
+  exist there). Filter test points at `invoice_number is_not_empty`. To showcase
+  filter strongly, seed ~6 invoices under one shared schema.
+- **Other distribution surfaces** considered but not built: GPT Actions (Custom
+  GPT, ~half-day), Gemini CLI extension.
 
 ## Endpoints
 - **MCP server:** `https://mcp.talonic.com/mcp` (Streamable HTTP, **stateless**)
