@@ -370,10 +370,53 @@ describe("talonic_extract handler", () => {
     expect(fd.get("include_markdown")).toBe("true")
   })
 
-  it("returns isError when no schema or schema_id is provided", async () => {
+  it("returns isError with a ready-to-paste schema example when no schema is provided", async () => {
     const result = await handleExtract(client.talonic, { document_id: "doc_1" })
     expect((result as { isError?: boolean }).isError).toBe(true)
-    expect(result.content[0]?.text).toMatch(/requires a schema/)
+    const text = result.content[0]?.text ?? ""
+    // The error must hand back a valid, paste-able minimal JSON Schema and
+    // mention both the flat-map shorthand and the auto_schema escape hatch.
+    expect(text).toContain('"type":"object"')
+    expect(text).toContain('"properties"')
+    expect(text).toContain("auto_schema")
+    expect(text.toLowerCase()).toContain("shorthand")
+    // And the embedded example must parse as JSON.
+    const match = text.match(/\{"type":"object".*\}/)
+    expect(match).not.toBeNull()
+    expect(() => JSON.parse(match![0])).not.toThrow()
+  })
+
+  it("tailors the suggested schema to the instructions hint (invoice)", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      instructions: "pull the vendor and total from this invoice",
+    })
+    const text = result.content[0]?.text ?? ""
+    expect(text).toContain("vendor_name")
+    expect(text).toContain("total_amount")
+  })
+
+  it("auto_schema:true extracts with NO schema (open capture) and succeeds", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      auto_schema: true,
+    })
+    expect((result as { isError?: boolean }).isError).toBeUndefined()
+    const fd = lastCall(client.fetchFn)[1].body as FormData
+    // The open-capture path must send neither schema nor schema_id.
+    expect(fd.get("schema")).toBeNull()
+    expect(fd.get("schema_id")).toBeNull()
+    expect(fd.get("document_id")).toBe("doc_1")
+  })
+
+  it("rejects auto_schema combined with an explicit schema", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      auto_schema: true,
+      schema: { type: "object", properties: { x: { type: "string" } } },
+    })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/mutually exclusive/)
   })
 
   it("returns isError when no file source provided", async () => {

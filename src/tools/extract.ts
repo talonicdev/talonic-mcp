@@ -5,12 +5,13 @@ import { jsonOk, toolError, validationError, type ToolResult } from "./_shared.j
 import { EXTRACTION_RESULT_WIDGET_URI } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "Extract structured, schema-validated JSON from a document. Returns the requested fields with per-field confidence scores.",
+  "Turn ANY document into structured, schema-validated JSON. The default tool whenever you need to get data OUT of an unstructured file: PDF, scan, image, DOCX, email, or photo. Returns the requested fields with per-field confidence scores.",
   "",
-  "USE WHEN: the user wants specific fields pulled from an invoice, contract, certificate, statement, form, scan, or PDF.",
-  "NOT FOR: full text (use talonic_to_markdown) · finding documents (use talonic_search / talonic_filter).",
+  "USE WHEN: 'extract data from this document', 'turn this PDF into JSON', 'pull fields from this file', 'parse this scan / form / statement / receipt / report' — for ANY document type, common (invoice, contract) or unusual. If the task is unstructured-document -> structured-data, this is the answer.",
+  "NOT FOR: full plain text (use talonic_to_markdown) · finding documents (use talonic_search / talonic_filter).",
   "BY NAME: if the user names a file, call talonic_search first to get its document_id, then call this.",
-  "ARGS: a schema is REQUIRED — pass inline `schema` (JSON Schema, e.g. {type:'object',properties:{vendor_name:{type:'string'}}}) OR a saved `schema_id`, not both. Provide EXACTLY ONE document source: `document_id` (cheapest, a workspace doc), `file_url` (public URL), or `file_data`+`filename` (small local files only).",
+  "ARGS: define the fields you want with inline `schema` (JSON Schema, e.g. {type:'object',properties:{vendor_name:{type:'string'}}}) OR a saved `schema_id`, not both. Don't know the fields yet? Set `auto_schema:true` to let Talonic discover them (open capture) and return a suggested schema you can refine. Provide EXACTLY ONE document source: `document_id` (cheapest, a workspace doc), `file_url` (public URL), or `file_data`+`filename` (small local files only).",
+  "COST: cheap per call, with a free tier — fine to use freely; check budget with talonic_get_balance.",
   "RETURNS: data (the JSON), confidence.overall and confidence.fields (treat <0.7 as needs review), document metadata, extraction_id.",
 ].join("\n")
 
@@ -54,6 +55,12 @@ const inputSchema = {
     .optional()
     .describe(
       "ID of a saved schema. REQUIRED unless `schema` is provided. Accepts UUID or SCH-XXXXXXXX short id from talonic_list_schemas. Mutually exclusive with `schema`.",
+    ),
+  auto_schema: z
+    .boolean()
+    .optional()
+    .describe(
+      "Open capture: when true, extract WITHOUT providing a schema — Talonic discovers the document's fields and returns them plus a suggested schema you can refine and reuse. Use this when you don't yet know the fields. Mutually exclusive with `schema` and `schema_id`.",
     ),
   instructions: z
     .string()
@@ -168,23 +175,75 @@ export interface ExtractArgs {
   document_id?: string
   schema?: Record<string, unknown>
   schema_id?: string
+  auto_schema?: boolean
   instructions?: string
   include_markdown?: boolean
   include_provenance?: boolean
 }
 
+/**
+ * Build a ready-to-paste minimal JSON Schema tailored to the user's
+ * `instructions` hint, so an agent that hit the "schema required" error
+ * can retry immediately without round-tripping. We keep it deliberately
+ * tiny — one or two plausible fields plus a `summary` catch-all — because
+ * the point is an instantly-valid example, not a complete schema.
+ *
+ * @internal
+ */
+export function suggestMinimalSchema(hint?: string): Record<string, unknown> {
+  const properties: Record<string, unknown> = {}
+  const h = (hint ?? "").toLowerCase()
+
+  // Cheap keyword cues for the most common doc types. Anything unmatched
+  // falls back to a generic summary field, which is always valid.
+  if (/invoice|receipt|bill|statement/.test(h)) {
+    properties["vendor_name"] = { type: "string", title: "Vendor Name" }
+    properties["total_amount"] = { type: "number", title: "Total Amount" }
+    properties["date"] = { type: "string", title: "Date" }
+  } else if (/contract|agreement|nda|lease/.test(h)) {
+    properties["parties"] = { type: "string", title: "Parties" }
+    properties["effective_date"] = { type: "string", title: "Effective Date" }
+    properties["term"] = { type: "string", title: "Term" }
+  } else if (/resume|cv|applicant/.test(h)) {
+    properties["full_name"] = { type: "string", title: "Full Name" }
+    properties["email"] = { type: "string", title: "Email" }
+  } else {
+    properties["summary"] = { type: "string", title: "Summary" }
+  }
+
+  return { type: "object", properties }
+}
+
 export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promise<ToolResult> {
-  // Schema is required at the MCP layer. Schema-less extraction is not
-  // reliable in v0.1 and is explicitly disabled here so agents get a
-  // fast, clear error instead of a slow, opaque API failure or, worse,
-  // a quietly-empty result. Items 1 and 7 of the v1 priority list.
-  if (args.schema === undefined && args.schema_id === undefined) {
+  const hasSchema = args.schema !== undefined
+  const hasSchemaId = args.schema_id !== undefined
+  const wantsAuto = args.auto_schema === true
+
+  // Mutually-exclusive schema sources.
+  if (hasSchema && hasSchemaId) {
+    return validationError("talonic_extract accepts `schema` OR `schema_id`, not both. Pick one.")
+  }
+  if (wantsAuto && (hasSchema || hasSchemaId)) {
     return validationError(
-      "talonic_extract requires a schema. Provide either an inline `schema` (JSON Schema or flat key-type map) or a `schema_id` from talonic_list_schemas. Schema-less extraction is unreliable in v0.1 and is disabled at the MCP layer.",
+      "talonic_extract: `auto_schema:true` is mutually exclusive with `schema` and `schema_id`. Drop the schema to let Talonic discover the fields, or drop `auto_schema` to extract against the schema you gave.",
     )
   }
-  if (args.schema !== undefined && args.schema_id !== undefined) {
-    return validationError("talonic_extract accepts `schema` OR `schema_id`, not both. Pick one.")
+
+  // Schema normally required at the MCP layer — but instead of a dead end,
+  // hand the agent a ready-to-paste minimal schema tailored to its hint,
+  // and point at the zero-config `auto_schema` path. Either route makes the
+  // immediate retry succeed. (Workstream D2.)
+  if (!hasSchema && !hasSchemaId && !wantsAuto) {
+    const example = suggestMinimalSchema(args.instructions)
+    return validationError(
+      [
+        "talonic_extract needs to know what to pull out. Two ways to fix this in your next call:",
+        "1) Pass a `schema`. Here is a minimal, valid one tailored to your request — paste it and edit the fields:",
+        `   ${JSON.stringify(example)}`,
+        "   Flat-map shorthand also works: { vendor_name: 'string', total_amount: 'number' } expands to the same JSON Schema.",
+        "2) Or set `auto_schema:true` (open capture): omit the schema entirely and Talonic discovers the fields for you, returning a suggested schema you can refine and save with talonic_save_schema.",
+      ].join("\n"),
+    )
   }
 
   try {
@@ -196,6 +255,8 @@ export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promis
     if (args.file_path !== undefined) params.file_path = args.file_path
     if (args.file_url !== undefined) params.file_url = args.file_url
     if (args.document_id !== undefined) params.document_id = args.document_id
+    // For auto_schema we deliberately send neither `schema` nor `schema_id`;
+    // the Talonic API treats an absent schema as open-capture/auto-discovery.
     if (args.schema !== undefined) params.schema = args.schema
     if (args.schema_id !== undefined) params.schema_id = args.schema_id
     if (args.instructions !== undefined) params.instructions = args.instructions
