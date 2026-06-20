@@ -55,7 +55,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "By design in v0.1. Schema-less extraction is unreliable, so the MCP layer rejects calls that omit both `schema` and `schema_id` before they reach the API. Provide either an inline `schema` (full JSON Schema recommended) or a `schema_id` from `talonic_list_schemas`.",
+        text: "By design. To keep results reliable, the MCP layer asks for the fields you want when a call omits `schema`, `schema_id`, and `auto_schema`. The error hands back a ready-to-paste minimal JSON Schema (tailored to your `instructions`) so the retry succeeds immediately. Three ways forward: provide an inline `schema` (full JSON Schema recommended), pass a `schema_id` from `talonic_list_schemas`, or set `auto_schema: true` for open capture — Talonic discovers the fields and returns a suggested schema you can refine.",
       },
 
       {
@@ -166,7 +166,7 @@ export const sections: RawSection[] = [
       {
         question: "Why does talonic_extract fail with a validation error?",
         answer:
-          "The most common cause is a missing schema. In v0.1, schema-less extraction is disabled at the MCP layer. Always provide a schema (inline JSON Schema) or schema_id from talonic_list_schemas.",
+          "The most common cause is that no fields were specified. Provide a schema (inline JSON Schema) or a schema_id from talonic_list_schemas — or set auto_schema: true for open capture, where Talonic discovers the fields and returns a suggested schema. The validation error already hands back a ready-to-paste minimal schema, so the retry succeeds on the next call.",
       },
       {
         question: "How do I debug MCP server connection issues?",
@@ -200,12 +200,12 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Most limitations relate to the extraction pipeline's maturity in v0.1. Schema-less extraction, certain filter operators, cost information, and per-field provenance are not yet available. These are documented here so agent developers can set accurate expectations and build appropriate fallbacks.",
+        text: "Most limitations relate to the extraction pipeline's maturity in v0.1. Certain filter operators, cost information, and per-field provenance have constraints. These are documented here so agent developers can set accurate expectations and build appropriate fallbacks.",
       },
       {
         type: "list",
         items: [
-          "**Schema is required on `talonic_extract`.** Schema-less extraction is unreliable in v0.1 and is rejected at the MCP layer with a validation error. Always pass a `schema` (full JSON Schema recommended) or a `schema_id`.",
+          "**`talonic_extract` needs to know which fields to pull.** Pass a `schema` (full JSON Schema recommended) or a `schema_id` — or set `auto_schema: true` for open capture, where Talonic discovers the fields and returns a suggested schema. A call that gives none of the three returns a validation error that hands back a ready-to-paste minimal schema, so the retry succeeds immediately.",
           "**Schema definition: prefer full JSON Schema.** The flat key-type map is documented as accepted; if you get a 'no fields' error from the API, fall back to JSON Schema.",
           "**Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.",
           "**Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.",
@@ -257,7 +257,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "Do not rely on schema-less extraction in automated workflows — it is explicitly disabled in v0.1 and will return a validation error. Always provide a `schema` or `schema_id`.",
+        text: "For predictable automated workflows, pin the fields with a `schema` or `schema_id`. When you don't yet know the fields, `auto_schema: true` (open capture) discovers them and returns a suggested schema you can save and reuse for stability.",
       },
     ],
     related: [
@@ -269,12 +269,12 @@ export const sections: RawSection[] = [
       {
         question: "What are the known limitations of Talonic MCP?",
         answer:
-          "Schema is required on talonic_extract. Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
+          "talonic_extract needs fields specified via schema, schema_id, or auto_schema: true (open capture). Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
       },
       {
-        question: "Will schema-less extraction be supported in the future?",
+        question: "Can I extract without knowing the fields up front (schema-less)?",
         answer:
-          "Yes, it is planned for a future release. In v0.1, schema-less extraction is disabled because it produces unreliable results. Always provide a schema or schema_id.",
+          "Yes. Set auto_schema: true on talonic_extract for open capture: Talonic discovers the document's fields and returns a suggested schema alongside the data. Refine and save that schema with talonic_save_schema for stable, repeatable extraction. For predictable production workflows, providing an explicit schema or schema_id is still recommended.",
       },
       {
         question: "How do I check my credit balance or costs?",

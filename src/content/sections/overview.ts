@@ -241,7 +241,7 @@ export const sections: RawSection[] = [
       {
         type: "list",
         items: [
-          "**They want specific fields**: vendor, total, dates, parties, line items. Use `talonic_extract` with a `schema` (full JSON Schema is most reliable) or a `schema_id` from `talonic_list_schemas`. Schema is required; the MCP layer rejects schema-less calls.",
+          "**They want specific fields**: vendor, total, dates, parties, line items. Use `talonic_extract` with a `schema` (full JSON Schema is most reliable) or a `schema_id` from `talonic_list_schemas`. Don't know the fields yet? Set `auto_schema: true` for open capture — Talonic discovers them and returns a suggested schema to refine.",
           "**They want the full text content**, e.g. for summarisation, translation, or general analysis. Use `talonic_to_markdown`. It returns OCR-converted markdown without forcing a schema.",
           "**They want both**: extract once with a schema (which also yields markdown when `include_markdown: true` is set), avoiding two uploads.",
         ],

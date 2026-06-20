@@ -671,7 +671,7 @@
       {
         "type": "callout",
         "variant": "warning",
-        "text": "Always provide either a `schema` or `schema_id`. The MCP layer rejects schema-less calls with a validation error before they reach the API."
+        "text": "Specify the fields you want: provide a `schema` or `schema_id`, or set `auto_schema: true` for open capture (Talonic discovers the fields and returns a suggested schema). A call giving none of the three returns a validation error that hands back a ready-to-paste minimal schema."
       },
       {
         "type": "heading",
@@ -2400,7 +2400,7 @@
       },
       {
         "type": "paragraph",
-        "text": "By design in v0.1: schema-less extraction is unreliable, so the MCP layer rejects calls that omit both `schema` and `schema_id` before they reach the API. Provide either an inline `schema` (full JSON Schema recommended) or a `schema_id` from `talonic_list_schemas`."
+        "text": "By design, to keep results reliable. The error hands back a ready-to-paste minimal JSON Schema (tailored to your `instructions`) so the retry succeeds immediately. Three ways forward: provide an inline `schema` (full JSON Schema recommended), pass a `schema_id` from `talonic_list_schemas`, or set `auto_schema: true` for open capture — Talonic discovers the fields and returns a suggested schema you can refine."
       },
       {
         "type": "heading",
