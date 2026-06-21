@@ -15,6 +15,8 @@ const ALL_TOOLS = [
   "talonic_list_schemas",
   "talonic_save_schema",
   "talonic_get_balance",
+  "talonic_get_pricing",
+  "talonic_get_usage",
   "talonic_request_upload",
 ]
 

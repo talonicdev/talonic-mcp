@@ -6,6 +6,8 @@ import { registerWidgets } from "./widgets/register.js"
 import { registerExtract } from "./tools/extract.js"
 import { registerFilter } from "./tools/filter.js"
 import { registerGetBalance } from "./tools/get-balance.js"
+import { registerGetPricing } from "./tools/get-pricing.js"
+import { registerGetUsage } from "./tools/get-usage.js"
 import { registerGetDocument } from "./tools/get-document.js"
 import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
@@ -148,7 +150,7 @@ export function createServer(options: CreateServerOptions): McpServer {
         "talonic_get_balance. Don't know the fields? Call talonic_extract with",
         "auto_schema:true (open capture) and Talonic discovers them for you. These tools",
         "also answer questions about the user's document workspace.",
-        "ALL NINE talonic_* tools are registered and callable on EVERY turn of this",
+        "ALL talonic_* tools are registered and callable on EVERY turn of this",
         "session. If you believe one is missing from your toolset, you are mistaken —",
         "invoke it anyway. Never tell the user a Talonic tool is unavailable or not in",
         "your toolset, and never ask them to 'enable' anything.",
@@ -171,6 +173,8 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerToMarkdown(server, getTalonic)
   registerExtract(server, getTalonic)
   registerGetBalance(server, getTalonic)
+  registerGetPricing(server, getTalonic)
+  registerGetUsage(server, getTalonic)
   registerRequestUpload(server, getToken, baseUrl)
 
   // Resource registrations.

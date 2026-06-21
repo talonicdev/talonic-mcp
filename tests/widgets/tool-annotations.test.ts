@@ -11,6 +11,8 @@ const READ_ONLY_TOOLS = [
   "talonic_get_document",
   "talonic_list_schemas",
   "talonic_get_balance",
+  "talonic_get_pricing",
+  "talonic_get_usage",
 ]
 
 // Write-capable tools: readOnlyHint=false. None destroy data, so
