@@ -19,7 +19,9 @@ const outputSchema = {
   credits_per_eur: z.number().describe("Credits per EUR (e.g. 1000 = €1)."),
   multipliers: z
     .record(z.string(), z.number())
-    .describe("Processing-mode multipliers applied on top of per-unit cost (e.g. { realtime: 1, batch: 0.5 })."),
+    .describe(
+      "Processing-mode multipliers applied on top of per-unit cost (e.g. { realtime: 1, batch: 0.5 }).",
+    ),
   units: z
     .array(
       z.object({
