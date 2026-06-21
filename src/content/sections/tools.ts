@@ -1393,6 +1393,268 @@ Payment terms: Net 30`,
     mentions: ["credits", "balance", "EUR", "burn rate", "runway", "tier", "budget"],
   },
   {
+    slug: "talonic-get-pricing",
+    parentSlug: "tools",
+    title: "talonic_get_pricing",
+    seoTitle: "talonic_get_pricing Tool — Talonic MCP",
+    description:
+      "MCP tool that returns the machine-readable Talonic credit pricing catalog: fixed per-unit credit rates, EUR equivalents, the credits-per-EUR conversion, and processing-mode multipliers, so an agent can predict spend before running anything.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Returns the credit pricing catalog: fixed per-unit credit rates, their EUR equivalents, the credits-per-EUR conversion rate, and processing-mode multipliers (such as batch at 0.5x). Because the rates are fixed rather than token-based, an agent can read them and compute the exact cost of a planned job before spending a credit. The endpoint is public, so it works even before an API key is provisioned.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "use-when",
+        text: "When to use",
+      },
+      {
+        type: "list",
+        items: [
+          "Estimating the cost of a planned extraction, structuring, or matching job before running it.",
+          "Answering a user question about how much Talonic costs per page or per operation.",
+          "Deciding whether a workload fits a budget, especially before signing up.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "do-not-use",
+        text: "When not to use",
+      },
+      {
+        type: "list",
+        items: [
+          "For the workspace's remaining credit balance: use `talonic_get_balance`.",
+          "For what the workspace has already spent and on what: use `talonic_get_usage`.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "response-shape",
+        text: "Response shape",
+      },
+      {
+        type: "list",
+        items: [
+          "`currency`: billing currency for the EUR equivalents (always `EUR`).",
+          "`credits_per_eur`: conversion rate between credits and EUR (1,000 credits = 1 EUR at the standard rate).",
+          "`multipliers`: processing-mode multipliers keyed by mode (e.g. `realtime: 1`, `batch: 0.5`).",
+          "`units`: array of catalog lines, each with `unit`, `label`, `credits`, `eur`, and `free`.",
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{}`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "currency": "EUR",
+  "credits_per_eur": 1000,
+  "multipliers": { "realtime": 1, "batch": 0.5 },
+  "units": [
+    { "unit": "page_ingest", "label": "Document page ingestion", "credits": 100, "eur": 0.1, "free": false },
+    { "unit": "structuring_cell", "label": "Structuring cell (LLM-reasoned)", "credits": 20, "eur": 0.02, "free": false },
+    { "unit": "registry_resolved_cell", "label": "Structuring cell (Field Registry resolved)", "credits": 0, "eur": 0, "free": true },
+    { "unit": "intelligence_op", "label": "Intelligence operation (matching, cases, reconciliation)", "credits": 100, "eur": 0.1, "free": false },
+    { "unit": "delivery", "label": "Delivery (webhook / export)", "credits": 0, "eur": 0, "free": true },
+    { "unit": "validation", "label": "Validation / quality check", "credits": 0, "eur": 0, "free": true }
+  ]
+}`,
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "pricing-estimate-example",
+        text: "Example: quote a workload before running it",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Agent estimates the cost of a 20-page batch extraction",
+        code: `// User: "How much will it cost to extract this 20-page contract in batch mode?"
+// Agent reads pricing:
+// talonic_get_pricing → {}
+
+// page_ingest = 100 credits, batch multiplier = 0.5
+// 20 pages * 100 credits * 0.5 = 1000 credits = 1.00 EUR
+
+// Agent: "Extracting 20 pages in batch mode costs about 1,000 credits
+//  (1.00 EUR). Realtime would be 2,000 credits (2.00 EUR). Proceed in batch?"`,
+      },
+      {
+        type: "paragraph",
+        text: "Cost-aware agents call `talonic_get_pricing` to turn a workload into a concrete quote before committing to it. Multiply the relevant per-unit rate by the expected unit count, then apply the processing-mode multiplier. Because the catalog also returns the credits-per-EUR rate, the agent can present the estimate in either credits or euros without hardcoding any number.",
+      },
+      {
+        type: "paragraph",
+        text: "The catalog distinguishes billable units from free ones. Document page ingestion, structuring cells filled by fresh model reasoning, and intelligence operations carry a cost; Field Registry resolved cells, delivery, and validation are free. A document whose fields are answered entirely from the Field Registry therefore incurs only its page-ingestion cost, which an agent can surface as a reason to reuse schemas across similar documents.",
+      },
+    ],
+    related: [
+      { label: "talonic_get_usage", slug: "talonic-get-usage" },
+      { label: "talonic_get_balance", slug: "talonic-get-balance" },
+    ],
+    faq: [
+      {
+        question: "Does talonic_get_pricing require an API key?",
+        answer:
+          "No. The pricing catalog is public, so an agent can read rates before signing up or provisioning a key. Call it with no arguments; it is read-only and safe to call at any time.",
+      },
+      {
+        question: "How does an agent compute the cost of a job from the catalog?",
+        answer:
+          "Multiply the per-unit credits by the number of units (pages, cells, or operations), then apply the processing-mode multiplier (1 for realtime, 0.5 for batch). Divide by credits_per_eur to express the result in euros.",
+      },
+      {
+        question: "Which operations are free in the catalog?",
+        answer:
+          "Field Registry resolved cells, delivery, and validation cost zero credits. Only fresh ingestion, fresh model-reasoned structuring cells, and intelligence operations (matching, cases, reconciliation) are billable.",
+      },
+    ],
+    mentions: [
+      "pricing",
+      "credit catalog",
+      "cost estimation",
+      "per-page pricing",
+      "batch discount",
+      "credits per EUR",
+      "budget",
+    ],
+  },
+  {
+    slug: "talonic-get-usage",
+    parentSlug: "tools",
+    title: "talonic_get_usage",
+    seoTitle: "talonic_get_usage Tool — Talonic MCP",
+    description:
+      "MCP tool that returns per-function credit consumption for the workspace over a trailing window, so an agent can see where credits went across extraction, structuring, and intelligence operations.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Returns the workspace's credit consumption grouped by platform function over a trailing window, plus the total. Where `talonic_get_balance` reports what is left, this tool reports where the credits went: how much each function (page ingestion, structuring cells, intelligence operations) cost over the period. The breakdown is ordered by spend, highest first, so the dominant cost driver is the first row.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "use-when",
+        text: "When to use",
+      },
+      {
+        type: "list",
+        items: [
+          "The user asks what they have spent credits on, or which function dominates their spend.",
+          "Reviewing burn by function to decide whether to shift work to batch mode or trim an operation.",
+          "Producing a spend report for the last N days.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "do-not-use",
+        text: "When not to use",
+      },
+      {
+        type: "list",
+        items: [
+          "For the remaining balance and runway: use `talonic_get_balance`.",
+          "For per-unit rates before running a job: use `talonic_get_pricing`.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "arguments",
+        text: "Arguments",
+      },
+      {
+        type: "list",
+        items: [
+          "`days` (optional): trailing reporting window in days. Default 30, clamped between 1 and 365.",
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "response-shape",
+        text: "Response shape",
+      },
+      {
+        type: "list",
+        items: [
+          "`period_days`: length of the reporting window in days.",
+          "`total_credits`: total credits consumed across all functions in the window.",
+          "`by_function`: array of `{ operation_type, operations, credits }`, highest spend first.",
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "days": 30 }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "period_days": 30,
+  "total_credits": 48200,
+  "by_function": [
+    { "operation_type": "page_ingest", "operations": 412, "credits": 41200 },
+    { "operation_type": "structuring_cell", "operations": 300, "credits": 6000 },
+    { "operation_type": "intelligence_op", "operations": 10, "credits": 1000 }
+  ]
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Agents use `talonic_get_usage` to attribute spend to the functions that caused it. Pairing it with `talonic_get_balance` gives a full picture: balance shows how much is left, usage shows what consumed it, and pricing shows the rate of each function. An agent noticing that page ingestion dominates spend might suggest batch mode for the 0.5x discount, or reusing schemas so more cells resolve from the Field Registry for free.",
+      },
+      {
+        type: "paragraph",
+        text: "The figures read from the credit transaction ledger, so they reconcile exactly with the balance and history reported elsewhere. The `operation_type` values match the unit identifiers in the pricing catalog, which lets an agent join usage to rates and explain not just how many credits a function consumed but why. To express any figure in euros, divide by the credits-per-EUR rate from the pricing catalog.",
+      },
+    ],
+    related: [
+      { label: "talonic_get_pricing", slug: "talonic-get-pricing" },
+      { label: "talonic_get_balance", slug: "talonic-get-balance" },
+    ],
+    faq: [
+      {
+        question: "How is talonic_get_usage different from talonic_get_balance?",
+        answer:
+          "Balance reports what is left (and runway); usage reports what was spent, grouped by function. Use balance to check headroom and usage to attribute spend to extraction, structuring, or intelligence operations.",
+      },
+      {
+        question: "What window does talonic_get_usage cover?",
+        answer:
+          "The last 30 days by default. Pass days to change it, anywhere from 1 to 365. The response echoes period_days so the agent can confirm the window it summarized.",
+      },
+      {
+        question: "Why is the breakdown empty?",
+        answer:
+          "Per-function rows populate as billable operations are charged. While metering runs in shadow mode the ledger records what each operation would cost without deducting, so the breakdown can be empty until enforcement is enabled. Pricing still returns the rates in the meantime.",
+      },
+    ],
+    mentions: [
+      "credit usage",
+      "per-function spend",
+      "credit consumption",
+      "burn rate",
+      "operation type",
+      "spend report",
+    ],
+  },
+  {
     slug: "talonic-request-upload",
     parentSlug: "tools",
     title: "talonic_request_upload",

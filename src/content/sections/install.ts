@@ -56,7 +56,7 @@ export const sections: RawSection[] = [
           "Click **Connect**. You are redirected to Talonic to sign in.",
           "Sign in with Google, Microsoft, or your company SSO.",
           "Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, and `schemas:read`. Pick a workspace if you have multiple.",
-          "You are returned to Claude.ai with the connector live. All nine tools are available in any new conversation.",
+          "You are returned to Claude.ai with the connector live. All eleven tools are available in any new conversation.",
         ],
       },
       {
@@ -108,7 +108,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "All three install paths expose the same nine tools and two resources. The hosted server runs the latest version of `@talonic/mcp` automatically; the local `npx` install picks up the latest version on next client restart when pinned to `@latest`.",
+        text: "All three install paths expose the same eleven tools and two resources. The hosted server runs the latest version of `@talonic/mcp` automatically; the local `npx` install picks up the latest version on next client restart when pinned to `@latest`.",
       },
       {
         type: "heading",
@@ -118,7 +118,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "After adding the config and restarting your MCP client, verify the connection by asking the agent to list your schemas. This is a lightweight read-only call that confirms the API key is valid and the server is reachable. If the call succeeds, all nine tools are ready to use.",
+        text: "After adding the config and restarting your MCP client, verify the connection by asking the agent to list your schemas. This is a lightweight read-only call that confirms the API key is valid and the server is reachable. If the call succeeds, all eleven tools are ready to use.",
       },
       {
         type: "code",
@@ -208,7 +208,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all nine tools.",
+        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all eleven tools.",
       },
       {
         type: "paragraph",
@@ -527,7 +527,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's nine tools and two resources automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
+        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's eleven tools and two resources automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
       },
       {
         type: "paragraph",
@@ -614,7 +614,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, the nine tools appear in the tool picker and the `talonic://schemas` and `talonic://webhooks/reference` resources are browseable in the resources panel.",
+        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, the eleven tools appear in the tool picker and the `talonic://schemas` and `talonic://webhooks/reference` resources are browseable in the resources panel.",
       },
       {
         type: "paragraph",
