@@ -17,6 +17,31 @@ import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
+ * Wrap a fetch so every outbound Talonic API call carries
+ * `User-Agent: talonic-mcp/<v> <clientName>`. The platform's `resolveSurface`
+ * uses the UA to classify the request's funnel `surface` (claude_desktop /
+ * cursor / chatgpt …). `clientName` is read lazily so the persistent stdio
+ * session can fill it in after the initialize handshake. Never throws.
+ *
+ * @public
+ */
+export function makeTaggedFetch(
+  getClientName: () => string | undefined,
+  baseFetch: typeof fetch = fetch,
+): typeof fetch {
+  return ((input: any, init?: any) => {
+    try {
+      const headers = new Headers(init?.headers)
+      const cn = getClientName()
+      headers.set("user-agent", `talonic-mcp/${VERSION}${cn ? ` ${cn}` : ""}`)
+      return baseFetch(input, { ...init, headers })
+    } catch {
+      return baseFetch(input, init)
+    }
+  }) as typeof fetch
+}
+
+/**
  * Options for {@link createServer}.
  *
  * @public
@@ -87,6 +112,9 @@ export interface CreateServerOptions {
 export function createServer(options: CreateServerOptions): McpServer {
   const baseUrl = options.baseUrl
 
+  let clientName: string | undefined
+  const taggedFetch = makeTaggedFetch(() => clientName)
+
   // Build the token getter. Drives raw-fetch resources (webhook reference)
   // and is the source of truth for SDK rebuild when using tokenProvider.
   const getToken: () => string = (() => {
@@ -111,6 +139,7 @@ export function createServer(options: CreateServerOptions): McpServer {
             token: tok,
             client: new Talonic({
               apiKey: tok,
+              fetch: taggedFetch,
               ...(baseUrl ? { baseUrl } : {}),
             }),
           }
@@ -121,6 +150,7 @@ export function createServer(options: CreateServerOptions): McpServer {
     if (options.apiKey) {
       const t = new Talonic({
         apiKey: options.apiKey,
+        fetch: taggedFetch,
         ...(baseUrl ? { baseUrl } : {}),
       })
       return () => t
@@ -163,6 +193,20 @@ export function createServer(options: CreateServerOptions): McpServer {
       ].join(" "),
     },
   )
+
+  // The MCP initialize handshake is the only place the client identifies
+  // itself. On stdio (persistent session) this lets us tag outbound calls'
+  // surface; on stateless HTTP the platform resolves surface from the OAuth
+  // client_name instead, so leaving this unset there is correct.
+  const prevOnInitialized = server.server.oninitialized
+  server.server.oninitialized = () => {
+    prevOnInitialized?.()
+    try {
+      clientName = server.server.getClientVersion()?.name
+    } catch {
+      /* never let telemetry capture affect the handshake */
+    }
+  }
 
   // Tool registrations.
   registerListSchemas(server, getTalonic)
