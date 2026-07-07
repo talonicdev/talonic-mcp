@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Read the workspace's per-function credit consumption over a trailing window: where the credits actually went.",
@@ -63,6 +64,10 @@ export function registerGetUsage(server: McpServer, getTalonic: () => Talonic): 
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
+      },
+      _meta: {
+        ui: { resourceUri: WIDGET_URIS.getUsage },
+        "openai/outputTemplate": WIDGET_URIS.getUsage,
       },
     },
     async (args: { days?: number }) => handleGetUsage(getTalonic(), args.days),

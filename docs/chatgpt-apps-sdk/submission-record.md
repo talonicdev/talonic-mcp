@@ -159,3 +159,24 @@ platform repo.
 - Review: ~30–120 days; status via dashboard + email.
 - Only one version may be in review at a time — do not resubmit while pending.
 - Rejections: reply to the rejection email with the Case ID.
+
+## Post-approval tool additions (2026-07-07)
+The app was approved on the 9-tool surface (0.1.66). Two metering tools were
+added afterwards — `talonic_get_pricing` + `talonic_get_usage` (0.1.67,
+2026-06-22) — so the live `mcp.talonic.com` `tools/list` now returns **11
+tools**. Because a push to `main` auto-redeploys the hosted endpoint, OpenAI
+detected the changed MCP config (the user received a config-change email).
+
+Both new tools shipped with full LLM-oriented descriptions and return valid
+data, but initially had **no branded widget** — the only two bare tools in an
+app whose selling point is a branded card per tool. The **2026-07-07 alignment
+pass** (this change) built `src/widgets/pricing.ts` + `src/widgets/usage.ts`,
+wired `_meta["openai/outputTemplate"]` into both tools, registered the widget
+resources, added the missing `src/content/seo.ts` nav entries, and extended
+`tests/widgets/all-widgets.test.ts` to lock 11/11 widget coverage. Full
+one-widget-per-tool parity is restored.
+
+**Open question for a human:** confirm whether OpenAI requires a re-review when
+tools are added to an already-approved app, or whether the directory listing
+auto-tracks the live surface. Reconnect the connector after the deploy (ChatGPT
+caches `tools/list` at connect time).

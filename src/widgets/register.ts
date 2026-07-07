@@ -10,6 +10,8 @@ import { getMarkdownViewWidgetHtml } from "./markdown-view.js"
 import { getSchemaListWidgetHtml } from "./schema-list.js"
 import { getSearchResultsWidgetHtml } from "./search-results.js"
 import { getFilterResultsWidgetHtml } from "./filter-results.js"
+import { getPricingWidgetHtml } from "./pricing.js"
+import { getUsageWidgetHtml } from "./usage.js"
 
 /**
  * Widget template HTML by resource URI. Used by the http-server's public
@@ -30,6 +32,8 @@ export function getWidgetTemplateHtml(uri: string): string | undefined {
     [WIDGET_URIS.listSchemas]: getSchemaListWidgetHtml,
     [WIDGET_URIS.saveSchema]: getSchemaSavedWidgetHtml,
     [WIDGET_URIS.getBalance]: getBalanceWidgetHtml,
+    [WIDGET_URIS.getPricing]: getPricingWidgetHtml,
+    [WIDGET_URIS.getUsage]: getUsageWidgetHtml,
     [WIDGET_URIS.requestUpload]: getUploadLinkWidgetHtml,
   }
   return map[uri]?.()
@@ -117,6 +121,23 @@ export function registerWidgets(server: McpServer): void {
     title: "Talonic Balance",
     description: "Inline view of the workspace credit balance, tier, burn, and runway.",
     html: getBalanceWidgetHtml(),
+  })
+
+  registerWidget(server, {
+    name: "pricing-widget",
+    uri: WIDGET_URIS.getPricing,
+    title: "Talonic Pricing",
+    description:
+      "Inline view of the credit pricing catalog: per-unit rates, EUR values, and multipliers.",
+    html: getPricingWidgetHtml(),
+  })
+
+  registerWidget(server, {
+    name: "usage-widget",
+    uri: WIDGET_URIS.getUsage,
+    title: "Talonic Usage",
+    description: "Inline breakdown of credit consumption per function over the trailing window.",
+    html: getUsageWidgetHtml(),
   })
 
   registerWidget(server, {

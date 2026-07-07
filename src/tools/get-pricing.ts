@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { WIDGET_URIS } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Read Talonic's machine-readable credit pricing catalog: fixed per-unit rates so you can predict spend BEFORE running anything.",
@@ -62,6 +63,10 @@ export function registerGetPricing(server: McpServer, getTalonic: () => Talonic)
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
+      },
+      _meta: {
+        ui: { resourceUri: WIDGET_URIS.getPricing },
+        "openai/outputTemplate": WIDGET_URIS.getPricing,
       },
     },
     async () => handleGetPricing(getTalonic()),

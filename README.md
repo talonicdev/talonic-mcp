@@ -5,7 +5,7 @@
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. **Nine tools and two resources**, verified end-to-end against production (including the Claude.ai hosted connector). Runs as a local stdio process for desktop/IDE clients and as a hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
+> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. **Eleven tools and two resources**, verified end-to-end against production (including the Claude.ai hosted connector). Runs as a local stdio process for desktop/IDE clients and as a hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
 ---
 
@@ -24,6 +24,8 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_list_schemas`** | List saved schemas (with definitions). |
 | **`talonic_save_schema`** | Save a reusable schema to the workspace. |
 | **`talonic_get_balance`** | Read credit balance, EUR value, burn rate, and runway for budget-aware behaviour. |
+| **`talonic_get_pricing`** | Read the public per-unit credit pricing catalog and multipliers to predict spend before running a job. |
+| **`talonic_get_usage`** | Break down credit consumption per function over a trailing window (default 30 days). |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
@@ -85,7 +87,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all nine tools.
+Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all eleven tools.
 </details>
 
 <details>
@@ -143,7 +145,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
 4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`). Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All nine tools appear.
+5. You're returned to Claude.ai. All eleven tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 
