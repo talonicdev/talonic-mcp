@@ -1,0 +1,24 @@
+# Smithery configuration — https://smithery.ai/servers/talonic/talonic
+# Classic stdio spec: tells Smithery how to launch this server from the
+# published npm package and which config it needs.
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - talonicApiKey
+    properties:
+      talonicApiKey:
+        type: string
+        title: Talonic API Key
+        description: Your Talonic API key. Get one at https://app.talonic.com.
+  commandFunction: |-
+    (config) => ({
+      command: "npx",
+      args: ["-y", "@talonic/mcp@latest"],
+      env: {
+        TALONIC_API_KEY: config.talonicApiKey
+      }
+    })
+  exampleConfig:
+    talonicApiKey: tal_xxxxxxxxxxxxxxxx
