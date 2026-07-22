@@ -23,7 +23,16 @@
     "document-extraction",
     "ocr",
     "structured-data",
-    "anthropic"
+    "anthropic",
+    "pdf",
+    "invoice",
+    "form",
+    "contract",
+    "scan",
+    "unstructured-data",
+    "enterprise",
+    "document-ai",
+    "schema"
   ],
   "type": "module",
   "main": "./dist/index.js",
