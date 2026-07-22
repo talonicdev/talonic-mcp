@@ -1,6 +1,6 @@
 # CLAUDE.md — Claude Code entry point for `talonic-mcp`
 
-**Full agent orientation lives in [`AGENTS.md`](AGENTS.md).** Read it first — it covers the repo map, the nine tools, the browser-handoff upload architecture, the CI/publish chain, and the common workflows. This file repeats only the two things you must not get wrong, plus the commands you'll use every session.
+**Full agent orientation lives in [`AGENTS.md`](AGENTS.md).** Read it first — it covers the repo map, the eleven tools, the browser-handoff upload architecture, the CI/publish chain, and the common workflows. This file repeats only the two things you must not get wrong, plus the commands you'll use every session.
 
 This repo is the **Talonic MCP server** (`@talonic/mcp`): document-extraction API exposed as MCP tools, running over stdio (local installs) and Streamable HTTP (`mcp.talonic.com`, for Claude.ai connectors).
 

@@ -1,9 +1,27 @@
 # ChatGPT App Directory — Submission Record
 
-**Submitted:** 2026-06-08
+**✅ APPROVED & LIVE — 2026-06-16.** In the ChatGPT App Directory. Approved on the
+3rd submission after a string of distinct, real fixes (see "Post-v1 fixes" below).
+Live at `@talonic/mcp` 0.1.66+, stateless MCP at `https://mcp.talonic.com/mcp`.
+
+**Submitted:** 2026-06-08 (v1) · 2026-06-09 (v2) · 2026-06-12 (v3 — approved)
 **App name:** Talonic — "Extract data and talk to docs"
 **Publishing entity:** Talonic GmbH (business-verified on OpenAI Platform)
 **Category:** Productivity
+
+## Open follow-ups (NOT blocking — app is approved)
+- **Platform — browser-upload pipeline:** docs strand at `status=uploading` →
+  hourly cleanup / `ocr_failed`. Two leads: the `worker:batch` extraction-queue
+  consumer not reliably running in prod, and a `request_upload` anomaly where the
+  returned document_id appears decoupled from the row the upload token writes
+  (repro IDs in this session). Platform-team item; full diagnosis available.
+- **Platform — OCR fallback disabled** (`94b01b89`): image/scanned PDFs 422.
+- **Demo account data is fragmented:** no field has broad filterable coverage
+  (best invoice field `invoice_number` = 2 docs; `invoice_currency` doesn't
+  exist there). Filter test points at `invoice_number is_not_empty`. To showcase
+  filter strongly, seed ~6 invoices under one shared schema.
+- **Other distribution surfaces** considered but not built: GPT Actions (Custom
+  GPT, ~half-day), Gemini CLI extension.
 
 ## Endpoints
 - **MCP server:** `https://mcp.talonic.com/mcp` (Streamable HTTP, **stateless**)
@@ -98,6 +116,29 @@ follow-on testing surfaced four issues — all fixed and live (0.1.64):
    tools are live/callable and that filenames resolve via `talonic_search` first
    — to stop hedging ("isn't exposed") and enable confident by-name chaining.
 
+5. **Widget templates fetchable from the ChatGPT sandbox (0.1.65)** — v2 review
+   failed ONLY test case #4 with "Error loading app, failed to fetch the
+   template" (confirmed by OpenAI reviewer Mia, 2026-06-10). Reproduced: the
+   template fetch died on (a) 403 — Origin allowlist lacked
+   `*.web-sandbox.oaiusercontent.com`, the iframe domain widgets render on,
+   preflight included; (b) 401 if the fetcher omits the OAuth token; (c) 406 if
+   Accept lacks text/event-stream. Fixed: sandbox-origin suffix rule in
+   origin.ts + a public widget-template fast path in http-server.ts (static,
+   secret-free HTML; non-widget resources still require auth). All three
+   verified fixed against prod; auth guard re-verified.
+
+6. **Search query contract + zero-result hint; filter attempt-first (0.1.66)** —
+   full test re-run (2026-06-12) failed #7/#8: the search API matches LITERAL
+   tokens (verified: 'invoice' rich results; 'invoices' junk; sentence queries
+   empty), while our own param doc said "natural-language query". Search now
+   teaches the contract (one short SINGULAR keyword / exact filename) and
+   all-empty results carry a retry `hint` (verified live). Filter now says to
+   attempt text eq/contains with a natural field name (server-side resolution,
+   warnings[] on miss) — discovery only required for numeric ops. #4 (model
+   claimed to_markdown "not in toolset", worked when pushed): instructions now
+   assert all nine tools are callable every turn; get_document carries a
+   to_markdown chain cue. Hedging is model behavior — mitigated, not provable.
+
 **Operational note:** after any deploy, the connector must be **reconnected** in
 the client (ChatGPT caches `tools/list` at connect time). The stateless transport
 means an unexpected restart no longer breaks an already-connected session, but a
@@ -118,3 +159,24 @@ platform repo.
 - Review: ~30–120 days; status via dashboard + email.
 - Only one version may be in review at a time — do not resubmit while pending.
 - Rejections: reply to the rejection email with the Case ID.
+
+## Post-approval tool additions (2026-07-07)
+The app was approved on the 9-tool surface (0.1.66). Two metering tools were
+added afterwards — `talonic_get_pricing` + `talonic_get_usage` (0.1.67,
+2026-06-22) — so the live `mcp.talonic.com` `tools/list` now returns **11
+tools**. Because a push to `main` auto-redeploys the hosted endpoint, OpenAI
+detected the changed MCP config (the user received a config-change email).
+
+Both new tools shipped with full LLM-oriented descriptions and return valid
+data, but initially had **no branded widget** — the only two bare tools in an
+app whose selling point is a branded card per tool. The **2026-07-07 alignment
+pass** (this change) built `src/widgets/pricing.ts` + `src/widgets/usage.ts`,
+wired `_meta["openai/outputTemplate"]` into both tools, registered the widget
+resources, added the missing `src/content/seo.ts` nav entries, and extended
+`tests/widgets/all-widgets.test.ts` to lock 11/11 widget coverage. Full
+one-widget-per-tool parity is restored.
+
+**Open question for a human:** confirm whether OpenAI requires a re-review when
+tools are added to an already-approved app, or whether the directory listing
+auto-tracks the live surface. Reconnect the connector after the deploy (ChatGPT
+caches `tools/list` at connect time).

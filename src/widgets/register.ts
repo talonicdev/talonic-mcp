@@ -10,6 +10,34 @@ import { getMarkdownViewWidgetHtml } from "./markdown-view.js"
 import { getSchemaListWidgetHtml } from "./schema-list.js"
 import { getSearchResultsWidgetHtml } from "./search-results.js"
 import { getFilterResultsWidgetHtml } from "./filter-results.js"
+import { getPricingWidgetHtml } from "./pricing.js"
+import { getUsageWidgetHtml } from "./usage.js"
+
+/**
+ * Widget template HTML by resource URI. Used by the http-server's public
+ * template fast path: ChatGPT's widget renderer fetches these from the
+ * sandbox iframe context, and that fetch must never fail on auth or Accept
+ * negotiation. The templates are static, secret-free HTML (asserted by
+ * tests), so serving them unauthenticated is safe.
+ *
+ * @internal
+ */
+export function getWidgetTemplateHtml(uri: string): string | undefined {
+  const map: Record<string, () => string> = {
+    [WIDGET_URIS.extract]: getExtractionResultWidgetHtml,
+    [WIDGET_URIS.search]: getSearchResultsWidgetHtml,
+    [WIDGET_URIS.filter]: getFilterResultsWidgetHtml,
+    [WIDGET_URIS.getDocument]: getDocumentMetaWidgetHtml,
+    [WIDGET_URIS.toMarkdown]: getMarkdownViewWidgetHtml,
+    [WIDGET_URIS.listSchemas]: getSchemaListWidgetHtml,
+    [WIDGET_URIS.saveSchema]: getSchemaSavedWidgetHtml,
+    [WIDGET_URIS.getBalance]: getBalanceWidgetHtml,
+    [WIDGET_URIS.getPricing]: getPricingWidgetHtml,
+    [WIDGET_URIS.getUsage]: getUsageWidgetHtml,
+    [WIDGET_URIS.requestUpload]: getUploadLinkWidgetHtml,
+  }
+  return map[uri]?.()
+}
 
 /**
  * Register the extraction-result widget as an MCP resource.
@@ -93,6 +121,23 @@ export function registerWidgets(server: McpServer): void {
     title: "Talonic Balance",
     description: "Inline view of the workspace credit balance, tier, burn, and runway.",
     html: getBalanceWidgetHtml(),
+  })
+
+  registerWidget(server, {
+    name: "pricing-widget",
+    uri: WIDGET_URIS.getPricing,
+    title: "Talonic Pricing",
+    description:
+      "Inline view of the credit pricing catalog: per-unit rates, EUR values, and multipliers.",
+    html: getPricingWidgetHtml(),
+  })
+
+  registerWidget(server, {
+    name: "usage-widget",
+    uri: WIDGET_URIS.getUsage,
+    title: "Talonic Usage",
+    description: "Inline breakdown of credit consumption per function over the trailing window.",
+    html: getUsageWidgetHtml(),
   })
 
   registerWidget(server, {

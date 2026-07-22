@@ -1,6 +1,6 @@
 {
   "name": "@talonic/mcp",
-  "version": "0.1.64",
+  "version": "0.1.73",
   "mcpName": "io.github.talonicdev/talonic-mcp",
   "description": "Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the Model Context Protocol.",
   "license": "MIT",
@@ -23,7 +23,16 @@
     "document-extraction",
     "ocr",
     "structured-data",
-    "anthropic"
+    "anthropic",
+    "pdf",
+    "invoice",
+    "form",
+    "contract",
+    "scan",
+    "unstructured-data",
+    "enterprise",
+    "document-ai",
+    "schema"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -65,7 +74,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@talonic/node": "^0.1.10",
+    "@talonic/node": "^0.1.24",
     "zod": "^4.0.0"
   },
   "devDependencies": {

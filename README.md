@@ -5,7 +5,7 @@
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. **Nine tools and two resources**, verified end-to-end against production (including the Claude.ai hosted connector). Runs as a local stdio process for desktop/IDE clients and as a hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
+> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. **Eleven tools and two resources**, verified end-to-end against production (including the Claude.ai hosted connector). Runs as a local stdio process for desktop/IDE clients and as a hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
 ---
 
@@ -24,6 +24,8 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_list_schemas`** | List saved schemas (with definitions). |
 | **`talonic_save_schema`** | Save a reusable schema to the workspace. |
 | **`talonic_get_balance`** | Read credit balance, EUR value, burn rate, and runway for budget-aware behaviour. |
+| **`talonic_get_pricing`** | Read the public per-unit credit pricing catalog and multipliers to predict spend before running a job. |
+| **`talonic_get_usage`** | Break down credit consumption per function over a trailing window (default 30 days). |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
@@ -85,7 +87,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all nine tools.
+Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all eleven tools.
 </details>
 
 <details>
@@ -143,7 +145,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
 4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`). Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All nine tools appear.
+5. You're returned to Claude.ai. All eleven tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 
@@ -264,7 +266,7 @@ The `env` block is missing or unread. Check the JSON shape, then fully restart t
 Confirm `command` is `npx` and `args` are exactly `["-y", "@talonic/mcp@latest"]`. Sanity check in a terminal: `npx -y @talonic/mcp@latest --version` should print a version.
 
 **`talonic_extract` returns a validation error with no schema.**
-By design. Schema-less extraction is unreliable, so the MCP layer rejects calls missing both `schema` and `schema_id`. Provide an inline `schema` (full JSON Schema recommended) or a `schema_id` from `talonic_list_schemas`.
+By design — the call needs to know which fields to pull. The error hands back a ready-to-paste minimal schema (tailored to your `instructions`) so the retry succeeds immediately. Three ways forward: provide an inline `schema` (full JSON Schema recommended), pass a `schema_id` from `talonic_list_schemas`, or set `auto_schema: true` for open capture — Talonic discovers the fields and returns a suggested schema you can refine.
 
 **Dragging a file into Claude.ai gives empty/`null` fields.**
 The hosted-connector tool-call cap (~32 KB) truncated `file_data`. Use [`talonic_request_upload`](#file-uploads-the-browser-handoff-flow) — the browser-handoff flow is the supported path. Local-stdio installs are unaffected.
@@ -282,7 +284,7 @@ Some clients cache tool lists. For Claude.ai, remove and re-add the connector. F
 
 ## Known limitations (v0.1)
 
-- **Schema is required on `talonic_extract`.** Schema-less extraction is rejected at the MCP layer. Pass a `schema` (full JSON Schema recommended) or `schema_id`. If a flat key-type map (`{ vendor_name: "string" }`) yields a "no fields" error, use full JSON Schema:
+- **`talonic_extract` needs the fields specified.** Pass a `schema` (full JSON Schema recommended) or a `schema_id` — or set `auto_schema: true` for open capture, which discovers the fields and returns a suggested schema. A call giving none of the three returns a validation error that hands back a ready-to-paste minimal schema. If a flat key-type map (`{ vendor_name: "string" }`) yields a "no fields" error, use full JSON Schema:
   ```json
   {
     "type": "object",

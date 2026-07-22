@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The nine tools (and what an agent should reach for)
+## The eleven tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -39,8 +39,10 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_list_schemas` | `list-schemas.ts` | yes | Saved schemas with definitions. |
 | `talonic_save_schema` | `save-schema.ts` | no | Persist a reusable schema. |
 | `talonic_get_balance` | `get-balance.ts` | yes | Credit balance, EUR, burn rate, runway. |
+| `talonic_get_pricing` | `get-pricing.ts` | yes | Public per-unit credit pricing catalog + multipliers. Predict spend before running. |
+| `talonic_get_usage` | `get-usage.ts` | yes | Per-function credit consumption over a trailing window (default 30 days). |
 
-Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — five lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, `to_markdown` are `false`.
+Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — seven lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, `to_markdown`, `request_upload` are `false`.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 

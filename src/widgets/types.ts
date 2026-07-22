@@ -29,6 +29,8 @@ export const WIDGET_URIS = {
   listSchemas: "ui://widget/schema-list.html",
   saveSchema: "ui://widget/schema-saved.html",
   getBalance: "ui://widget/balance.html",
+  getPricing: "ui://widget/pricing.html",
+  getUsage: "ui://widget/usage.html",
   requestUpload: "ui://widget/upload-link.html",
 } as const
 

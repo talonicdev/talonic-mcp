@@ -10,6 +10,7 @@ const DESCRIPTION = [
   "USE WHEN: value-based criteria on extracted fields — numeric/date/text comparisons or presence checks.",
   "NOT FOR: free-text / concept search (use talonic_search) · a single document by id (use talonic_get_document).",
   "ARGS: conditions[] (AND-ed). Each = EXACTLY ONE of `field` (canonical name) or `field_id` (UUID), an `operator`, and usually a `value`. Operators: eq, neq, gt, gte, lt, lte, between (needs `value` AND `value_to`), contains, is_empty / is_not_empty (no value). `value`/`value_to` are string|number|boolean matching the field type (ISO YYYY-MM-DD for dates).",
+  "TEXT FILTERS: for eq/contains/is_not_empty on a text field, just TRY a natural field name ('currency', 'vendor_name') — names resolve server-side and an unresolved field surfaces in warnings[] rather than erroring. Do NOT block on discovering the field first; search-first is only required for numeric operators.",
   "NUMERIC GUARD: gt/gte/lt/lte/between only work when the field's dataType is 'number'. Call talonic_search first and check dataType; a numeric op on a string field returns zero matches. If the response has `warnings[]`, surface them to the user — do not silently retry.",
   "RETURNS: data[] (matching documents with field values), total, warnings[].",
 ].join("\n")

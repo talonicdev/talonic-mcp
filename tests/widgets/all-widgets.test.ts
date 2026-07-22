@@ -13,6 +13,8 @@ const TOOL_WIDGET_MAP: Array<[string, string]> = [
   ["talonic_list_schemas", WIDGET_URIS.listSchemas],
   ["talonic_save_schema", WIDGET_URIS.saveSchema],
   ["talonic_get_balance", WIDGET_URIS.getBalance],
+  ["talonic_get_pricing", WIDGET_URIS.getPricing],
+  ["talonic_get_usage", WIDGET_URIS.getUsage],
   ["talonic_request_upload", WIDGET_URIS.requestUpload],
 ]
 
@@ -67,10 +69,10 @@ describe("every widget resource is registered correctly", () => {
 })
 
 describe("widget coverage is complete", () => {
-  it("registers exactly one widget per tool (9 total)", () => {
+  it("registers exactly one widget per tool (11 total)", () => {
     const server = buildServer()
     const widgetUris = Object.values(WIDGET_URIS)
-    expect(widgetUris).toHaveLength(9)
+    expect(widgetUris).toHaveLength(11)
     for (const uri of widgetUris) {
       expect(server._registeredResources[uri], `missing widget ${uri}`).toBeDefined()
     }

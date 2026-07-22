@@ -138,6 +138,41 @@ describe("talonic_search handler", () => {
     const url = lastCall(fetchFn)[0]
     expect(url).not.toContain("limit=")
   })
+
+  it("adds a retry hint when nothing matched (search is literal keyword matching)", async () => {
+    // The search API matches literal tokens: 'invoices' (plural) and sentence
+    // queries return empty even in a workspace full of invoices, and models
+    // then wrongly conclude the workspace has nothing (OpenAI review test #7).
+    // An empty result must carry an actionable hint so the agent retries with
+    // a singular keyword instead of giving up.
+    const { talonic } = makeTalonic({
+      documents: [],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [],
+    })
+    const result = await handleSearch(talonic, { query: "documents related to invoices" })
+    const parsed = parsedText(result) as { hint?: string }
+    expect(parsed.hint).toBeDefined()
+    expect(parsed.hint).toMatch(/singular/i)
+    // The outputSchema must accept the hint (structuredContent validation).
+    const Output = z.object(searchOutputSchema)
+    expect(Output.safeParse(parsed).success).toBe(true)
+  })
+
+  it("does NOT add a hint when there are matches", async () => {
+    const { talonic } = makeTalonic({
+      documents: [{ id: "doc_1", name: "invoice.pdf" }],
+      fieldMatches: [],
+      sources: [],
+      schemas: [],
+      fields: [],
+    })
+    const result = await handleSearch(talonic, { query: "invoice" })
+    const parsed = parsedText(result) as { hint?: string }
+    expect(parsed.hint).toBeUndefined()
+  })
 })
 
 describe("talonic_filter handler", () => {
@@ -335,10 +370,53 @@ describe("talonic_extract handler", () => {
     expect(fd.get("include_markdown")).toBe("true")
   })
 
-  it("returns isError when no schema or schema_id is provided", async () => {
+  it("returns isError with a ready-to-paste schema example when no schema is provided", async () => {
     const result = await handleExtract(client.talonic, { document_id: "doc_1" })
     expect((result as { isError?: boolean }).isError).toBe(true)
-    expect(result.content[0]?.text).toMatch(/requires a schema/)
+    const text = result.content[0]?.text ?? ""
+    // The error must hand back a valid, paste-able minimal JSON Schema and
+    // mention both the flat-map shorthand and the auto_schema escape hatch.
+    expect(text).toContain('"type":"object"')
+    expect(text).toContain('"properties"')
+    expect(text).toContain("auto_schema")
+    expect(text.toLowerCase()).toContain("shorthand")
+    // And the embedded example must parse as JSON.
+    const match = text.match(/\{"type":"object".*\}/)
+    expect(match).not.toBeNull()
+    expect(() => JSON.parse(match![0])).not.toThrow()
+  })
+
+  it("tailors the suggested schema to the instructions hint (invoice)", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      instructions: "pull the vendor and total from this invoice",
+    })
+    const text = result.content[0]?.text ?? ""
+    expect(text).toContain("vendor_name")
+    expect(text).toContain("total_amount")
+  })
+
+  it("auto_schema:true extracts with NO schema (open capture) and succeeds", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      auto_schema: true,
+    })
+    expect((result as { isError?: boolean }).isError).toBeUndefined()
+    const fd = lastCall(client.fetchFn)[1].body as FormData
+    // The open-capture path must send neither schema nor schema_id.
+    expect(fd.get("schema")).toBeNull()
+    expect(fd.get("schema_id")).toBeNull()
+    expect(fd.get("document_id")).toBe("doc_1")
+  })
+
+  it("rejects auto_schema combined with an explicit schema", async () => {
+    const result = await handleExtract(client.talonic, {
+      document_id: "doc_1",
+      auto_schema: true,
+      schema: { type: "object", properties: { x: { type: "string" } } },
+    })
+    expect((result as { isError?: boolean }).isError).toBe(true)
+    expect(result.content[0]?.text).toMatch(/mutually exclusive/)
   })
 
   it("returns isError when no file source provided", async () => {

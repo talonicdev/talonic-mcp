@@ -135,7 +135,10 @@ jobs:
           git push
 
       - name: Publish to npm
-        run: npm publish --access public
+        # --provenance attaches a signed build attestation (repo is public,
+        # id-token: write is already granted above). Gives the npm page a
+        # verified "Built and signed on GitHub Actions" badge.
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

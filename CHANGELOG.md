@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Branded inline widgets for every tool.** All nine tools now render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), and `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]` pointing at its widget resource. Non-widget tool calls previously rendered as a generic "api_tool" entry in ChatGPT; now every call is branded.
+- **Branded inline widgets for every tool.** All eleven tools now render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), `talonic_get_pricing` (pricing-catalog table with per-unit rates, EUR, free badges, and multiplier chips), `talonic_get_usage` (per-function credit breakdown with proportion bars), and `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]` pointing at its widget resource. Non-widget tool calls previously rendered as a generic "api_tool" entry in ChatGPT; now every call is branded.
+- **Widgets for the two metering tools** (`talonic_get_pricing`, `talonic_get_usage`) — these were added after the App Directory approval (0.1.67) without widgets, leaving them the only two bare tools; the 2026-07-07 alignment pass gives them cards matching the other nine, restoring one-widget-per-tool parity. Also added their entries to the MCP docs nav (`src/content/seo.ts`), which had been missed.
 
 ### Changed
 
-- **Refactored widget scaffolding into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP), and a `registerWidget()` helper. Each widget supplies only its `render(payload)` body via `buildWidgetHtml()`. `registerWidgets()` registers all nine.
+- **Refactored widget scaffolding into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP), and a `registerWidget()` helper. Each widget supplies only its `render(payload)` body via `buildWidgetHtml()`. `registerWidgets()` registers all eleven.
 
 ## [0.1.52] - 2026-06-01
 

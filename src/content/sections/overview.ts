@@ -222,7 +222,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The nine tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_request_upload`** hands the user a browser link for files too large to pass through a hosted connector (Claude.ai), **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and **`talonic_get_balance`** lets the agent check the workspace credit balance before kicking off large batches.",
+        text: "The eleven tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_request_upload`** hands the user a browser link for files too large to pass through a hosted connector (Claude.ai), **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and the billing tools (**`talonic_get_balance`** for the remaining balance, **`talonic_get_pricing`** for per-unit rates, **`talonic_get_usage`** for per-function spend) let the agent stay budget-aware before and after large batches.",
       },
       {
         type: "paragraph",
@@ -241,7 +241,7 @@ export const sections: RawSection[] = [
       {
         type: "list",
         items: [
-          "**They want specific fields**: vendor, total, dates, parties, line items. Use `talonic_extract` with a `schema` (full JSON Schema is most reliable) or a `schema_id` from `talonic_list_schemas`. Schema is required; the MCP layer rejects schema-less calls.",
+          "**They want specific fields**: vendor, total, dates, parties, line items. Use `talonic_extract` with a `schema` (full JSON Schema is most reliable) or a `schema_id` from `talonic_list_schemas`. Don't know the fields yet? Set `auto_schema: true` for open capture — Talonic discovers them and returns a suggested schema to refine.",
           "**They want the full text content**, e.g. for summarisation, translation, or general analysis. Use `talonic_to_markdown`. It returns OCR-converted markdown without forcing a schema.",
           "**They want both**: extract once with a schema (which also yields markdown when `include_markdown: true` is set), avoiding two uploads.",
         ],
