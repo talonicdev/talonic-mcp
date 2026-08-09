@@ -4,11 +4,15 @@ import type { RawSection } from "../types"
 // Enterprise sections — access control, self-hosted deployments, audit
 // logging, and server-side integration for custom agents.
 //
-// ⚠ DRAFT STATUS: paragraphs containing "[CONFIRM: ...]" state product
-// behavior that has not yet been verified against the platform. Every
-// [CONFIRM] marker must be resolved (verified, corrected, or deleted) by a
-// platform owner before this file ships to talonic.com. Grep for "[CONFIRM"
-// to find all open items.
+// ⚠ DRAFT STATUS: verified against the platform codebase on 2026-08-09
+// (packages/api: api/, auth/, oauth-server/, compartments/, filter/,
+// records/). Two kinds of markers remain and must be resolved before this
+// file ships to talonic.com:
+//   [CONFIRM: …]     — a business/deployment fact code cannot answer.
+//   [PRODUCT GAP: …] — the platform does not do this yet; either ship the
+//                      capability or reword the section. Do NOT publish the
+//                      claim as-is.
+// Grep for "[CONFIRM" and "[PRODUCT GAP" to find all open items.
 // ---------------------------------------------------------------------------
 
 export const sections: RawSection[] = [
@@ -21,11 +25,11 @@ export const sections: RawSection[] = [
     title: "Access Control & Permissions",
     seoTitle: "MCP Access Control & Permissions — Talonic",
     description:
-      "How Talonic workspace, document-type, and record-level permissions apply to MCP tool calls, what scope attaches to an API key, and what happens on out-of-scope requests.",
+      "How Talonic workspace isolation and API key scopes apply to MCP tool calls, what an agent's credential can and cannot reach, and what happens on out-of-scope requests.",
     content: [
       {
         type: "paragraph",
-        text: "The MCP server enforces no permissions of its own — and that is the point. It is a stateless protocol adapter: every tool call is translated into a request against the Talonic platform API, carrying the caller's own credential. Access control is evaluated by the platform on every request, exactly as it is for the web application and the REST API. There is no separate, weaker permission model for agents; an agent connected through MCP can never see more than the credential it presents is allowed to see.",
+        text: "The MCP server enforces no permissions of its own — and that is the point. It is a stateless protocol adapter: every tool call is translated into a request against the Talonic platform API, carrying the caller's own credential. Access control is evaluated by the platform on every request. There is no separate permission model for agents; an agent connected through MCP can never see more than the credential it presents is allowed to see.",
       },
       {
         type: "heading",
@@ -35,27 +39,31 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "MCP calls authenticate with one of two credential types, and permissions attach to whichever is presented. A **Talonic API key** (`tlnc_...`) is scoped to the workspace it was created in and carries that workspace's access rights. An **OAuth 2.1 access token**, issued by the Talonic authorization server when a user connects through a hosted client such as Claude.ai, acts on behalf of that user and carries the user's own role and workspace memberships. In both cases the credential travels with every individual tool call — the hosted MCP server holds no session state and no ambient permissions.",
-      },
-      {
-        type: "callout",
-        variant: "warning",
-        text: "[CONFIRM: exact scoping granularity of an API key — is a key bound to one workspace only, or can it span workspaces? Can a key be restricted to specific document types, schemas, or read-only access at creation time? Document the key-creation options here.]",
+        text: "MCP calls authenticate with one of two credential types. A **Talonic API key** (`tlnc_...`) is bound to exactly one workspace — it cannot span workspaces — and carries a set of scopes granted at creation: `read`, `write`, `extract`, `usage`, and operational scopes. A key with only `read` cannot extract, upload, or save schemas. An **OAuth 2.1 access token** is issued to an individual user after verifying their active workspace membership; on the API surface it authorizes with the same shape as a key — the user's workspace plus coarse scopes. In both cases the credential travels with every individual tool call — the hosted MCP server holds no session state and no ambient permissions.",
       },
       {
         type: "heading",
         level: 3,
         id: "access-control-layers",
-        text: "Permission layers applied to a call",
+        text: "The enforced boundary",
       },
       {
         type: "paragraph",
-        text: "The platform evaluates access at the workspace, schema, and record level. A tool call such as `talonic_search` or `talonic_filter` only ever operates within the workspace the credential resolves to, and results are limited to documents and records that credential may read. Write-capable tools (`talonic_extract`, `talonic_save_schema`, `talonic_request_upload`) additionally require write permission on the target workspace.",
+        text: "Two controls apply to every MCP call. **Workspace isolation:** every query the platform runs is scoped to the credential's workspace; documents, schemas, fields, and extractions of other workspaces are unreachable by construction, not by filtering after the fact. **Scope enforcement:** each endpoint declares required scopes, and a call with a credential missing the scope is rejected with an explicit `403 insufficient_scope` error. Read tools (`talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`) require `read`; write-capable tools (`talonic_extract`, `talonic_save_schema`, `talonic_request_upload`) require `write` or `extract`.",
+      },
+      {
+        type: "paragraph",
+        text: "Within a workspace, **compartments** provide need-to-know restriction below the workspace boundary: a workspace admin can bind users to compartments scoped to individual documents, document types, or sources, and non-admin members outside a compartment cannot list, read, or export its documents in the application.",
       },
       {
         type: "callout",
         variant: "warning",
-        text: "[CONFIRM: (1) whether field-level and sensitivity-classification permissions are enforced on API/MCP reads, or only in the UI; (2) whether compartments apply to MCP calls identically to the UI and the platform agent; (3) whether a document type restriction on a role filters MCP search/filter results. Each of these was asserted to MSD on 29 July — the wording here must match what was committed.]",
+        text: "[PRODUCT GAP: compartment restrictions are enforced for signed-in application users on document reads, but are not yet applied to API-key or OAuth-authenticated calls on the public API — the surface MCP uses — and not yet to the search/filter endpoints. Until that enforcement ships, an API credential reads workspace-wide. Do not publish this page, and do not tell customers compartments constrain MCP, before the /v1 + filter enforcement lands. Isolation pattern that IS fully enforced today: separate workspaces with per-workspace keys.]",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Talonic does not have field-level or sensitivity-classification access control. Document sensitivity tiers exist as classification metadata that agents can filter on, but they do not gate access. If a team must not see a class of documents, put those documents in a separate workspace (fully enforced) or compartment (see gap note above).",
       },
       {
         type: "heading",
@@ -65,12 +73,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Two behaviors matter to a security review and they are different by design. When an agent requests a **specific resource** it cannot access (for example `talonic_get_document` with a document ID outside its workspace), the platform returns an explicit error rather than an empty success — the agent knows it was denied. When an agent runs a **query** (`talonic_search`, `talonic_filter`), results are scoped to what the credential may read: documents outside its scope are absent from the result set, not flagged in it.",
-      },
-      {
-        type: "callout",
-        variant: "warning",
-        text: "[CONFIRM: verify both behaviors against the platform — the exact error code/message for a denied direct lookup, and that query tools silently scope rather than error. If a query against an entirely forbidden document type errors instead, document that.]",
+        text: "Three behaviors matter to a security review. A **direct lookup** of a resource outside the credential's workspace (for example `talonic_get_document` with a foreign document ID) returns an explicit `404 not found` — deliberately indistinguishable from a nonexistent ID, so out-of-scope resources cannot even be confirmed to exist. A **query** (`talonic_search`, `talonic_filter`) is scoped to the credential's workspace at the SQL level: out-of-scope rows are absent from the result set, not flagged in it, and a query can never leak a count or a name across the boundary. A **missing scope** (a read-only key calling `talonic_extract`) fails with an explicit `403 insufficient_scope` error naming the scope required.",
       },
       {
         type: "heading",
@@ -80,13 +83,13 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: 'Consider a workspace holding both HR contracts and supplier invoices, and two API keys: `key A`, created with access to the full workspace, and `key B`, restricted to the invoices document type. The same `talonic_filter` call — filter invoices and contracts where `counterparty = "Acme"` — returns both document sets under key A, and only the invoice records under key B. The contract records are not redacted or stubbed for key B; they are simply not part of its result set.',
+        text: "Consider two workspaces — Clinical and Procurement — each holding documents mentioning the counterparty \"Acme\", and one API key per workspace. The same `talonic_filter` call returns entirely disjoint result sets under the two keys: each key sees only its own workspace's records, and neither response indicates that the other workspace's matches exist.",
       },
       {
         type: "code",
         language: "json",
-        title: "Same talonic_filter call, two differently-scoped keys",
-        code: `// Request (identical for both keys)
+        title: "Same talonic_filter call, keys from two different workspaces",
+        code: `// Request (identical under both keys)
 {
   "tool": "talonic_filter",
   "arguments": {
@@ -94,19 +97,15 @@ export const sections: RawSection[] = [
   }
 }
 
-// Response with key A (full workspace)      // Response with key B (invoices only)
-{                                            {
-  "results": [                                 "results": [
-    { "document_type": "contract", ... },        { "document_type": "invoice", ... }
-    { "document_type": "invoice", ... }        ],
-  ],                                           "total": 1
-  "total": 2                                 }
-}`,
+// key A (Clinical workspace)          // key B (Procurement workspace)
+//  → only Clinical documents           //  → only Procurement documents
+//  → no indication that Procurement    //  → no indication that Clinical
+//    matches exist                     //    matches exist`,
       },
       {
         type: "callout",
         variant: "warning",
-        text: "[CONFIRM: run this example against a real workspace with two scoped keys and replace the sketch above with the actual request/response payloads. Do not ship a fabricated response shape.]",
+        text: "[CONFIRM: run this example against two real workspaces and paste the actual response payloads before publishing. Also reconcile this page with what was committed to MSD on 29 July — if finer-than-workspace control through MCP was implied, that requires the compartment enforcement noted above, not just documentation.]",
       },
     ],
     related: [
@@ -118,20 +117,32 @@ export const sections: RawSection[] = [
       {
         question: "Does MCP have its own permission model?",
         answer:
-          "No. The MCP server is a stateless adapter; every tool call is authorized by the Talonic platform using the credential the call carries. Agents get exactly the access of the API key or OAuth user they authenticate as — never more.",
+          "No. The MCP server is a stateless adapter; every tool call is authorized by the Talonic platform using the credential the call carries. Agents get exactly the access of the API key or OAuth token they authenticate with — never more.",
       },
       {
         question: "Do permissions attach to the API key or to the calling user?",
         answer:
-          "Both paths exist. An API key carries the scope it was created with; an OAuth 2.1 access token (used by hosted clients like Claude.ai) carries the connecting user's own permissions. Whichever credential a call presents is what gets evaluated.",
+          "An API key is bound to exactly one workspace and a set of scopes granted at creation. An OAuth 2.1 token is issued to an individual user after verifying workspace membership and authorizes with the same workspace-plus-scopes shape on the API surface.",
       },
       {
         question: "What happens when an agent requests a document it is not allowed to see?",
         answer:
-          "A direct lookup of an out-of-scope resource returns an explicit error. Query tools like talonic_search and talonic_filter scope their result sets to what the credential may read, so out-of-scope documents are absent rather than flagged.",
+          "A direct lookup outside the credential's workspace returns 404 — indistinguishable from a nonexistent ID. Queries are scoped at the SQL level, so out-of-scope documents are simply absent from results. A call missing a required scope fails with an explicit 403 error.",
+      },
+      {
+        question: "Can one API key access multiple workspaces?",
+        answer:
+          "No. A key is bound to exactly one workspace at creation and cannot span workspaces. Teams working across workspaces use one key per workspace, which also keeps audit attribution clean.",
       },
     ],
-    mentions: ["access control", "permissions", "API key scope", "OAuth 2.1", "workspace"],
+    mentions: [
+      "access control",
+      "permissions",
+      "API key scope",
+      "OAuth 2.1",
+      "workspace",
+      "compartments",
+    ],
   },
 
   // -------------------------------------------------------------------------
@@ -249,13 +260,18 @@ export const sections: RawSection[] = [
     slug: "audit-logging",
     parentSlug: "enterprise",
     title: "Audit Logging",
-    seoTitle: "MCP Audit Logging & SIEM Export — Talonic",
+    seoTitle: "MCP Audit Logging & Export — Talonic",
     description:
-      "What Talonic logs for every MCP tool call — identity, tool, arguments, documents returned — plus retention, SIEM export, and attributing returned data to a specific agent call.",
+      "Talonic's tamper-evident audit trail — what each record contains, retention and legal holds, export paths, and how MCP agent activity is attributed after the fact.",
     content: [
       {
+        type: "callout",
+        variant: "warning",
+        text: "[PRODUCT GAP — blocks this entire page: public-API calls (the path every MCP tool call takes) do not yet emit audit-trail events. Today the audit trail records application activity and lifecycle events; /v1 requests land only in a separate API request log that captures method and path but not the key identity or the documents touched. Instrumenting /v1 reads into the audit trail — with key ID and affected document IDs — must ship before this page is published or the capability is claimed to a customer. Note: the existing platform Archive docs already overclaim this ('an API call that touches a document produces the same audit event as a click in the UI') and should be corrected in the same pass.]",
+      },
+      {
         type: "paragraph",
-        text: "Every MCP tool call reaches the platform as an authenticated API request, and is logged by the same audit pipeline that records UI and REST API activity. There is no side channel: an agent reading documents through MCP produces the same class of audit evidence as a user reading them in the application.",
+        text: "Talonic keeps a tamper-evident audit trail per workspace: every record is SHA-256 hash-chained to its predecessor, chains are anchored daily, and an integrity-verification endpoint walks the chain on demand. Audit records survive the deletion of what they describe — deleting a document does not delete its history.",
       },
       {
         type: "heading",
@@ -265,41 +281,42 @@ export const sections: RawSection[] = [
       },
       {
         type: "param-table",
-        title: "Audit record fields for an MCP tool call",
+        title: "Audit record fields",
         params: [
           {
-            name: "identity",
+            name: "actor_type / actor_id / actor_label",
             type: "string",
             description:
-              "The authenticated principal: the API key ID (not the secret) or, for OAuth-authenticated calls, the user. [CONFIRM: exact field names and whether key ID and user are both present when applicable.]",
+              "The authenticated principal: a user (ID plus email), an API key (key ID, never the secret), or the system. This is the field that turns the audit trail into an agent-attribution tool once /v1 instrumentation lands.",
           },
           {
-            name: "tool",
+            name: "action",
             type: "string",
             description:
-              "The MCP tool invoked, e.g. `talonic_filter`. [CONFIRM: whether the platform records the MCP tool name or the underlying REST endpoint; if the latter, document the tool-to-endpoint mapping here.]",
+              "Namespaced action, e.g. `document.viewed`, `document.exported`, `document.deleted`, `hold.applied`, `erasure.executed`.",
           },
           {
-            name: "arguments",
+            name: "entity_type / entity_id / entity_label",
+            type: "string",
+            description:
+              "The affected resource — for document access, the document ID and filename. Recorded without foreign keys so the record survives deletion of the resource.",
+          },
+          {
+            name: "occurred_at",
+            type: "timestamp",
+            description: "Server-side timestamp at emission.",
+          },
+          {
+            name: "reason / context",
             type: "object",
             description:
-              "The call's arguments. [CONFIRM: logged in full, truncated, or redacted? File payloads are large — state the exact policy.]",
+              "Free-text reason where the action carries one (e.g. legal-hold release) and small structured extras. Request payloads and file contents are never stored in the audit trail.",
           },
           {
-            name: "documents_returned",
-            type: "string[]",
+            name: "prev_hash / event_hash",
+            type: "string",
             description:
-              "IDs of documents/records included in the response. [CONFIRM: is response content or only resource IDs recorded? This is the field MSD's question hinges on.]",
-          },
-          {
-            name: "timestamp",
-            type: "string",
-            description: "ISO 8601 time of the call. [CONFIRM: field name and precision.]",
-          },
-          {
-            name: "workspace",
-            type: "string",
-            description: "The workspace the call was scoped to. [CONFIRM: field name.]",
+              "The tamper-evidence chain: each record's hash covers its content plus the previous record's hash.",
           },
         ],
       },
@@ -307,11 +324,16 @@ export const sections: RawSection[] = [
         type: "heading",
         level: 3,
         id: "audit-retention-export",
-        text: "Retention and SIEM export",
+        text: "Retention and export",
       },
       {
         type: "paragraph",
-        text: "[CONFIRM: state the actual retention period (and whether it is configurable per tenant), and the supported export paths to a customer SIEM — API pull, scheduled export to customer storage, streaming. Pharma reviewers will expect a concrete integration path, e.g. Sentinel or Splunk; name what is actually supported today and nothing more.]",
+        text: "Audit records are retained for **24 months** by default (a deployment-level setting; dedicated deployments can run a different window). Trimming is suspended entirely for any workspace with an active legal hold. Export is admin-only: a filterable query API (`GET /records/audit-events` — by time range, action, actor, and entity), a CSV export endpoint, and a chain-integrity verification endpoint. The full-tenant export bundle includes the audit log. Streaming delivery to external SIEM systems is on the roadmap; today, SIEM ingestion works by scheduled pulls of the CSV export API.",
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "[CONFIRM: whether per-tenant audit-retention configuration is a commitment we make for dedicated deployments (the setting is deployment-level today, not per-workspace), and what SIEM integration is actually promised to customers — the CSV-pull pattern is what exists.]",
       },
       {
         type: "heading",
@@ -321,12 +343,12 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The attribution question an admin actually asks after the fact is: *this value surfaced in an agent's output — which call produced it, under whose credential?* Because every MCP call is individually authenticated and logged with the documents it returned, an admin can [CONFIRM: describe the actual workflow — filter the audit trail by key/user + time window + document ID? Is there a UI for this or is it API-only? Verify this end-to-end with a real query before shipping this paragraph].",
+        text: "The attribution question an admin actually asks after the fact is: *this value surfaced in an agent's output — which call produced it, under whose credential?* The audit query API filters by entity ID, so `GET /records/audit-events?entity_type=document&entity_id=<uuid>` returns every recorded access to that document with the acting credential and timestamp. [PRODUCT GAP: for MCP traffic this query returns nothing until /v1 reads emit audit events — see the note at the top of this page. The query mechanics, indexes, and admin surface already exist; the missing piece is emission on the public API path.]",
       },
       {
         type: "callout",
         variant: "info",
-        text: "One key per agent makes attribution trivial: if each agent identity holds its own API key, the audit trail's key ID column is an agent ID column. See Server-Side Integration for key-handling patterns.",
+        text: "One key per agent makes attribution trivial: if each agent identity holds its own API key, the audit trail's actor column is an agent column. See Server-Side Integration for key-handling patterns.",
       },
     ],
     related: [
@@ -336,22 +358,22 @@ export const sections: RawSection[] = [
     ],
     faq: [
       {
-        question: "Are MCP calls audited differently from UI activity?",
+        question: "Is the Talonic audit trail tamper-evident?",
         answer:
-          "No — every MCP tool call reaches the platform as an authenticated API request and is recorded by the same audit pipeline as UI and REST activity. Agents do not have a quieter path to data.",
+          "Yes. Every record is SHA-256 hash-chained to its predecessor, chains are anchored daily, and an integrity-verification endpoint walks the chain on demand. Audit records survive deletion of the resources they describe.",
       },
       {
-        question: "Can I tell which agent retrieved a specific document?",
+        question: "How long are audit records kept?",
         answer:
-          "Yes, if agents hold distinct credentials: each audit record carries the authenticated key or user plus the documents returned, so filtering the trail by document ID shows every call — and every credential — that touched it.",
+          "24 months by default, as a deployment-level setting. Workspaces under an active legal hold are excluded from trimming entirely — audit history is preserved for as long as the hold stands.",
       },
       {
         question: "How do I get Talonic audit logs into my SIEM?",
         answer:
-          "[CONFIRM: answer with the actually-supported export path and retention period before publishing.]",
+          "Via scheduled pulls of the admin-only CSV export API (GET /records/audit-events/export), filterable by time range, action, actor, and entity. Streaming SIEM delivery is on the roadmap.",
       },
     ],
-    mentions: ["audit logging", "SIEM", "retention", "attribution", "compliance"],
+    mentions: ["audit logging", "SIEM", "retention", "attribution", "hash chain", "legal hold"],
   },
 
   // -------------------------------------------------------------------------
@@ -463,9 +485,10 @@ console.log(result.content)`,
         type: "list",
         items: [
           "**Inject, never bake:** keys enter the runtime as environment variables or through your secret manager (AWS Secrets Manager, Azure Key Vault, Vault) — never in an image, a repo, or agent prompt text.",
-          "**One key per agent identity:** give each distinct agent its own key rather than sharing one per team. Scoping stays minimal and the audit trail's key column becomes an agent column — attribution for free.",
-          "**Rotation:** [CONFIRM: document the actual rotation mechanics — can two keys be active during a rotation window? Is there an API to mint/revoke keys programmatically, or is it UI-only? State what exists today.]",
-          "[CONFIRM: any per-key rate limits that make one-key-per-agent the wrong choice at high call volumes — link the limits page once it exists.]",
+          "**Grant minimal scopes:** keys carry scopes fixed at creation. An agent that only queries needs a `read`-only key; reserve `write` and `extract` for agents that ingest. A read-only key calling a write tool fails with an explicit 403.",
+          "**One key per agent identity:** give each distinct agent its own key rather than sharing one per team. Scopes stay minimal, a compromised agent is revocable in isolation, and each key becomes an attribution handle for that agent's activity.",
+          "**Rotation is mint-then-revoke:** key management is fully programmatic — `GET/POST/DELETE /v1/account/keys` (a `write`-scoped key can mint and revoke keys). Any number of keys can be active simultaneously, so zero-downtime rotation is: mint the successor, roll it out, revoke the predecessor. [CONFIRM: on enterprise plans, dashboard key creation is managed by Talonic — document how enterprise customers request or self-serve keys in practice.]",
+          "**Guard the `write` scope:** because a `write`-scoped key can mint further keys, treat `write` keys like credentials-issuing credentials — store them with the same care as the workspace itself, and prefer `read`-only keys everywhere possible.",
         ],
       },
       {
@@ -491,9 +514,14 @@ console.log(result.content)`,
           "Yes. Every request is independently authenticated over HTTPS, so there is no long-lived state a cold start would break. Open a session, call tools, close it — or hold the session open for the lifetime of a warm instance.",
       },
       {
+        question: "How do I rotate an agent's API key without downtime?",
+        answer:
+          "Mint the replacement key via POST /v1/account/keys, deploy it to the agent, then revoke the old key via DELETE /v1/account/keys/:keyId. Multiple keys can be active at once, so there is no gap.",
+      },
+      {
         question: "How should agents store the Talonic API key?",
         answer:
-          "Inject it at runtime via environment variables or a secret manager, never in images or repos, and give each agent identity its own key — scoping stays minimal and every audit record then identifies the agent directly.",
+          "Inject it at runtime via environment variables or a secret manager, never in images or repos. Give each agent identity its own minimally-scoped key — read-only unless the agent ingests — so a compromise is contained and revocable in isolation.",
       },
     ],
     mentions: [
@@ -503,6 +531,7 @@ console.log(result.content)`,
       "serverless",
       "Streamable HTTP",
       "API key rotation",
+      "scopes",
     ],
   },
 ]
