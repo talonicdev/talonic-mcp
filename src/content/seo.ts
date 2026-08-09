@@ -54,6 +54,16 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
     children: [{ id: "env-variables", label: "Environment Variables" }],
   },
   {
+    id: "enterprise",
+    label: "Enterprise",
+    children: [
+      { id: "access-control", label: "Access Control & Permissions" },
+      { id: "self-hosted-mcp", label: "VPC & On-Premises" },
+      { id: "audit-logging", label: "Audit Logging" },
+      { id: "custom-agents", label: "Server-Side Integration" },
+    ],
+  },
+  {
     id: "troubleshooting",
     label: "Troubleshooting",
     children: [

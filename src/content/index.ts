@@ -26,6 +26,7 @@ import { sections as install } from "./sections/install"
 import { sections as tools } from "./sections/tools"
 import { sections as features } from "./sections/features"
 import { sections as configuration } from "./sections/configuration"
+import { sections as enterprise } from "./sections/enterprise"
 import { sections as troubleshooting } from "./sections/troubleshooting"
 
 // ---------------------------------------------------------------------------
@@ -38,6 +39,7 @@ const ALL_RAW: RawSection[] = [
   ...tools,
   ...features,
   ...configuration,
+  ...enterprise,
   ...troubleshooting,
 ]
 
