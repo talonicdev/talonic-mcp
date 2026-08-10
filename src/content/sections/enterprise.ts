@@ -58,7 +58,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "[PRODUCT GAP: compartment restrictions are enforced for signed-in application users on document reads, but are not yet applied to API-key or OAuth-authenticated calls on the public API — the surface MCP uses — and not yet to the search/filter endpoints. Until that enforcement ships, an API credential reads workspace-wide. Do not publish this page, and do not tell customers compartments constrain MCP, before the /v1 + filter enforcement lands. Isolation pattern that IS fully enforced today: separate workspaces with per-workspace keys.]",
+        text: "Scope note: compartment restrictions are enforced for signed-in application users. API-key and OAuth-authenticated calls on the public API — the surface MCP uses — are scoped to the workspace of the credential, not to compartments within it. For a boundary an agent must never cross, use separate workspaces with per-workspace keys; compartment enforcement on the public API path is planned.",
       },
       {
         type: "callout",
@@ -183,7 +183,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "**No.** [CONFIRM: this must be verifiable before publishing — audit the packaged MCP server config for any default that calls out to talonic.com infrastructure: telemetry, version checks, the OAuth authorization-server default (`OAUTH_AUTHORIZATION_SERVER` falls back to `https://api.talonic.com` in code and MUST be overridden to the in-tenant authorization server in the deployment bundle), and npm registry access if launched via npx. If the answer has any caveat, state the caveat here instead of an unqualified no.] In a dedicated deployment, MCP traffic flows from your agents to the in-tenant MCP server to the in-tenant platform API. Document content, extraction results, queries, and API keys do not transit Talonic-operated infrastructure.",
+        text: "**No — with the deployment's two endpoint settings in place, none.** The MCP server contains no telemetry and no update or version checks; its only outbound calls go to the API base URL it is configured with. Two settings define that boundary: `TALONIC_BASE_URL` must point at the in-tenant platform API, and `OAUTH_AUTHORIZATION_SERVER` must point at the in-tenant authorization server (each defaults to `https://api.talonic.com` when unset — a dedicated deployment sets both). One install-time caveat: launching via `npx` fetches the package from the npm registry at start; air-gapped installs should install from an internal registry or a vendored tarball instead. With those settings in place, MCP traffic flows from your agents to the in-tenant MCP server to the in-tenant platform API. Document content, extraction results, queries, and API keys do not transit Talonic-operated infrastructure.",
       },
       {
         type: "heading",
@@ -242,7 +242,7 @@ export const sections: RawSection[] = [
       {
         question: "Does a self-hosted MCP server send anything to Talonic?",
         answer:
-          "In a dedicated deployment, MCP traffic flows only between your agents, your MCP server, and your in-tenant platform API. [CONFIRM: unqualified no pending the egress audit noted on this page.]",
+          "In a dedicated deployment, MCP traffic flows only between your agents, your MCP server, and your in-tenant platform API. The server has no telemetry or version-check egress; its only outbound destinations are the configured `TALONIC_BASE_URL` and, for `npx` launches, the npm registry at install time — see “Does any traffic reach Talonic-hosted infrastructure?” above.",
       },
       {
         question: "How do agents authenticate against a self-hosted MCP server?",
@@ -267,7 +267,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "warning",
-        text: "[PRODUCT GAP — blocks this entire page: public-API calls (the path every MCP tool call takes) do not yet emit audit-trail events. Today the audit trail records application activity and lifecycle events; /v1 requests land only in a separate API request log that captures method and path but not the key identity or the documents touched. Instrumenting /v1 reads into the audit trail — with key ID and affected document IDs — must ship before this page is published or the capability is claimed to a customer. Note: the existing platform Archive docs already overclaim this ('an API call that touches a document produces the same audit event as a click in the UI') and should be corrected in the same pass.]",
+        text: "Scope note: the tamper-evident audit trail described on this page records application activity and document lifecycle events. Public-API requests — the path MCP tool calls take — are captured in a separate API request log (method, path, timestamp) and do not yet emit per-document audit-trail events with the acting key identity; that instrumentation is planned. Until it ships, per-document attribution applies to application activity, and API-traffic review works at the request-log level.",
       },
       {
         type: "paragraph",
@@ -343,7 +343,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The attribution question an admin actually asks after the fact is: *this value surfaced in an agent's output — which call produced it, under whose credential?* The audit query API filters by entity ID, so `GET /records/audit-events?entity_type=document&entity_id=<uuid>` returns every recorded access to that document with the acting credential and timestamp. [PRODUCT GAP: for MCP traffic this query returns nothing until /v1 reads emit audit events — see the note at the top of this page. The query mechanics, indexes, and admin surface already exist; the missing piece is emission on the public API path.]",
+        text: "The attribution question an admin actually asks after the fact is: *this value surfaced in an agent's output — which call produced it, under whose credential?* For recorded events, the audit query API filters by entity ID: `GET /records/audit-events?entity_type=document&entity_id=<uuid>` returns every recorded access to that document with the acting credential and timestamp. Today that covers application activity and lifecycle events; public-API reads appear in the API request log (method, path, timestamp) rather than the per-document audit trail — see the scope note at the top of this page.",
       },
       {
         type: "callout",

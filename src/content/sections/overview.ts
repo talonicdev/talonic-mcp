@@ -15,7 +15,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Eight tools and two resources: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
+        text: "Eleven tools and two resources: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`, `talonic_request_upload`, plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
       },
       {
         type: "paragraph",
@@ -106,7 +106,7 @@ export const sections: RawSection[] = [
       {
         question: "How many tools does the Talonic MCP server expose?",
         answer:
-          "Eight tools and two resources. The tools are talonic_extract, talonic_search, talonic_filter, talonic_get_document, talonic_to_markdown, talonic_list_schemas, talonic_save_schema, and talonic_get_balance. The resources are talonic://schemas and talonic://webhooks/reference.",
+          "Eleven tools and two resources. The tools are talonic_extract, talonic_search, talonic_filter, talonic_get_document, talonic_to_markdown, talonic_list_schemas, talonic_save_schema, talonic_get_balance, talonic_get_pricing, talonic_get_usage, and talonic_request_upload. The resources are talonic://schemas and talonic://webhooks/reference.",
       },
     ],
     mentions: ["MCP", "Model Context Protocol", "AI agents", "document extraction"],
