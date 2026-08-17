@@ -28,6 +28,8 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
+**Internal exception — `src/tools/growth.ts`** registers four Talonic-internal, superadmin-only growth-analytics tools (`talonic_growth_*`) against the platform's `/v1/growth/*` surface. They are registered CONDITIONALLY: both entrypoints call `probeGrowthAccess()` and include them only when the session's credential passes the platform's superadmin gate (hosted: per-token 5-min cache in `http-server.ts`; stdio: once at boot). The platform re-checks the principal on every call, so the probe is listing UX, never the security boundary. Deliberately absent from BOTH public docs surfaces — do not add them to `src/content/` or `docs/sections.json`.
+
 | Tool | File | Read-only? | Notes |
 | --- | --- | --- | --- |
 | `talonic_extract` | `extract.ts` | no | Primary tool. Schema **required** (rejected at MCP layer otherwise). Inputs: `file_data`+`filename`, `file_path`, `file_url`, or `document_id`. |

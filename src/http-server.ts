@@ -41,6 +41,7 @@ import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
+import { probeGrowthAccess } from "./tools/growth.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml } from "./widgets/register.js"
 import { widgetMeta } from "./widgets/shared.js"
@@ -48,6 +49,30 @@ import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
+
+/**
+ * Per-token cache of the growth-access probe, so the superadmin check does
+ * not add a platform round-trip to every stateless MCP request. Entries live
+ * GROWTH_PROBE_TTL_MS; the map is pruned wholesale past 1000 tokens (bounded
+ * memory beats LRU precision for a 5-minute cache). Negative results are
+ * cached too — a customer session stays one lookup per TTL, not per call.
+ */
+const GROWTH_PROBE_TTL_MS = 5 * 60 * 1000
+const growthProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. */
+export async function growthAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = probeGrowthAccess,
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = growthProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (growthProbeCache.size >= 1000) growthProbeCache.clear()
+  growthProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
+  return ok
+}
 
 /**
  * Canonical public URL of this MCP resource. Advertised in the protected
@@ -422,7 +447,8 @@ export function createRequestHandler(): (
     // Fresh, stateless transport + server for this single request. The token
     // is fixed for the request, so a plain provider returning it suffices.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
-    const mcpServer = createServer({ tokenProvider: () => token })
+    const includeGrowthTools = await growthAccessCached(token)
+    const mcpServer = createServer({ tokenProvider: () => token, includeGrowthTools })
     res.on("close", () => {
       void transport.close()
       void mcpServer.close()
