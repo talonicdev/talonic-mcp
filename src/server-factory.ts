@@ -13,6 +13,7 @@ import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
+import { registerGrowthTools } from "./tools/growth.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -83,6 +84,14 @@ export interface CreateServerOptions {
    * Stdio installs do not need this; they should use `apiKey` instead.
    */
   tokenProvider?: () => string
+
+  /**
+   * Register the Talonic-internal growth analytics tools (superadmin-only).
+   * Callers set this ONLY after `probeGrowthAccess` passed for the session's
+   * credential — the platform re-checks the principal on every call, so this
+   * flag controls listing visibility, never access. Defaults to false.
+   */
+  includeGrowthTools?: boolean
 }
 
 /**
@@ -220,6 +229,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
   registerRequestUpload(server, getToken, baseUrl)
+  if (options.includeGrowthTools) {
+    registerGrowthTools(server, getToken, baseUrl)
+  }
 
   // Resource registrations.
   registerSchemasResource(server, getTalonic)
