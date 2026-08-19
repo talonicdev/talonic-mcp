@@ -18,6 +18,11 @@ const ALL_TOOLS = [
   "talonic_get_pricing",
   "talonic_get_usage",
   "talonic_request_upload",
+  "talonic_list_agent_tasks",
+  "talonic_get_agent_task",
+  "talonic_claim_agent_task",
+  "talonic_heartbeat_agent_task",
+  "talonic_submit_agent_task",
 ]
 
 // Tools that act on a specific document must tell the model to resolve a

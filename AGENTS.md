@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The eleven tools (and what an agent should reach for)
+## The sixteen public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -43,8 +43,13 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_get_balance` | `get-balance.ts` | yes | Credit balance, EUR, burn rate, runway. |
 | `talonic_get_pricing` | `get-pricing.ts` | yes | Public per-unit credit pricing catalog + multipliers. Predict spend before running. |
 | `talonic_get_usage` | `get-usage.ts` | yes | Per-function credit consumption over a trailing window (default 30 days). |
+| `talonic_list_agent_tasks` | `agent-tasks.ts` | yes | Metadata worklist for documents parked at Agent stages. |
+| `talonic_get_agent_task` | `agent-tasks.ts` | yes | Audited fetch of one immutable input snapshot and output contract. |
+| `talonic_claim_agent_task` | `agent-tasks.ts` | no | Acquire or reclaim a leased task and execution epoch. |
+| `talonic_heartbeat_agent_task` | `agent-tasks.ts` | no | Extend the current claim lease using its epoch. |
+| `talonic_submit_agent_task` | `agent-tasks.ts` | no | Submit declared typed outputs transactionally and resume the document. |
 
-Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — seven lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, `to_markdown`, `request_upload` are `false`.
+Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — nine lookup tools have `readOnlyHint: true`; the seven write-capable tools have it `false`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 
