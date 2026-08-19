@@ -41,6 +41,7 @@ import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
+import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml } from "./widgets/register.js"
 import { widgetMeta } from "./widgets/shared.js"
@@ -48,6 +49,31 @@ import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
+
+/**
+ * Per-token cache for conditional admin-tool visibility. Both positive and
+ * negative probes are cached for five minutes. The map is bounded by a coarse
+ * clear at 1,000 entries; the platform re-authorizes every actual tool call.
+ */
+const ADMIN_AGENT_TASK_PROBE_TTL_MS = 5 * 60 * 1000
+const adminAgentTaskProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. */
+export async function adminAgentTaskAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = probeAgentTaskAdminAccess,
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = adminAgentTaskProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (adminAgentTaskProbeCache.size >= 1000) adminAgentTaskProbeCache.clear()
+  adminAgentTaskProbeCache.set(token, {
+    ok,
+    expiresAt: now() + ADMIN_AGENT_TASK_PROBE_TTL_MS,
+  })
+  return ok
+}
 
 /**
  * Canonical public URL of this MCP resource. Advertised in the protected
@@ -173,10 +199,14 @@ function asWidgetTemplateRead(parsed: unknown): { uri: string; id: unknown } | n
  *
  * @internal
  */
-export function createRequestHandler(): (
-  req: IncomingMessage,
-  res: ServerResponse,
-) => Promise<void> {
+export interface CreateRequestHandlerOptions {
+  /** Override the conditional admin visibility check (primarily for tests). */
+  adminAgentTaskAccess?: (token: string) => Promise<boolean>
+}
+
+export function createRequestHandler(
+  options: CreateRequestHandlerOptions = {},
+): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
   return async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost")
     const path = url.pathname
@@ -422,7 +452,17 @@ export function createRequestHandler(): (
     // Fresh, stateless transport + server for this single request. The token
     // is fixed for the request, so a plain provider returning it suffices.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
-    const mcpServer = createServer({ tokenProvider: () => token })
+    const includeAdminAgentTaskTools = await (
+      options.adminAgentTaskAccess ??
+      ((currentToken: string) =>
+        adminAgentTaskAccessCached(currentToken, (candidate) =>
+          probeAgentTaskAdminAccess(candidate, process.env["TALONIC_BASE_URL"]),
+        ))
+    )(token)
+    const mcpServer = createServer({
+      tokenProvider: () => token,
+      includeAdminAgentTaskTools,
+    })
     res.on("close", () => {
       void transport.close()
       void mcpServer.close()

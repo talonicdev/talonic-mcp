@@ -13,6 +13,7 @@ import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
+import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -83,6 +84,13 @@ export interface CreateServerOptions {
    * Stdio installs do not need this; they should use `apiKey` instead.
    */
   tokenProvider?: () => string
+
+  /**
+   * Register Talonic-internal cross-tenant Agent-task variants. Callers set
+   * this only after the platform access probe passes. The platform still
+   * re-authorizes every call; this flag controls listing visibility only.
+   */
+  includeAdminAgentTaskTools?: boolean
 }
 
 /**
@@ -189,6 +197,9 @@ export function createServer(options: CreateServerOptions): McpServer {
         "with that id — do not ask the user for an id.",
         "talonic_search matches LITERAL keywords: query with one short singular term or an",
         "exact filename, never a sentence; on an empty result retry with a shorter keyword.",
+        "For Agent-stage work, follow list -> get -> claim -> heartbeat while needed ->",
+        "submit. Preserve the execution_epoch from claim and return only fields declared",
+        "in the task output_contract; never continue after a lease or epoch conflict.",
         "Prefer acting over explaining.",
       ].join(" "),
     },
@@ -220,6 +231,10 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
   registerRequestUpload(server, getToken, baseUrl)
+  registerAgentTaskTools(server, getToken, baseUrl)
+  if (options.includeAdminAgentTaskTools) {
+    registerAdminAgentTaskTools(server, getToken, baseUrl)
+  }
 
   // Resource registrations.
   registerSchemasResource(server, getTalonic)

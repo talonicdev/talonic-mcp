@@ -13,6 +13,7 @@ import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "./server-factory.js"
+import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -78,7 +79,14 @@ export async function main(
   }
 
   const baseUrl = env["TALONIC_BASE_URL"]
-  const server = createServer({ apiKey, ...(baseUrl ? { baseUrl } : {}) })
+  // Cross-tenant tools are hidden unless this key's principal is an active
+  // superadmin. Payload calls remain OAuth + step-up only on the platform.
+  const includeAdminAgentTaskTools = await probeAgentTaskAdminAccess(apiKey, baseUrl)
+  const server = createServer({
+    apiKey,
+    ...(baseUrl ? { baseUrl } : {}),
+    includeAdminAgentTaskTools,
+  })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)
