@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
+import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -81,8 +82,18 @@ export async function main(
   const baseUrl = env["TALONIC_BASE_URL"]
   // Talonic-internal growth tools appear only when this key's creator is an
   // active superadmin (probe never throws; customers just skip registration).
-  const includeGrowthTools = await probeGrowthAccess(apiKey, baseUrl)
-  const server = createServer({ apiKey, ...(baseUrl ? { baseUrl } : {}), includeGrowthTools })
+  // Cross-tenant Agent-task tools use the same visibility model; payload calls
+  // remain OAuth + step-up only on the platform.
+  const [includeGrowthTools, includeAdminAgentTaskTools] = await Promise.all([
+    probeGrowthAccess(apiKey, baseUrl),
+    probeAgentTaskAdminAccess(apiKey, baseUrl),
+  ])
+  const server = createServer({
+    apiKey,
+    ...(baseUrl ? { baseUrl } : {}),
+    includeGrowthTools,
+    includeAdminAgentTaskTools,
+  })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)

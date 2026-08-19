@@ -10,24 +10,34 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { createServer as createHttpServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
-import { createRequestHandler } from "../src/http-server"
+import { createRequestHandler, type CreateRequestHandlerOptions } from "../src/http-server"
 
 interface HarnessServer {
   server: Server
   baseUrl: string
 }
 
-async function startHarness(): Promise<HarnessServer> {
-  const server = createHttpServer(createRequestHandler())
+async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<HarnessServer> {
+  const server = createHttpServer(
+    createRequestHandler({
+      growthAccess: async () => false,
+      adminAgentTaskAccess: async () => false,
+      ...options,
+    }),
+  )
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
   const { port } = server.address() as AddressInfo
   return { server, baseUrl: `http://127.0.0.1:${port}` }
 }
 
 async function stopHarness(h: HarnessServer): Promise<void> {
-  await new Promise<void>((resolve, reject) =>
+  const closed = new Promise<void>((resolve, reject) =>
     h.server.close((err) => (err ? reject(err) : resolve())),
   )
+  // Node's built-in fetch may retain a keep-alive connection after the
+  // response body is consumed. Terminate it so per-test teardown is bounded.
+  h.server.closeAllConnections()
+  await closed
 }
 
 function initializeBody(): string {
@@ -127,6 +137,22 @@ describe("HTTP server routing", () => {
     const text = await res.text()
     expect(text).toContain("talonic_extract")
     expect(text).toContain("talonic_get_balance")
+    expect(text).toContain("talonic_list_agent_tasks")
+    expect(text).not.toContain("talonic_admin_list_agent_tasks")
+  })
+
+  it("tools/list includes admin variants only when the access check passes", async () => {
+    await stopHarness(h)
+    h = await startHarness({ adminAgentTaskAccess: async () => true })
+    const res = await fetch(`${h.baseUrl}/mcp`, {
+      method: "POST",
+      headers: MCP_HEADERS,
+      body: JSON.stringify({ jsonrpc: "2.0", id: 3, method: "tools/list", params: {} }),
+    })
+    expect(res.status).toBe(200)
+    const text = await res.text()
+    expect(text).toContain("talonic_admin_list_agent_tasks")
+    expect(text).toContain("talonic_admin_submit_agent_task")
   })
 
   it("widget template resources/read works WITHOUT auth and with JSON-only Accept (review fix)", async () => {

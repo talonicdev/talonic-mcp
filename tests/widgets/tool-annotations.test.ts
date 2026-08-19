@@ -13,6 +13,8 @@ const READ_ONLY_TOOLS = [
   "talonic_get_balance",
   "talonic_get_pricing",
   "talonic_get_usage",
+  "talonic_list_agent_tasks",
+  "talonic_get_agent_task",
 ]
 
 // Write-capable tools: readOnlyHint=false. None destroy data, so
@@ -31,6 +33,9 @@ const WRITE_TOOLS = [
   "talonic_extract",
   "talonic_to_markdown",
   "talonic_request_upload",
+  "talonic_claim_agent_task",
+  "talonic_heartbeat_agent_task",
+  "talonic_submit_agent_task",
 ]
 
 const ALL_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS]
@@ -72,5 +77,35 @@ describe("tool annotations conform to Apps SDK guidelines", () => {
     expect(tool, `${name} not registered`).toBeDefined()
     expect(tool.annotations?.readOnlyHint).toBe(false)
     expect(tool.annotations?.destructiveHint).toBe(false)
+  })
+})
+
+describe("conditional admin Agent-task annotations", () => {
+  const server = createServer({
+    apiKey: "tlnc_test",
+    includeAdminAgentTaskTools: true,
+  }) as any
+
+  it.each(["talonic_admin_list_agent_tasks", "talonic_admin_get_agent_task"])(
+    "%s is read-only",
+    (name) => {
+      expect(server._registeredTools[name]?.annotations).toMatchObject({
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      })
+    },
+  )
+
+  it.each([
+    "talonic_admin_claim_agent_task",
+    "talonic_admin_heartbeat_agent_task",
+    "talonic_admin_submit_agent_task",
+  ])("%s is mutating but non-destructive", (name) => {
+    expect(server._registeredTools[name]?.annotations).toMatchObject({
+      readOnlyHint: false,
+      destructiveHint: false,
+      openWorldHint: false,
+    })
   })
 })

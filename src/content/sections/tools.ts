@@ -1822,4 +1822,271 @@ Payment terms: Net 30`,
       "32 KB cap",
     ],
   },
+  {
+    slug: "talonic-list-agent-tasks",
+    parentSlug: "tools",
+    title: "talonic_list_agent_tasks",
+    seoTitle: "talonic_list_agent_tasks Tool — Talonic MCP",
+    description:
+      "List document-scoped work waiting at Agent stages in the current Talonic workspace.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List Agent-stage tasks visible to the current workspace credential. The response contains task metadata and cursor pagination; payload data is deliberately fetched one task at a time so each disclosure can be audited.",
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "list-agent-tasks-workflow",
+        text: "Start the pull workflow",
+      },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          'Call `talonic_list_agent_tasks` with `status: "available"`.',
+          "Inspect a candidate with `talonic_get_agent_task`.",
+          "Claim it with `talonic_claim_agent_task` before doing work.",
+          "Heartbeat while processing, then submit only fields declared in `output_contract`.",
+        ],
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "status",
+            type: "available | claimed | submitted | timed_out | cancelled",
+            description:
+              "Optional lifecycle-state filter. Start with `available` when looking for work.",
+          },
+          {
+            name: "limit",
+            type: "integer",
+            description: "Page size from 1 to 100. Defaults to 50.",
+          },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque `pagination.next_cursor` from the previous page.",
+          },
+        ],
+      },
+      {
+        type: "callout",
+        text: "An empty worklist is normal: tasks exist only when a running document reaches an enabled Agent stage and the credential's Sources-IAM rules allow it.",
+      },
+    ],
+    related: [
+      { label: "talonic_get_agent_task", slug: "talonic-get-agent-task" },
+      { label: "talonic_claim_agent_task", slug: "talonic-claim-agent-task" },
+    ],
+    faq: [
+      {
+        question: "Does listing Agent tasks expose document data?",
+        answer:
+          "No. The list returns metadata only. Fetching one task's immutable input snapshot uses talonic_get_agent_task and is recorded as an audited disclosure.",
+      },
+    ],
+    mentions: ["Agent stage", "worklist", "MCP agent", "cursor pagination"],
+  },
+  {
+    slug: "talonic-get-agent-task",
+    parentSlug: "tools",
+    title: "talonic_get_agent_task",
+    seoTitle: "talonic_get_agent_task Tool — Talonic MCP",
+    description:
+      "Fetch one Agent task's immutable document snapshot, instructions, and declared output contract.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Fetch the immutable input snapshot captured when one document reached an Agent stage. The payload also carries stage instructions, timeout policy, and the only output fields the agent may return.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "task_id",
+            type: "UUID",
+            required: true,
+            description: "Task ID returned by `talonic_list_agent_tasks`.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Key response fields",
+        code: `{\n  "id": "11111111-1111-4111-8111-111111111111",\n  "status": "available",\n  "input_snapshot": { "vendor_name": { "value": "Acme" } },\n  "output_contract": [\n    { "key": "risk_score", "dataType": "number", "required": true }\n  ],\n  "instructions": "Assess supplier risk from the supplied evidence.",\n  "timeout_fallthrough": "route_to_review"\n}`,
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "Fetching a task payload is an audited data disclosure. Do not fetch tasks speculatively; inspect metadata first and fetch only work you intend to evaluate.",
+      },
+    ],
+    related: [
+      { label: "talonic_list_agent_tasks", slug: "talonic-list-agent-tasks" },
+      { label: "talonic_claim_agent_task", slug: "talonic-claim-agent-task" },
+    ],
+    faq: [
+      {
+        question: "Can the snapshot change while an agent processes it?",
+        answer:
+          "No. It is captured when the document enters the Agent stage and remains immutable for that task. Results are validated against the accompanying output_contract.",
+      },
+    ],
+    mentions: ["immutable snapshot", "output contract", "audit trail", "document task"],
+  },
+  {
+    slug: "talonic-claim-agent-task",
+    parentSlug: "tools",
+    title: "talonic_claim_agent_task",
+    seoTitle: "talonic_claim_agent_task Tool — Talonic MCP",
+    description: "Acquire a leased claim on an available Agent task before processing it.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Claim a task before processing. A successful claim returns the full payload plus a new `execution_epoch` and `lease_expires_at`; both prevent two agents from writing results for the same task.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "task_id",
+            type: "UUID",
+            required: true,
+            description: "Available task to claim, or an expired claim to reclaim.",
+          },
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "A live claim held by another actor returns HTTP 409. Do not retry in a tight loop. Select another available task or wait until the lease expires.",
+      },
+      {
+        type: "paragraph",
+        text: "Save the returned `execution_epoch`. Every heartbeat and submit must echo that exact epoch. Reclaiming an expired lease increments it, permanently invalidating work from the earlier claimant.",
+      },
+    ],
+    related: [
+      { label: "talonic_heartbeat_agent_task", slug: "talonic-heartbeat-agent-task" },
+      { label: "talonic_submit_agent_task", slug: "talonic-submit-agent-task" },
+    ],
+    faq: [
+      {
+        question: "What is an execution epoch?",
+        answer:
+          "It is the claim generation. Each successful claim or reclaim receives a new integer; stale epochs are rejected so an expired worker cannot overwrite a newer worker's result.",
+      },
+    ],
+    mentions: ["claim lease", "execution epoch", "conflict", "reclaim"],
+  },
+  {
+    slug: "talonic-heartbeat-agent-task",
+    parentSlug: "tools",
+    title: "talonic_heartbeat_agent_task",
+    seoTitle: "talonic_heartbeat_agent_task Tool — Talonic MCP",
+    description: "Extend an active Agent-task lease while processing continues.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Extend the lease for a task you already claimed. Heartbeat before `lease_expires_at` when processing may take longer than the remaining lease window.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "task_id",
+            type: "UUID",
+            required: true,
+            description: "Claimed task ID.",
+          },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch returned by the current successful claim.",
+          },
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "A stale epoch or a claim owned by another actor returns HTTP 409. Stop work and do not submit results after that conflict.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_agent_task", slug: "talonic-claim-agent-task" },
+      { label: "talonic_submit_agent_task", slug: "talonic-submit-agent-task" },
+    ],
+    faq: [
+      {
+        question: "How often should an agent heartbeat?",
+        answer:
+          "Only when needed, comfortably before lease_expires_at. Use the updated lease expiry returned by each successful heartbeat rather than a fixed client-side assumption.",
+      },
+    ],
+    mentions: ["heartbeat", "lease expiry", "execution epoch", "long-running task"],
+  },
+  {
+    slug: "talonic-submit-agent-task",
+    parentSlug: "tools",
+    title: "talonic_submit_agent_task",
+    seoTitle: "talonic_submit_agent_task Tool — Talonic MCP",
+    description:
+      "Submit typed, declared Agent-task outputs transactionally and resume the parked document.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Return the result of a claimed Agent task. Output keys must match `output_contract` exactly, required fields must be present, and every value must match its declared data type. The platform validates the entire result before writing any cell.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch from the current claim.",
+          },
+          {
+            name: "outputs",
+            type: "object",
+            required: true,
+            description:
+              "Declared field key to `{ value, confidence?, reasoning? }`. Confidence is 0–1; reasoning is at most 4,000 characters.",
+          },
+          {
+            name: "summary",
+            type: "string",
+            description: "Optional overall result summary, at most 4,000 characters.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Submit result",
+        code: `{\n  "task_id": "11111111-1111-4111-8111-111111111111",\n  "execution_epoch": 3,\n  "outputs": {\n    "risk_score": {\n      "value": 0.72,\n      "confidence": 0.88,\n      "reasoning": "Two adverse indicators in the supplied evidence."\n    }\n  },\n  "summary": "Supplier requires enhanced review."\n}`,
+      },
+      {
+        type: "callout",
+        text: "Successful outputs are attributed to `AI Agent (MCP)` in the audit trail and stored with `mcp_agent` provenance. They do not receive human-review authority in v1.",
+      },
+    ],
+    related: [
+      { label: "talonic_get_agent_task", slug: "talonic-get-agent-task" },
+      { label: "talonic_heartbeat_agent_task", slug: "talonic-heartbeat-agent-task" },
+    ],
+    faq: [
+      {
+        question: "Can an Agent task return extra fields it discovered?",
+        answer:
+          "No. Undeclared fields and invalid types are rejected before any value is written. Add desired outputs to the Agent stage contract first, then run a new document task.",
+      },
+    ],
+    mentions: ["transactional submit", "AI Agent (MCP)", "mcp_agent", "typed outputs"],
+  },
 ]

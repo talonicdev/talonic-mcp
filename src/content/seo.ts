@@ -38,6 +38,11 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
       { id: "talonic-get-pricing", label: "talonic_get_pricing" },
       { id: "talonic-get-usage", label: "talonic_get_usage" },
       { id: "talonic-request-upload", label: "talonic_request_upload" },
+      { id: "talonic-list-agent-tasks", label: "talonic_list_agent_tasks" },
+      { id: "talonic-get-agent-task", label: "talonic_get_agent_task" },
+      { id: "talonic-claim-agent-task", label: "talonic_claim_agent_task" },
+      { id: "talonic-heartbeat-agent-task", label: "talonic_heartbeat_agent_task" },
+      { id: "talonic-submit-agent-task", label: "talonic_submit_agent_task" },
     ],
   },
   {
