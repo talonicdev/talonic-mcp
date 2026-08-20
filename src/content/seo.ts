@@ -43,6 +43,7 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
       { id: "talonic-claim-agent-task", label: "talonic_claim_agent_task" },
       { id: "talonic-heartbeat-agent-task", label: "talonic_heartbeat_agent_task" },
       { id: "talonic-submit-agent-task", label: "talonic_submit_agent_task" },
+      { id: "apps-toolset", label: "Apps Toolset" },
     ],
   },
   {

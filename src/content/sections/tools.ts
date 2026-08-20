@@ -2089,4 +2089,46 @@ Payment terms: Net 30`,
     ],
     mentions: ["transactional submit", "AI Agent (MCP)", "mcp_agent", "typed outputs"],
   },
+  {
+    slug: "apps-toolset",
+    parentSlug: "tools",
+    title: "Apps Toolset",
+    seoTitle: "Apps Toolset — Talonic MCP",
+    description:
+      "Manage and run Talonic Apps from any MCP agent: fifteen management tools plus one dynamic app_<slug> tool per enabled app.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Talonic Apps are governed decision apps — Contract (grants), Logic (rules | assisted | external), Output (schema-typed decision), Ledger (append-only journal + sealed decision record). The MCP server exposes the full administrative surface as fifteen `talonic_*_app*` management tools: list/get/create apps, save and publish draft versions, enable/disable (the kill switch), run (with `dry_run` and `idempotency_key`), inspect runs and their journals, export sealed decision records, and raise, list, and resolve Human Reviews with the two-part resolution + feedback payload.",
+      },
+      { type: "heading", level: 3, id: "dynamic-per-app-tools", text: "Dynamic per-app tools" },
+      {
+        type: "paragraph",
+        text: "Every enabled app is additionally published as its own callable tool named `app_<slug>` (hyphens map to underscores: `load-auto-billing` becomes `app_load_auto_billing`), with the app's input JSON Schema as the tool schema. The tool list is computed per request from the token-scoped catalog (`GET /v1/apps`, ETag-cached per token), so an agent's tool list contains exactly the apps its token is granted. Hosted (stateless) clients pick up catalog changes on their next `tools/list`; stdio sessions receive `tools/list_changed` notifications from a periodic refresh (`TALONIC_APPS_REFRESH_MS`, default 60000, 0 disables).",
+      },
+      {
+        type: "paragraph",
+        text: "Tenant-authored input schemas convert to tool schemas under hard limits (depth 6, 100 properties, 32 KB); anything outside the supported JSON Schema 2020-12 subset falls back to a documented free-form `input` object rather than failing silently.",
+      },
+      { type: "heading", level: 3, id: "review-policy", text: "Review policy" },
+      {
+        type: "paragraph",
+        text: "Reviews of kind `approval` are human-only by platform policy — an agent resolver receives HTTP 403 and should route the review to a person instead. Agents may always raise reviews: asking for help is part of the protocol.",
+      },
+    ],
+    related: [{ label: "talonic_extract", slug: "talonic-extract" }],
+    faq: [
+      {
+        question: "Why does an app appear as its own tool?",
+        answer:
+          "Enabled Talonic Apps are published as callable app_<slug> MCP tools with the app's input schema, so a customer's agents can call governed, audited decisions with zero extra configuration.",
+      },
+      {
+        question: "Why did an app tool disappear?",
+        answer:
+          "The app was disabled, its token grant was revoked, or a new version changed the catalog; the tool list follows the token-scoped catalog on each request (hosted) or refresh tick (stdio).",
+      },
+    ],
+    mentions: ["talonic_list_apps", "talonic_run_app", "app_<slug>", "talonic_resolve_app_review"],
+  },
 ]
