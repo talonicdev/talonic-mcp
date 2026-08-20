@@ -14,6 +14,8 @@ import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
+import { registerAppsTools } from "./tools/apps.js"
+import { registerDynamicAppTools, type AppsCatalog } from "./tools/app-tools.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -91,6 +93,17 @@ export interface CreateServerOptions {
    * re-authorizes every call; this flag controls listing visibility only.
    */
   includeAdminAgentTaskTools?: boolean
+
+  /**
+   * Token-scoped catalog of enabled Apps, fetched by the caller (per-token
+   * cached — see `fetchAppsCatalog`). When provided, every enabled app is
+   * registered as its own `app_<slug>` tool at createServer time. On the
+   * stateless hosted transport a fresh server is built per POST, so this IS
+   * the per-request recompute the Apps spec mandates; there is no
+   * `listChanged` push there by design. stdio callers additionally arm
+   * `armStdioAppToolRefresh` for live updates.
+   */
+  appsCatalog?: AppsCatalog
 }
 
 /**
@@ -200,6 +213,11 @@ export function createServer(options: CreateServerOptions): McpServer {
         "For Agent-stage work, follow list -> get -> claim -> heartbeat while needed ->",
         "submit. Preserve the execution_epoch from claim and return only fields declared",
         "in the task output_contract; never continue after a lease or epoch conflict.",
+        "Talonic Apps are governed decision apps; each enabled app is ALSO its own",
+        "callable app_<slug> tool. To operate apps (create, configure, publish, run,",
+        "review), use the talonic_*_app* management tools; to simply execute one, call",
+        "its app_<slug> tool. Resolve reviews with talonic_resolve_app_review; approval",
+        "reviews are human-only by policy.",
         "Prefer acting over explaining.",
       ].join(" "),
     },
@@ -234,6 +252,10 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerAgentTaskTools(server, getToken, baseUrl)
   if (options.includeAdminAgentTaskTools) {
     registerAdminAgentTaskTools(server, getToken, baseUrl)
+  }
+  registerAppsTools(server, getToken, baseUrl)
+  if (options.appsCatalog) {
+    registerDynamicAppTools(server, options.appsCatalog, getToken, baseUrl)
   }
 
   // Resource registrations.

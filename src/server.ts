@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "./server-factory.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { armStdioAppToolRefresh, dynamicToolHandles, fetchAppsCatalog } from "./tools/app-tools.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -82,14 +83,29 @@ export async function main(
   // Cross-tenant tools are hidden unless this key's principal is an active
   // superadmin. Payload calls remain OAuth + step-up only on the platform.
   const includeAdminAgentTaskTools = await probeAgentTaskAdminAccess(apiKey, baseUrl)
+  const appsCatalog = await fetchAppsCatalog(apiKey, baseUrl)
   const server = createServer({
     apiKey,
     ...(baseUrl ? { baseUrl } : {}),
     includeAdminAgentTaskTools,
+    ...(appsCatalog ? { appsCatalog } : {}),
   })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)
+
+  // stdio keeps a live session: poll the Apps catalog and let register/remove
+  // drive notifications/tools/list_changed. TALONIC_APPS_REFRESH_MS=0 disables.
+  const refreshMs = Number(env["TALONIC_APPS_REFRESH_MS"] ?? 60_000)
+  if (Number.isFinite(refreshMs) && refreshMs > 0) {
+    armStdioAppToolRefresh(
+      server,
+      () => apiKey,
+      baseUrl,
+      refreshMs,
+      dynamicToolHandles.get(server) ?? new Map(),
+    )
+  }
 
   // McpServer keeps the process alive while the transport is open. We
   // hand control over to the SDK's lifecycle here; if the transport

@@ -42,6 +42,7 @@ import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { fetchAppsCatalog, type AppsCatalog } from "./tools/app-tools.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml } from "./widgets/register.js"
 import { widgetMeta } from "./widgets/shared.js"
@@ -202,6 +203,8 @@ function asWidgetTemplateRead(parsed: unknown): { uri: string; id: unknown } | n
 export interface CreateRequestHandlerOptions {
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
+  /** Override the per-token Apps catalog fetch (primarily for tests). */
+  appsCatalogFetcher?: (token: string) => Promise<AppsCatalog | null>
 }
 
 export function createRequestHandler(
@@ -459,9 +462,18 @@ export function createRequestHandler(
           probeAgentTaskAdminAccess(candidate, process.env["TALONIC_BASE_URL"]),
         ))
     )(token)
+    // Per-request dynamic app tools: the server below lives for exactly one
+    // request, so recomputing the token-scoped catalog here (per-token cached
+    // with ETag revalidation) IS the tool-list refresh on the stateless
+    // transport — clients see changes on their next tools/list.
+    const appsCatalog: AppsCatalog | null = await (
+      options.appsCatalogFetcher ??
+      ((currentToken: string) => fetchAppsCatalog(currentToken, process.env["TALONIC_BASE_URL"]))
+    )(token)
     const mcpServer = createServer({
       tokenProvider: () => token,
       includeAdminAgentTaskTools,
+      ...(appsCatalog ? { appsCatalog } : {}),
     })
     res.on("close", () => {
       void transport.close()
