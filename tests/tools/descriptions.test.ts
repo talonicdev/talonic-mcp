@@ -23,6 +23,10 @@ const ALL_TOOLS = [
   "talonic_claim_agent_task",
   "talonic_heartbeat_agent_task",
   "talonic_submit_agent_task",
+  "talonic_list_db_sources",
+  "talonic_get_db_delta",
+  "talonic_list_db_changes",
+  "talonic_get_db_entity_history",
 ]
 
 // Tools that act on a specific document must tell the model to resolve a

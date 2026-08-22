@@ -9,6 +9,7 @@ import { registerGetBalance } from "./tools/get-balance.js"
 import { registerGetPricing } from "./tools/get-pricing.js"
 import { registerGetUsage } from "./tools/get-usage.js"
 import { registerGetDocument } from "./tools/get-document.js"
+import { registerDbSnapshotTools } from "./tools/db-snapshots.js"
 import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
@@ -249,6 +250,7 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetBalance(server, getTalonic)
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
+  registerDbSnapshotTools(server, getTalonic)
   registerRequestUpload(server, getToken, baseUrl)
   registerAgentTaskTools(server, getToken, baseUrl)
   if (options.includeAdminAgentTaskTools) {
