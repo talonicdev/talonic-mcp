@@ -15,6 +15,7 @@ import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerAppsTools } from "./tools/apps.js"
+import { registerAppsBuilderTools } from "./tools/apps-builder.js"
 import { registerDynamicAppTools, type AppsCatalog } from "./tools/app-tools.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -254,6 +255,7 @@ export function createServer(options: CreateServerOptions): McpServer {
     registerAdminAgentTaskTools(server, getToken, baseUrl)
   }
   registerAppsTools(server, getToken, baseUrl)
+  registerAppsBuilderTools(server, getToken, baseUrl)
   if (options.appsCatalog) {
     registerDynamicAppTools(server, options.appsCatalog, getToken, baseUrl)
   }

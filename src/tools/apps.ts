@@ -25,7 +25,7 @@ const limit = z.number().int().min(1).max(200).optional().describe("Page size (d
 const cursor = z.string().min(1).optional().describe("Opaque cursor from pagination.next_cursor.")
 
 interface ApiRequest {
-  method?: "GET" | "POST" | "PATCH" | "DELETE"
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
   path: string
   query?: Record<string, string | number | boolean | undefined>
   body?: unknown
@@ -45,7 +45,7 @@ function apiUrl(
   return url.toString()
 }
 
-async function appsRequest(
+export async function appsRequest(
   getToken: () => string,
   baseUrl: string | undefined,
   request: ApiRequest,

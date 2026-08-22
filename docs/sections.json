@@ -43,12 +43,7 @@
         "answer": "An official Model Context Protocol server that gives AI agents sixteen public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
-    "mentions": [
-      "MCP",
-      "Model Context Protocol",
-      "AI agents",
-      "document extraction"
-    ]
+    "mentions": ["MCP", "Model Context Protocol", "AI agents", "document extraction"]
   },
   {
     "slug": "mcp-installation",
@@ -310,11 +305,7 @@
         "answer": "Edit claude_desktop_config.json, add the Talonic MCP server config (hosted URL or local npx) with your API key, and fully restart Claude Desktop (Cmd+Q on macOS)."
       }
     ],
-    "mentions": [
-      "Claude Desktop",
-      "macOS",
-      "Windows"
-    ]
+    "mentions": ["Claude Desktop", "macOS", "Windows"]
   },
   {
     "slug": "mcp-cursor",
@@ -366,10 +357,7 @@
         "answer": "Edit ~/.cursor/mcp.json and add the Talonic MCP server config with your API key. Hosted or local."
       }
     ],
-    "mentions": [
-      "Cursor",
-      "IDE"
-    ]
+    "mentions": ["Cursor", "IDE"]
   },
   {
     "slug": "mcp-cline",
@@ -423,10 +411,7 @@
         "answer": "Open the Cline panel settings, go to MCP Servers, click Edit, and add the Talonic config entry."
       }
     ],
-    "mentions": [
-      "Cline",
-      "VS Code"
-    ]
+    "mentions": ["Cline", "VS Code"]
   },
   {
     "slug": "mcp-continue",
@@ -478,11 +463,7 @@
         "answer": "Edit ~/.continue/config.json and add a Talonic entry to the mcpServers array with your API key."
       }
     ],
-    "mentions": [
-      "Continue",
-      "VS Code",
-      "JetBrains"
-    ]
+    "mentions": ["Continue", "VS Code", "JetBrains"]
   },
   {
     "slug": "mcp-cowork",
@@ -532,9 +513,7 @@
         "answer": "Open Cowork settings, go to MCP Servers, click Add, and paste the standard Talonic config with your API key."
       }
     ],
-    "mentions": [
-      "Cowork"
-    ]
+    "mentions": ["Cowork"]
   },
   {
     "slug": "mcp-talonic-extract",
@@ -743,13 +722,7 @@
         "answer": "Scores above 0.90 are reliable. Between 0.70–0.90, flag to the user for verification. Below 0.70, ask the user to verify or re-extract with more specific instructions."
       }
     ],
-    "mentions": [
-      "talonic_extract",
-      "file_data",
-      "schema",
-      "confidence",
-      "extraction"
-    ]
+    "mentions": ["talonic_extract", "file_data", "schema", "confidence", "extraction"]
   },
   {
     "slug": "mcp-talonic-search",
@@ -1299,11 +1272,7 @@
       }
     ],
     "faq": [],
-    "mentions": [
-      "talonic_get_document",
-      "metadata",
-      "document_id"
-    ]
+    "mentions": ["talonic_get_document", "metadata", "document_id"]
   },
   {
     "slug": "mcp-talonic-to-markdown",
@@ -1455,12 +1424,7 @@
         "answer": "If you already called talonic_extract, reuse the document_id from that response to call talonic_to_markdown for free."
       }
     ],
-    "mentions": [
-      "talonic_to_markdown",
-      "OCR",
-      "markdown",
-      "document_id"
-    ]
+    "mentions": ["talonic_to_markdown", "OCR", "markdown", "document_id"]
   },
   {
     "slug": "mcp-talonic-list-schemas",
@@ -1530,11 +1494,7 @@
       }
     ],
     "faq": [],
-    "mentions": [
-      "talonic_list_schemas",
-      "schemas",
-      "schema_id"
-    ]
+    "mentions": ["talonic_list_schemas", "schemas", "schema_id"]
   },
   {
     "slug": "mcp-talonic-save-schema",
@@ -1662,12 +1622,7 @@
         "answer": "Full JSON Schema ({type: 'object', properties: {...}}) is most reliable. Flat key-type maps ({field: 'type'}) work for simple schemas but are normalized server-side and may produce errors with complex structures."
       }
     ],
-    "mentions": [
-      "talonic_save_schema",
-      "schema",
-      "JSON Schema",
-      "flat key-type"
-    ]
+    "mentions": ["talonic_save_schema", "schema", "JSON Schema", "flat key-type"]
   },
   {
     "slug": "mcp-talonic-get-balance",
@@ -1793,14 +1748,7 @@
         "answer": "Days of runway at the trailing 30-day average burn rate. The value -1 means no consumption in the trailing window, so runway cannot be computed."
       }
     ],
-    "mentions": [
-      "talonic_get_balance",
-      "credits",
-      "balance",
-      "tier",
-      "burn rate",
-      "runway"
-    ]
+    "mentions": ["talonic_get_balance", "credits", "balance", "tier", "burn rate", "runway"]
   },
   {
     "slug": "mcp-talonic-request-upload",
@@ -1989,12 +1937,7 @@
         "answer": "Two resources: talonic://schemas (browseable list of saved schemas) and talonic://webhooks/reference (static reference for the API's webhook events and payloads)."
       }
     ],
-    "mentions": [
-      "MCP resource",
-      "talonic://schemas",
-      "talonic://webhooks/reference",
-      "webhooks"
-    ]
+    "mentions": ["MCP resource", "talonic://schemas", "talonic://webhooks/reference", "webhooks"]
   },
   {
     "slug": "mcp-cost-and-limits",
@@ -2141,14 +2084,7 @@
         "answer": "The API returns 429 with a reset timestamp. The SDK retries automatically with exponential backoff (up to 3 retries by default)."
       }
     ],
-    "mentions": [
-      "credits",
-      "rate limits",
-      "429",
-      "402",
-      "free tier",
-      "cost"
-    ]
+    "mentions": ["credits", "rate limits", "429", "402", "free tier", "cost"]
   },
   {
     "slug": "mcp-drag-drop",
@@ -2277,13 +2213,7 @@
       }
     ],
     "faq": [],
-    "mentions": [
-      "architecture",
-      "stdio",
-      "HTTP",
-      "Streamable HTTP",
-      "session"
-    ]
+    "mentions": ["architecture", "stdio", "HTTP", "Streamable HTTP", "session"]
   },
   {
     "slug": "mcp-configuration",
@@ -2348,12 +2278,7 @@
       }
     ],
     "faq": [],
-    "mentions": [
-      "TALONIC_API_KEY",
-      "TALONIC_BASE_URL",
-      "configuration",
-      "headers"
-    ]
+    "mentions": ["TALONIC_API_KEY", "TALONIC_BASE_URL", "configuration", "headers"]
   },
   {
     "slug": "mcp-troubleshooting",
@@ -2478,14 +2403,7 @@
       }
     ],
     "faq": [],
-    "mentions": [
-      "troubleshooting",
-      "debugging",
-      "errors",
-      "401",
-      "402",
-      "500"
-    ]
+    "mentions": ["troubleshooting", "debugging", "errors", "401", "402", "500"]
   },
   {
     "slug": "mcp-apps-toolset",
@@ -2519,6 +2437,15 @@
       {
         "type": "paragraph",
         "text": "Reviews of kind 'approval' are human-only by platform policy — an agent resolver receives HTTP 403 and should route the review to a person instead. Agents may always raise reviews: asking for help is part of the protocol."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Builder toolset"
+      },
+      {
+        "type": "paragraph",
+        "text": "Ten further tools cover building an app to a tested state and maintaining it: read the draft logic and bindable fields, interpret rule sentences with plain-language guidance, propose and apply natural-language edits as typed operations, save an acceptance set (labeled ground truth plus tolerance) and check any run against it by pure ledger comparison, read a batch run's per-subject verdicts, and hold natural-language interview turns on Human Reviews with server-side contract validation."
       }
     ],
     "related": [
@@ -2541,11 +2468,6 @@
         "answer": "The app was disabled, its token grant was revoked, or a new version changed the catalog; the tool list follows the token-scoped catalog on each request (hosted) or refresh tick (stdio)."
       }
     ],
-    "mentions": [
-      "talonic_list_apps",
-      "talonic_run_app",
-      "app_<slug>",
-      "talonic_resolve_app_review"
-    ]
+    "mentions": ["talonic_list_apps", "talonic_run_app", "app_<slug>", "talonic_resolve_app_review"]
   }
 ]
