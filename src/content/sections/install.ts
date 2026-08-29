@@ -28,9 +28,9 @@ export const sections: RawSection[] = [
     slug: "install-overview",
     parentSlug: "install",
     title: "Install Overview",
-    seoTitle: "Install Talonic MCP — Talonic Docs",
+    seoTitle: "Install the Talonic MCP Server — Hosted or Local npx",
     description:
-      "Install the Talonic MCP server with a one-line npx invocation. No clone, no build. Works with every MCP client.",
+      "Install the Talonic MCP server two ways: the hosted endpoint at mcp.talonic.com with OAuth or Bearer auth, or a one-line local npx run for stdio clients.",
     content: [
       {
         type: "paragraph",
@@ -56,7 +56,7 @@ export const sections: RawSection[] = [
           "Click **Connect**. You are redirected to Talonic to sign in.",
           "Sign in with Google, Microsoft, or your company SSO.",
           "Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, and `schemas:read`. Pick a workspace if you have multiple.",
-          "You are returned to Claude.ai with the connector live. All sixteen public tools are available in any new conversation.",
+          "You are returned to Claude.ai with the connector live. The full Talonic tool set is available in any new conversation.",
         ],
       },
       {
@@ -108,7 +108,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "All three install paths expose the same sixteen public tools and two resources. The hosted server runs the latest version of `@talonic/mcp` automatically; the local `npx` install picks up the latest version on next client restart when pinned to `@latest`.",
+        text: "All three install paths expose the same public tool set and two resources. The hosted server runs the latest version of `@talonic/mcp` automatically; the local `npx` install picks up the latest version on next client restart when pinned to `@latest`.",
       },
       {
         type: "heading",
@@ -118,7 +118,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "After adding the config and restarting your MCP client, verify the connection by asking the agent to list your schemas. This is a lightweight read-only call that confirms the API key is valid and the server is reachable. If the call succeeds, all sixteen public tools are ready to use.",
+        text: "After adding the config and restarting your MCP client, verify the connection by asking the agent to list your schemas. This is a lightweight read-only call that confirms the API key is valid and the server is reachable. If the call succeeds, the full tool set is ready to use.",
       },
       {
         type: "code",
@@ -195,8 +195,9 @@ export const sections: RawSection[] = [
     slug: "claude-desktop",
     parentSlug: "install",
     title: "Claude Desktop",
-    seoTitle: "Claude Desktop Setup — Talonic MCP",
-    description: "Configure the Talonic MCP server in Claude Desktop on macOS and Windows.",
+    seoTitle: "Set Up Talonic MCP in Claude Desktop on macOS & Windows",
+    description:
+      "Configure the Talonic MCP server in Claude Desktop: edit claude_desktop_config.json on macOS or Windows, fully restart, and verify the tool set connects.",
     content: [
       {
         type: "paragraph",
@@ -208,7 +209,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all sixteen public tools.",
+        text: "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with the full Talonic tool set.",
       },
       {
         type: "paragraph",
@@ -297,8 +298,9 @@ export const sections: RawSection[] = [
     slug: "cursor",
     parentSlug: "install",
     title: "Cursor",
-    seoTitle: "Cursor Setup — Talonic MCP",
-    description: "Configure the Talonic MCP server in Cursor IDE.",
+    seoTitle: "How to Set Up the Talonic MCP Server in the Cursor IDE",
+    description:
+      "Add the Talonic MCP server to Cursor via ~/.cursor/mcp.json, hosted or local npx, then extract structured data from files inside your project workspace.",
     content: [
       {
         type: "paragraph",
@@ -363,6 +365,10 @@ export const sections: RawSection[] = [
         text: "When using the hosted MCP option in Cursor, the connection is established over HTTPS with no local process. This means Cursor starts faster and there is no Node.js dependency. For teams sharing a Cursor workspace configuration, the hosted option is simpler to standardise because every developer only needs an API key — no local Node.js version management needed.",
       },
       {
+        type: "paragraph",
+        text: "To verify the install, open Cursor Settings → MCP: the `talonic` entry should show a green status indicator and list its tools. If it stays red or shows no tools, check that `TALONIC_API_KEY` sits inside the `env` block of `~/.cursor/mcp.json` — Cursor launches MCP servers itself and does not inherit your shell profile — then run `npx -y @talonic/mcp` once in a terminal to surface install-time errors, and reload the window so Cursor re-reads the config.",
+      },
+      {
         type: "callout",
         variant: "info",
         text: "Cursor supports both the hosted and local MCP options. The hosted option is simpler since Cursor can connect directly via HTTPS without spawning a local process.",
@@ -399,8 +405,9 @@ export const sections: RawSection[] = [
     slug: "cline",
     parentSlug: "install",
     title: "Cline",
-    seoTitle: "Cline Setup — Talonic MCP",
-    description: "Configure the Talonic MCP server in the Cline VS Code extension.",
+    seoTitle: "Set Up the Talonic MCP Server in Cline for VS Code",
+    description:
+      "Configure the Talonic MCP server in the Cline VS Code extension, with auto-approval rules letting read-only Talonic tools run without confirmation prompts.",
     content: [
       {
         type: "paragraph",
@@ -492,8 +499,9 @@ export const sections: RawSection[] = [
     slug: "continue",
     parentSlug: "install",
     title: "Continue",
-    seoTitle: "Continue Setup — Talonic MCP",
-    description: "Configure the Talonic MCP server in Continue for VS Code and JetBrains.",
+    seoTitle: "Set Up Talonic MCP in Continue for VS Code & JetBrains",
+    description:
+      "Add the Talonic MCP server to Continue's mcpServers array in ~/.continue/config.json — one config shared by VS Code and JetBrains — and verify it works.",
     content: [
       { type: "paragraph", text: "Edit `~/.continue/config.json`. Add to the `mcpServers` array:" },
       { type: "heading", level: 3, id: "continue-hosted", text: "Hosted (recommended)" },
@@ -527,7 +535,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's sixteen public tools and two resources automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
+        text: "After saving the config, reload your IDE window to pick up the changes. Continue discovers Talonic's public tools and two resources automatically. You can verify the connection by asking the agent to call `talonic_list_schemas` — it should return your saved schemas or an empty list.",
       },
       {
         type: "paragraph",
@@ -604,8 +612,9 @@ export const sections: RawSection[] = [
     slug: "cowork",
     parentSlug: "install",
     title: "Cowork",
-    seoTitle: "Cowork Setup — Talonic MCP",
-    description: "Configure the Talonic MCP server in Cowork.",
+    seoTitle: "Set Up the Talonic MCP Server in Cowork — Quick Guide",
+    description:
+      "Configure the Talonic MCP server in Cowork, browse saved schemas in the resources panel via talonic://schemas, and extract dropped files with one call.",
     content: [
       { type: "paragraph", text: "Open Cowork settings → MCP Servers → Add." },
       { type: "heading", level: 3, id: "cowork-hosted", text: "Hosted (recommended)" },
@@ -614,7 +623,7 @@ export const sections: RawSection[] = [
       { type: "code", language: "json", code: MCP_CONFIG_SNIPPET },
       {
         type: "paragraph",
-        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, the sixteen public tools appear in the tool picker and the `talonic://schemas` and `talonic://webhooks/reference` resources are browseable in the resources panel.",
+        text: "Cowork is a chat-style MCP client that supports drag-and-drop file uploads and resource browsing. After adding the Talonic config, Talonic's public tools appear in the tool picker and the `talonic://schemas` and `talonic://webhooks/reference` resources are browseable in the resources panel.",
       },
       {
         type: "paragraph",
@@ -662,6 +671,10 @@ export const sections: RawSection[] = [
       {
         type: "paragraph",
         text: "For teams onboarding new members, Cowork's visual schema browser is especially useful. A new team member can see all available extraction templates at a glance, understand what fields each schema extracts, and start processing documents immediately without needing to learn schema IDs or ask colleagues which templates exist. Combined with drag-and-drop file uploads, the barrier to entry is as low as it gets.",
+      },
+      {
+        type: "paragraph",
+        text: "To verify the install, start a new chat and confirm Talonic's tools appear in the tool picker and `talonic://schemas` shows in the resources panel. If neither appears, re-open Cowork's MCP Servers settings to confirm the entry saved, check the API key value, and restart Cowork so it relaunches its MCP connections — config edits are only picked up on restart.",
       },
       {
         type: "callout",
