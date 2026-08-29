@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "mcp-introduction",
     parentSlug: "overview",
     title: "Introduction",
-    seoTitle: "MCP Server Introduction — Talonic Docs",
+    seoTitle: "Talonic MCP Server Introduction — Document Extraction",
     description:
-      "Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the Model Context Protocol.",
+      "Official Talonic MCP server for AI agents: extract structured, schema-validated JSON from any document via the Model Context Protocol, hosted or local.",
     content: [
       {
         type: "paragraph",
@@ -15,7 +15,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "Eight tools and two resources: `talonic_extract`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
+        text: "The tool set covers the full document workflow: extraction (`talonic_extract`, `talonic_to_markdown`, `talonic_request_upload`), workspace retrieval (`talonic_search`, `talonic_filter`, `talonic_get_document`), schema management (`talonic_list_schemas`, `talonic_save_schema`), cost visibility (`talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`), and the Agent-task worklist (`talonic_list_agent_tasks` through `talonic_submit_agent_task`), plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
       },
       {
         type: "paragraph",
@@ -74,13 +74,13 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "info",
-        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub.",
+        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub. Building a Node application instead of wiring up an agent? The [Talonic Node SDK](https://talonic.com/docs/sdk/introduction) exposes the same extraction API as a typed client library.",
       },
     ],
     related: [
       { label: "Why Use This", slug: "why-mcp" },
       { label: "Claude Desktop", slug: "claude-desktop" },
-      { label: "Node SDK", slug: "introduction" },
+      { label: "Install Overview", slug: "install-overview" },
     ],
     faq: [
       {
@@ -104,9 +104,9 @@ export const sections: RawSection[] = [
           "The server supports PDF, PNG, JPG, TIFF, DOCX, XLSX, and other common document formats. Documents can be invoices, contracts, receipts, forms, certificates, or any structured or semi-structured document. The extraction pipeline handles OCR, layout analysis, and field extraction server-side.",
       },
       {
-        question: "How many tools does the Talonic MCP server expose?",
+        question: "What tools does the Talonic MCP server expose?",
         answer:
-          "Eight tools and two resources. The tools are talonic_extract, talonic_search, talonic_filter, talonic_get_document, talonic_to_markdown, talonic_list_schemas, talonic_save_schema, and talonic_get_balance. The resources are talonic://schemas and talonic://webhooks/reference.",
+          "Tools for every step of the document workflow: extraction (talonic_extract, talonic_to_markdown, talonic_request_upload), retrieval (talonic_search, talonic_filter, talonic_get_document), schema management (talonic_list_schemas, talonic_save_schema), cost visibility (talonic_get_balance, talonic_get_pricing, talonic_get_usage), and the Agent-task worklist, plus the talonic://schemas and talonic://webhooks/reference resources. See the Tool Reference for the full, current list.",
       },
     ],
     mentions: ["MCP", "Model Context Protocol", "AI agents", "document extraction"],
@@ -115,9 +115,9 @@ export const sections: RawSection[] = [
     slug: "why-mcp",
     parentSlug: "overview",
     title: "Why Use This",
-    seoTitle: "Why Talonic MCP — Talonic Docs",
+    seoTitle: "Why Use the Talonic MCP Server Instead of OCR + LLM",
     description:
-      "Why AI agents should use the Talonic MCP server instead of raw OCR plus LLM calls for document extraction.",
+      "Why AI agents get better document extraction from the Talonic MCP server than raw OCR plus LLM calls: schema validation, confidence scores, stable IDs.",
     content: [
       {
         type: "paragraph",
@@ -125,7 +125,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Seven other tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing saved schemas, saving new ones, and reading the workspace credit balance for budget-aware behaviour.",
+        text: "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Companion tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing and saving schemas, requesting browser-handoff uploads, processing Agent-stage tasks, and reading the workspace credit balance, pricing catalog, and usage breakdown for budget-aware behaviour.",
       },
       {
         type: "paragraph",
@@ -212,9 +212,9 @@ export const sections: RawSection[] = [
     slug: "agent-decision-guide",
     parentSlug: "overview",
     title: "Agent Decision Guide",
-    seoTitle: "Agent Decision Guide — Talonic MCP",
+    seoTitle: "Agent Decision Guide — Choosing the Right Talonic Tool",
     description:
-      "How an AI agent should pick between Talonic's tools, handle low-confidence results, and avoid unnecessary calls.",
+      "How an AI agent should choose between Talonic MCP tools, handle low-confidence extractions, and avoid wasted calls that cost credits or repeat work done.",
     content: [
       {
         type: "paragraph",
@@ -222,7 +222,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The sixteen public tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_request_upload`** hands the user a browser link for files too large to pass through a hosted connector (Claude.ai), **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and the billing tools (**`talonic_get_balance`** for the remaining balance, **`talonic_get_pricing`** for per-unit rates, **`talonic_get_usage`** for per-function spend) let the agent stay budget-aware before and after large batches.",
+        text: "Talonic's public tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_request_upload`** hands the user a browser link for files too large to pass through a hosted connector (Claude.ai), **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and the billing tools (**`talonic_get_balance`** for the remaining balance, **`talonic_get_pricing`** for per-unit rates, **`talonic_get_usage`** for per-function spend) let the agent stay budget-aware before and after large batches.",
       },
       {
         type: "paragraph",
@@ -307,8 +307,28 @@ export const sections: RawSection[] = [
           "**The needed data is already in conversation history** from a previous tool call. Re-use it. Repeat calls cost credits and slow the response.",
           "**The user wants to discuss or revise** an extraction you already produced. Reason over the previous result instead of re-extracting.",
           "**Schema design iteration**. Iterate the schema with the user via `talonic_extract` with an inline schema; only call `talonic_save_schema` once they confirm.",
-          "**Cost, EUR price, and remaining credit balance are not surfaced in v0.1 tool responses.** If the user asks 'how much will this cost' or 'how many credits do I have left', point them to the Talonic dashboard at https://app.talonic.com.",
+          "**Cost questions have dedicated read-only tools.** If the user asks 'how much will this cost', call `talonic_get_pricing`; for 'how many credits do I have left', call `talonic_get_balance`; for 'where did my credits go', call `talonic_get_usage`. Do not guess numbers or send the user to the dashboard for questions these tools answer.",
         ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Worked example: 'invoices over 1000 EUR' is a filter, not an extract",
+        code: `// User: "Which of my invoices are over 1000 EUR?"
+// The documents are already extracted — do NOT re-extract. Filter instead:
+// talonic_filter({
+//   "conditions": [
+//     { "field": "total", "op": "gt", "value": 1000 }
+//   ]
+// })
+// → matching documents with their extracted field values, zero credits spent
+//   on re-processing. Only fall back to talonic_search for conceptual queries
+//   like "the contract about the Berlin office lease".`,
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Rule of thumb: read-only tools (`talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`) are safe to call whenever they help. Credit-consuming or write tools (`talonic_extract`, `talonic_to_markdown` on new files, `talonic_save_schema`) deserve a moment of doubt: is the answer already available without them?",
       },
     ],
     related: [
@@ -340,9 +360,9 @@ export const sections: RawSection[] = [
     slug: "get-api-key",
     parentSlug: "overview",
     title: "Get an API Key",
-    seoTitle: "Get an API Key — Talonic MCP",
+    seoTitle: "Get a Talonic API Key for the MCP Server in 30 Seconds",
     description:
-      "Get a Talonic API key in 30 seconds. Each user runs against their own isolated workspace with private documents and schemas.",
+      "Create a free Talonic API key at app.talonic.com in about 30 seconds, then drop the tlnc_ value into any MCP client config. Each key has its own workspace.",
     content: [
       {
         type: "paragraph",
