@@ -74,7 +74,7 @@ export const sections: RawSection[] = [
       {
         type: "callout",
         variant: "info",
-        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub. Building a Node application instead of wiring up an agent? The [Talonic Node SDK](https://talonic.com/docs/sdk/introduction) exposes the same extraction API as a typed client library.",
+        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub. Building a Node application instead of wiring up an agent? The [Talonic Node SDK](https://talonic.com/docs/sdk) exposes the same extraction API as a typed client library.",
       },
     ],
     related: [

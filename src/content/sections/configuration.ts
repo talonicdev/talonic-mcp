@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "env-variables",
     parentSlug: "configuration",
     title: "Environment Variables",
-    seoTitle: "Configuration — Talonic MCP",
+    seoTitle: "Environment Variables — Talonic MCP Server Reference",
     description:
-      "Environment variables for configuring the Talonic MCP server: API key and optional base URL override.",
+      "Configure the Talonic MCP server with environment variables: the required TALONIC_API_KEY, the optional TALONIC_BASE_URL override, and hosted-mode Bearer auth.",
     content: [
       { type: "paragraph", text: "Set via the `env` block in your MCP client config:" },
       {
@@ -29,7 +29,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The `TALONIC_API_KEY` is the only required configuration. It authenticates every API call the MCP server makes on your behalf. The key must start with `tlnc_` — if you pass a key with a different prefix, the server will reject it at startup with a clear error message.",
+        text: "The `TALONIC_API_KEY` is the only required configuration. It authenticates every API call the MCP server makes on your behalf. Talonic keys start with `tlnc_`. The server checks only that the variable is set — it does not validate the prefix at startup, so a malformed or revoked key boots normally and then fails on the first tool call with a `401`.",
       },
       {
         type: "paragraph",
@@ -41,7 +41,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "If the MCP server cannot read the API key at startup, it exits with a descriptive error. Common causes include a malformed `env` block in the JSON config, a typo in the variable name, or the MCP client not passing environment variables through to the spawned process. Always fully restart the client after editing the config.",
+        text: "If the MCP server cannot read the API key at startup, it exits immediately with `Error: TALONIC_API_KEY environment variable is required.` and a pointer to `https://app.talonic.com`. Common causes include a malformed `env` block in the JSON config, a typo in the variable name, or the MCP client not passing environment variables through to the spawned process. Always fully restart the client after editing the config.",
       },
       {
         type: "heading",
@@ -101,6 +101,40 @@ export const sections: RawSection[] = [
         text: "When using the hosted server at `mcp.talonic.com`, environment variables are not used at all. Instead, the API key is passed in the `Authorization` header as a `Bearer` token. This means the `env` block is irrelevant for hosted configurations — only the `url` and `headers` fields matter. If you switch from local to hosted, remove the `env`, `command`, and `args` fields and replace them with `url` and `headers`.",
       },
       {
+        type: "heading",
+        level: 3,
+        id: "env-self-hosting",
+        text: "Self-hosting the HTTP transport",
+      },
+      {
+        type: "paragraph",
+        text: "The two variables above are everything a local `npx` install reads. If you self-host the streamable-HTTP transport (`npm run start:http`) instead of using `mcp.talonic.com`, a few more variables shape how the server advertises itself to OAuth clients. These are irrelevant for stdio installs and for anyone using the hosted endpoint.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "PORT",
+            type: "number",
+            description: "Port the HTTP transport listens on.",
+            default: "3000",
+          },
+          {
+            name: "MCP_RESOURCE_URL",
+            type: "string",
+            description:
+              "Public URL this deployment advertises as its OAuth protected-resource identifier.",
+            default: "https://mcp.talonic.com",
+          },
+          {
+            name: "OAUTH_AUTHORIZATION_SERVER",
+            type: "string",
+            description: "Authorization server clients are pointed at during OAuth discovery.",
+            default: "https://api.talonic.com",
+          },
+        ],
+      },
+      {
         type: "callout",
         variant: "warning",
         text: "Never commit your `TALONIC_API_KEY` to version control. If using a shared MCP config template, replace the key with a placeholder like `tlnc_your_key_here` before sharing.",
@@ -125,7 +159,7 @@ export const sections: RawSection[] = [
       {
         question: "What happens if the API key is missing or invalid?",
         answer:
-          "The MCP server exits at startup with a descriptive error message. Check that the env block in your config is correctly formatted and the key starts with tlnc_. Restart the client after fixing.",
+          "A missing key exits at startup with 'Error: TALONIC_API_KEY environment variable is required.' An invalid key is different: the server does not validate the prefix at startup, so it boots normally and the first tool call fails with a 401. Check that the env block is correctly formatted, then restart the client.",
       },
       {
         question: "Can I set the API key in my shell profile instead of the config file?",

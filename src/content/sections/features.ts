@@ -145,7 +145,7 @@ api.talonic.com`,
       },
       {
         type: "paragraph",
-        text: "The MCP server acts as a thin translation layer between the MCP protocol and the Talonic REST API — the same API the [Talonic Node SDK](https://talonic.com/docs/sdk/introduction) wraps for application code. It receives tool calls from the agent over **stdio** (local mode) or **streamable HTTP** (hosted mode), validates parameters, constructs the appropriate API request, and returns the response in the MCP-standard `content` format the agent expects.",
+        text: "The MCP server acts as a thin translation layer between the MCP protocol and the Talonic REST API — the same API the [Talonic Node SDK](https://talonic.com/docs/sdk) wraps for application code. It receives tool calls from the agent over **stdio** (local mode) or **streamable HTTP** (hosted mode), validates parameters, constructs the appropriate API request, and returns the response in the MCP-standard `content` format the agent expects.",
       },
       {
         type: "paragraph",
