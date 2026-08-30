@@ -11,9 +11,13 @@
 | Surface in `talonic-mcp` | Built into | Consumed by | Feeds these pages |
 |---|---|---|---|
 | **`src/content/sections/*.ts`** (typed TS modules) | `dist/content.js` via `tsup`, exported as `@talonic/mcp/content` subpath | the **website** (`@/app/docs/mcp/McpContentPage` calls `getMcpSection(slug)`) | **`talonic.com/docs/mcp/*`** — all MCP docs pages |
-| **`docs/sections.json`** (hand-edited JSON) | shipped as-is; pulled at build time by the **platform** repo's `sync-external-docs.yml` workflow | the **`@talonic/docs`** npm package (published from the platform monorepo) | `talonic.com/docs/sdk/*`, `talonic.com/docs/api/*`, `talonic.com/docs/platform/*` — **NOT** `/docs/mcp/*` |
+| **`docs/sections.json`** (hand-edited JSON) | shipped as-is; pulled at build time by the **platform** repo's `sync-external-docs.yml` workflow | the **`@talonic/docs`** npm package (published from the platform monorepo), where it becomes the `mcp` content domain (`packages/docs/src/content/mcp/sections.json`, exposed as `getMcpSection`/`getAllMcpSections`) | **no live page** — see below |
 
-**Critical implication:** if you edit `docs/sections.json` thinking you are updating the MCP docs page, **nothing on `talonic.com/docs/mcp` will change** — that file feeds the SDK / API / Platform doc pages on the website, not MCP. To update MCP docs you must edit `src/content/sections/*.ts`.
+**Critical implication:** if you edit `docs/sections.json` thinking you are updating the MCP docs page, **nothing on `talonic.com/docs/mcp` will change**. To update MCP docs you must edit `src/content/sections/*.ts`.
+
+**Where `docs/sections.json` actually ends up.** The sync lands it in `@talonic/docs` as that package's `mcp` domain — it does *not* feed the SDK, API, or Platform pages, which have their own content in the platform monorepo. As of 2026-08-29 no consumer renders that domain: the website imports `getMcpSection` from `@talonic/mcp/content`, never from `@talonic/docs`, and the platform's `packages/web` does not reference it at all. The only thing that reads it today is `packages/docs/src/content/validate.ts`, which link-checks it as a non-owned domain (violations are warnings, not errors, because this repo is the source of truth).
+
+Treat it as a **maintained-but-dormant surface**: the publish workflow's docs-drift guard still requires it to move whenever `src/tools/**` changes, so it must stay accurate, but a fix there reaches no user until something renders the domain. Prefer keeping it a faithful summary of `src/content/sections/*.ts` rather than investing in depth it cannot deliver.
 
 (This split caused weeks of silent drift in May 2026; the fix that finally surfaced the gap is documented in this repo's git history under commit `eac4dd6 docs(content): close MCP-docs gap on talonic.com`.)
 

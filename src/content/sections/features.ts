@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "drag-and-drop",
     parentSlug: "features",
     title: "Drag & Drop Files",
-    seoTitle: "Drag & Drop File Support — Talonic MCP",
+    seoTitle: "Drag & Drop File Extraction with the Talonic MCP Server",
     description:
-      "Drop PDFs and documents directly into Claude Desktop, Cursor, or Cowork and extract data without file path configuration.",
+      "Drop PDFs and other documents straight into Claude Desktop, Cursor, or Cowork and extract structured data — no file paths, no upload configuration needed.",
     content: [
       {
         type: "paragraph",
@@ -125,9 +125,9 @@ export const sections: RawSection[] = [
     slug: "how-it-works",
     parentSlug: "features",
     title: "How It Works",
-    seoTitle: "How Talonic MCP Works — Talonic Docs",
+    seoTitle: "How the Talonic MCP Server Works — Architecture Guide",
     description:
-      "Architecture of the Talonic MCP server: MCP protocol over stdio to the agent, HTTPS with Bearer auth to api.talonic.com.",
+      "Architecture of the Talonic MCP server: MCP over stdio or Streamable HTTP on the agent side, HTTPS calls with Bearer auth to api.talonic.com on the other.",
     content: [
       {
         type: "code",
@@ -145,7 +145,7 @@ api.talonic.com`,
       },
       {
         type: "paragraph",
-        text: "The MCP server acts as a thin translation layer between the MCP protocol and the Talonic REST API. It receives tool calls from the agent over **stdio** (local mode) or **streamable HTTP** (hosted mode), validates parameters, constructs the appropriate API request, and returns the response in the MCP-standard `content` format the agent expects.",
+        text: "The MCP server acts as a thin translation layer between the MCP protocol and the Talonic REST API — the same API the [Talonic Node SDK](https://talonic.com/docs/sdk) wraps for application code. It receives tool calls from the agent over **stdio** (local mode) or **streamable HTTP** (hosted mode), validates parameters, constructs the appropriate API request, and returns the response in the MCP-standard `content` format the agent expects.",
       },
       {
         type: "paragraph",
@@ -211,7 +211,7 @@ api.talonic.com`,
     ],
     related: [
       { label: "Environment Variables", slug: "env-variables" },
-      { label: "Node SDK", slug: "introduction" },
+      { label: "Common Issues", slug: "common-issues" },
       { label: "Install Overview", slug: "install-overview" },
     ],
     faq: [

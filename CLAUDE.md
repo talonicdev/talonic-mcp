@@ -7,9 +7,9 @@ This repo is the **Talonic MCP server** (`@talonic/mcp`): document-extraction AP
 ## ⚠️ Before touching docs content — two parallel surfaces
 
 - `src/content/sections/*.ts` → `@talonic/mcp/content` → renders **`talonic.com/docs/mcp/*`**.
-- `docs/sections.json` → `@talonic/docs` (synced via the platform repo) → renders **`talonic.com/docs/{sdk,api,platform}/*`**, **NOT `/docs/mcp/`**.
+- `docs/sections.json` → `@talonic/docs` (synced via the platform repo) → becomes that package's `mcp` content domain, which **nothing currently renders**. It does *not* feed `/docs/{sdk,api,platform}/*` — those have their own content in the platform monorepo.
 
-Edit the wrong one and your change silently never appears. The full map, the add-a-tool checklist, the failure-mode table, and the CI-token map are in [`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md). Read it before any non-trivial doc change.
+Edit the wrong one and your change silently never appears. `docs/sections.json` is maintained-but-dormant: the publish workflow's docs-drift guard still requires it to stay in step with `src/tools/**`, so keep it accurate, but user-visible MCP docs only come from `src/content/sections/*.ts`. The full map, the add-a-tool checklist, the failure-mode table, and the CI-token map are in [`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md). Read it before any non-trivial doc change.
 
 ## ⚠️ A push to `main` is a release
 

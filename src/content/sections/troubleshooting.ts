@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "common-issues",
     parentSlug: "troubleshooting",
     title: "Common Issues",
-    seoTitle: "Troubleshooting — Talonic MCP",
+    seoTitle: "Common Issues — Talonic MCP Server Troubleshooting",
     description:
-      "Solutions for common Talonic MCP server issues: missing API key, server not appearing, extract errors, and filter validation.",
+      "Fix the most common Talonic MCP server problems: a missing API key, tools not appearing in the client, extract schema errors, and filter validation failures.",
     content: [
       {
         type: "paragraph",
@@ -190,17 +190,17 @@ export const sections: RawSection[] = [
     slug: "known-limitations",
     parentSlug: "troubleshooting",
     title: "Known Limitations",
-    seoTitle: "Known Limitations — Talonic MCP",
+    seoTitle: "Known Limitations of the Talonic MCP Server and Tools",
     description:
-      "Current limitations in the Talonic MCP server v0.1: schema requirement, filter discoverability and typing, Claude.ai drag-and-drop stall, and unsurfaced cost.",
+      "Limitations of the Talonic MCP server: the extract schema requirement, filter typing rules, the Claude.ai drag-and-drop stall, and header-based cost reporting.",
     content: [
       {
         type: "paragraph",
-        text: "The Talonic MCP server v0.1 is production-ready but has a number of known limitations that are planned for future releases. Understanding these limitations helps agents make better decisions about when and how to use each tool.",
+        text: "The Talonic MCP server is production-ready but has a number of known limitations that are planned for future releases. Understanding these limitations helps agents make better decisions about when and how to use each tool.",
       },
       {
         type: "paragraph",
-        text: "Most limitations relate to the extraction pipeline's maturity in v0.1. Certain filter operators, cost information, and per-field provenance have constraints. These are documented here so agent developers can set accurate expectations and build appropriate fallbacks.",
+        text: "Most limitations relate to the maturity of the extraction pipeline. Certain filter operators, cost reporting, and per-field provenance have constraints. These are documented here so agent developers can set accurate expectations and build appropriate fallbacks.",
       },
       {
         type: "list",
@@ -211,12 +211,12 @@ export const sections: RawSection[] = [
           "**Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.",
           "**`is_not_empty` filter checks materialized data.** Results reflect values within seconds of extraction completing. For batch-mode documents, values are materialized after the batch poll cycle completes.",
           "**Dragging a file directly into a Claude.ai chat does not work through the hosted connector** — use `talonic_request_upload` instead. A base64-encoded real PDF exceeds Claude.ai's tool-call argument cap (~32 KB decoded / ~43 KB base64, measured against production), so `file_data` is silently truncated and the API returns `null` fields. This is a structural platform limit, not a Talonic bug. The supported path is the browser-handoff flow: `talonic_request_upload` returns an `app.talonic.com/u/<token>` link the user opens to drop the file; poll `talonic_get_document` until `status` is `completed`, then `talonic_extract` by `document_id`. Alternatives: `file_url` or a pre-uploaded `document_id`. Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) have no cap and use `file_data` directly.",
-          "**Cost, EUR price, and remaining balance are not surfaced.** The API does not return them yet. Credit balance must be checked in the Talonic dashboard.",
+          "**Cost reporting depends on response headers.** `talonic_extract` returns a `cost` object (`costCredits`, `costEur`, `balanceCredits`, and the registry-vs-AI cell split) parsed from the `X-Talonic-*` response headers. It is `null` for non-extract calls and may be absent against older API deployments that do not send those headers, so treat it as optional and fall back to `talonic_get_balance` rather than assuming it is present.",
         ],
       },
       {
         type: "paragraph",
-        text: "Agents should handle these limitations gracefully. For the schema requirement, always construct or reference a schema before calling `talonic_extract`. For the missing cost information, direct users to the Talonic dashboard at `https://app.talonic.com` when they ask about pricing or credit balance.",
+        text: "Agents should handle these limitations gracefully. For the schema requirement, always construct or reference a schema before calling `talonic_extract`. When a user asks what a run cost, read the `cost` object off the extract response and fall back to `talonic_get_balance` if it is absent; for rates and historical spend, use `talonic_get_pricing` and `talonic_get_usage` rather than guessing.",
       },
       {
         type: "paragraph",
@@ -269,7 +269,7 @@ export const sections: RawSection[] = [
       {
         question: "What are the known limitations of Talonic MCP?",
         answer:
-          "talonic_extract needs fields specified via schema, schema_id, or auto_schema: true (open capture). Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. Cost and balance are not surfaced in tool responses yet.",
+          "talonic_extract needs fields specified via schema, schema_id, or auto_schema: true (open capture). Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. The cost object on an extract response is header-derived, so it can be absent against older API deployments.",
       },
       {
         question: "Can I extract without knowing the fields up front (schema-less)?",
@@ -279,7 +279,7 @@ export const sections: RawSection[] = [
       {
         question: "How do I check my credit balance or costs?",
         answer:
-          "Cost information is not surfaced in v0.1 tool responses. Check your credit balance and usage in the Talonic dashboard at app.talonic.com.",
+          "For a single extraction, read the cost object on the talonic_extract response: costCredits, costEur, and balanceCredits. For workspace-level figures, call talonic_get_balance for the remaining balance, talonic_get_pricing for per-unit rates, and talonic_get_usage for what has already been spent.",
       },
       {
         question: "How do I report a new limitation or bug?",
@@ -305,9 +305,9 @@ export const sections: RawSection[] = [
     slug: "upgrading",
     parentSlug: "troubleshooting",
     title: "Upgrading",
-    seoTitle: "Upgrading from Older Versions — Talonic MCP",
+    seoTitle: "Upgrading the Talonic MCP Server from Older Versions",
     description:
-      "How to upgrade from older @talonic/mcp versions that had the silent-bin bug affecting MCP client launches.",
+      "Upgrade @talonic/mcp from versions before 0.1.3, where a silent-bin bug stopped the server from launching through the npm symlink that every MCP client uses.",
     content: [
       {
         type: "paragraph",

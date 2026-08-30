@@ -16,7 +16,7 @@ Before changing **any** documentation content, internalise this — it has cause
 | Edit this… | …to change this page |
 | --- | --- |
 | `src/content/sections/*.ts` → `@talonic/mcp/content` | **`talonic.com/docs/mcp/*`** (the MCP docs) |
-| `docs/sections.json` → `@talonic/docs` (synced via the platform repo) | `talonic.com/docs/{sdk,api,platform}/*` — **NOT** `/docs/mcp/` |
+| `docs/sections.json` → `@talonic/docs` (synced via the platform repo) | the `mcp` content domain of `@talonic/docs`, which **no page currently renders** — **NOT** `/docs/mcp/`, and not `/docs/{sdk,api,platform}/*` either |
 
 If you edit `docs/sections.json` expecting the MCP docs page to change, **nothing on `/docs/mcp` will move.** Full architecture, the four-file checklist for adding a tool, the failure-mode table, and the CI-token map live in **[`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md)** — read it before any non-trivial doc change.
 
@@ -115,7 +115,7 @@ Always run typecheck + test + format:check before any push.
 
 `.github/workflows/publish.yml` runs on push to `main` touching `src/**`, `docs/**`, or `package.json`:
 
-1. **Docs-drift guard** — fails if `src/tools/**`, `src/http-server.ts`, `src/server-factory.ts`, or `src/resources/**` changed without `docs/sections.json`. Opt out with `[skip docs]` in a commit message **only** for genuinely non-doc-affecting changes (refactors, internal fixes, CI, debug instrumentation). ⚠️ This guard watches the *SDK/API/Platform* surface, not the MCP docs surface — it does **not** enforce that `src/content/sections/*.ts` was updated when tools change. Discipline + `docs-pipeline.md` are the only enforcement there.
+1. **Docs-drift guard** — fails if `src/tools/**`, `src/http-server.ts`, `src/server-factory.ts`, or `src/resources/**` changed without `docs/sections.json`. Opt out with `[skip docs]` in a commit message **only** for genuinely non-doc-affecting changes (refactors, internal fixes, CI, debug instrumentation). ⚠️ This guard watches the dormant `docs/sections.json` surface, not the live MCP docs surface — it does **not** enforce that `src/content/sections/*.ts` was updated when tools change. Discipline + `docs-pipeline.md` are the only enforcement there.
 2. Build, test, auto-bump patch version, sync `server.json`.
 3. `npm publish` (`NPM_TOKEN`).
 4. MCP Registry publish (`mcp-publisher`, GitHub OIDC).

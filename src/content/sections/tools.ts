@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "talonic-extract",
     parentSlug: "tools",
     title: "talonic_extract",
-    seoTitle: "talonic_extract Tool — Talonic MCP",
+    seoTitle: "talonic_extract — Structured Document Extraction Tool",
     description:
-      "Extract structured, schema-validated data from a document. Returns clean JSON with per-field confidence scores.",
+      "MCP tool that extracts structured, schema-validated JSON from documents with per-field confidence scores. Accepts file data, paths, URLs, or document IDs.",
     content: [
       { type: "paragraph", text: "Extract structured, schema-validated data from a document." },
       {
@@ -227,9 +227,9 @@ export const sections: RawSection[] = [
     slug: "talonic-search",
     parentSlug: "tools",
     title: "talonic_search",
-    seoTitle: "talonic_search Tool — Talonic MCP",
+    seoTitle: "talonic_search — Workspace Omnisearch Tool for Agents",
     description:
-      "Omnisearch across documents, fields, sources, and schemas in the workspace. Supports conceptual and fuzzy queries.",
+      "MCP omnisearch tool across documents, fields, sources, and schemas in a Talonic workspace. Handles conceptual, fuzzy queries and returns typed field matches.",
     content: [
       {
         type: "paragraph",
@@ -393,9 +393,9 @@ export const sections: RawSection[] = [
     slug: "talonic-filter",
     parentSlug: "tools",
     title: "talonic_filter",
-    seoTitle: "talonic_filter Tool — Talonic MCP",
+    seoTitle: "talonic_filter — Filter Documents by Extracted Fields",
     description:
-      "Filter documents by extracted field values using composable conditions like eq, gt, between, and contains.",
+      "MCP tool that filters workspace documents by extracted field values with composable conditions — eq, gt, between, contains — plus typing warnings surfaced.",
     content: [
       {
         type: "paragraph",
@@ -605,9 +605,9 @@ export const sections: RawSection[] = [
     slug: "talonic-get-document",
     parentSlug: "tools",
     title: "talonic_get_document",
-    seoTitle: "talonic_get_document Tool — Talonic MCP",
+    seoTitle: "talonic_get_document — Document Metadata & Status Tool",
     description:
-      "Fetch full metadata for a single document by ID, including processing log and link URLs.",
+      "MCP tool that fetches one document's metadata by ID: processing status, page count, and dashboard links. The polling primitive for browser-handoff uploads.",
     content: [
       {
         type: "paragraph",
@@ -742,9 +742,9 @@ export const sections: RawSection[] = [
     slug: "talonic-to-markdown",
     parentSlug: "tools",
     title: "talonic_to_markdown",
-    seoTitle: "talonic_to_markdown Tool — Talonic MCP",
+    seoTitle: "talonic_to_markdown — OCR Documents to Clean Markdown",
     description:
-      "Get OCR-converted markdown for a document. Accepts document_id, file_data + filename, file_path, or file_url.",
+      "MCP tool that returns OCR-converted markdown for a whole document. Accepts document_id, file_data plus filename, file_path, or file_url — no schema needed.",
     content: [
       {
         type: "paragraph",
@@ -900,8 +900,9 @@ Payment terms: Net 30`,
     slug: "talonic-list-schemas",
     parentSlug: "tools",
     title: "talonic_list_schemas",
-    seoTitle: "talonic_list_schemas Tool — Talonic MCP",
-    description: "List all saved schemas in the workspace as compact summaries.",
+    seoTitle: "talonic_list_schemas — List Saved Extraction Schemas",
+    description:
+      "MCP tool that lists every saved schema in your Talonic workspace with IDs, names, and full field definitions, so agents reuse schemas instead of redesigning.",
     content: [
       {
         type: "paragraph",
@@ -1049,8 +1050,9 @@ Payment terms: Net 30`,
     slug: "talonic-save-schema",
     parentSlug: "tools",
     title: "talonic_save_schema",
-    seoTitle: "talonic_save_schema Tool — Talonic MCP",
-    description: "Save a schema definition to the workspace for reuse across extractions.",
+    seoTitle: "talonic_save_schema — Save Reusable Extraction Schemas",
+    description:
+      "MCP tool that persists a JSON Schema for reuse across extractions. Returns a schema_id (UUID or SCH-XXXXXXXX) to pass on every future talonic_extract call.",
     content: [
       {
         type: "paragraph",
@@ -1252,9 +1254,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-balance",
     parentSlug: "tools",
     title: "talonic_get_balance",
-    seoTitle: "talonic_get_balance Tool — Talonic MCP",
+    seoTitle: "talonic_get_balance — Check Credits, Burn Rate, Runway",
     description:
-      "MCP tool that returns the current Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next monthly tier-reset timestamp.",
+      "MCP tool returning your Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next tier reset — for budget-aware agent behaviour.",
     content: [
       {
         type: "paragraph",
@@ -1363,10 +1365,16 @@ Payment terms: Net 30`,
         type: "paragraph",
         text: "The `burn_rate_30d_credits` field shows total consumption over the trailing 30 days, not a daily average. Agents can divide by 30 to estimate daily usage. Combined with `balance_credits`, this provides a clear picture of workspace sustainability. A high burn rate with a low balance signals the need for a plan upgrade or reduced usage before the next tier reset.",
       },
+      {
+        type: "callout",
+        variant: "info",
+        text: "`talonic_get_balance` is read-only and never consumes credits, so it is always safe to call. Top-ups and plan changes are deliberately not exposed at the MCP layer — for those, send the user to the dashboard at [app.talonic.com](https://app.talonic.com) or the plan overview at [talonic.com/pricing](https://talonic.com/pricing).",
+      },
     ],
     related: [
       { label: "talonic_extract", slug: "talonic-extract" },
-      { label: "Pricing", slug: "pricing" },
+      { label: "talonic_get_pricing", slug: "talonic-get-pricing" },
+      { label: "talonic_get_usage", slug: "talonic-get-usage" },
     ],
     faq: [
       {
@@ -1396,9 +1404,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-pricing",
     parentSlug: "tools",
     title: "talonic_get_pricing",
-    seoTitle: "talonic_get_pricing Tool — Talonic MCP",
+    seoTitle: "talonic_get_pricing — Credit Pricing Catalog for Agents",
     description:
-      "MCP tool that returns the machine-readable Talonic credit pricing catalog: fixed per-unit credit rates, EUR equivalents, the credits-per-EUR conversion, and processing-mode multipliers, so an agent can predict spend before running anything.",
+      "MCP tool that returns Talonic's public credit pricing catalog: per-unit rates, EUR equivalents, and batch multipliers, so agents can predict spend upfront.",
     content: [
       {
         type: "paragraph",
@@ -1498,6 +1506,15 @@ Payment terms: Net 30`,
         type: "paragraph",
         text: "The catalog distinguishes billable units from free ones. Document page ingestion, structuring cells filled by fresh model reasoning, and intelligence operations carry a cost; Field Registry resolved cells, delivery, and validation are free. A document whose fields are answered entirely from the Field Registry therefore incurs only its page-ingestion cost, which an agent can surface as a reason to reuse schemas across similar documents.",
       },
+      {
+        type: "paragraph",
+        text: "Pricing pairs naturally with the other two cost tools. Before a job, quote it from the catalog; afterwards, verify what it actually cost with `talonic_get_usage`, whose `operation_type` values match the catalog's unit identifiers, and check the remaining headroom with `talonic_get_balance`. Because every estimate is derived from the live catalog rather than numbers baked into the agent's prompt, quotes stay correct even when Talonic adjusts a rate or adds a new billable unit.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Rates are fixed per unit rather than token-based, so a quote computed from the catalog is exact, not an estimate band. The only variables the agent needs are the unit counts (pages, cells, operations) and the processing mode.",
+      },
     ],
     related: [
       { label: "talonic_get_usage", slug: "talonic-get-usage" },
@@ -1534,9 +1551,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-usage",
     parentSlug: "tools",
     title: "talonic_get_usage",
-    seoTitle: "talonic_get_usage Tool — Talonic MCP",
+    seoTitle: "talonic_get_usage — Per-Function Credit Usage Reports",
     description:
-      "MCP tool that returns per-function credit consumption for the workspace over a trailing window, so an agent can see where credits went across extraction, structuring, and intelligence operations.",
+      "MCP tool that breaks down Talonic credit consumption by platform function over a trailing window (default 30 days), ordered by spend to show cost drivers.",
     content: [
       {
         type: "paragraph",
@@ -1623,6 +1640,15 @@ Payment terms: Net 30`,
         type: "paragraph",
         text: "The figures read from the credit transaction ledger, so they reconcile exactly with the balance and history reported elsewhere. The `operation_type` values match the unit identifiers in the pricing catalog, which lets an agent join usage to rates and explain not just how many credits a function consumed but why. To express any figure in euros, divide by the credits-per-EUR rate from the pricing catalog.",
       },
+      {
+        type: "paragraph",
+        text: "A practical reporting pattern: call `talonic_get_usage` with `days: 7` for a weekly report, join each `operation_type` row to its catalog line from `talonic_get_pricing`, and present spend per function in both credits and euros alongside the operation counts. Because the window is clamped to 1–365 days, month-over-month comparisons are two calls with different `days` values — no client-side bookkeeping or stored history is needed.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "`talonic_get_usage` is read-only and free to call. An empty `by_function` breakdown usually means no billable operations were charged in the window — see the FAQ below on shadow-mode metering — so treat it as 'nothing charged', not as an error.",
+      },
     ],
     related: [
       { label: "talonic_get_pricing", slug: "talonic-get-pricing" },
@@ -1658,9 +1684,9 @@ Payment terms: Net 30`,
     slug: "talonic-request-upload",
     parentSlug: "tools",
     title: "talonic_request_upload",
-    seoTitle: "talonic_request_upload Tool — Talonic MCP",
+    seoTitle: "talonic_request_upload — Browser-Handoff File Uploads",
     description:
-      "Request a browser-handoff upload link for files that can't be delivered via tool-call arguments. Returns a pre-allocated document_id, an upload URL, and an expiry timestamp.",
+      "MCP tool that mints a browser upload link for files too large for tool-call arguments. Returns a document_id, upload URL, and expiry for hosted connectors.",
     content: [
       {
         type: "paragraph",
@@ -1826,13 +1852,21 @@ Payment terms: Net 30`,
     slug: "talonic-list-agent-tasks",
     parentSlug: "tools",
     title: "talonic_list_agent_tasks",
-    seoTitle: "talonic_list_agent_tasks Tool — Talonic MCP",
+    seoTitle: "talonic_list_agent_tasks — Agent Worklist for Documents",
     description:
-      "List document-scoped work waiting at Agent stages in the current Talonic workspace.",
+      "MCP tool that lists Agent-stage tasks awaiting external processing in your Talonic workspace — metadata only, with status filters and cursor pagination.",
     content: [
       {
         type: "paragraph",
         text: "List Agent-stage tasks visible to the current workspace credential. The response contains task metadata and cursor pagination; payload data is deliberately fetched one task at a time so each disclosure can be audited.",
+      },
+      {
+        type: "paragraph",
+        text: "Agent stages are pipeline steps that park a running document until an external agent supplies a set of declared output fields — a risk assessment, an enrichment lookup, a judgment call the pipeline cannot make itself. When a document reaches an enabled Agent stage, the platform captures an immutable input snapshot, creates a task, and waits. This tool is the entry point of the pull workflow: it shows what work exists without exposing any document data.",
+      },
+      {
+        type: "paragraph",
+        text: "Each row in `data[]` carries identifiers (`id`, `document_id`, `pipeline_id`, `stage_id`), the lifecycle `status` (`available`, `claimed`, `submitted`, `timed_out`, or `cancelled`), the current `execution_epoch`, and the timing fields `claimed_at`, `lease_expires_at`, `timeout_at`, `submitted_at`, and `created_at`. That is enough to decide which task to inspect next — and nothing more, by design. `pagination.has_more` and `pagination.next_cursor` drive paging.",
       },
       {
         type: "heading",
@@ -1872,6 +1906,32 @@ Payment terms: Net 30`,
         ],
       },
       {
+        type: "code",
+        language: "json",
+        title: "Tool input and response",
+        code: `// talonic_list_agent_tasks({ "status": "available", "limit": 2 })
+{
+  "data": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "document_id": "22222222-2222-4222-8222-222222222222",
+      "stage_id": "33333333-3333-4333-8333-333333333333",
+      "status": "available",
+      "execution_epoch": 1,
+      "claimed_at": null,
+      "lease_expires_at": null,
+      "timeout_at": "2026-08-30T12:00:00.000Z",
+      "created_at": "2026-08-29T09:15:00.000Z"
+    }
+  ],
+  "pagination": { "has_more": false, "next_cursor": null }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: 'For a long-running worker loop, list with `status: "available"` on a modest interval rather than a tight poll, and page with `cursor` only when `has_more` is true. Filtering by `claimed` or `timed_out` is useful for supervision — spotting tasks another worker abandoned (their lease expired but they were never resubmitted) that are now eligible for reclaiming via `talonic_claim_agent_task`.',
+      },
+      {
         type: "callout",
         text: "An empty worklist is normal: tasks exist only when a running document reaches an enabled Agent stage and the credential's Sources-IAM rules allow it.",
       },
@@ -1879,12 +1939,23 @@ Payment terms: Net 30`,
     related: [
       { label: "talonic_get_agent_task", slug: "talonic-get-agent-task" },
       { label: "talonic_claim_agent_task", slug: "talonic-claim-agent-task" },
+      { label: "talonic_submit_agent_task", slug: "talonic-submit-agent-task" },
     ],
     faq: [
       {
         question: "Does listing Agent tasks expose document data?",
         answer:
           "No. The list returns metadata only. Fetching one task's immutable input snapshot uses talonic_get_agent_task and is recorded as an audited disclosure.",
+      },
+      {
+        question: "What do the Agent task statuses mean?",
+        answer:
+          "available means no one holds the task; claimed means an agent holds a live lease; submitted means outputs were accepted and the document resumed; timed_out means the stage's deadline passed without a submission; cancelled means the platform withdrew the task, for example because the document was removed or the stage was reconfigured.",
+      },
+      {
+        question: "How does pagination work on the Agent-task worklist?",
+        answer:
+          "Pass limit (1-100, default 50) to size the page. When pagination.has_more is true, pass the opaque pagination.next_cursor value as cursor on the next call. Cursors encode a position, not a filter, so keep the same status filter across pages.",
       },
     ],
     mentions: ["Agent stage", "worklist", "MCP agent", "cursor pagination"],
@@ -1893,13 +1964,21 @@ Payment terms: Net 30`,
     slug: "talonic-get-agent-task",
     parentSlug: "tools",
     title: "talonic_get_agent_task",
-    seoTitle: "talonic_get_agent_task Tool — Talonic MCP",
+    seoTitle: "talonic_get_agent_task — Fetch an Agent Task's Payload",
     description:
-      "Fetch one Agent task's immutable document snapshot, instructions, and declared output contract.",
+      "MCP tool that fetches one Agent task's immutable input snapshot, instructions, and declared output contract. Every payload fetch is an audited disclosure.",
     content: [
       {
         type: "paragraph",
         text: "Fetch the immutable input snapshot captured when one document reached an Agent stage. The payload also carries stage instructions, timeout policy, and the only output fields the agent may return.",
+      },
+      {
+        type: "paragraph",
+        text: "The payload extends the metadata from `talonic_list_agent_tasks` with four fields. `input_snapshot` is the frozen view of the document's extracted data at the moment it entered the stage — later edits to the document do not leak into a running task. `output_contract` declares every field the agent may submit, each with a key, a `dataType`, and a `required` flag. `instructions` is the stage author's free-text brief. `timeout_fallthrough` (`hold`, `skip`, or `route_to_review`) says what happens to the document if nobody submits before `timeout_at`.",
+      },
+      {
+        type: "paragraph",
+        text: "Fetching a task does not lease it: another agent can still claim the work while you are reading it. Treat get as the inspection step — confirm the instructions and contract are something you can actually fulfil — then take the lease with `talonic_claim_agent_task` before doing any real processing. If a claim races you to it, pick another task from the list rather than waiting on that one.",
       },
       {
         type: "param-table",
@@ -1911,6 +1990,16 @@ Payment terms: Net 30`,
             description: "Task ID returned by `talonic_list_agent_tasks`.",
           },
         ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "task_id": "11111111-1111-4111-8111-111111111111" }`,
+      },
+      {
+        type: "paragraph",
+        text: "Payload access is deliberately narrow. The worklist never includes snapshots, and each `talonic_get_agent_task` call is recorded as an audited disclosure of that document's data to the calling credential. Fetch payloads for tasks you actually intend to process rather than sweeping the queue — it keeps the audit trail meaningful and avoids disclosing document contents your workflow never needed.",
       },
       {
         type: "code",
@@ -1934,6 +2023,16 @@ Payment terms: Net 30`,
         answer:
           "No. It is captured when the document enters the Agent stage and remains immutable for that task. Results are validated against the accompanying output_contract.",
       },
+      {
+        question: "Does fetching an Agent task claim it?",
+        answer:
+          "No. talonic_get_agent_task is read-only; the task stays available and another agent can claim it while you inspect. Call talonic_claim_agent_task to take the lease before processing.",
+      },
+      {
+        question: "What does timeout_fallthrough mean?",
+        answer:
+          "It is the stage's policy for a task nobody submits before timeout_at: hold keeps the document parked, skip lets the document continue without the agent outputs, and route_to_review sends it to human review. Use it to judge how urgent a task is.",
+      },
     ],
     mentions: ["immutable snapshot", "output contract", "audit trail", "document task"],
   },
@@ -1941,12 +2040,17 @@ Payment terms: Net 30`,
     slug: "talonic-claim-agent-task",
     parentSlug: "tools",
     title: "talonic_claim_agent_task",
-    seoTitle: "talonic_claim_agent_task Tool — Talonic MCP",
-    description: "Acquire a leased claim on an available Agent task before processing it.",
+    seoTitle: "talonic_claim_agent_task — Lease an Agent Task Safely",
+    description:
+      "MCP tool that claims an available Agent task before processing. Returns the payload plus an execution epoch and lease so two agents never collide on a task.",
     content: [
       {
         type: "paragraph",
         text: "Claim a task before processing. A successful claim returns the full payload plus a new `execution_epoch` and `lease_expires_at`; both prevent two agents from writing results for the same task.",
+      },
+      {
+        type: "paragraph",
+        text: "The claim is the concurrency boundary of the Agent-task workflow. Listing and fetching are read-only and race-free; the moment real work starts, exactly one actor must own the task. The lease makes ownership crash-safe — if the claimant dies, the lease simply expires and the task becomes reclaimable — while the epoch makes ownership unambiguous: whichever claim is newest wins, and everything an older claimant tries to write afterwards is rejected.",
       },
       {
         type: "param-table",
@@ -1960,6 +2064,22 @@ Payment terms: Net 30`,
         ],
       },
       {
+        type: "code",
+        language: "json",
+        title: "Tool input and response (payload fields elided)",
+        code: `// talonic_claim_agent_task({ "task_id": "11111111-1111-4111-8111-111111111111" })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "status": "claimed",
+  "execution_epoch": 2,
+  "claimed_at": "2026-08-29T10:00:00.000Z",
+  "lease_expires_at": "2026-08-29T10:10:00.000Z",
+  "input_snapshot": { "...": "full payload, same shape as talonic_get_agent_task" },
+  "output_contract": [{ "key": "risk_score", "dataType": "number", "required": true }],
+  "instructions": "Assess supplier risk from the supplied evidence."
+}`,
+      },
+      {
         type: "callout",
         variant: "warning",
         text: "A live claim held by another actor returns HTTP 409. Do not retry in a tight loop. Select another available task or wait until the lease expires.",
@@ -1967,6 +2087,10 @@ Payment terms: Net 30`,
       {
         type: "paragraph",
         text: "Save the returned `execution_epoch`. Every heartbeat and submit must echo that exact epoch. Reclaiming an expired lease increments it, permanently invalidating work from the earlier claimant.",
+      },
+      {
+        type: "paragraph",
+        text: "Because a successful claim returns the complete payload, a worker that goes straight from the list to a claim never needs a separate `talonic_get_agent_task` call — inspect-then-claim is for when you want to read before committing, claim-directly is for when the worklist row is enough. After claiming, do the work, heartbeat if the lease is running short, and finish with a single `talonic_submit_agent_task` call.",
       },
     ],
     related: [
@@ -1979,6 +2103,16 @@ Payment terms: Net 30`,
         answer:
           "It is the claim generation. Each successful claim or reclaim receives a new integer; stale epochs are rejected so an expired worker cannot overwrite a newer worker's result.",
       },
+      {
+        question: "Can I claim a task that is already claimed?",
+        answer:
+          "Only once its lease has expired. A live claim by another actor returns HTTP 409; after lease_expires_at passes without a heartbeat, the same claim call succeeds as a reclaim and increments the execution epoch.",
+      },
+      {
+        question: "What happens if I claim a task and never finish it?",
+        answer:
+          "Nothing is written. The lease expires, the task becomes reclaimable, and if timeout_at passes with no submission the stage's timeout_fallthrough policy (hold, skip, or route_to_review) decides what happens to the document. Abandoning a claim never corrupts data — it only delays the document.",
+      },
     ],
     mentions: ["claim lease", "execution epoch", "conflict", "reclaim"],
   },
@@ -1986,12 +2120,41 @@ Payment terms: Net 30`,
     slug: "talonic-heartbeat-agent-task",
     parentSlug: "tools",
     title: "talonic_heartbeat_agent_task",
-    seoTitle: "talonic_heartbeat_agent_task Tool — Talonic MCP",
-    description: "Extend an active Agent-task lease while processing continues.",
+    seoTitle: "talonic_heartbeat_agent_task — Keep a Task Lease Alive",
+    description:
+      "MCP tool that extends the lease on a claimed Agent task using its execution epoch, so long-running work is not reassigned to another agent mid-processing.",
     content: [
       {
         type: "paragraph",
         text: "Extend the lease for a task you already claimed. Heartbeat before `lease_expires_at` when processing may take longer than the remaining lease window.",
+      },
+      {
+        type: "paragraph",
+        text: "A heartbeat is a cheap, targeted call: it echoes the `task_id` and the `execution_epoch` from your claim, and the platform pushes `lease_expires_at` forward. The response is the task's refreshed metadata — no payload — so the field to read is the new `lease_expires_at`, which becomes your next deadline. Heartbeat only while genuine processing is under way; a worker that heartbeats forever without submitting is indistinguishable from a stuck one and holds the document hostage until `timeout_at`.",
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input and response (metadata only)",
+        code: `// talonic_heartbeat_agent_task({
+//   "task_id": "11111111-1111-4111-8111-111111111111",
+//   "execution_epoch": 2
+// })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "status": "claimed",
+  "execution_epoch": 2,
+  "lease_expires_at": "2026-08-29T10:20:00.000Z",
+  "timeout_at": "2026-08-30T12:00:00.000Z"
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Treat a failed heartbeat as a hard stop. HTTP 409 means the epoch is stale — the lease lapsed and someone reclaimed the task — so any result you were computing now belongs to a claim that no longer exists and will be rejected on submit. Discard the work, return to `talonic_list_agent_tasks`, and pick up something new rather than racing the current owner.",
+      },
+      {
+        type: "paragraph",
+        text: "The lease and the stage timeout are separate clocks. Heartbeats move `lease_expires_at`, which governs who owns the task; they never move `timeout_at`, the stage-level deadline after which the platform applies the task's `timeout_fallthrough` policy. A worker can therefore hold a perfectly healthy lease and still lose the task to a stage timeout if processing drags on too long — budget the work against `timeout_at`, not just the lease.",
       },
       {
         type: "param-table",
@@ -2026,6 +2189,16 @@ Payment terms: Net 30`,
         answer:
           "Only when needed, comfortably before lease_expires_at. Use the updated lease expiry returned by each successful heartbeat rather than a fixed client-side assumption.",
       },
+      {
+        question: "What does a heartbeat return?",
+        answer:
+          "The task's refreshed metadata, including the new lease_expires_at and the current execution_epoch. It never returns the payload — the input snapshot was already delivered by the claim.",
+      },
+      {
+        question: "My heartbeat returned HTTP 409 — can I still submit?",
+        answer:
+          "No. A 409 means your execution epoch is stale: the lease expired and the task was reclaimed or withdrawn. Submits with that epoch will also be rejected, so discard the in-flight work and claim a different task.",
+      },
     ],
     mentions: ["heartbeat", "lease expiry", "execution epoch", "long-running task"],
   },
@@ -2033,13 +2206,17 @@ Payment terms: Net 30`,
     slug: "talonic-submit-agent-task",
     parentSlug: "tools",
     title: "talonic_submit_agent_task",
-    seoTitle: "talonic_submit_agent_task Tool — Talonic MCP",
+    seoTitle: "talonic_submit_agent_task — Submit Typed Task Outputs",
     description:
-      "Submit typed, declared Agent-task outputs transactionally and resume the parked document.",
+      "MCP tool that submits declared, typed outputs for a claimed Agent task in one transaction, validated against the output contract, resuming the document.",
     content: [
       {
         type: "paragraph",
         text: "Return the result of a claimed Agent task. Output keys must match `output_contract` exactly, required fields must be present, and every value must match its declared data type. The platform validates the entire result before writing any cell.",
+      },
+      {
+        type: "paragraph",
+        text: "Submit is the last call of the pull workflow — list, get, claim, heartbeat, submit — and the only one that changes the document. It requires the `task_id` plus the exact `execution_epoch` from your claim; a stale epoch is rejected with HTTP 409 just as it is on heartbeats, which is what makes the workflow safe to run from several workers at once.",
       },
       {
         type: "param-table",
@@ -2072,12 +2249,21 @@ Payment terms: Net 30`,
         code: `{\n  "task_id": "11111111-1111-4111-8111-111111111111",\n  "execution_epoch": 3,\n  "outputs": {\n    "risk_score": {\n      "value": 0.72,\n      "confidence": 0.88,\n      "reasoning": "Two adverse indicators in the supplied evidence."\n    }\n  },\n  "summary": "Supplier requires enhanced review."\n}`,
       },
       {
+        type: "paragraph",
+        text: "Validation is all-or-nothing. Every output key must exist in the task's `output_contract`, every `required` field must be present, and every `value` must match its declared data type. If any check fails, the platform rejects the whole submission and writes nothing — there is no partially-filled result to clean up. On success the task's status moves to `submitted`, the response returns the task's metadata, and the parked document resumes through the rest of its pipeline with your values in place.",
+      },
+      {
+        type: "paragraph",
+        text: "The optional `confidence` (0–1) and `reasoning` (up to 4,000 characters) accompany each value into the document's audit trail, and `summary` describes the result as a whole. Filling them in is worth the tokens: reviewers see them next to the value when deciding whether to trust it, and they are the only trace of why the agent answered as it did once the conversation that produced the answer is gone.",
+      },
+      {
         type: "callout",
         text: "Successful outputs are attributed to `AI Agent (MCP)` in the audit trail and stored with `mcp_agent` provenance. They do not receive human-review authority in v1.",
       },
     ],
     related: [
       { label: "talonic_get_agent_task", slug: "talonic-get-agent-task" },
+      { label: "talonic_claim_agent_task", slug: "talonic-claim-agent-task" },
       { label: "talonic_heartbeat_agent_task", slug: "talonic-heartbeat-agent-task" },
     ],
     faq: [
@@ -2085,6 +2271,16 @@ Payment terms: Net 30`,
         question: "Can an Agent task return extra fields it discovered?",
         answer:
           "No. Undeclared fields and invalid types are rejected before any value is written. Add desired outputs to the Agent stage contract first, then run a new document task.",
+      },
+      {
+        question: "What happens if my submission fails validation?",
+        answer:
+          "Nothing is written — the submit is transactional. The task stays claimed under your execution epoch, so fix the outputs to match the contract and submit again before the lease expires.",
+      },
+      {
+        question: "Can I resubmit or amend after a successful submit?",
+        answer:
+          "No. A successful submit is terminal for that task: the status becomes submitted and the document resumes. Corrections happen downstream — in review or by rerunning the document — not by a second submit.",
       },
     ],
     mentions: ["transactional submit", "AI Agent (MCP)", "mcp_agent", "typed outputs"],
