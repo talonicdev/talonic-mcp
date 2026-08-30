@@ -5,9 +5,9 @@ export const sections: RawSection[] = [
     slug: "talonic-extract",
     parentSlug: "tools",
     title: "talonic_extract",
-    seoTitle: "talonic_extract Tool — Talonic MCP",
+    seoTitle: "talonic_extract — Structured Document Extraction Tool",
     description:
-      "Extract structured, schema-validated data from a document. Returns clean JSON with per-field confidence scores.",
+      "MCP tool that extracts structured, schema-validated JSON from documents with per-field confidence scores. Accepts file data, paths, URLs, or document IDs.",
     content: [
       { type: "paragraph", text: "Extract structured, schema-validated data from a document." },
       {
@@ -227,9 +227,9 @@ export const sections: RawSection[] = [
     slug: "talonic-search",
     parentSlug: "tools",
     title: "talonic_search",
-    seoTitle: "talonic_search Tool — Talonic MCP",
+    seoTitle: "talonic_search — Workspace Omnisearch Tool for Agents",
     description:
-      "Omnisearch across documents, fields, sources, and schemas in the workspace. Supports conceptual and fuzzy queries.",
+      "MCP omnisearch tool across documents, fields, sources, and schemas in a Talonic workspace. Handles conceptual, fuzzy queries and returns typed field matches.",
     content: [
       {
         type: "paragraph",
@@ -393,9 +393,9 @@ export const sections: RawSection[] = [
     slug: "talonic-filter",
     parentSlug: "tools",
     title: "talonic_filter",
-    seoTitle: "talonic_filter Tool — Talonic MCP",
+    seoTitle: "talonic_filter — Filter Documents by Extracted Fields",
     description:
-      "Filter documents by extracted field values using composable conditions like eq, gt, between, and contains.",
+      "MCP tool that filters workspace documents by extracted field values with composable conditions — eq, gt, between, contains — plus typing warnings surfaced.",
     content: [
       {
         type: "paragraph",
@@ -605,9 +605,9 @@ export const sections: RawSection[] = [
     slug: "talonic-get-document",
     parentSlug: "tools",
     title: "talonic_get_document",
-    seoTitle: "talonic_get_document Tool — Talonic MCP",
+    seoTitle: "talonic_get_document — Document Metadata & Status Tool",
     description:
-      "Fetch full metadata for a single document by ID, including processing log and link URLs.",
+      "MCP tool that fetches one document's metadata by ID: processing status, page count, and dashboard links. The polling primitive for browser-handoff uploads.",
     content: [
       {
         type: "paragraph",
@@ -742,9 +742,9 @@ export const sections: RawSection[] = [
     slug: "talonic-to-markdown",
     parentSlug: "tools",
     title: "talonic_to_markdown",
-    seoTitle: "talonic_to_markdown Tool — Talonic MCP",
+    seoTitle: "talonic_to_markdown — OCR Documents to Clean Markdown",
     description:
-      "Get OCR-converted markdown for a document. Accepts document_id, file_data + filename, file_path, or file_url.",
+      "MCP tool that returns OCR-converted markdown for a whole document. Accepts document_id, file_data plus filename, file_path, or file_url — no schema needed.",
     content: [
       {
         type: "paragraph",
@@ -900,8 +900,9 @@ Payment terms: Net 30`,
     slug: "talonic-list-schemas",
     parentSlug: "tools",
     title: "talonic_list_schemas",
-    seoTitle: "talonic_list_schemas Tool — Talonic MCP",
-    description: "List all saved schemas in the workspace as compact summaries.",
+    seoTitle: "talonic_list_schemas — List Saved Extraction Schemas",
+    description:
+      "MCP tool that lists every saved schema in your Talonic workspace with IDs, names, and full field definitions, so agents reuse schemas instead of redesigning.",
     content: [
       {
         type: "paragraph",
@@ -1049,8 +1050,9 @@ Payment terms: Net 30`,
     slug: "talonic-save-schema",
     parentSlug: "tools",
     title: "talonic_save_schema",
-    seoTitle: "talonic_save_schema Tool — Talonic MCP",
-    description: "Save a schema definition to the workspace for reuse across extractions.",
+    seoTitle: "talonic_save_schema — Save Reusable Extraction Schemas",
+    description:
+      "MCP tool that persists a JSON Schema for reuse across extractions. Returns a schema_id (UUID or SCH-XXXXXXXX) to pass on every future talonic_extract call.",
     content: [
       {
         type: "paragraph",
@@ -1252,9 +1254,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-balance",
     parentSlug: "tools",
     title: "talonic_get_balance",
-    seoTitle: "talonic_get_balance Tool — Talonic MCP",
+    seoTitle: "talonic_get_balance — Check Credits, Burn Rate, Runway",
     description:
-      "MCP tool that returns the current Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next monthly tier-reset timestamp.",
+      "MCP tool returning your Talonic credit balance, EUR value, 30-day burn rate, projected runway, tier, and next tier reset — for budget-aware agent behaviour.",
     content: [
       {
         type: "paragraph",
@@ -1396,9 +1398,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-pricing",
     parentSlug: "tools",
     title: "talonic_get_pricing",
-    seoTitle: "talonic_get_pricing Tool — Talonic MCP",
+    seoTitle: "talonic_get_pricing — Credit Pricing Catalog for Agents",
     description:
-      "MCP tool that returns the machine-readable Talonic credit pricing catalog: fixed per-unit credit rates, EUR equivalents, the credits-per-EUR conversion, and processing-mode multipliers, so an agent can predict spend before running anything.",
+      "MCP tool that returns Talonic's public credit pricing catalog: per-unit rates, EUR equivalents, and batch multipliers, so agents can predict spend upfront.",
     content: [
       {
         type: "paragraph",
@@ -1534,9 +1536,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-usage",
     parentSlug: "tools",
     title: "talonic_get_usage",
-    seoTitle: "talonic_get_usage Tool — Talonic MCP",
+    seoTitle: "talonic_get_usage — Per-Function Credit Usage Reports",
     description:
-      "MCP tool that returns per-function credit consumption for the workspace over a trailing window, so an agent can see where credits went across extraction, structuring, and intelligence operations.",
+      "MCP tool that breaks down Talonic credit consumption by platform function over a trailing window (default 30 days), ordered by spend to show cost drivers.",
     content: [
       {
         type: "paragraph",
@@ -1658,9 +1660,9 @@ Payment terms: Net 30`,
     slug: "talonic-request-upload",
     parentSlug: "tools",
     title: "talonic_request_upload",
-    seoTitle: "talonic_request_upload Tool — Talonic MCP",
+    seoTitle: "talonic_request_upload — Browser-Handoff File Uploads",
     description:
-      "Request a browser-handoff upload link for files that can't be delivered via tool-call arguments. Returns a pre-allocated document_id, an upload URL, and an expiry timestamp.",
+      "MCP tool that mints a browser upload link for files too large for tool-call arguments. Returns a document_id, upload URL, and expiry for hosted connectors.",
     content: [
       {
         type: "paragraph",
@@ -1826,9 +1828,9 @@ Payment terms: Net 30`,
     slug: "talonic-list-agent-tasks",
     parentSlug: "tools",
     title: "talonic_list_agent_tasks",
-    seoTitle: "talonic_list_agent_tasks Tool — Talonic MCP",
+    seoTitle: "talonic_list_agent_tasks — Agent Worklist for Documents",
     description:
-      "List document-scoped work waiting at Agent stages in the current Talonic workspace.",
+      "MCP tool that lists Agent-stage tasks awaiting external processing in your Talonic workspace — metadata only, with status filters and cursor pagination.",
     content: [
       {
         type: "paragraph",
@@ -1893,9 +1895,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-agent-task",
     parentSlug: "tools",
     title: "talonic_get_agent_task",
-    seoTitle: "talonic_get_agent_task Tool — Talonic MCP",
+    seoTitle: "talonic_get_agent_task — Fetch an Agent Task's Payload",
     description:
-      "Fetch one Agent task's immutable document snapshot, instructions, and declared output contract.",
+      "MCP tool that fetches one Agent task's immutable input snapshot, instructions, and declared output contract. Every payload fetch is an audited disclosure.",
     content: [
       {
         type: "paragraph",
@@ -1941,8 +1943,9 @@ Payment terms: Net 30`,
     slug: "talonic-claim-agent-task",
     parentSlug: "tools",
     title: "talonic_claim_agent_task",
-    seoTitle: "talonic_claim_agent_task Tool — Talonic MCP",
-    description: "Acquire a leased claim on an available Agent task before processing it.",
+    seoTitle: "talonic_claim_agent_task — Lease an Agent Task Safely",
+    description:
+      "MCP tool that claims an available Agent task before processing. Returns the payload plus an execution epoch and lease so two agents never collide on a task.",
     content: [
       {
         type: "paragraph",
@@ -1986,8 +1989,9 @@ Payment terms: Net 30`,
     slug: "talonic-heartbeat-agent-task",
     parentSlug: "tools",
     title: "talonic_heartbeat_agent_task",
-    seoTitle: "talonic_heartbeat_agent_task Tool — Talonic MCP",
-    description: "Extend an active Agent-task lease while processing continues.",
+    seoTitle: "talonic_heartbeat_agent_task — Keep a Task Lease Alive",
+    description:
+      "MCP tool that extends the lease on a claimed Agent task using its execution epoch, so long-running work is not reassigned to another agent mid-processing.",
     content: [
       {
         type: "paragraph",
@@ -2033,9 +2037,9 @@ Payment terms: Net 30`,
     slug: "talonic-submit-agent-task",
     parentSlug: "tools",
     title: "talonic_submit_agent_task",
-    seoTitle: "talonic_submit_agent_task Tool — Talonic MCP",
+    seoTitle: "talonic_submit_agent_task — Submit Typed Task Outputs",
     description:
-      "Submit typed, declared Agent-task outputs transactionally and resume the parked document.",
+      "MCP tool that submits declared, typed outputs for a claimed Agent task in one transaction, validated against the output contract, resuming the document.",
     content: [
       {
         type: "paragraph",
