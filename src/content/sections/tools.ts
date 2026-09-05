@@ -2285,4 +2285,740 @@ Payment terms: Net 30`,
     ],
     mentions: ["transactional submit", "AI Agent (MCP)", "mcp_agent", "typed outputs"],
   },
+  {
+    slug: "talonic-list-fields",
+    parentSlug: "tools",
+    title: "talonic_list_fields",
+    seoTitle: "talonic_list_fields — List Field Registry Concepts",
+    description:
+      "MCP tool that lists the workspace's Field Registry: every canonical concept Talonic discovered across documents, with stable ids, maturity level, synonyms and occurrence counts.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List the workspace's **Field Registry** — the canonical concepts Talonic has discovered across every ingested document. Each entry carries a stable `id`, `canonical_name`, `data_type`, a named `maturity` level, `synonyms`, a curated `description`, `occurrence_count` and `superseded_by` when the row was merged into another concept.",
+      },
+      { type: "heading", level: 3, id: "list-fields-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You need to know WHAT data exists before querying it.",
+          "You want the exact field id for `talonic_get_field` or `talonic_field_values`.",
+          "You are choosing between similar concepts and want their maturity and occurrence counts side by side.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-fields-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "To locate a specific document by name — use `talonic_search`.",
+          "To filter documents by a field value — use `talonic_filter`.",
+          "When you are unsure which field holds a concept — call `talonic_find_data` first; it matches by meaning.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-fields-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "search",
+            type: "string",
+            description: "Case-insensitive contains match on canonical_name / display_name.",
+          },
+          {
+            name: "maturity",
+            type: "string",
+            description:
+              "`core`, `proven` or `candidate`. Prefer `core`/`proven` for anything you build on.",
+          },
+          {
+            name: "include_superseded",
+            type: "boolean",
+            description:
+              "Include rows merged into a survivor (they carry `superseded_by`). Default false.",
+          },
+          { name: "limit", type: "number", description: "Page size (default 20, max 100)." },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque cursor from `pagination.next_cursor`.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "list-fields-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          { name: "data[].id", type: "string", description: "Stable field UUID." },
+          {
+            name: "data[].canonical_name",
+            type: "string",
+            description: "Normalized concept name.",
+          },
+          {
+            name: "data[].maturity",
+            type: "string",
+            description:
+              "`core` (fully trusted), `proven` (recurring, stable id) or `candidate` (new; may still be merged or renamed).",
+          },
+          {
+            name: "data[].synonyms",
+            type: "string[]",
+            description: "Names folded onto the concept by merges and cleanup.",
+          },
+          {
+            name: "data[].superseded_by",
+            type: "object|null",
+            description: "Set when the row was merged into a survivor; follow `superseded_by.id`.",
+          },
+          {
+            name: "pagination",
+            type: "object",
+            description: "`total`, `limit`, `has_more`, `next_cursor`.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "search": "invoice", "maturity": "proven", "limit": 5 }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "data": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "canonical_name": "invoice_number",
+      "display_name": "Invoice Number",
+      "data_type": "string",
+      "maturity": "proven",
+      "tier": 2,
+      "synonyms": ["inv_no", "invoice no"],
+      "description": "The supplier's invoice identifier",
+      "occurrence_count": 412,
+      "superseded_by": null,
+      "links": { "self": "/v1/fields/a1b2…", "card": "/v1/fields/a1b2…/card", "values": "/v1/fields/a1b2…/values" }
+    }
+  ],
+  "pagination": { "total": 1, "limit": 5, "has_more": false, "next_cursor": null }
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "What does maturity mean and which level should I build on?",
+        answer:
+          "`core` (tier 1) is universal and fully trusted; `proven` (tier 2) recurs and has a stable id; `candidate` (tier 3) is newly discovered and may still be merged or renamed. Build on `core` or `proven`; treat `candidate` as a hint.",
+      },
+    ],
+    mentions: [
+      "field registry",
+      "list fields",
+      "maturity",
+      "canonical fields",
+      "superseded_by",
+      "field ids",
+    ],
+  },
+  {
+    slug: "talonic-get-field",
+    parentSlug: "tools",
+    title: "talonic_get_field",
+    seoTitle: "talonic_get_field — Field Concept Card",
+    description:
+      "MCP tool that returns a Field Registry concept card: definition, synonyms and aliases, maturity, occurrence statistics, value distribution with examples, schema usage and identity links.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Get the **concept card** for one field: what it means (curated description and extraction instruction), its synonyms and merge aliases, maturity, where it occurs (document and occurrence counts, first/last seen, document-type spread), its value distribution (top values with counts, distinct count, examples), schema usage, and identity links (`superseded_by`, absorbed concepts). Accepts a field `name` in the user's own words — it is resolved through canonical name, synonyms, merge aliases and the registry's spelling fold, then followed to the live concept.",
+      },
+      { type: "heading", level: 3, id: "get-field-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You must decide whether a field is the right concept for a question.",
+          "You need example values or the value shape before writing a filter or a query.",
+          "The user names a field ('Invoice No', 'Vertragsnummer') and you need the live concept behind it.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-field-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "To list many fields — use `talonic_list_fields`.",
+          "To read every value of a field — use `talonic_field_values`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-field-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "field_id",
+            type: "string",
+            description: "Field UUID. Provide either `field_id` or `name`.",
+          },
+          {
+            name: "name",
+            type: "string",
+            description:
+              "Field name to resolve (canonical → synonyms → aliases → spelling fold, redirects followed).",
+          },
+          {
+            name: "include_history",
+            type: "boolean",
+            description: "Append the curation trail (tier changes, merges, renames), newest first.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-field-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "definition",
+            type: "object",
+            description: "`description`, `instruction`, `synonyms[]`, `aliases[]`.",
+          },
+          {
+            name: "identity",
+            type: "object",
+            description: "`pinned`, `source`, `superseded_by`, `absorbed[]`.",
+          },
+          {
+            name: "occurrence",
+            type: "object",
+            description:
+              "`occurrence_count`, `document_count`, `first_seen_at`, `last_seen_at`, `document_type_distribution`.",
+          },
+          {
+            name: "values",
+            type: "object",
+            description: "`total`, `distinct_count`, `top[]` (value, count, share), `examples[]`.",
+          },
+          { name: "usage", type: "object", description: "`schema_count`, `schema_field_count`." },
+          {
+            name: "resolution",
+            type: "object",
+            description: "Present when `name` was given: `matched_by` and `redirected_from[]`.",
+          },
+          {
+            name: "history",
+            type: "object",
+            description: "Present when `include_history` is true.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "name": "Invoice No", "include_history": true }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "canonical_name": "invoice_number",
+  "maturity": "proven",
+  "data_type": "string",
+  "definition": { "description": "The supplier's invoice identifier", "instruction": "Extract the invoice number as printed", "synonyms": ["inv_no"], "aliases": [{ "name": "invoice no", "source": "merge" }] },
+  "identity": { "pinned": false, "source": null, "superseded_by": null, "absorbed": [] },
+  "occurrence": { "occurrence_count": 412, "document_count": 398, "first_seen_at": "2026-03-02T09:14:00.000Z", "last_seen_at": "2026-09-04T16:02:11.000Z", "document_type_distribution": { "invoice": 398 } },
+  "values": { "total": 412, "distinct_count": 405, "top": [{ "value": "INV-2026-0001", "count": 2, "share": 0.0049 }], "examples": ["INV-2026-0001", "RE-88231"] },
+  "usage": { "schema_count": 2, "schema_field_count": 2 },
+  "resolution": { "matched_by": "synonym", "redirected_from": [] },
+  "history": { "total": 1, "data": [{ "kind": "tier_changed", "at": "2026-04-01T00:00:00.000Z", "detail": { "direction": "promoted", "from_maturity": "candidate", "to_maturity": "proven" } }] }
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "Can I pass the user's wording instead of an id?",
+        answer:
+          "Yes. `name` is resolved through the canonical name, synonyms, merge aliases and the registry's spelling fold, then followed to the live concept; the response's `resolution.matched_by` says which arm matched.",
+      },
+    ],
+    mentions: [
+      "concept card",
+      "field definition",
+      "field by name",
+      "resolve field",
+      "example values",
+      "field history",
+    ],
+  },
+  {
+    slug: "talonic-field-values",
+    parentSlug: "tools",
+    title: "talonic_field_values",
+    seoTitle: "talonic_field_values — Read a Field Across Documents",
+    description:
+      "MCP tool that reads a Field Registry concept's current values across all documents with provenance: document, value, confidence, raw name, source text and resolution band.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Read a field's **current values across documents**, with provenance — one row per bound occurrence: document id, filename and type, the value, its confidence, the raw name it was captured under, the verbatim source text, and the resolution band that bound it. Rows are Sources-IAM filtered for the caller and cursor-paginated newest first.",
+      },
+      { type: "heading", level: 3, id: "field-values-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "The user asks 'what are all the X across my documents'.",
+          "You need to tabulate or aggregate one concept across the corpus.",
+          "You want the evidence (source text plus document) behind a value.",
+        ],
+      },
+      { type: "heading", level: 3, id: "field-values-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Multi-field, row-shaped queries over documents — use `talonic_filter`.",
+          "One document's full field set — use `talonic_get_document`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "field-values-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "field_id",
+            type: "string",
+            description: "Field UUID. Provide either `field_id` or `name`.",
+          },
+          {
+            name: "name",
+            type: "string",
+            description: "Field name (resolved like `talonic_get_field`).",
+          },
+          {
+            name: "document_id",
+            type: "string",
+            description: "Only occurrences on this document.",
+          },
+          {
+            name: "value",
+            type: "string",
+            description: "Case-insensitive contains filter on the value text.",
+          },
+          { name: "limit", type: "number", description: "Page size (default 20, max 100)." },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque cursor from `pagination.next_cursor`.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "field-values-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "data[].document_id",
+            type: "string",
+            description:
+              "Document the value came from (`document_filename`, `document_type` alongside).",
+          },
+          {
+            name: "data[].value",
+            type: "any",
+            description: "The current bound value as captured.",
+          },
+          {
+            name: "data[].confidence",
+            type: "number|null",
+            description: "Capture confidence 0–1.",
+          },
+          {
+            name: "data[].provenance",
+            type: "object",
+            description:
+              "`raw_field_name`, `source_text`, `resolved_by` (`exact`, `cluster`, `semantic_auto`, `llm_rescue`, …), `needs_confirmation`, `via_redirect`.",
+          },
+          {
+            name: "concept_ids",
+            type: "string[]",
+            description: "The concept plus absorbed redirects whose occurrences are included.",
+          },
+          { name: "pagination", type: "object", description: "`total` counts the visible set." },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "name": "invoice_number", "value": "2026", "limit": 2 }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "field_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "canonical_name": "invoice_number",
+  "concept_ids": ["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
+  "data": [
+    {
+      "occurrence_id": "0f1e2d3c-…",
+      "document_id": "f0e1d2c3-…",
+      "document_filename": "RE-2026-0142.pdf",
+      "document_type": "invoice",
+      "value": "INV-2026-0142",
+      "confidence": 0.97,
+      "provenance": { "raw_field_name": "Rechnungsnummer", "source_text": "Rechnungsnummer: INV-2026-0142", "resolved_by": "exact", "needs_confirmation": false, "via_redirect": false },
+      "links": { "document": "/v1/documents/f0e1…", "document_fields": "/v1/documents/f0e1…/fields" }
+    }
+  ],
+  "pagination": { "total": 37, "limit": 2, "has_more": true, "next_cursor": "MGYx…" }
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "Are the values filtered by the caller's document visibility?",
+        answer:
+          "Yes. Rows and `pagination.total` are Sources-IAM filtered as the API key's minting user, exactly like the other document reads.",
+      },
+    ],
+    mentions: [
+      "field values",
+      "values across documents",
+      "provenance",
+      "source text",
+      "resolution band",
+      "cross-document",
+    ],
+  },
+  {
+    slug: "talonic-find-data",
+    parentSlug: "tools",
+    title: "talonic_find_data",
+    seoTitle: "talonic_find_data — Locate Data Behind a Concept",
+    description:
+      "MCP tool that resolves a natural-language concept to the registry fields, values, documents and passages that carry it, by meaning — the same retrieval the in-product Talonic agent uses.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Locate the **real data behind a concept** before querying anything. Semantic plus lexical retrieval resolves a phrase in the user's words ('payment volume per transaction', 'Vertragslaufzeit') to the registry fields, values, documents and text passages that carry it — even when the field was captured under a different name. It is the same `find_data` primitive the in-product Talonic agent calls first, exposed with no model in the loop.",
+      },
+      { type: "heading", level: 3, id: "find-data-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "The user asks about a concept and you are unsure which field holds it.",
+          "`talonic_list_fields` or `talonic_search` came back empty or ambiguous.",
+          "The answer may live in document prose rather than a captured cell.",
+        ],
+      },
+      { type: "heading", level: 3, id: "find-data-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Reading a known field's values — use `talonic_field_values`.",
+          "Filtering by a known field — use `talonic_filter`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "find-data-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          { name: "query", type: "string", description: "The concept, in the user's words." },
+          {
+            name: "top_k",
+            type: "number",
+            description: "Max results per plane (1–25, default 10).",
+          },
+          {
+            name: "document_ids",
+            type: "string[]",
+            description: "Hard scope: restrict every plane to these documents.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "find-data-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "result.fields",
+            type: "array",
+            description:
+              "Matching concepts: canonical_name, field ids/keys, tier, occurrence_count, sample values with their documents.",
+          },
+          {
+            name: "result.values / result.documents / result.passages",
+            type: "array",
+            description:
+              "Value, document and passage planes — each item a ready handle for the next call.",
+          },
+          {
+            name: "citations",
+            type: "array",
+            description: "Provenance the platform attached to the result.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "query": "contract end date", "top_k": 5 }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "tool": "find_data",
+  "result": {
+    "fields": [{ "canonical_name": "contract_end_date", "field_key": "contract_end_date", "tier": 2, "occurrence_count": 88, "samples": [{ "value": "2027-12-31", "document_id": "f0e1…" }] }],
+    "documents": [{ "document_id": "f0e1…", "filename": "Vertrag-GETEC-2024.pdf", "score": 0.81 }],
+    "passages": []
+  },
+  "citations": [{ "document_id": "f0e1…" }]
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "How is this different from talonic_search?",
+        answer:
+          "`talonic_search` matches literal keywords across documents, fields, sources and schemas. `talonic_find_data` matches by MEANING against the field registry and document text and returns ready handles (field ids, document ids, passages) for the next call.",
+      },
+    ],
+    mentions: [
+      "find data",
+      "semantic retrieval",
+      "concept to field",
+      "which field holds",
+      "locate data",
+      "passages",
+    ],
+  },
+  {
+    slug: "talonic-list-agent-tools",
+    parentSlug: "tools",
+    title: "talonic_list_agent_tools",
+    seoTitle: "talonic_list_agent_tools — Platform Agent Tool Registry",
+    description:
+      "MCP tool that lists the platform's agent tool registry — every retrieval, provenance and analysis primitive the in-product Talonic agent runs on — with input schemas and per-credential invocability.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List the platform's **agent tool registry**: every retrieval, provenance and analysis primitive the in-product Talonic agent runs on (`find_data`, `describe_data`, `query_data` for read-only SQL over the extracted data, `get_document_markdown`, `workspace_overview`, …), each with its JSON input schema and whether **this** credential may invoke it. An API key reaches the read-only subset; the platform enforces the capability matrix on every call.",
+      },
+      { type: "heading", level: 3, id: "list-agent-tools-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You need a capability the dedicated `talonic_*` tools do not cover (SQL over structured data, a workspace overview, cohort discovery).",
+          "You want to see exactly what the in-product agent can do before driving it yourself with `talonic_invoke_agent_tool`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-agent-tools-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Anything a dedicated `talonic_*` tool already does — prefer those, they are shaped for you.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-agent-tools-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "only_invocable",
+            type: "boolean",
+            description: "Hide tools this credential cannot invoke. Default true.",
+          },
+          {
+            name: "include_schemas",
+            type: "boolean",
+            description: "Include each tool's JSON input schema. Default true.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "list-agent-tools-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "tools[].name",
+            type: "string",
+            description: "Tool name to pass to `talonic_invoke_agent_tool`.",
+          },
+          {
+            name: "tools[].can_invoke",
+            type: "boolean",
+            description: "Whether this credential's role may run it.",
+          },
+          {
+            name: "tools[].input_schema",
+            type: "object",
+            description: "JSON Schema of the tool's `args`.",
+          },
+          {
+            name: "invocable_count / totalCount",
+            type: "number",
+            description: "Counts over the full registry.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "only_invocable": true, "include_schemas": false }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "tools": [
+    { "name": "find_data", "description": "CALL THIS FIRST to locate the real data behind a natural-language concept…", "impact": "read", "capability": "data.read", "can_invoke": true },
+    { "name": "query_data", "description": "Run a read-only SQL SELECT over the extracted data…", "impact": "read", "capability": "data.read", "can_invoke": true }
+  ],
+  "invocable_count": 12,
+  "totalCount": 48
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "Why are some tools listed with can_invoke false?",
+        answer:
+          "An API key runs as a read-only principal, so tools above the `data.read` capability (anything that spends credits or writes) are listed for transparency but cannot be invoked through the API.",
+      },
+    ],
+    mentions: [
+      "agent tools",
+      "tool registry",
+      "query_data",
+      "describe_data",
+      "capabilities",
+      "can_invoke",
+    ],
+  },
+  {
+    slug: "talonic-invoke-agent-tool",
+    parentSlug: "tools",
+    title: "talonic_invoke_agent_tool",
+    seoTitle: "talonic_invoke_agent_tool — Run a Platform Agent Tool",
+    description:
+      "MCP tool that invokes one named platform agent tool directly with caller-chosen arguments — read-only SQL over extracted data, document text, workspace overviews — with no model in the loop.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Invoke **one named tool** from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself: `query_data` for a read-only SQL `SELECT` over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text. Denied capabilities come back as an error naming the capability required; the platform re-checks every call.",
+      },
+      { type: "heading", level: 3, id: "invoke-agent-tool-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "`talonic_list_agent_tools` showed a tool with `can_invoke: true` that does what you need.",
+        ],
+      },
+      { type: "heading", level: 3, id: "invoke-agent-tool-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: ["Anything a dedicated `talonic_*` tool already does — prefer those."],
+      },
+      { type: "heading", level: 3, id: "invoke-agent-tool-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          { name: "name", type: "string", description: "Tool name, e.g. `query_data`." },
+          {
+            name: "args",
+            type: "object",
+            description: "Arguments matching the tool's `input_schema`.",
+          },
+          {
+            name: "document_ids",
+            type: "string[]",
+            description: "Hard scope for scope-aware tools.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "invoke-agent-tool-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          { name: "tool", type: "string", description: "The tool that ran." },
+          { name: "result", type: "any", description: "The tool's parsed output." },
+          {
+            name: "citations / artifacts / cards",
+            type: "array",
+            description: "Present when the tool attached them.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input",
+        code: `{ "name": "query_data", "args": { "sql": "SELECT field_key, count(*) FROM cells GROUP BY 1 ORDER BY 2 DESC LIMIT 5" } }`,
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool response",
+        code: `{
+  "tool": "query_data",
+  "result": { "rows": [{ "field_key": "invoice_number", "count": 412 }], "row_count": 1 }
+}`,
+      },
+    ],
+    related: [
+      { label: "talonic_search", slug: "talonic-search" },
+      { label: "talonic_filter", slug: "talonic-filter" },
+    ],
+    faq: [
+      {
+        question: "Does invoking a tool cost credits?",
+        answer:
+          "No. Every tool an API key can reach is LLM-free, so there is no model call to meter; the route is bounded by its own rate-limit namespace instead.",
+      },
+    ],
+    mentions: [
+      "invoke tool",
+      "query_data",
+      "sql over extracted data",
+      "document markdown",
+      "agent tool",
+      "no model in the loop",
+    ],
+  },
 ]

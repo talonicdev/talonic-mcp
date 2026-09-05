@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The sixteen public tools (and what an agent should reach for)
+## The twenty-two public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -43,6 +43,12 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_get_balance` | `get-balance.ts` | yes | Credit balance, EUR, burn rate, runway. |
 | `talonic_get_pricing` | `get-pricing.ts` | yes | Public per-unit credit pricing catalog + multipliers. Predict spend before running. |
 | `talonic_get_usage` | `get-usage.ts` | yes | Per-function credit consumption over a trailing window (default 30 days). |
+| `talonic_list_fields` | `fields.ts` | yes | Field Registry list with maturity + superseded_by; raw fetch over `/v1/fields`. |
+| `talonic_get_field` | `fields.ts` | yes | Concept card (`/v1/fields/:id/card`), name resolution via `/v1/fields/resolve`, optional history. |
+| `talonic_field_values` | `fields.ts` | yes | Cross-document values with provenance (`/v1/fields/:id/values`). |
+| `talonic_find_data` | `agent-tools.ts` | yes | Wraps `POST /v1/agent/tools/find_data/invoke`. |
+| `talonic_list_agent_tools` | `agent-tools.ts` | yes | Wraps `GET /v1/agent/tools`; hides non-invocable tools by default. |
+| `talonic_invoke_agent_tool` | `agent-tools.ts` | read tools only | Wraps `POST /v1/agent/tools/:name/invoke`; the platform enforces the capability matrix. |
 | `talonic_list_agent_tasks` | `agent-tasks.ts` | yes | Metadata worklist for documents parked at Agent stages. |
 | `talonic_get_agent_task` | `agent-tasks.ts` | yes | Audited fetch of one immutable input snapshot and output contract. |
 | `talonic_claim_agent_task` | `agent-tasks.ts` | no | Acquire or reclaim a leased task and execution epoch. |

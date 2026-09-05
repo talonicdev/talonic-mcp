@@ -26,6 +26,12 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_get_balance`** | Read credit balance, EUR value, burn rate, and runway for budget-aware behaviour. |
 | **`talonic_get_pricing`** | Read the public per-unit credit pricing catalog and multipliers to predict spend before running a job. |
 | **`talonic_get_usage`** | Break down credit consumption per function over a trailing window (default 30 days). |
+| **`talonic_list_fields`** | List the Field Registry — every canonical concept with a stable id, maturity (`core` / `proven` / `candidate`), synonyms and occurrence counts. |
+| **`talonic_get_field`** | Concept card for one field (by id or by NAME): definition, aliases, maturity, occurrence stats, value distribution with examples, schema usage, identity links. |
+| **`talonic_field_values`** | One concept's current values across all documents, with provenance (document, source text, resolution band). |
+| **`talonic_find_data`** | Resolve a concept in the user's words to the fields, values, documents and passages that carry it — by meaning, not by name. |
+| **`talonic_list_agent_tools`** | The platform's agent tool registry (`query_data` SQL, `describe_data`, document markdown, …) with schemas and per-credential invocability. |
+| **`talonic_invoke_agent_tool`** | Run one platform agent tool directly with your own arguments — no model in the loop. |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
@@ -145,7 +151,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
 4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`). Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All sixteen public tools appear.
+5. You're returned to Claude.ai. All twenty-two public tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 

@@ -16,6 +16,8 @@ import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
+import { registerFieldTools } from "./tools/fields.js"
+import { registerAgentRegistryTools } from "./tools/agent-tools.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -206,6 +208,12 @@ export function createServer(options: CreateServerOptions): McpServer {
         "with that id — do not ask the user for an id.",
         "talonic_search matches LITERAL keywords: query with one short singular term or an",
         "exact filename, never a sentence; on an empty result retry with a shorter keyword.",
+        "The Field Registry is the source of truth for WHAT data exists: talonic_find_data",
+        "resolves a concept in the user's words to the fields/documents that carry it,",
+        "talonic_list_fields / talonic_get_field describe concepts (prefer maturity core or",
+        "proven for anything you build on), talonic_field_values reads one concept across all",
+        "documents with provenance. Anything else the in-product agent can do is reachable via",
+        "talonic_list_agent_tools + talonic_invoke_agent_tool (e.g. query_data for SQL).",
         "For Agent-stage work, follow list -> get -> claim -> heartbeat while needed ->",
         "submit. Preserve the execution_epoch from claim and return only fields declared",
         "in the task output_contract; never continue after a lease or epoch conflict.",
@@ -240,6 +248,8 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
   registerRequestUpload(server, getToken, baseUrl)
+  registerFieldTools(server, getToken, baseUrl)
+  registerAgentRegistryTools(server, getToken, baseUrl)
   registerAgentTaskTools(server, getToken, baseUrl)
   if (options.includeGrowthTools) {
     registerGrowthTools(server, getToken, baseUrl)
