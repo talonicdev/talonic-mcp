@@ -114,7 +114,7 @@ const GET_DESCRIPTION = [
   "USE WHEN: you must decide whether a field is the right concept for a question, need example values or the value shape before writing a filter, or hold a field NAME from the user and need the live concept behind it.",
   "NOT FOR: listing many fields (talonic_list_fields) or reading every value (talonic_field_values).",
   "",
-  "ARGS: exactly one of `field_id` or `name`. Names are resolved through canonical name → synonyms → merge aliases → spelling fold and followed to the live concept; the response says which arm matched. `include_history: true` appends the curation trail (merges, renames, maturity moves).",
+  "ARGS: exactly one of `field_id` or `name`. Names are resolved through canonical name → spelling fold → merge aliases → synonyms (then case-insensitive fallbacks) and followed to the live concept; the response says which arm matched. `include_history: true` appends the curation trail (merges, renames, maturity moves).",
   "RETURNS: the card { id, canonical_name, maturity, data_type, definition, identity, occurrence, values, usage, links } plus `resolution` when a name was given and `history` when requested.",
 ].join("\n")
 

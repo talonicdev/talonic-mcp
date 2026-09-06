@@ -115,6 +115,78 @@
         "open_world_justification": "Only reads private Talonic billing and usage data and does not publish or modify public internet state.",
         "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
       }
+    },
+    "talonic_list_fields": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads the Field Registry concept list (ids, names, maturity, synonyms, counts) from the user's Talonic workspace; nothing is created, modified or deleted.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_get_field": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads one Field Registry concept card (definition, aliases, statistics, value examples, history) from the user's Talonic workspace; nothing is created, modified or deleted.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_field_values": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads a concept's captured values across the user's own documents with provenance from the user's Talonic workspace; nothing is created, modified or deleted.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_find_data": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads retrieval results (fields, values, documents, passages) for a concept from the user's Talonic workspace; nothing is created, modified or deleted.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_list_agent_tools": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads the catalog of platform agent tools and which ones this credential may invoke from the user's Talonic workspace; nothing is created, modified or deleted.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "talonic_invoke_agent_tool": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Runs one platform agent tool with caller-supplied arguments. An API key can only reach the platform's read-only (data.read) tools; every write-capable tool is refused server-side with a capability error.",
+        "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
+        "destructive_justification": "Cannot delete, overwrite, revoke access, or perform irreversible actions: the platform enforces the read-only capability matrix on every invocation."
+      }
     }
   },
   "test_cases": [
@@ -188,6 +260,46 @@
       "file_attachment_urls": null,
       "tools_triggered": "talonic_request_upload",
       "expected_output": "Returns an upload URL and a document ID to track the upload.",
+      "expected_output_url": null
+    },
+    {
+      "description": "List Field Registry concepts by maturity.",
+      "user_prompt": "Which proven fields does my Talonic workspace know about?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_fields",
+      "expected_output": "Returns registry concepts with ids, canonical names, maturity level, synonyms and occurrence counts.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Describe one field by name.",
+      "user_prompt": "What does the field 'Invoice No' mean in my workspace and what values does it take?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_get_field",
+      "expected_output": "Returns the concept card: definition, aliases, maturity, occurrence statistics and example values, resolved from the user's wording.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Read one concept across all documents.",
+      "user_prompt": "List every invoice number captured across my documents with the document it came from.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_field_values",
+      "expected_output": "Returns one row per occurrence with document, value, confidence and source text.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Find the data behind a concept.",
+      "user_prompt": "Where in my documents is the contract end date captured?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_find_data",
+      "expected_output": "Returns matching registry fields, values, documents and passages for the concept.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Run a platform agent tool directly.",
+      "user_prompt": "Use the platform's query_data tool to count captured cells per field in my workspace.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_agent_tools, talonic_invoke_agent_tool",
+      "expected_output": "Lists the invocable agent tools, then returns the query_data result rows.",
       "expected_output_url": null
     }
   ],
