@@ -147,7 +147,7 @@ jobs:
         # short-lived publish credential. --provenance attaches a signed
         # build attestation and gives the npm page the verified "Built and
         # signed on GitHub Actions" badge.
-        run: npm publish --access public --provenance --loglevel verbose
+        run: npm publish --access public --provenance
 
       # The Registry sync is intentionally a soft step. A registry hiccup
       # should never block the website / platform-docs rebuilds below;
