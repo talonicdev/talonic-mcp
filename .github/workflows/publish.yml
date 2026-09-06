@@ -33,6 +33,12 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
+      # Trusted publishing (npm verifies the GitHub Actions OIDC identity —
+      # no NPM_TOKEN secret, nothing to expire) needs npm >= 11.5.1; the
+      # Node 22 runner image ships npm 10.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest && npm --version
+
       # Docs-drift guard.
       #
       # talonic.com/docs/mcp is fed by docs/sections.json (via the platform's
@@ -135,12 +141,13 @@ jobs:
           git push
 
       - name: Publish to npm
-        # --provenance attaches a signed build attestation (repo is public,
-        # id-token: write is already granted above). Gives the npm page a
-        # verified "Built and signed on GitHub Actions" badge.
+        # Authenticates via npm trusted publishing: the package's npm settings
+        # list this repo + workflow file as a trusted publisher, and npm
+        # exchanges the job's OIDC token (id-token: write above) for a
+        # short-lived publish credential. --provenance attaches a signed
+        # build attestation and gives the npm page the verified "Built and
+        # signed on GitHub Actions" badge.
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # The Registry sync is intentionally a soft step. A registry hiccup
       # should never block the website / platform-docs rebuilds below;
