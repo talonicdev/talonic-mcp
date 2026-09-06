@@ -2114,7 +2114,7 @@
     "content": [
       {
         "type": "paragraph",
-        "text": "Get the **concept card** for one field: what it means (curated description and extraction instruction), its synonyms and merge aliases, maturity, where it occurs (document and occurrence counts, first/last seen, document-type spread), its value distribution (top values with counts, distinct count, examples), schema usage, and identity links (`superseded_by`, absorbed concepts). Accepts a field `name` in the user's own words — it is resolved through canonical name, synonyms, merge aliases and the registry's spelling fold, then followed to the live concept."
+        "text": "Get the **concept card** for one field: what it means (curated description and extraction instruction), its synonyms and merge aliases, maturity, where it occurs (document and occurrence counts, first/last seen, document-type spread), its value distribution (top values with counts, distinct count, examples), schema usage, and identity links (`superseded_by`, absorbed concepts). Accepts a field `name` in the user's own words — it is resolved through the canonical name, the registry's spelling fold, merge aliases and synonyms (with case-insensitive fallbacks), then followed to the live concept."
       },
       {
         "type": "heading",
@@ -2160,7 +2160,7 @@
           {
             "name": "name",
             "type": "string",
-            "description": "Field name to resolve (canonical → synonyms → aliases → spelling fold, redirects followed)."
+            "description": "Field name to resolve (canonical → spelling fold → aliases → synonyms, then case-insensitive fallbacks; redirects followed)."
           },
           {
             "name": "include_history",
@@ -2241,7 +2241,7 @@
     "faq": [
       {
         "question": "Can I pass the user's wording instead of an id?",
-        "answer": "Yes. `name` is resolved through the canonical name, synonyms, merge aliases and the registry's spelling fold, then followed to the live concept; the response's `resolution.matched_by` says which arm matched."
+        "answer": "Yes. `name` is resolved through the canonical name, the registry's spelling fold, merge aliases and synonyms (with case-insensitive fallbacks), then followed to the live concept; the response's `resolution.matched_by` says which arm matched."
       }
     ],
     "mentions": [
