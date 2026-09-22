@@ -2,6 +2,9 @@
 
 **Date:** 2026-09-22 · **Status:** approved in outline (Hamlet, 2026-09-22: "then do the housekeeping and, based on the fully updated MCP, we will do the Claude directory push") · **Sub-project:** 3 of 3 (1 = widget parity, 2 = Run/Specs/Ask tools — both local on `main`, unpushed)
 
+
+> **Post-merge update (2026-09-22, after sub-project 2b Task 1):** upstream shipped 0.1.77 (PR #22, seven decision-task tools) and 0.1.78 (PR #23, CI registry-wait) mid-program; sub-project 2b merged them and brought the seven to widget/manifest/mirror/website parity. Read every count in this spec as **36 tools / 36 widgets**, the live version as **0.1.78**, the pending release as **0.1.79**, and the CHANGELOG backfill range as **0.1.53 → 0.1.78**. The plan carries the binding table.
+
 ## Goal
 
 Bring every repo-facing and reviewer-facing record of the MCP server in line with what the code now is (29 tools, 29 widgets, 0.1.76 live → 0.1.77 pending), close the review-criteria risks Anthropic's checklist would flag, and produce a complete, paste-ready resubmission package for the Claude Connectors Directory — so that the only remaining step is Hamlet clicking through the portal after the release.

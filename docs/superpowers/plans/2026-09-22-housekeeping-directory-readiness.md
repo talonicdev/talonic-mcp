@@ -2,13 +2,33 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Every record of the Talonic MCP server (changelog, status, tool descriptions Anthropic will review, listing collateral) matches the 29-tool / 29-widget server now on local `main`, and a paste-ready Claude Connectors Directory resubmission package exists — so the only steps left are Hamlet's push (release) and his clicks in the Anthropic portal.
+**Goal:** Every record of the Talonic MCP server (changelog, status, tool descriptions Anthropic will review, listing collateral) matches the 36-tool / 36-widget server (see the post-merge reality update below) now on local `main`, and a paste-ready Claude Connectors Directory resubmission package exists — so the only steps left are Hamlet's push (release) and his clicks in the Anthropic portal.
 
 **Architecture:** Docs-only except for two tool descriptions (`talonic_invoke_agent_tool`, `talonic_list_agent_tools`) that gain the read-only-restriction and target-API sentences Anthropic's review criteria ask for. Two new test locks (changelog structure/coverage; description wording). No behaviour changes.
 
 **Tech Stack:** Markdown, TypeScript (descriptions + tests), vitest 3, prettier.
 
 **Spec:** `docs/superpowers/specs/2026-09-22-housekeeping-directory-readiness-design.md`
+
+## Post-merge reality update (2026-09-22, after sub-project 2b Task 1) — BINDING over the task text below
+
+The task text below was written when local `main` had 29 tools and `origin/main` was at 0.1.76. Between writing and execution, upstream shipped PR #22 (seven `talonic_*_decision_task` tools, published **0.1.77**) and PR #23 (CI: MCP Registry publish waits for npm, published **0.1.78**), and sub-project 2b merged them (merge commit 1da2e44) and gave the seven tools widgets, manifest entries, mirror docs and website pages. Wherever a task below says otherwise, these facts win:
+
+| Was | Is now |
+| --- | --- |
+| 29 public tools / 29 widgets / manifest 29 / preflight 29 | **36** public tools / 36 widgets / manifest 36 / preflight 36 (22 read-only, 14 write-capable) |
+| `docs/sections.json` mirror: 29 tool entries (43 total) | 36 tool entries (**50** total) |
+| `@talonic/mcp` 0.1.76 live on npm / Registry / mcp.talonic.com | **0.1.78** live (verify with `curl -s https://mcp.talonic.com/health` and `npm view @talonic/mcp version` at execution time) |
+| next push publishes 0.1.77 | next push publishes **0.1.79** |
+| CHANGELOG backfill 0.1.53 → 0.1.76 | backfill **0.1.53 → 0.1.78**: add `## [0.1.77] - 2026-09-22` (move the "External-mode decision-task protocol … seven new tools" bullet there from `[Unreleased]`) and `## [0.1.78] - 2026-09-22` (`### Changed` — "CI: the MCP Registry publish waits up to four minutes for npm to serve the new version, retries three times, and warns instead of failing"); drop the `> 0.1.77 shipped …` note line that sub-project 2b left under `[Unreleased]` once the headings exist; `[Unreleased]` keeps sub-project 1/2/2b bullets (widget parity 36, Specs/Run/Ask, decision-task widgets, surface tagging fix, Apps SDK metadata, review fixes) |
+| STATUS.md tool list 29 | 36: the 29 plus list_decision_tasks, claim_decision_task, read_decision_package, heartbeat_decision_task, submit_decision_task, release_decision_task, fail_decision_task (External-mode Apps; `apps:decide` OAuth scope advertised; non-invocable marking when the token lacks it) |
+| website: 22 MCP pages live, 29 local | 22 live, **36** local (29 + 7 decision-task pages, website commits 25ce06a, e4ccb2a + the 2b website commit) |
+| Claude directory package "29 public tools … Read-only (20)" | **36 public tools … Read-only (22)**: the 20 + `talonic_list_decision_tasks`, `talonic_read_decision_package`; write-capable (14): the 9 + claim/heartbeat/submit/release/fail decision task; add one sentence to the listing description: External-mode app decisions (claim → read package → submit / release / fail) behind the `apps:decide` scope |
+| sweep regex `0\.1\.7[0-6]` | `0\.1\.7[0-8]` for "stale version" hits that claim to be current/pending (dated history stays) |
+| Directory prepared "against 0.1.77 … portal syncs 29 tools" | against **0.1.79** … portal syncs **36** tools |
+
+Also true now: `tests/changelog.test.ts` coverage range ends at 0.1.78; `server.json`/`package.json` read 0.1.78 (CI-managed, never edit); `git log --oneline origin/main..main` is the unpublished set.
+
 
 ## Global Constraints
 
