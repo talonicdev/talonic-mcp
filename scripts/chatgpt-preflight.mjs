@@ -19,21 +19,23 @@ const port = await new Promise((resolve, reject) => {
   s.on("error", reject)
 })
 
+const failures = []
+
 const child = spawn(process.execPath, ["dist/http-server.js"], {
   env: { ...process.env, PORT: String(port), TALONIC_BASE_URL: "http://127.0.0.1:9" },
   stdio: ["ignore", "pipe", "pipe"],
 })
+child.on("error", (err) => failures.push("could not start dist/http-server.js: " + err.message))
 let logs = ""
 child.stdout.on("data", (d) => (logs += d))
 child.stderr.on("data", (d) => (logs += d))
 
 const base = `http://127.0.0.1:${port}`
-const failures = []
 try {
   let up = false
   for (let i = 0; i < 50 && !up; i++) {
     try {
-      up = (await fetch(`${base}/health`)).ok
+      up = (await fetch(`${base}/health`, { signal: AbortSignal.timeout(1_000) })).ok
     } catch {
       await sleep(100)
     }
@@ -45,6 +47,7 @@ try {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", ...headers },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10_000),
     })
     const text = await res.text()
     const m = text.match(/data: (\{[\s\S]*\})/)
@@ -81,6 +84,7 @@ try {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 3, method: "resources/read", params: { uri } }),
+      signal: AbortSignal.timeout(10_000),
     })
     const body = await res.json().catch(() => null)
     const item = body?.result?.contents?.[0]
@@ -98,6 +102,11 @@ try {
   failures.push(String(err?.message ?? err))
 } finally {
   child.kill("SIGTERM")
+  await Promise.race([
+    new Promise((r) => child.once("exit", r)),
+    sleep(2000),
+  ])
+  if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL")
 }
 
 if (failures.length) {
