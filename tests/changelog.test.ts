@@ -39,10 +39,13 @@ describe("CHANGELOG.md", () => {
     }
   })
 
-  it("has a heading for every patch release from 0.1.45 up to the package version (releases 0.1.48 never shipped)", () => {
+  it("has a heading for every patch release from 0.1.45 up to the package version", () => {
     const have = new Set(headings.map((h) => h.version))
     const [maj, min, patch] = pkgVersion.split(".").map(Number)
-    const skipped = new Set(["0.1.48"]) // bump commit without a publish; no npm release exists
+    // Every 0.1.x in [45, package version] has shipped a real npm release (verified against
+    // `npm view @talonic/mcp versions --json` and every `git tag -l 'v0.1.*'` in range) — this
+    // set exists only for a genuinely tag-less or unpublished patch, should one ever occur again.
+    const skipped = new Set<string>([])
     for (let p = 45; p <= patch; p++) {
       const v = `${maj}.${min}.${p}`
       if (skipped.has(v)) continue

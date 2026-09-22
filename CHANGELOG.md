@@ -80,10 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Widgets for the two metering tools** (`talonic_get_pricing`, `talonic_get_usage`) — added after the App Directory approval (0.1.67) without cards, they were the only two bare tools; this alignment pass restores one-widget-per-tool parity (11/11) and adds their missing MCP docs nav entries.
 
-### Changed
-
-- **Widget scaffolding refactored into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP) and a `registerWidget()` helper; each widget supplies only its `render(payload)` body.
-
 ## [0.1.71] - 2026-06-23
 
 ### Added
@@ -181,6 +177,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Branded inline widgets for every tool.** All nine tools render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]`.
 
+### Changed
+
+- **Widget scaffolding refactored into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP) and a `registerWidget()` helper; each widget supplies only its `render(payload)` body.
+
 ## [0.1.55] - 2026-06-03
 
 ### Fixed
@@ -205,7 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ChatGPT Apps SDK widget** (`src/widgets/`) now reads tool output via `window.openai` and declares a Content-Security-Policy, fixing the extraction-result card rendering inside ChatGPT's iframe sandbox.
 
-## [0.1.51] - 2026-06-01
+## [0.1.51] - 2026-05-28
 
 ### Added
 
@@ -215,7 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `talonic_list_schemas` now returns **compact summaries** (id, short_id, name, description, version, field count) and drops the heavy full `definition` blob from the list response. Fetch a single schema's definition on demand instead of paying for every definition on every list call.
 
-## [0.1.50] - 2026-05-31
+## [0.1.50] - 2026-05-28
 
 ### Fixed
 
@@ -231,19 +231,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`talonic_request_upload` polling guidance hardened.** The description now states explicitly that a user message like "done" or "uploaded" confirms only the browser-side upload — the agent must still poll `talonic_get_document` until `status` is `completed` before calling `talonic_extract`. `talonic_get_document`'s description documents the full lifecycle (`pending_upload → queued → extracting → completed`).
 
-## [0.1.47] - 2026-05-28
+## [0.1.48] - 2026-05-28
 
 ### Changed
 
 - **Aligned the browser-handoff poll target with the platform fix.** After the platform began enqueuing extraction on upload, the happy-path lifecycle became `pending_upload → queued → extracting → completed` and no longer surfaces `uploaded` in normal operation. `talonic_request_upload` and `talonic_get_document` descriptions now tell agents to poll for `completed`. Added unit tests for `talonic_request_upload` (happy path, custom base URL, per-call token refresh, non-2xx and network-error paths).
 
-## [0.1.46] - 2026-05-27
+## [0.1.47] - 2026-05-28
+
+### Note
+
+- Version-bump-only release (`f64b0eb`): no commits landed between it and `v0.1.46` — an immediate re-publish with no code or doc changes. The next substantive change shipped in 0.1.48.
+
+## [0.1.46] - 2026-05-28
 
 ### Added
 
 - **`talonic_request_upload` — browser-handoff upload for hosted AI agents.** A new tool that routes file delivery around two structural limits of hosted connectors (Claude.ai web, ChatGPT): the ~32 KB tool-call argument cap and the sandbox egress allowlist. It returns a pre-allocated `document_id`, a browser-openable `upload_url` (`https://app.talonic.com/u/<token>`), and an `expires_at`. The user opens the link and drops the file; the agent polls `talonic_get_document` until `status === "completed"`, then calls `talonic_extract` with the `document_id`. Tool count: 8 → 9. `talonic_extract`'s description gained a "large files / hosted environments" note pointing at the new flow. Verified end-to-end against production Claude.ai.
 
-## [0.1.45] - 2026-05-20
+## [0.1.45] - 2026-05-27
 
 ### Added
 
