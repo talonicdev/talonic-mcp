@@ -98,6 +98,7 @@ That's the full list. After both pushes land, Vercel rebuilds and the new tool p
 | Edits to `docs/sections.json` don't appear on `/docs/mcp/*` | **You edited the wrong file.** | Edit `src/content/sections/*.ts` instead (mcp) |
 | `Docs-drift guard` fails on push | Tool source changed without docs/sections.json | Either update `docs/sections.json` too, or add `[skip docs]` to a commit message in the push |
 | Publish chain runs but `talonic.com/docs/mcp/*` still stale | Vercel cache OR website rebuild didn't fire | Check `gh run list --repo talonicdev/website --workflow=update-docs.yml`; manually fire `gh workflow run publish.yml -r main` from talonic-mcp |
+| Run is green, npm has the new version, but the MCP Registry `isLatest` is one version behind | `mcp-publisher publish` validates the version against npm, whose read replicas can lag a publish by minutes; the step is `continue-on-error`, so the run stays green (surfaced as a `::warning::` annotation since 2026-09-22; the workflow now waits up to 4 min for npm and retries 3×) | Nothing urgent, installs come from npm. To close it now: `mcp-publisher login github && mcp-publisher publish` from the repo root at the bumped commit; otherwise the next release retries |
 | `sync-external-docs.yml` 403 on checkout | `PLATFORM_SYNC_TOKEN` secret missing or under-scoped | Re-issue PAT with `Contents: read/write` on `talonicdev/platform`; update the secret |
 
 ## CI tokens (purposes, scopes, where they live)
