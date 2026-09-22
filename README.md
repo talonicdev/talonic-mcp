@@ -32,6 +32,11 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_find_data`** | Resolve a concept in the user's words to the fields, values, documents and passages that carry it — by meaning, not by name. |
 | **`talonic_list_agent_tools`** | The platform's agent tool registry (`query_data` SQL, `describe_data`, document markdown, …) with schemas and per-credential invocability. |
 | **`talonic_invoke_agent_tool`** | Run one platform agent tool directly with your own arguments — no model in the loop. |
+| **`talonic_list_agent_tasks`** | Metadata worklist for documents parked at Agent stages. |
+| **`talonic_get_agent_task`** | Audited fetch of one Agent task's immutable input snapshot and output contract. |
+| **`talonic_claim_agent_task`** | Acquire or reclaim a leased Agent task and its execution epoch. |
+| **`talonic_heartbeat_agent_task`** | Extend the current claim lease on an Agent task using its epoch. |
+| **`talonic_submit_agent_task`** | Submit an Agent task's declared typed outputs transactionally and resume the document. |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
