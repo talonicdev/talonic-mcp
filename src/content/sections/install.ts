@@ -55,7 +55,7 @@ export const sections: RawSection[] = [
           "URL: `https://mcp.talonic.com/mcp` — no query string, no headers.",
           "Click **Connect**. You are redirected to Talonic to sign in.",
           "Sign in with Google, Microsoft, or your company SSO.",
-          "Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, and `schemas:read`. Pick a workspace if you have multiple.",
+          "Approve the consent screen. The requested scopes are `extract:write`, `documents:read`, `schemas:read`, and `apps:decide` (the decision-task tools for External-mode Apps). Connectors added before `apps:decide` existed keep working; the seven decision tools show as not invocable until you remove and re-add the connector. Pick a workspace if you have multiple.",
           "You are returned to Claude.ai with the connector live. The full Talonic tool set is available in any new conversation.",
         ],
       },

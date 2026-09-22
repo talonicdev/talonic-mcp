@@ -15,7 +15,7 @@ export const sections: RawSection[] = [
       },
       {
         type: "paragraph",
-        text: "The tool set covers the full document workflow: extraction (`talonic_extract`, `talonic_to_markdown`, `talonic_request_upload`), workspace retrieval (`talonic_search`, `talonic_filter`, `talonic_get_document`), schema management (`talonic_list_schemas`, `talonic_save_schema`), cost visibility (`talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`), and the Agent-task worklist (`talonic_list_agent_tasks` through `talonic_submit_agent_task`), plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
+        text: "The tool set covers the full document workflow: extraction (`talonic_extract`, `talonic_to_markdown`, `talonic_request_upload`), workspace retrieval (`talonic_search`, `talonic_filter`, `talonic_get_document`), schema management (`talonic_list_schemas`, `talonic_save_schema`), cost visibility (`talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`), the Agent-task worklist (`talonic_list_agent_tasks` through `talonic_submit_agent_task`), and the External-mode decision-task protocol for Talonic Apps (`talonic_list_decision_tasks` through `talonic_fail_decision_task`), plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
       },
       {
         type: "paragraph",
