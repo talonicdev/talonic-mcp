@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { resolveFetch } from "./_http.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
@@ -44,7 +45,7 @@ export async function handleRequestUpload(
     const base = baseUrl ?? "https://api.talonic.com"
     const token = getToken()
 
-    const res = await fetch(`${base}/v1/documents/upload-session`, {
+    const res = await resolveFetch(getToken)(`${base}/v1/documents/upload-session`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

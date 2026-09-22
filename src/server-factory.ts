@@ -1,5 +1,6 @@
 import { Talonic } from "@talonic/node"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
+import { withFetch } from "./tools/_http.js"
 import { registerSchemasResource } from "./resources/schemas-resource.js"
 import { registerWebhooksResource } from "./resources/webhooks-resource.js"
 import { registerWidgets } from "./widgets/register.js"
@@ -142,6 +143,11 @@ export function createServer(options: CreateServerOptions): McpServer {
     return () => fallback
   })()
 
+  // Raw-fetch tools (no SDK client) resolve this instead of `getToken`, so
+  // their outbound calls carry the same User-Agent surface tag as the
+  // SDK-backed tools above.
+  const rawToken = withFetch(getToken, taggedFetch)
+
   // Build the Talonic SDK getter. Drives every tool and the schemas resource.
   const getTalonic: () => Talonic = (() => {
     if (options.talonic) {
@@ -247,20 +253,20 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetBalance(server, getTalonic)
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
-  registerRequestUpload(server, getToken, baseUrl)
-  registerFieldTools(server, getToken, baseUrl)
-  registerAgentRegistryTools(server, getToken, baseUrl)
-  registerAgentTaskTools(server, getToken, baseUrl)
+  registerRequestUpload(server, rawToken, baseUrl)
+  registerFieldTools(server, rawToken, baseUrl)
+  registerAgentRegistryTools(server, rawToken, baseUrl)
+  registerAgentTaskTools(server, rawToken, baseUrl)
   if (options.includeGrowthTools) {
-    registerGrowthTools(server, getToken, baseUrl)
+    registerGrowthTools(server, rawToken, baseUrl)
   }
   if (options.includeAdminAgentTaskTools) {
-    registerAdminAgentTaskTools(server, getToken, baseUrl)
+    registerAdminAgentTaskTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.
   registerSchemasResource(server, getTalonic)
-  registerWebhooksResource(server, getToken, baseUrl)
+  registerWebhooksResource(server, rawToken, baseUrl)
 
   // UI widget resources (Apps SDK). One per tool.
   registerWidgets(server)

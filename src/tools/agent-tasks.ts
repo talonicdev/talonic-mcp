@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { resolveFetch } from "./_http.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -140,7 +141,7 @@ async function agentTaskRequest(
   request: ApiRequest,
 ): Promise<ToolResult> {
   try {
-    const response = await fetch(apiUrl(baseUrl, request.path, request.query), {
+    const response = await resolveFetch(getToken)(apiUrl(baseUrl, request.path, request.query), {
       method: request.method ?? "GET",
       headers: {
         Authorization: `Bearer ${getToken()}`,

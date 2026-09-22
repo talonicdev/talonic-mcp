@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { resolveFetch } from "./_http.js"
 
 /**
  * Growth analytics tools — Talonic-internal, superadmin-only.
@@ -34,7 +35,7 @@ async function growthGet(
     const qs = new URLSearchParams()
     for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== "") qs.set(k, v)
     const url = `${baseUrl ?? DEFAULT_BASE}/v1/growth/${path}${qs.size ? `?${qs}` : ""}`
-    const res = await fetch(url, {
+    const res = await resolveFetch(getToken)(url, {
       headers: { Authorization: `Bearer ${getToken()}`, Accept: "application/json" },
     })
     if (res.status === 403) {

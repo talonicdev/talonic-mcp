@@ -1,4 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
+import { resolveFetch } from "../tools/_http.js"
 
 /**
  * Webhook reference info fetched from the Talonic API.
@@ -57,7 +58,7 @@ export function registerWebhooksResource(
       await Promise.all(
         WEBHOOK_INFO_ENDPOINTS.map(async ({ path, key }) => {
           try {
-            const res = await fetch(`${base}${path}`, {
+            const res = await resolveFetch(getToken)(`${base}${path}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: "application/json",

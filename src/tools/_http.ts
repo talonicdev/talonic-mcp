@@ -3,6 +3,27 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 /** Default Talonic API origin for raw-fetch tools (mirrors the SDK default). */
 export const DEFAULT_BASE = "https://api.talonic.com"
 
+/**
+ * A bearer-token getter that may carry the `fetch` implementation raw-fetch
+ * tools must use. `createServer` attaches its User-Agent-tagging fetch so the
+ * platform can attribute these calls to a client surface, exactly like the
+ * SDK-backed tools. Plain getters (tests, library callers) fall back to the
+ * global fetch.
+ */
+export type TokenSource = (() => string) & { fetch?: typeof fetch }
+
+/** Wrap a token getter with the fetch implementation raw-fetch tools should use. */
+export function withFetch(getToken: () => string, fetchImpl: typeof fetch): TokenSource {
+  const source = (() => getToken()) as TokenSource
+  source.fetch = fetchImpl
+  return source
+}
+
+/** The fetch a raw-fetch tool must call for this token getter. */
+export function resolveFetch(getToken: () => string): typeof fetch {
+  return (getToken as TokenSource).fetch ?? fetch
+}
+
 /** Query-string values a raw-fetch tool may forward; `undefined`/empty are dropped. */
 export type QueryParams = Record<string, string | number | boolean | undefined>
 
@@ -40,7 +61,7 @@ export async function apiJson<T = unknown>(
   opts: { params?: QueryParams; body?: unknown } = {},
 ): Promise<T> {
   const url = buildUrl(baseUrl, path, opts.params)
-  const res = await fetch(url, {
+  const res = await resolveFetch(getToken)(url, {
     method,
     headers: {
       Authorization: `Bearer ${getToken()}`,
