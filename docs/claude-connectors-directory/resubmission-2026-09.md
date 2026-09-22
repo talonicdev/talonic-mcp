@@ -6,7 +6,8 @@ Prepared 2026-09-22 against `@talonic/mcp` **0.1.79** — local `main` at commit
 
 - [ ] Release 0.1.79 is live (`curl -s https://mcp.talonic.com/health` shows the version).
 - [ ] `npm run preflight:chatgpt` and `npm run smoke:live` green on that build.
-- [ ] Test account: a Talonic workspace with a populated corpus (the workspace already contains sample documents — at least a couple of dozen processed documents, at least one published Spec, and a saved schema named "Invoice") and an API key — Anthropic requires "a fully populated account". `[Hamlet fills in: which workspace/account this is, and its OAuth sign-in details or API key]`. Credentials go in step 9's portal field, never in this repo.
+- [ ] Test account: a Talonic workspace with a populated corpus (the workspace already contains sample documents — at least a couple of dozen processed documents) and an API key — Anthropic requires "a fully populated account". `[Hamlet fills in: which workspace/account this is, and its OAuth sign-in details or API key]`. Credentials go in step 9's portal field, never in this repo.
+- [ ] Test workspace seeded: a saved schema named "Invoice"; a published Spec named "Invoice" (so §9's Spec prompts read naturally); at least one **PARKED** Agent-stage task (an Agent stage waiting on an external claimant) and at least one **AVAILABLE** decision task (an External-mode app run parked for decision) — otherwise 9 of the 36 test prompts in §9 (the Agent-task and decision-task groups) return empty results.
 - [ ] Icon: `Logo 400px.png` (square PNG; Hamlet has it — path outside this repo).
 
 ## 1. Connection
@@ -66,7 +67,7 @@ The seven decision-task tools are for **External-mode Talonic Apps** and require
 ## 3. Listing
 
 - Server name (≤ 100): **Talonic**
-- Tagline (≤ 55): **Extract validated structured data from any document** (50 chars)
+- Tagline (≤ 55): **Extract validated structured data from any document** (51 chars)
 - Description (≤ 2000):
 
   Talonic turns any document — PDFs, scans, photos, invoices, contracts, certificates, statements, forms — into clean, schema-validated JSON, instead of the raw OCR-plus-guesswork that makes tables, dates, and totals drift. Through this connector, Claude can: extract structured fields from a document already in the workspace or from a public file URL, with per-field confidence scores and source provenance on every value; route files too large for a hosted tool-call payload through a one-time browser upload link the user opens themselves; convert a document to clean OCR markdown; search and filter the workspace by document content or by extracted field values; browse the Field Registry, the canonical set of concepts Talonic has discovered across a workspace's documents, each with a definition, synonyms, and a value distribution; define and save reusable extraction schemas; run the workspace's own configured Spec pipelines over a batch of documents and read back structured rows; and ask natural-language questions over a workspace's documents, getting back a cited, verified answer grounded in source spans. A separate set of tools lets an outside agent participate in a Talonic App's decision points — claim a parked run, read its frozen input package with full provenance, then submit, release, or fail the decision — gated behind the `apps:decide` OAuth scope so it only activates for authorized workspace roles. A free tier is available, no credit card required. The server is hosted at `mcp.talonic.com` and authenticates via OAuth 2.1 with PKCE and dynamic client registration, so no API key ever touches the connector configuration. Full documentation is at `talonic.com/docs/mcp`.
@@ -120,63 +121,65 @@ One change since the 2026-05-12 submission: the scope list now also advertises `
 
 - Test account instructions text (for the reviewer):
 
+  **Prompts 18–22 (Agent tasks) and 30–36 (Decision tasks) below need the seeded state from §0 — at least one PARKED Agent-stage task and one AVAILABLE decision task — or they return an empty list/claim-conflict instead of exercising the claim → heartbeat → submit flow.**
+
   1. Sign in via **Add custom connector** in Claude.ai and connect with OAuth using the provided credentials — no API key needed for the hosted connector. `[Hamlet fills in: the actual test-account sign-in credentials / workspace name]`.
-  2. The workspace already contains sample documents, at least one saved schema named "Invoice", and at least one configured Spec, so every tool below returns real data without any setup.
-  3. Suggested prompts, one per tool (36 total), grouped to match the tool families above:
+  2. The workspace already contains sample documents, a saved schema named "Invoice", a configured Spec named "Invoice", a parked Agent-stage task, and an available decision task (see §0), so every tool below returns real data without any setup.
+  3. Suggested prompts, one per tool (36 total, numbered), grouped to match the tool families above:
 
      **Extraction & documents**
-     - `talonic_search` — "Search my Talonic workspace for invoice documents."
-     - `talonic_filter` — "List the documents in my workspace that have an invoice number."
-     - `talonic_get_document` — "Show the document details and processing status for the sample invoice in my workspace."
-     - `talonic_extract` — "Extract the vendor name, total amount, and invoice date from the sample invoice in my workspace."
-     - `talonic_to_markdown` — "Show me the text of the sample invoice as markdown."
-     - `talonic_request_upload` — "I want to add a new file to my Talonic workspace — give me an upload link."
+     1. `talonic_search` — "Search my Talonic workspace for invoice documents."
+     2. `talonic_filter` — "List the documents in my workspace that have an invoice number."
+     3. `talonic_get_document` — "Show the document details and processing status for the sample invoice in my workspace."
+     4. `talonic_extract` — "Extract the vendor name, total amount, and invoice date from the sample invoice in my workspace."
+     5. `talonic_to_markdown` — "Show me the text of the sample invoice as markdown."
+     6. `talonic_request_upload` — "I want to add a new file to my Talonic workspace — give me an upload link."
 
      **Schemas**
-     - `talonic_list_schemas` — "What schemas do I have saved in my Talonic workspace?"
-     - `talonic_save_schema` — "Save a new schema called 'Receipt Test' with fields vendor_name (string) and total (number)."
+     7. `talonic_list_schemas` — "What schemas do I have saved in my Talonic workspace?"
+     8. `talonic_save_schema` — "Save a new schema called 'Receipt Test' with fields vendor_name (string) and total (number)."
 
      **Metering**
-     - `talonic_get_balance` — "What's my Talonic credit balance?"
-     - `talonic_get_pricing` — "What does Talonic charge per page for extraction?"
-     - `talonic_get_usage` — "Break down my Talonic credit usage over the last 30 days."
+     9. `talonic_get_balance` — "What's my Talonic credit balance?"
+     10. `talonic_get_pricing` — "What does Talonic charge per page for extraction?"
+     11. `talonic_get_usage` — "Break down my Talonic credit usage over the last 30 days."
 
      **Field Registry**
-     - `talonic_list_fields` — "What fields has Talonic discovered across my documents?"
-     - `talonic_get_field` — "Tell me about the invoice_number field in my workspace's Field Registry."
-     - `talonic_field_values` — "Show me every value captured for invoice_number, with sources."
-     - `talonic_find_data` — "Where does my workspace track payment due dates?"
+     12. `talonic_list_fields` — "What fields has Talonic discovered across my documents?"
+     13. `talonic_get_field` — "Tell me about the invoice_number field in my workspace's Field Registry."
+     14. `talonic_field_values` — "Show me every value captured for invoice_number, with sources."
+     15. `talonic_find_data` — "Where does my workspace track payment due dates?"
 
      **Platform agent tools**
-     - `talonic_list_agent_tools` — "What agent tools does my Talonic workspace expose?"
-     - `talonic_invoke_agent_tool` — "Run the describe_data agent tool on my workspace."
+     16. `talonic_list_agent_tools` — "What agent tools does my Talonic workspace expose?"
+     17. `talonic_invoke_agent_tool` — "Run the describe_data agent tool on my workspace."
 
-     **Agent tasks**
-     - `talonic_list_agent_tasks` — "List the Agent-stage tasks visible to this credential."
-     - `talonic_get_agent_task` — "Show me the details of the first available Agent-stage task."
-     - `talonic_claim_agent_task` — "Claim the first available Agent-stage task."
-     - `talonic_heartbeat_agent_task` — "Extend the lease on the Agent-stage task I just claimed."
-     - `talonic_submit_agent_task` — "Submit the declared outputs for the Agent-stage task I claimed." (reviewer supplies sample values matching the task's contract)
+     **Agent tasks** (needs the seeded parked Agent-stage task — see §0)
+     18. `talonic_list_agent_tasks` — "List the Agent-stage tasks visible to this credential."
+     19. `talonic_get_agent_task` — "Show me the details of the first available Agent-stage task."
+     20. `talonic_claim_agent_task` — "Claim the first available Agent-stage task."
+     21. `talonic_heartbeat_agent_task` — "Extend the lease on the Agent-stage task I just claimed."
+     22. `talonic_submit_agent_task` — "Submit the declared outputs for the Agent-stage task I claimed." (reviewer supplies sample values matching the task's contract)
 
      **Specs & pipelines**
-     - `talonic_list_specs` — "What Specs are configured in my Talonic workspace?"
-     - `talonic_get_spec` — "Show me the structure of my Invoice Spec."
-     - `talonic_run_spec` — "Run my Invoice Spec over the documents already in my workspace."
-     - `talonic_get_run` — "Check the status of the Spec run I just started."
-     - `talonic_get_run_results` — "Show me the results of that Spec run as a table."
+     23. `talonic_list_specs` — "What Specs are configured in my Talonic workspace?"
+     24. `talonic_get_spec` — "Show me the structure of my Invoice Spec."
+     25. `talonic_run_spec` — "Run my Invoice Spec over the documents already in my workspace."
+     26. `talonic_get_run` — "Check the status of the Spec run I just started."
+     27. `talonic_get_run_results` — "Show me the results of that Spec run as a table."
 
      **Ask**
-     - `talonic_ask` — "What's the total across all invoices in my workspace, and where does that number come from?"
-     - `talonic_get_answer` — "Check whether my last question has finished processing."
+     28. `talonic_ask` — "What's the total across all invoices in my workspace, and where does that number come from?"
+     29. `talonic_get_answer` — "Check whether my last question has finished processing."
 
-     **Decision tasks** (External-mode Apps; requires an OAuth session with the `apps:decide` scope, or an API key with a per-app `decide` grant)
-     - `talonic_list_decision_tasks` — "List the decision tasks waiting on my Talonic App."
-     - `talonic_claim_decision_task` — "Claim the next available decision task for my Talonic App."
-     - `talonic_read_decision_package` — "Show me the input package for the decision task I just claimed."
-     - `talonic_heartbeat_decision_task` — "Extend the lease on the decision task I'm working on."
-     - `talonic_submit_decision_task` — "Submit my decision for the claimed task: outcome, evidence, and rationale." (reviewer supplies values matching the task's output contract)
-     - `talonic_release_decision_task` — "Release the decision task I claimed back to available — I can't decide it right now."
-     - `talonic_fail_decision_task` — "Mark the decision task I claimed as undecidable and explain why."
+     **Decision tasks** (needs the seeded available decision task — see §0; requires an OAuth session with the `apps:decide` scope, or an API key with a per-app `decide` grant)
+     30. `talonic_list_decision_tasks` — "List the decision tasks waiting on my Talonic App."
+     31. `talonic_claim_decision_task` — "Claim the next available decision task for my Talonic App."
+     32. `talonic_read_decision_package` — "Show me the input package for the decision task I just claimed."
+     33. `talonic_heartbeat_decision_task` — "Extend the lease on the decision task I'm working on."
+     34. `talonic_submit_decision_task` — "Submit my decision for the claimed task: outcome, evidence, and rationale." (reviewer supplies values matching the task's output contract)
+     35. `talonic_release_decision_task` — "Release the decision task I claimed back to available — I can't decide it right now."
+     36. `talonic_fail_decision_task` — "Mark the decision task I claimed as undecidable and explain why."
 
 - Credentials: entered in the portal only, never in this repo.
 - Confirmation that every tool was exercised: `[Hamlet fills in: MCP Inspector pass — date + who ran it]`; `[Hamlet fills in: Claude.ai custom-connector test — date]`.

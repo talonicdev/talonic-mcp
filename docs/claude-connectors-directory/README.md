@@ -8,6 +8,7 @@ Sibling of `../chatgpt-apps-sdk/` (the ChatGPT App Directory record). This folde
 ## Before doing anything else
 
 - [ ] Release 0.1.79 is live (`curl -s https://mcp.talonic.com/health` shows the version). As of 2026-09-22 the live version is still 0.1.78 (local `main` is 50 commits ahead, unpublished); publish first so the portal's automatic scan sees all 36 tools, then work through `resubmission-2026-09.md`.
+- [ ] Test workspace seeded: sample documents; a saved schema named "Invoice"; a published Spec named "Invoice" (so `resubmission-2026-09.md` §9's Spec prompts read naturally); at least one **PARKED** Agent-stage task (an Agent stage waiting on an external claimant) and at least one **AVAILABLE** decision task (an External-mode app run parked for decision) — otherwise 9 of the 36 test prompts in §9 (the Agent-task and decision-task groups) return empty results.
 
 ## Current server surface (2026-09-22, binding over any older count in this folder)
 
