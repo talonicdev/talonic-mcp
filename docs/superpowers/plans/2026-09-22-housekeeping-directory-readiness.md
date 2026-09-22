@@ -27,6 +27,8 @@ The task text below was written when local `main` had 29 tools and `origin/main`
 | sweep regex `0\.1\.7[0-6]` | `0\.1\.7[0-8]` for "stale version" hits that claim to be current/pending (dated history stays) |
 | Directory prepared "against 0.1.77 … portal syncs 29 tools" | against **0.1.79** … portal syncs **36** tools |
 
+**Release-history corrections found during execution (binding):** 0.1.48 WAS published (npm lists it; tag v0.1.48 → the c95a678 poll-target fix), so the changelog test's skip set is empty and 0.1.48 has its own heading; 0.1.46 and 0.1.47 were bump-only re-publishes (Note entries); `talonic_request_upload` shipped in 0.1.45 (c86a455), not 0.1.46; the widget-scaffolding refactor (`src/widgets/shared.ts`) shipped in 0.1.56 (3f484e3), not 0.1.72; every heading's date is its tag's date (0.1.45 = 2026-05-27). Wherever Task 1's prepared text below says otherwise, git history wins.
+
 Also true now: `tests/changelog.test.ts` coverage range ends at 0.1.78; `server.json`/`package.json` read 0.1.78 (CI-managed, never edit); `git log --oneline origin/main..main` is the unpublished set.
 
 
