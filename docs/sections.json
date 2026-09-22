@@ -4,11 +4,11 @@
     "parentSlug": "mcp-overview",
     "title": "Introduction",
     "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. Twenty-two public tools and two resources for structured document extraction via the Model Context Protocol.",
+    "description": "Official Talonic MCP server for AI agents. twenty-nine public tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
-        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents twenty-two public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
+        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents twenty-nine public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
       },
       {
         "type": "paragraph",
@@ -3324,6 +3324,1775 @@
       "401",
       "402",
       "500"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-pricing",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_pricing",
+    "seoTitle": "talonic_get_pricing — Credit Pricing Catalog for Agents",
+    "description": "MCP tool that returns Talonic's public credit pricing catalog: per-unit rates, EUR equivalents, and batch multipliers, so agents can predict spend upfront.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Returns the credit pricing catalog: fixed per-unit credit rates, their EUR equivalents, the credits-per-EUR conversion rate, and processing-mode multipliers (such as batch at 0.5x). Because the rates are fixed rather than token-based, an agent can read them and compute the exact cost of a planned job before spending a credit. The endpoint is public, so it works even before an API key is provisioned."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Estimating the cost of a planned extraction, structuring, or matching job before running it.",
+          "Answering a user question about how much Talonic costs per page or per operation.",
+          "Deciding whether a workload fits a budget, especially before signing up."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "For the workspace's remaining credit balance: use `talonic_get_balance`.",
+          "For what the workspace has already spent and on what: use `talonic_get_usage`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "response-shape",
+        "text": "Response shape"
+      },
+      {
+        "type": "list",
+        "items": [
+          "`currency`: billing currency for the EUR equivalents (always `EUR`).",
+          "`credits_per_eur`: conversion rate between credits and EUR (1,000 credits = 1 EUR at the standard rate).",
+          "`multipliers`: processing-mode multipliers keyed by mode (e.g. `realtime: 1`, `batch: 0.5`).",
+          "`units`: array of catalog lines, each with `unit`, `label`, `credits`, `eur`, and `free`."
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input",
+        "code": "{}"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool response",
+        "code": "{\n  \"currency\": \"EUR\",\n  \"credits_per_eur\": 1000,\n  \"multipliers\": { \"realtime\": 1, \"batch\": 0.5 },\n  \"units\": [\n    { \"unit\": \"page_ingest\", \"label\": \"Document page ingestion\", \"credits\": 100, \"eur\": 0.1, \"free\": false },\n    { \"unit\": \"structuring_cell\", \"label\": \"Structuring cell (LLM-reasoned)\", \"credits\": 20, \"eur\": 0.02, \"free\": false },\n    { \"unit\": \"registry_resolved_cell\", \"label\": \"Structuring cell (Field Registry resolved)\", \"credits\": 0, \"eur\": 0, \"free\": true },\n    { \"unit\": \"intelligence_op\", \"label\": \"Intelligence operation (matching, cases, reconciliation)\", \"credits\": 100, \"eur\": 0.1, \"free\": false },\n    { \"unit\": \"delivery\", \"label\": \"Delivery (webhook / export)\", \"credits\": 0, \"eur\": 0, \"free\": true },\n    { \"unit\": \"validation\", \"label\": \"Validation / quality check\", \"credits\": 0, \"eur\": 0, \"free\": true }\n  ]\n}"
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "pricing-estimate-example",
+        "text": "Example: quote a workload before running it"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Agent estimates the cost of a 20-page batch extraction",
+        "code": "// User: \"How much will it cost to extract this 20-page contract in batch mode?\"\n// Agent reads pricing:\n// talonic_get_pricing → {}\n\n// page_ingest = 100 credits, batch multiplier = 0.5\n// 20 pages * 100 credits * 0.5 = 1000 credits = 1.00 EUR\n\n// Agent: \"Extracting 20 pages in batch mode costs about 1,000 credits\n//  (1.00 EUR). Realtime would be 2,000 credits (2.00 EUR). Proceed in batch?\""
+      },
+      {
+        "type": "paragraph",
+        "text": "Cost-aware agents call `talonic_get_pricing` to turn a workload into a concrete quote before committing to it. Multiply the relevant per-unit rate by the expected unit count, then apply the processing-mode multiplier. Because the catalog also returns the credits-per-EUR rate, the agent can present the estimate in either credits or euros without hardcoding any number."
+      },
+      {
+        "type": "paragraph",
+        "text": "The catalog distinguishes billable units from free ones. Document page ingestion, structuring cells filled by fresh model reasoning, and intelligence operations carry a cost; Field Registry resolved cells, delivery, and validation are free. A document whose fields are answered entirely from the Field Registry therefore incurs only its page-ingestion cost, which an agent can surface as a reason to reuse schemas across similar documents."
+      },
+      {
+        "type": "paragraph",
+        "text": "Pricing pairs naturally with the other two cost tools. Before a job, quote it from the catalog; afterwards, verify what it actually cost with `talonic_get_usage`, whose `operation_type` values match the catalog's unit identifiers, and check the remaining headroom with `talonic_get_balance`. Because every estimate is derived from the live catalog rather than numbers baked into the agent's prompt, quotes stay correct even when Talonic adjusts a rate or adds a new billable unit."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Rates are fixed per unit rather than token-based, so a quote computed from the catalog is exact, not an estimate band. The only variables the agent needs are the unit counts (pages, cells, operations) and the processing mode."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_usage",
+        "slug": "mcp-talonic-get-usage"
+      },
+      {
+        "label": "talonic_get_balance",
+        "slug": "mcp-talonic-get-balance"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does talonic_get_pricing require an API key?",
+        "answer": "No. The pricing catalog is public, so an agent can read rates before signing up or provisioning a key. Call it with no arguments; it is read-only and safe to call at any time."
+      },
+      {
+        "question": "How does an agent compute the cost of a job from the catalog?",
+        "answer": "Multiply the per-unit credits by the number of units (pages, cells, or operations), then apply the processing-mode multiplier (1 for realtime, 0.5 for batch). Divide by credits_per_eur to express the result in euros."
+      },
+      {
+        "question": "Which operations are free in the catalog?",
+        "answer": "Field Registry resolved cells, delivery, and validation cost zero credits. Only fresh ingestion, fresh model-reasoned structuring cells, and intelligence operations (matching, cases, reconciliation) are billable."
+      }
+    ],
+    "mentions": [
+      "pricing",
+      "credit catalog",
+      "cost estimation",
+      "per-page pricing",
+      "batch discount",
+      "credits per EUR",
+      "budget"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-usage",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_usage",
+    "seoTitle": "talonic_get_usage — Per-Function Credit Usage Reports",
+    "description": "MCP tool that breaks down Talonic credit consumption by platform function over a trailing window (default 30 days), ordered by spend to show cost drivers.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Returns the workspace's credit consumption grouped by platform function over a trailing window, plus the total. Where `talonic_get_balance` reports what is left, this tool reports where the credits went: how much each function (page ingestion, structuring cells, intelligence operations) cost over the period. The breakdown is ordered by spend, highest first, so the dominant cost driver is the first row."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "The user asks what they have spent credits on, or which function dominates their spend.",
+          "Reviewing burn by function to decide whether to shift work to batch mode or trim an operation.",
+          "Producing a spend report for the last N days."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "For the remaining balance and runway: use `talonic_get_balance`.",
+          "For per-unit rates before running a job: use `talonic_get_pricing`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "arguments",
+        "text": "Arguments"
+      },
+      {
+        "type": "list",
+        "items": [
+          "`days` (optional): trailing reporting window in days. Default 30, clamped between 1 and 365."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "response-shape",
+        "text": "Response shape"
+      },
+      {
+        "type": "list",
+        "items": [
+          "`period_days`: length of the reporting window in days.",
+          "`total_credits`: total credits consumed across all functions in the window.",
+          "`by_function`: array of `{ operation_type, operations, credits }`, highest spend first."
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input",
+        "code": "{ \"days\": 30 }"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool response",
+        "code": "{\n  \"period_days\": 30,\n  \"total_credits\": 48200,\n  \"by_function\": [\n    { \"operation_type\": \"page_ingest\", \"operations\": 412, \"credits\": 41200 },\n    { \"operation_type\": \"structuring_cell\", \"operations\": 300, \"credits\": 6000 },\n    { \"operation_type\": \"intelligence_op\", \"operations\": 10, \"credits\": 1000 }\n  ]\n}"
+      },
+      {
+        "type": "paragraph",
+        "text": "Agents use `talonic_get_usage` to attribute spend to the functions that caused it. Pairing it with `talonic_get_balance` gives a full picture: balance shows how much is left, usage shows what consumed it, and pricing shows the rate of each function. An agent noticing that page ingestion dominates spend might suggest batch mode for the 0.5x discount, or reusing schemas so more cells resolve from the Field Registry for free."
+      },
+      {
+        "type": "paragraph",
+        "text": "The figures read from the credit transaction ledger, so they reconcile exactly with the balance and history reported elsewhere. The `operation_type` values match the unit identifiers in the pricing catalog, which lets an agent join usage to rates and explain not just how many credits a function consumed but why. To express any figure in euros, divide by the credits-per-EUR rate from the pricing catalog."
+      },
+      {
+        "type": "paragraph",
+        "text": "A practical reporting pattern: call `talonic_get_usage` with `days: 7` for a weekly report, join each `operation_type` row to its catalog line from `talonic_get_pricing`, and present spend per function in both credits and euros alongside the operation counts. Because the window is clamped to 1–365 days, month-over-month comparisons are two calls with different `days` values — no client-side bookkeeping or stored history is needed."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "`talonic_get_usage` is read-only and free to call. An empty `by_function` breakdown usually means no billable operations were charged in the window — see the FAQ below on shadow-mode metering — so treat it as 'nothing charged', not as an error."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_pricing",
+        "slug": "mcp-talonic-get-pricing"
+      },
+      {
+        "label": "talonic_get_balance",
+        "slug": "mcp-talonic-get-balance"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How is talonic_get_usage different from talonic_get_balance?",
+        "answer": "Balance reports what is left (and runway); usage reports what was spent, grouped by function. Use balance to check headroom and usage to attribute spend to extraction, structuring, or intelligence operations."
+      },
+      {
+        "question": "What window does talonic_get_usage cover?",
+        "answer": "The last 30 days by default. Pass days to change it, anywhere from 1 to 365. The response echoes period_days so the agent can confirm the window it summarized."
+      },
+      {
+        "question": "Why is the breakdown empty?",
+        "answer": "Per-function rows populate as billable operations are charged. While metering runs in shadow mode the ledger records what each operation would cost without deducting, so the breakdown can be empty until enforcement is enabled. Pricing still returns the rates in the meantime."
+      }
+    ],
+    "mentions": [
+      "credit usage",
+      "per-function spend",
+      "credit consumption",
+      "burn rate",
+      "operation type",
+      "spend report"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-agent-tasks",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_agent_tasks",
+    "seoTitle": "talonic_list_agent_tasks — Agent Worklist for Documents",
+    "description": "MCP tool that lists Agent-stage tasks awaiting external processing in your Talonic workspace — metadata only, with status filters and cursor pagination.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List Agent-stage tasks visible to the current workspace credential. The response contains task metadata and cursor pagination; payload data is deliberately fetched one task at a time so each disclosure can be audited."
+      },
+      {
+        "type": "paragraph",
+        "text": "Agent stages are pipeline steps that park a running document until an external agent supplies a set of declared output fields — a risk assessment, an enrichment lookup, a judgment call the pipeline cannot make itself. When a document reaches an enabled Agent stage, the platform captures an immutable input snapshot, creates a task, and waits. This tool is the entry point of the pull workflow: it shows what work exists without exposing any document data."
+      },
+      {
+        "type": "paragraph",
+        "text": "Each row in `data[]` carries identifiers (`id`, `document_id`, `pipeline_id`, `stage_id`), the lifecycle `status` (`available`, `claimed`, `submitted`, `timed_out`, or `cancelled`), the current `execution_epoch`, and the timing fields `claimed_at`, `lease_expires_at`, `timeout_at`, `submitted_at`, and `created_at`. That is enough to decide which task to inspect next — and nothing more, by design. `pagination.has_more` and `pagination.next_cursor` drive paging."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "list-agent-tasks-workflow",
+        "text": "Start the pull workflow"
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "Call `talonic_list_agent_tasks` with `status: \"available\"`.",
+          "Inspect a candidate with `talonic_get_agent_task`.",
+          "Claim it with `talonic_claim_agent_task` before doing work.",
+          "Heartbeat while processing, then submit only fields declared in `output_contract`."
+        ]
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "available | claimed | submitted | timed_out | cancelled",
+            "description": "Optional lifecycle-state filter. Start with `available` when looking for work."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Page size from 1 to 100. Defaults to 50."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "Opaque `pagination.next_cursor` from the previous page."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input and response",
+        "code": "// talonic_list_agent_tasks({ \"status\": \"available\", \"limit\": 2 })\n{\n  \"data\": [\n    {\n      \"id\": \"11111111-1111-4111-8111-111111111111\",\n      \"document_id\": \"22222222-2222-4222-8222-222222222222\",\n      \"stage_id\": \"33333333-3333-4333-8333-333333333333\",\n      \"status\": \"available\",\n      \"execution_epoch\": 1,\n      \"claimed_at\": null,\n      \"lease_expires_at\": null,\n      \"timeout_at\": \"2026-08-30T12:00:00.000Z\",\n      \"created_at\": \"2026-08-29T09:15:00.000Z\"\n    }\n  ],\n  \"pagination\": { \"has_more\": false, \"next_cursor\": null }\n}"
+      },
+      {
+        "type": "paragraph",
+        "text": "For a long-running worker loop, list with `status: \"available\"` on a modest interval rather than a tight poll, and page with `cursor` only when `has_more` is true. Filtering by `claimed` or `timed_out` is useful for supervision — spotting tasks another worker abandoned (their lease expired but they were never resubmitted) that are now eligible for reclaiming via `talonic_claim_agent_task`."
+      },
+      {
+        "type": "callout",
+        "text": "An empty worklist is normal: tasks exist only when a running document reaches an enabled Agent stage and the credential's Sources-IAM rules allow it."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_agent_task",
+        "slug": "mcp-talonic-get-agent-task"
+      },
+      {
+        "label": "talonic_claim_agent_task",
+        "slug": "mcp-talonic-claim-agent-task"
+      },
+      {
+        "label": "talonic_submit_agent_task",
+        "slug": "mcp-talonic-submit-agent-task"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does listing Agent tasks expose document data?",
+        "answer": "No. The list returns metadata only. Fetching one task's immutable input snapshot uses talonic_get_agent_task and is recorded as an audited disclosure."
+      },
+      {
+        "question": "What do the Agent task statuses mean?",
+        "answer": "available means no one holds the task; claimed means an agent holds a live lease; submitted means outputs were accepted and the document resumed; timed_out means the stage's deadline passed without a submission; cancelled means the platform withdrew the task, for example because the document was removed or the stage was reconfigured."
+      },
+      {
+        "question": "How does pagination work on the Agent-task worklist?",
+        "answer": "Pass limit (1-100, default 50) to size the page. When pagination.has_more is true, pass the opaque pagination.next_cursor value as cursor on the next call. Cursors encode a position, not a filter, so keep the same status filter across pages."
+      }
+    ],
+    "mentions": [
+      "Agent stage",
+      "worklist",
+      "MCP agent",
+      "cursor pagination"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-agent-task",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_agent_task",
+    "seoTitle": "talonic_get_agent_task — Fetch an Agent Task's Payload",
+    "description": "MCP tool that fetches one Agent task's immutable input snapshot, instructions, and declared output contract. Every payload fetch is an audited disclosure.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Fetch the immutable input snapshot captured when one document reached an Agent stage. The payload also carries stage instructions, timeout policy, and the only output fields the agent may return."
+      },
+      {
+        "type": "paragraph",
+        "text": "The payload extends the metadata from `talonic_list_agent_tasks` with four fields. `input_snapshot` is the frozen view of the document's extracted data at the moment it entered the stage — later edits to the document do not leak into a running task. `output_contract` declares every field the agent may submit, each with a key, a `dataType`, and a `required` flag. `instructions` is the stage author's free-text brief. `timeout_fallthrough` (`hold`, `skip`, or `route_to_review`) says what happens to the document if nobody submits before `timeout_at`."
+      },
+      {
+        "type": "paragraph",
+        "text": "Fetching a task does not lease it: another agent can still claim the work while you are reading it. Treat get as the inspection step — confirm the instructions and contract are something you can actually fulfil — then take the lease with `talonic_claim_agent_task` before doing any real processing. If a claim races you to it, pick another task from the list rather than waiting on that one."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Task ID returned by `talonic_list_agent_tasks`."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input",
+        "code": "{ \"task_id\": \"11111111-1111-4111-8111-111111111111\" }"
+      },
+      {
+        "type": "paragraph",
+        "text": "Payload access is deliberately narrow. The worklist never includes snapshots, and each `talonic_get_agent_task` call is recorded as an audited disclosure of that document's data to the calling credential. Fetch payloads for tasks you actually intend to process rather than sweeping the queue — it keeps the audit trail meaningful and avoids disclosing document contents your workflow never needed."
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Key response fields",
+        "code": "{\n  \"id\": \"11111111-1111-4111-8111-111111111111\",\n  \"status\": \"available\",\n  \"input_snapshot\": { \"vendor_name\": { \"value\": \"Acme\" } },\n  \"output_contract\": [\n    { \"key\": \"risk_score\", \"dataType\": \"number\", \"required\": true }\n  ],\n  \"instructions\": \"Assess supplier risk from the supplied evidence.\",\n  \"timeout_fallthrough\": \"route_to_review\"\n}"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "text": "Fetching a task payload is an audited data disclosure. Do not fetch tasks speculatively; inspect metadata first and fetch only work you intend to evaluate."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_agent_tasks",
+        "slug": "mcp-talonic-list-agent-tasks"
+      },
+      {
+        "label": "talonic_claim_agent_task",
+        "slug": "mcp-talonic-claim-agent-task"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can the snapshot change while an agent processes it?",
+        "answer": "No. It is captured when the document enters the Agent stage and remains immutable for that task. Results are validated against the accompanying output_contract."
+      },
+      {
+        "question": "Does fetching an Agent task claim it?",
+        "answer": "No. talonic_get_agent_task is read-only; the task stays available and another agent can claim it while you inspect. Call talonic_claim_agent_task to take the lease before processing."
+      },
+      {
+        "question": "What does timeout_fallthrough mean?",
+        "answer": "It is the stage's policy for a task nobody submits before timeout_at: hold keeps the document parked, skip lets the document continue without the agent outputs, and route_to_review sends it to human review. Use it to judge how urgent a task is."
+      }
+    ],
+    "mentions": [
+      "immutable snapshot",
+      "output contract",
+      "audit trail",
+      "document task"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-claim-agent-task",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_claim_agent_task",
+    "seoTitle": "talonic_claim_agent_task — Lease an Agent Task Safely",
+    "description": "MCP tool that claims an available Agent task before processing. Returns the payload plus an execution epoch and lease so two agents never collide on a task.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Claim a task before processing. A successful claim returns the full payload plus a new `execution_epoch` and `lease_expires_at`; both prevent two agents from writing results for the same task."
+      },
+      {
+        "type": "paragraph",
+        "text": "The claim is the concurrency boundary of the Agent-task workflow. Listing and fetching are read-only and race-free; the moment real work starts, exactly one actor must own the task. The lease makes ownership crash-safe — if the claimant dies, the lease simply expires and the task becomes reclaimable — while the epoch makes ownership unambiguous: whichever claim is newest wins, and everything an older claimant tries to write afterwards is rejected."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Available task to claim, or an expired claim to reclaim."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input and response (payload fields elided)",
+        "code": "// talonic_claim_agent_task({ \"task_id\": \"11111111-1111-4111-8111-111111111111\" })\n{\n  \"id\": \"11111111-1111-4111-8111-111111111111\",\n  \"status\": \"claimed\",\n  \"execution_epoch\": 2,\n  \"claimed_at\": \"2026-08-29T10:00:00.000Z\",\n  \"lease_expires_at\": \"2026-08-29T10:10:00.000Z\",\n  \"input_snapshot\": { \"...\": \"full payload, same shape as talonic_get_agent_task\" },\n  \"output_contract\": [{ \"key\": \"risk_score\", \"dataType\": \"number\", \"required\": true }],\n  \"instructions\": \"Assess supplier risk from the supplied evidence.\"\n}"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "text": "A live claim held by another actor returns HTTP 409. Do not retry in a tight loop. Select another available task or wait until the lease expires."
+      },
+      {
+        "type": "paragraph",
+        "text": "Save the returned `execution_epoch`. Every heartbeat and submit must echo that exact epoch. Reclaiming an expired lease increments it, permanently invalidating work from the earlier claimant."
+      },
+      {
+        "type": "paragraph",
+        "text": "Because a successful claim returns the complete payload, a worker that goes straight from the list to a claim never needs a separate `talonic_get_agent_task` call — inspect-then-claim is for when you want to read before committing, claim-directly is for when the worklist row is enough. After claiming, do the work, heartbeat if the lease is running short, and finish with a single `talonic_submit_agent_task` call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_heartbeat_agent_task",
+        "slug": "mcp-talonic-heartbeat-agent-task"
+      },
+      {
+        "label": "talonic_submit_agent_task",
+        "slug": "mcp-talonic-submit-agent-task"
+      }
+    ],
+    "faq": [
+      {
+        "question": "What is an execution epoch?",
+        "answer": "It is the claim generation. Each successful claim or reclaim receives a new integer; stale epochs are rejected so an expired worker cannot overwrite a newer worker's result."
+      },
+      {
+        "question": "Can I claim a task that is already claimed?",
+        "answer": "Only once its lease has expired. A live claim by another actor returns HTTP 409; after lease_expires_at passes without a heartbeat, the same claim call succeeds as a reclaim and increments the execution epoch."
+      },
+      {
+        "question": "What happens if I claim a task and never finish it?",
+        "answer": "Nothing is written. The lease expires, the task becomes reclaimable, and if timeout_at passes with no submission the stage's timeout_fallthrough policy (hold, skip, or route_to_review) decides what happens to the document. Abandoning a claim never corrupts data — it only delays the document."
+      }
+    ],
+    "mentions": [
+      "claim lease",
+      "execution epoch",
+      "conflict",
+      "reclaim"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-heartbeat-agent-task",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_heartbeat_agent_task",
+    "seoTitle": "talonic_heartbeat_agent_task — Keep a Task Lease Alive",
+    "description": "MCP tool that extends the lease on a claimed Agent task using its execution epoch, so long-running work is not reassigned to another agent mid-processing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Extend the lease for a task you already claimed. Heartbeat before `lease_expires_at` when processing may take longer than the remaining lease window."
+      },
+      {
+        "type": "paragraph",
+        "text": "A heartbeat is a cheap, targeted call: it echoes the `task_id` and the `execution_epoch` from your claim, and the platform pushes `lease_expires_at` forward. The response is the task's refreshed metadata — no payload — so the field to read is the new `lease_expires_at`, which becomes your next deadline. Heartbeat only while genuine processing is under way; a worker that heartbeats forever without submitting is indistinguishable from a stuck one and holds the document hostage until `timeout_at`."
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Tool input and response (metadata only)",
+        "code": "// talonic_heartbeat_agent_task({\n//   \"task_id\": \"11111111-1111-4111-8111-111111111111\",\n//   \"execution_epoch\": 2\n// })\n{\n  \"id\": \"11111111-1111-4111-8111-111111111111\",\n  \"status\": \"claimed\",\n  \"execution_epoch\": 2,\n  \"lease_expires_at\": \"2026-08-29T10:20:00.000Z\",\n  \"timeout_at\": \"2026-08-30T12:00:00.000Z\"\n}"
+      },
+      {
+        "type": "paragraph",
+        "text": "Treat a failed heartbeat as a hard stop. HTTP 409 means the epoch is stale — the lease lapsed and someone reclaimed the task — so any result you were computing now belongs to a claim that no longer exists and will be rejected on submit. Discard the work, return to `talonic_list_agent_tasks`, and pick up something new rather than racing the current owner."
+      },
+      {
+        "type": "paragraph",
+        "text": "The lease and the stage timeout are separate clocks. Heartbeats move `lease_expires_at`, which governs who owns the task; they never move `timeout_at`, the stage-level deadline after which the platform applies the task's `timeout_fallthrough` policy. A worker can therefore hold a perfectly healthy lease and still lose the task to a stage timeout if processing drags on too long — budget the work against `timeout_at`, not just the lease."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Claimed task ID."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "Exact epoch returned by the current successful claim."
+          }
+        ]
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "text": "A stale epoch or a claim owned by another actor returns HTTP 409. Stop work and do not submit results after that conflict."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_claim_agent_task",
+        "slug": "mcp-talonic-claim-agent-task"
+      },
+      {
+        "label": "talonic_submit_agent_task",
+        "slug": "mcp-talonic-submit-agent-task"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How often should an agent heartbeat?",
+        "answer": "Only when needed, comfortably before lease_expires_at. Use the updated lease expiry returned by each successful heartbeat rather than a fixed client-side assumption."
+      },
+      {
+        "question": "What does a heartbeat return?",
+        "answer": "The task's refreshed metadata, including the new lease_expires_at and the current execution_epoch. It never returns the payload — the input snapshot was already delivered by the claim."
+      },
+      {
+        "question": "My heartbeat returned HTTP 409 — can I still submit?",
+        "answer": "No. A 409 means your execution epoch is stale: the lease expired and the task was reclaimed or withdrawn. Submits with that epoch will also be rejected, so discard the in-flight work and claim a different task."
+      }
+    ],
+    "mentions": [
+      "heartbeat",
+      "lease expiry",
+      "execution epoch",
+      "long-running task"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-submit-agent-task",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_submit_agent_task",
+    "seoTitle": "talonic_submit_agent_task — Submit Typed Task Outputs",
+    "description": "MCP tool that submits declared, typed outputs for a claimed Agent task in one transaction, validated against the output contract, resuming the document.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Return the result of a claimed Agent task. Output keys must match `output_contract` exactly, required fields must be present, and every value must match its declared data type. The platform validates the entire result before writing any cell."
+      },
+      {
+        "type": "paragraph",
+        "text": "Submit is the last call of the pull workflow — list, get, claim, heartbeat, submit — and the only one that changes the document. It requires the `task_id` plus the exact `execution_epoch` from your claim; a stale epoch is rejected with HTTP 409 just as it is on heartbeats, which is what makes the workflow safe to run from several workers at once."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Claimed task ID."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "Exact epoch from the current claim."
+          },
+          {
+            "name": "outputs",
+            "type": "object",
+            "required": true,
+            "description": "Declared field key to `{ value, confidence?, reasoning? }`. Confidence is 0–1; reasoning is at most 4,000 characters."
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "description": "Optional overall result summary, at most 4,000 characters."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Submit result",
+        "code": "{\n  \"task_id\": \"11111111-1111-4111-8111-111111111111\",\n  \"execution_epoch\": 3,\n  \"outputs\": {\n    \"risk_score\": {\n      \"value\": 0.72,\n      \"confidence\": 0.88,\n      \"reasoning\": \"Two adverse indicators in the supplied evidence.\"\n    }\n  },\n  \"summary\": \"Supplier requires enhanced review.\"\n}"
+      },
+      {
+        "type": "paragraph",
+        "text": "Validation is all-or-nothing. Every output key must exist in the task's `output_contract`, every `required` field must be present, and every `value` must match its declared data type. If any check fails, the platform rejects the whole submission and writes nothing — there is no partially-filled result to clean up. On success the task's status moves to `submitted`, the response returns the task's metadata, and the parked document resumes through the rest of its pipeline with your values in place."
+      },
+      {
+        "type": "paragraph",
+        "text": "The optional `confidence` (0–1) and `reasoning` (up to 4,000 characters) accompany each value into the document's audit trail, and `summary` describes the result as a whole. Filling them in is worth the tokens: reviewers see them next to the value when deciding whether to trust it, and they are the only trace of why the agent answered as it did once the conversation that produced the answer is gone."
+      },
+      {
+        "type": "callout",
+        "text": "Successful outputs are attributed to `AI Agent (MCP)` in the audit trail and stored with `mcp_agent` provenance. They do not receive human-review authority in v1."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_agent_task",
+        "slug": "mcp-talonic-get-agent-task"
+      },
+      {
+        "label": "talonic_claim_agent_task",
+        "slug": "mcp-talonic-claim-agent-task"
+      },
+      {
+        "label": "talonic_heartbeat_agent_task",
+        "slug": "mcp-talonic-heartbeat-agent-task"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can an Agent task return extra fields it discovered?",
+        "answer": "No. Undeclared fields and invalid types are rejected before any value is written. Add desired outputs to the Agent stage contract first, then run a new document task."
+      },
+      {
+        "question": "What happens if my submission fails validation?",
+        "answer": "Nothing is written — the submit is transactional. The task stays claimed under your execution epoch, so fix the outputs to match the contract and submit again before the lease expires."
+      },
+      {
+        "question": "Can I resubmit or amend after a successful submit?",
+        "answer": "No. A successful submit is terminal for that task: the status becomes submitted and the document resumes. Corrections happen downstream — in review or by rerunning the document — not by a second submit."
+      }
+    ],
+    "mentions": [
+      "transactional submit",
+      "AI Agent (MCP)",
+      "mcp_agent",
+      "typed outputs"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-specs",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_specs",
+    "seoTitle": "talonic_list_specs — List Workspace Specs",
+    "description": "MCP tool that lists the workspace's Specs — the configured pipelines an agent can run with talonic_run_spec — with schema ids, publish state, and field/node counts.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List the workspace's **Specs** — the configured pipelines an agent can run with `talonic_run_spec`. Each row carries the Spec `id`, `name`, the `schema_id` it materializes onto (a different id from the Spec's own), the published `version` and `materialized_version` (null when never published), `field_count`, `node_count` and timestamps."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "list-specs-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You need a `spec_id` to run the customer's pipeline.",
+          "The user refers to 'our invoice pipeline' and you must find it.",
+          "You want to see which Specs are published (`version` non-null) before running."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "list-specs-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You want ad-hoc extraction schemas — use `talonic_list_schemas`.",
+          "You want to discover fields — use `talonic_list_fields` / `talonic_find_data`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "list-specs-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "search",
+            "type": "string",
+            "description": "Case-insensitive contains match on the Spec name."
+          },
+          {
+            "name": "limit",
+            "type": "number",
+            "description": "Page size (default 20, max 100)."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "Opaque cursor from `pagination.next_cursor`."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "description": "`asc` or `desc`, sorted by `updated_at` (default desc)."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "list-specs-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "data[].id",
+            "type": "string",
+            "description": "Spec UUID."
+          },
+          {
+            "name": "data[].name",
+            "type": "string",
+            "description": "Spec name."
+          },
+          {
+            "name": "data[].schema_id",
+            "type": "string",
+            "description": "The schema this Spec materializes onto — a different id from the Spec's own."
+          },
+          {
+            "name": "data[].version",
+            "type": "number|null",
+            "description": "Published version number, or null if never published."
+          },
+          {
+            "name": "data[].materialized_version",
+            "type": "number|null",
+            "description": "Version currently materialized onto the schema, or null."
+          },
+          {
+            "name": "data[].field_count",
+            "type": "number",
+            "description": "Number of fields in the Spec."
+          },
+          {
+            "name": "data[].node_count",
+            "type": "number",
+            "description": "Number of nodes in the authored rail."
+          },
+          {
+            "name": "pagination.next_cursor",
+            "type": "string|null",
+            "description": "Cursor for the next page, or null when there isn't one."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_spec",
+        "slug": "mcp-talonic-get-spec"
+      },
+      {
+        "label": "talonic_run_spec",
+        "slug": "mcp-talonic-run-spec"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why does a Spec have both an id and a schema_id?",
+        "answer": "The Spec is the authoring document; running it materializes onto a schema, which has its own id. `talonic_run_spec` takes the Spec id."
+      }
+    ],
+    "mentions": [
+      "specs",
+      "list specs",
+      "pipelines",
+      "configured pipeline",
+      "spec id"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-spec",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_spec",
+    "seoTitle": "talonic_get_spec — Get a Spec's Structure",
+    "description": "MCP tool that returns one Spec's full structure: identity, version state, the schema it materializes onto, the authored rail (nodes[]) and compiled execution plan (phases[]), and its fields.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Get one Spec's full structure: identity and version state, the schema it materializes onto, `nodes[]` — the rail as authored, in editing order — and `phases[]` — the compiled execution plan, in run order. A validation checkpoint expands to one phase per gate, so the two lists differ on purpose. `fields[]` maps Spec fields to schema fields. Pass `include_versions` to also fetch `versions[]`, the Spec's published version history, newest first."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-spec-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You need to explain what a run will do before starting it.",
+          "You want to confirm a Spec is published (`version` non-null) before calling `talonic_run_spec`.",
+          "You need to map Spec field names to schema field keys."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-spec-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You want to list all Specs — use `talonic_list_specs`.",
+          "You are ready to execute the pipeline — use `talonic_run_spec`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-spec-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "spec_id",
+            "type": "string",
+            "required": true,
+            "description": "Spec UUID (from `talonic_list_specs`)."
+          },
+          {
+            "name": "include_versions",
+            "type": "boolean",
+            "description": "Also fetch the published versions list (adds `versions[]`)."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-spec-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "Spec UUID."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Spec name."
+          },
+          {
+            "name": "version",
+            "type": "number|null",
+            "description": "Published version number, or null if never published."
+          },
+          {
+            "name": "materialized_version",
+            "type": "number|null",
+            "description": "Version currently materialized onto the schema, or null."
+          },
+          {
+            "name": "schema.id",
+            "type": "string",
+            "description": "The schema this Spec materializes onto."
+          },
+          {
+            "name": "nodes[].type",
+            "type": "string",
+            "description": "Node type in the authored rail (e.g. extract, transform, validate)."
+          },
+          {
+            "name": "nodes[].name",
+            "type": "string",
+            "description": "Node display name."
+          },
+          {
+            "name": "phases[].number",
+            "type": "number",
+            "description": "Phase order in the compiled execution plan."
+          },
+          {
+            "name": "phases[].type",
+            "type": "string",
+            "description": "Phase type (e.g. extraction, validation, assembly)."
+          },
+          {
+            "name": "phases[].name",
+            "type": "string",
+            "description": "Phase display name."
+          },
+          {
+            "name": "fields[].name",
+            "type": "string",
+            "description": "Spec field name, mapped to its schema field."
+          },
+          {
+            "name": "versions[].version",
+            "type": "number",
+            "description": "Published version number (present when `include_versions` is true)."
+          },
+          {
+            "name": "versions[].is_materialized",
+            "type": "boolean",
+            "description": "Whether this version is the one currently materialized onto the schema."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_specs",
+        "slug": "mcp-talonic-list-specs"
+      },
+      {
+        "label": "talonic_run_spec",
+        "slug": "mcp-talonic-run-spec"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why do nodes and phases differ?",
+        "answer": "`nodes[]` is the rail as authored, in editing order; `phases[]` is the compiled execution plan, in run order. A validation checkpoint expands into one phase per gate, so a single authored node can produce several phases — the two lists differ on purpose."
+      }
+    ],
+    "mentions": [
+      "spec structure",
+      "rail",
+      "phases",
+      "compiled plan",
+      "spec versions"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-run-spec",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_run_spec",
+    "seoTitle": "talonic_run_spec — Run a Spec Pipeline",
+    "description": "MCP tool that runs a Spec — the customer's configured pipeline — over workspace documents or public file URLs in one call, returning a normalized RunEnvelope to poll.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Run a Spec — the customer's configured pipeline — over a set of documents in one call. Provide exactly one of `document_ids` (documents already in the workspace) or `file_urls` (public https files, max 20 — Talonic ingests them first). The call returns a RunEnvelope that normalizes two different backends (`/v1/pipelines` for `document_ids`, `/v1/run` for `file_urls`) into one shape, so the agent never has to know which route ran. Running a Spec consumes credits."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Documents not yet in the workspace: `talonic_request_upload` → poll `talonic_get_document` → `talonic_run_spec` with `document_ids`. Remote public files: `file_urls` (max 20)."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "run-spec-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "The user wants to run their configured pipeline (a Spec) over documents.",
+          "You need to process files through a Spec and produce its structured rows.",
+          "You already have a `spec_id` from `talonic_list_specs` and either workspace documents or public file URLs."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "run-spec-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "One-off extraction with an ad-hoc schema — use `talonic_extract`.",
+          "Checking progress on a run already started — use `talonic_get_run`.",
+          "Reading a completed run's rows — use `talonic_get_run_results`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "run-spec-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "spec_id",
+            "type": "string",
+            "required": true,
+            "description": "Spec UUID (from `talonic_list_specs`)."
+          },
+          {
+            "name": "document_ids",
+            "type": "string[]",
+            "description": "Workspace document ids (1–500). Mutually exclusive with `file_urls`."
+          },
+          {
+            "name": "file_urls",
+            "type": "string[]",
+            "description": "Public https file URLs (1–20). Mutually exclusive with `document_ids`."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Display name for the run."
+          },
+          {
+            "name": "pipeline_mode",
+            "type": "string",
+            "description": "`new` (default) or `append` to the Spec's existing pipeline."
+          },
+          {
+            "name": "batch_id",
+            "type": "string",
+            "description": "Caller grouping key. Only applies to the `file_urls` path."
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "description": "Flat caller tags stamped on every ingested document. Only applies to the `file_urls` path."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "run-spec-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "run_kind",
+            "type": "string",
+            "description": "`pipeline` (document_ids route) or `run` (file_urls route)."
+          },
+          {
+            "name": "run_id",
+            "type": "string|null",
+            "description": "Run id when `run_kind` is `run`; null otherwise."
+          },
+          {
+            "name": "pipeline_id",
+            "type": "string|null",
+            "description": "Pipeline id when `run_kind` is `pipeline`; null otherwise."
+          },
+          {
+            "name": "spec_id",
+            "type": "string",
+            "description": "The Spec that ran."
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "description": "`processing`, `completed` or `failed`, normalized across both backends."
+          },
+          {
+            "name": "raw_status",
+            "type": "string|null",
+            "description": "The backend's own status string, unnormalized."
+          },
+          {
+            "name": "input_count",
+            "type": "number",
+            "description": "Number of documents or URLs submitted."
+          },
+          {
+            "name": "documents[]",
+            "type": "array",
+            "description": "Per-document detail, present on the `file_urls` route."
+          },
+          {
+            "name": "links",
+            "type": "object",
+            "description": "Follow-up URLs, e.g. a poll link."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_run",
+        "slug": "mcp-talonic-get-run"
+      },
+      {
+        "label": "talonic_get_run_results",
+        "slug": "mcp-talonic-get-run-results"
+      },
+      {
+        "label": "talonic_request_upload",
+        "slug": "mcp-talonic-request-upload"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does this cost credits?",
+        "answer": "Yes — each ingested document and each pipeline stage meters credits like a run started in the app; check `talonic_get_balance` first for large batches."
+      }
+    ],
+    "mentions": [
+      "run spec",
+      "run pipeline",
+      "execute pipeline",
+      "file_urls",
+      "document_ids",
+      "pipeline_mode"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-run",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_run",
+    "seoTitle": "talonic_get_run — Poll a Spec Run",
+    "description": "MCP tool that polls a Spec run started by talonic_run_spec, returning normalized status plus document- and phase-level progress.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Poll a Spec run started by `talonic_run_spec`: a normalized `status`, document-level progress, and — for pipeline runs — per-phase progress. Pass exactly one of `run_id` or `pipeline_id`, whichever the RunEnvelope returned."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "You just called `talonic_run_spec` and need to track progress.",
+          "You want to know when a run finished, or whether any documents errored.",
+          "Poll every 5–10 seconds; stop as soon as `status` is `completed` or `failed`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Starting a run — use `talonic_run_spec`.",
+          "Reading the structured rows once a run is complete — use `talonic_get_run_results`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "string",
+            "description": "From a `run_kind: 'run'` envelope (`/v1/run`). Provide exactly one of `run_id` or `pipeline_id`."
+          },
+          {
+            "name": "pipeline_id",
+            "type": "string",
+            "description": "From a `run_kind: 'pipeline'` envelope (`/v1/pipelines`). Provide exactly one of `run_id` or `pipeline_id`."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "status",
+            "type": "string",
+            "description": "`processing`, `completed` or `failed`, normalized across both backends."
+          },
+          {
+            "name": "raw_status",
+            "type": "string|null",
+            "description": "The backend's own status string, unnormalized."
+          },
+          {
+            "name": "progress.total_documents",
+            "type": "number|null",
+            "description": "Total documents in the run."
+          },
+          {
+            "name": "progress.completed_documents",
+            "type": "number|null",
+            "description": "Documents finished successfully."
+          },
+          {
+            "name": "progress.error_documents",
+            "type": "number|null",
+            "description": "Documents that errored."
+          },
+          {
+            "name": "progress.phases[]",
+            "type": "array",
+            "description": "Per-phase progress for pipeline runs — phase id, name, type, and completed/running/error counts."
+          },
+          {
+            "name": "documents[]",
+            "type": "array",
+            "description": "Per-document detail, when present."
+          },
+          {
+            "name": "error_message",
+            "type": "string|null",
+            "description": "Top-level error, when `status` is `failed`."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_run_spec",
+        "slug": "mcp-talonic-run-spec"
+      },
+      {
+        "label": "talonic_get_run_results",
+        "slug": "mcp-talonic-get-run-results"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How long does a run take?",
+        "answer": "Seconds per document for extraction, plus validation and assembly stages; poll every 5–10 seconds and stop on completed or failed."
+      }
+    ],
+    "mentions": [
+      "run status",
+      "poll run",
+      "pipeline progress",
+      "run progress"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-run-results",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_run_results",
+    "seoTitle": "talonic_get_run_results — Read a Spec Run's Rows",
+    "description": "MCP tool that reads a Spec run's structured rows — one per document, with column definitions and pending-review counts.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read a Spec run's structured rows: one row per document, with the Spec's fields as clean values, plus the `columns[]` definitions that describe each field's key, display name and data type. Cells held for review serialize as `null` until a reviewer approves them — check `pending_review_count` to see how many are still held. Pass `include: ['provenance']` for per-field source spans, or `include: ['cells']` for the heavier cell-level payload."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-results-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "`talonic_get_run` reports `completed` — or you want to read partial rows while it is still `processing`.",
+          "You need the Spec's structured output for one document or the whole run."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-results-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Checking run progress — use `talonic_get_run`.",
+          "Per-field provenance of a single value — pass `include: ['provenance']` here, or use `talonic_field_values`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-results-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "string",
+            "description": "Provide exactly one of `run_id` or `pipeline_id`."
+          },
+          {
+            "name": "pipeline_id",
+            "type": "string",
+            "description": "Provide exactly one of `run_id` or `pipeline_id`."
+          },
+          {
+            "name": "document_id",
+            "type": "string",
+            "description": "Restrict to one document."
+          },
+          {
+            "name": "include",
+            "type": "string[]",
+            "description": "`cells` and/or `provenance` — extra per-field detail; heavier payload."
+          },
+          {
+            "name": "limit",
+            "type": "number",
+            "description": "Page size (1–200, default 50)."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "Opaque cursor from `pagination.next_cursor`."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-run-results-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "columns[].field_key",
+            "type": "string",
+            "description": "Stable field key, matches `data[].fields` keys."
+          },
+          {
+            "name": "columns[].display_name",
+            "type": "string",
+            "description": "Human-readable column label."
+          },
+          {
+            "name": "columns[].data_type",
+            "type": "string",
+            "description": "The field's data type (string, number, array, etc.)."
+          },
+          {
+            "name": "data[].document_id",
+            "type": "string",
+            "description": "The document this row belongs to."
+          },
+          {
+            "name": "data[].filename",
+            "type": "string",
+            "description": "The document's filename."
+          },
+          {
+            "name": "data[].status",
+            "type": "string",
+            "description": "`complete`, `partial`, `error` or `processing` for this document's row."
+          },
+          {
+            "name": "data[].fields",
+            "type": "object",
+            "description": "`{ field_key: value }` — the clean values; held cells are `null`."
+          },
+          {
+            "name": "pagination",
+            "type": "object",
+            "description": "`total`, `limit`, `has_more`, `next_cursor`."
+          },
+          {
+            "name": "pending_review_count",
+            "type": "number",
+            "description": "Number of held (pending-review) cells on this page."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_run",
+        "slug": "mcp-talonic-get-run"
+      },
+      {
+        "label": "talonic_field_values",
+        "slug": "mcp-talonic-field-values"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why is a value null?",
+        "answer": "Held (pending review) cells serialize as null until a reviewer approves them; `pending_review_count` tells you how many are held on the page."
+      }
+    ],
+    "mentions": [
+      "run results",
+      "pipeline results",
+      "structured rows",
+      "columns",
+      "pending review"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ask",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ask",
+    "seoTitle": "talonic_ask — Ask a Cited, Verified Question",
+    "description": "MCP tool that answers a natural-language question over the workspace's documents with a cited, verified markdown answer.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Ask a natural-language question over the workspace's documents and get a cited, verified answer in markdown. The Talonic agent plans over the structured field plane, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. The call waits up to `wait_seconds` (default 45, max 55) for the answer; if it is not ready in time, the response comes back `processing` with an `ask_id` to poll. Consumes credits."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "text": "Costs credits. For a known field's values use `talonic_field_values` or `talonic_filter` — they are free."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "ask-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "The user asks an open question about their documents, e.g. 'which vendors invoiced us twice in May?'",
+          "The user wants a summary across documents.",
+          "The answer needs reasoning over several fields, not a single known value."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "ask-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Reading a known field's values — use `talonic_field_values` (free).",
+          "Filtering documents by a known value — use `talonic_filter` (free).",
+          "Locating which field holds a concept — use `talonic_find_data`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "ask-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "The question, in the user's words (max 4000 characters)."
+          },
+          {
+            "name": "scope",
+            "type": "object",
+            "description": "Restrict the question to a slice of the workspace — `document_ids[]`, `schema_id`, `pipeline_id`, `data_product_id`, `document_type`, `source_id`, `tags[]`, `ingested_after`, `ingested_before`. Present fields are ANDed."
+          },
+          {
+            "name": "conversation_id",
+            "type": "string",
+            "description": "Continue an existing conversation; the agent sees prior turns."
+          },
+          {
+            "name": "output_format",
+            "type": "object",
+            "description": "Shape the answer — `instruction` and/or `template`. Form only, never grounding."
+          },
+          {
+            "name": "wait_seconds",
+            "type": "number",
+            "default": "45",
+            "description": "Seconds to wait for the answer before returning `processing` (0–55, default 45)."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "ask-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "ask_id",
+            "type": "string",
+            "description": "The ask's id — pass to `talonic_get_answer` if still processing."
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "description": "`completed`, `processing` or `error`."
+          },
+          {
+            "name": "conversation_id",
+            "type": "string",
+            "description": "This ask's conversation id; pass it back to continue the thread."
+          },
+          {
+            "name": "answer",
+            "type": "string",
+            "description": "The answer, in markdown."
+          },
+          {
+            "name": "citations[].quote",
+            "type": "string",
+            "description": "The exact source span backing a claim."
+          },
+          {
+            "name": "citations[].document_id",
+            "type": "string",
+            "description": "The document the citation came from."
+          },
+          {
+            "name": "citations[].filename",
+            "type": "string",
+            "description": "That document's filename."
+          },
+          {
+            "name": "verification.verdict",
+            "type": "string",
+            "description": "Whether every load-bearing claim checked out against its citation."
+          },
+          {
+            "name": "usage.credits_charged",
+            "type": "number",
+            "description": "Credits consumed by this ask."
+          },
+          {
+            "name": "waited_ms",
+            "type": "number",
+            "description": "How long the call actually waited before returning."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_answer",
+        "slug": "mcp-talonic-get-answer"
+      },
+      {
+        "label": "talonic_find_data",
+        "slug": "mcp-talonic-find-data"
+      },
+      {
+        "label": "talonic_field_values",
+        "slug": "mcp-talonic-field-values"
+      }
+    ],
+    "faq": [
+      {
+        "question": "What if the answer is not ready in time?",
+        "answer": "The tool returns status `processing` with the `ask_id`; call `talonic_get_answer` with it a few seconds later. Passing `conversation_id` lets follow-up questions see earlier turns."
+      }
+    ],
+    "mentions": [
+      "ask",
+      "question answering",
+      "RAG",
+      "cited answer",
+      "verification",
+      "conversation"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-answer",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_answer",
+    "seoTitle": "talonic_get_answer — Poll an Ask for Its Answer",
+    "description": "MCP tool that polls an ask started by talonic_ask for its completed, cited answer.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Poll an ask started by `talonic_ask` that was still `processing` when its wait ended. Returns the same cited, verified answer envelope once the ask completes."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-answer-use-when",
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "`talonic_ask` returned `status: 'processing'` with an `ask_id` — poll every few seconds until `completed` or `error`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-answer-do-not-use",
+        "text": "When not to use"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Asking a new question — use `talonic_ask`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-answer-params",
+        "text": "Parameters"
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "ask_id",
+            "type": "string",
+            "required": true,
+            "description": "The ask id, from `talonic_ask`."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "get-answer-response",
+        "text": "Response shape"
+      },
+      {
+        "type": "param-table",
+        "title": "Fields",
+        "params": [
+          {
+            "name": "status",
+            "type": "string",
+            "description": "`completed`, `processing` or `error`."
+          },
+          {
+            "name": "answer",
+            "type": "string",
+            "description": "The answer, in markdown, once completed."
+          },
+          {
+            "name": "citations[]",
+            "type": "array",
+            "description": "Source spans backing the answer, once completed."
+          },
+          {
+            "name": "verification",
+            "type": "object",
+            "description": "Verdict on whether claims checked out, once completed."
+          },
+          {
+            "name": "usage",
+            "type": "object",
+            "description": "Credits and tokens consumed."
+          },
+          {
+            "name": "poll_hint",
+            "type": "string",
+            "description": "Present only while `status` is `processing`; a hint to poll again shortly."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ask",
+        "slug": "mcp-talonic-ask"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How often should I poll?",
+        "answer": "Every 2–5 seconds; most asks complete within a minute."
+      }
+    ],
+    "mentions": [
+      "get answer",
+      "poll ask",
+      "answer status"
     ]
   }
 ]

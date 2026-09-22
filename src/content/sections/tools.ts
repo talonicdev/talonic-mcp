@@ -3021,4 +3021,799 @@ Payment terms: Net 30`,
       "no model in the loop",
     ],
   },
+  {
+    slug: "talonic-list-specs",
+    parentSlug: "tools",
+    title: "talonic_list_specs",
+    seoTitle: "talonic_list_specs — List Workspace Specs",
+    description:
+      "MCP tool that lists the workspace's Specs — the configured pipelines an agent can run with talonic_run_spec — with schema ids, publish state, and field/node counts.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List the workspace's **Specs** — the configured pipelines an agent can run with `talonic_run_spec`. Each row carries the Spec `id`, `name`, the `schema_id` it materializes onto (a different id from the Spec's own), the published `version` and `materialized_version` (null when never published), `field_count`, `node_count` and timestamps.",
+      },
+      { type: "heading", level: 3, id: "list-specs-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You need a `spec_id` to run the customer's pipeline.",
+          "The user refers to 'our invoice pipeline' and you must find it.",
+          "You want to see which Specs are published (`version` non-null) before running.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-specs-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "You want ad-hoc extraction schemas — use `talonic_list_schemas`.",
+          "You want to discover fields — use `talonic_list_fields` / `talonic_find_data`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "list-specs-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "search",
+            type: "string",
+            description: "Case-insensitive contains match on the Spec name.",
+          },
+          { name: "limit", type: "number", description: "Page size (default 20, max 100)." },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque cursor from `pagination.next_cursor`.",
+          },
+          {
+            name: "order",
+            type: "string",
+            description: "`asc` or `desc`, sorted by `updated_at` (default desc).",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "list-specs-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          { name: "data[].id", type: "string", description: "Spec UUID." },
+          { name: "data[].name", type: "string", description: "Spec name." },
+          {
+            name: "data[].schema_id",
+            type: "string",
+            description:
+              "The schema this Spec materializes onto — a different id from the Spec's own.",
+          },
+          {
+            name: "data[].version",
+            type: "number|null",
+            description: "Published version number, or null if never published.",
+          },
+          {
+            name: "data[].materialized_version",
+            type: "number|null",
+            description: "Version currently materialized onto the schema, or null.",
+          },
+          {
+            name: "data[].field_count",
+            type: "number",
+            description: "Number of fields in the Spec.",
+          },
+          {
+            name: "data[].node_count",
+            type: "number",
+            description: "Number of nodes in the authored rail.",
+          },
+          {
+            name: "pagination.next_cursor",
+            type: "string|null",
+            description: "Cursor for the next page, or null when there isn't one.",
+          },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_get_spec", slug: "talonic-get-spec" },
+      { label: "talonic_run_spec", slug: "talonic-run-spec" },
+    ],
+    faq: [
+      {
+        question: "Why does a Spec have both an id and a schema_id?",
+        answer:
+          "The Spec is the authoring document; running it materializes onto a schema, which has its own id. `talonic_run_spec` takes the Spec id.",
+      },
+    ],
+    mentions: ["specs", "list specs", "pipelines", "configured pipeline", "spec id"],
+  },
+  {
+    slug: "talonic-get-spec",
+    parentSlug: "tools",
+    title: "talonic_get_spec",
+    seoTitle: "talonic_get_spec — Get a Spec's Structure",
+    description:
+      "MCP tool that returns one Spec's full structure: identity, version state, the schema it materializes onto, the authored rail (nodes[]) and compiled execution plan (phases[]), and its fields.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Get one Spec's full structure: identity and version state, the schema it materializes onto, `nodes[]` — the rail as authored, in editing order — and `phases[]` — the compiled execution plan, in run order. A validation checkpoint expands to one phase per gate, so the two lists differ on purpose. `fields[]` maps Spec fields to schema fields. Pass `include_versions` to also fetch `versions[]`, the Spec's published version history, newest first.",
+      },
+      { type: "heading", level: 3, id: "get-spec-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You need to explain what a run will do before starting it.",
+          "You want to confirm a Spec is published (`version` non-null) before calling `talonic_run_spec`.",
+          "You need to map Spec field names to schema field keys.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-spec-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "You want to list all Specs — use `talonic_list_specs`.",
+          "You are ready to execute the pipeline — use `talonic_run_spec`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-spec-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "spec_id",
+            type: "string",
+            required: true,
+            description: "Spec UUID (from `talonic_list_specs`).",
+          },
+          {
+            name: "include_versions",
+            type: "boolean",
+            description: "Also fetch the published versions list (adds `versions[]`).",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-spec-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          { name: "id", type: "string", description: "Spec UUID." },
+          { name: "name", type: "string", description: "Spec name." },
+          {
+            name: "version",
+            type: "number|null",
+            description: "Published version number, or null if never published.",
+          },
+          {
+            name: "materialized_version",
+            type: "number|null",
+            description: "Version currently materialized onto the schema, or null.",
+          },
+          {
+            name: "schema.id",
+            type: "string",
+            description: "The schema this Spec materializes onto.",
+          },
+          {
+            name: "nodes[].type",
+            type: "string",
+            description: "Node type in the authored rail (e.g. extract, transform, validate).",
+          },
+          { name: "nodes[].name", type: "string", description: "Node display name." },
+          {
+            name: "phases[].number",
+            type: "number",
+            description: "Phase order in the compiled execution plan.",
+          },
+          {
+            name: "phases[].type",
+            type: "string",
+            description: "Phase type (e.g. extraction, validation, assembly).",
+          },
+          { name: "phases[].name", type: "string", description: "Phase display name." },
+          {
+            name: "fields[].name",
+            type: "string",
+            description: "Spec field name, mapped to its schema field.",
+          },
+          {
+            name: "versions[].version",
+            type: "number",
+            description: "Published version number (present when `include_versions` is true).",
+          },
+          {
+            name: "versions[].is_materialized",
+            type: "boolean",
+            description: "Whether this version is the one currently materialized onto the schema.",
+          },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_list_specs", slug: "talonic-list-specs" },
+      { label: "talonic_run_spec", slug: "talonic-run-spec" },
+    ],
+    faq: [
+      {
+        question: "Why do nodes and phases differ?",
+        answer:
+          "`nodes[]` is the rail as authored, in editing order; `phases[]` is the compiled execution plan, in run order. A validation checkpoint expands into one phase per gate, so a single authored node can produce several phases — the two lists differ on purpose.",
+      },
+    ],
+    mentions: ["spec structure", "rail", "phases", "compiled plan", "spec versions"],
+  },
+  {
+    slug: "talonic-run-spec",
+    parentSlug: "tools",
+    title: "talonic_run_spec",
+    seoTitle: "talonic_run_spec — Run a Spec Pipeline",
+    description:
+      "MCP tool that runs a Spec — the customer's configured pipeline — over workspace documents or public file URLs in one call, returning a normalized RunEnvelope to poll.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Run a Spec — the customer's configured pipeline — over a set of documents in one call. Provide exactly one of `document_ids` (documents already in the workspace) or `file_urls` (public https files, max 20 — Talonic ingests them first). The call returns a RunEnvelope that normalizes two different backends (`/v1/pipelines` for `document_ids`, `/v1/run` for `file_urls`) into one shape, so the agent never has to know which route ran. Running a Spec consumes credits.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Documents not yet in the workspace: `talonic_request_upload` → poll `talonic_get_document` → `talonic_run_spec` with `document_ids`. Remote public files: `file_urls` (max 20).",
+      },
+      { type: "heading", level: 3, id: "run-spec-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "The user wants to run their configured pipeline (a Spec) over documents.",
+          "You need to process files through a Spec and produce its structured rows.",
+          "You already have a `spec_id` from `talonic_list_specs` and either workspace documents or public file URLs.",
+        ],
+      },
+      { type: "heading", level: 3, id: "run-spec-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "One-off extraction with an ad-hoc schema — use `talonic_extract`.",
+          "Checking progress on a run already started — use `talonic_get_run`.",
+          "Reading a completed run's rows — use `talonic_get_run_results`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "run-spec-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "spec_id",
+            type: "string",
+            required: true,
+            description: "Spec UUID (from `talonic_list_specs`).",
+          },
+          {
+            name: "document_ids",
+            type: "string[]",
+            description: "Workspace document ids (1–500). Mutually exclusive with `file_urls`.",
+          },
+          {
+            name: "file_urls",
+            type: "string[]",
+            description: "Public https file URLs (1–20). Mutually exclusive with `document_ids`.",
+          },
+          { name: "name", type: "string", description: "Display name for the run." },
+          {
+            name: "pipeline_mode",
+            type: "string",
+            description: "`new` (default) or `append` to the Spec's existing pipeline.",
+          },
+          {
+            name: "batch_id",
+            type: "string",
+            description: "Caller grouping key. Only applies to the `file_urls` path.",
+          },
+          {
+            name: "metadata",
+            type: "object",
+            description:
+              "Flat caller tags stamped on every ingested document. Only applies to the `file_urls` path.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "run-spec-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "run_kind",
+            type: "string",
+            description: "`pipeline` (document_ids route) or `run` (file_urls route).",
+          },
+          {
+            name: "run_id",
+            type: "string|null",
+            description: "Run id when `run_kind` is `run`; null otherwise.",
+          },
+          {
+            name: "pipeline_id",
+            type: "string|null",
+            description: "Pipeline id when `run_kind` is `pipeline`; null otherwise.",
+          },
+          { name: "spec_id", type: "string", description: "The Spec that ran." },
+          {
+            name: "status",
+            type: "string",
+            description: "`processing`, `completed` or `failed`, normalized across both backends.",
+          },
+          {
+            name: "raw_status",
+            type: "string|null",
+            description: "The backend's own status string, unnormalized.",
+          },
+          {
+            name: "input_count",
+            type: "number",
+            description: "Number of documents or URLs submitted.",
+          },
+          {
+            name: "documents[]",
+            type: "array",
+            description: "Per-document detail, present on the `file_urls` route.",
+          },
+          { name: "links", type: "object", description: "Follow-up URLs, e.g. a poll link." },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_get_run", slug: "talonic-get-run" },
+      { label: "talonic_get_run_results", slug: "talonic-get-run-results" },
+      { label: "talonic_request_upload", slug: "talonic-request-upload" },
+    ],
+    faq: [
+      {
+        question: "Does this cost credits?",
+        answer:
+          "Yes — each ingested document and each pipeline stage meters credits like a run started in the app; check `talonic_get_balance` first for large batches.",
+      },
+    ],
+    mentions: [
+      "run spec",
+      "run pipeline",
+      "execute pipeline",
+      "file_urls",
+      "document_ids",
+      "pipeline_mode",
+    ],
+  },
+  {
+    slug: "talonic-get-run",
+    parentSlug: "tools",
+    title: "talonic_get_run",
+    seoTitle: "talonic_get_run — Poll a Spec Run",
+    description:
+      "MCP tool that polls a Spec run started by talonic_run_spec, returning normalized status plus document- and phase-level progress.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Poll a Spec run started by `talonic_run_spec`: a normalized `status`, document-level progress, and — for pipeline runs — per-phase progress. Pass exactly one of `run_id` or `pipeline_id`, whichever the RunEnvelope returned.",
+      },
+      { type: "heading", level: 3, id: "get-run-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "You just called `talonic_run_spec` and need to track progress.",
+          "You want to know when a run finished, or whether any documents errored.",
+          "Poll every 5–10 seconds; stop as soon as `status` is `completed` or `failed`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Starting a run — use `talonic_run_spec`.",
+          "Reading the structured rows once a run is complete — use `talonic_get_run_results`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "run_id",
+            type: "string",
+            description:
+              "From a `run_kind: 'run'` envelope (`/v1/run`). Provide exactly one of `run_id` or `pipeline_id`.",
+          },
+          {
+            name: "pipeline_id",
+            type: "string",
+            description:
+              "From a `run_kind: 'pipeline'` envelope (`/v1/pipelines`). Provide exactly one of `run_id` or `pipeline_id`.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "status",
+            type: "string",
+            description: "`processing`, `completed` or `failed`, normalized across both backends.",
+          },
+          {
+            name: "raw_status",
+            type: "string|null",
+            description: "The backend's own status string, unnormalized.",
+          },
+          {
+            name: "progress.total_documents",
+            type: "number|null",
+            description: "Total documents in the run.",
+          },
+          {
+            name: "progress.completed_documents",
+            type: "number|null",
+            description: "Documents finished successfully.",
+          },
+          {
+            name: "progress.error_documents",
+            type: "number|null",
+            description: "Documents that errored.",
+          },
+          {
+            name: "progress.phases[]",
+            type: "array",
+            description:
+              "Per-phase progress for pipeline runs — phase id, name, type, and completed/running/error counts.",
+          },
+          { name: "documents[]", type: "array", description: "Per-document detail, when present." },
+          {
+            name: "error_message",
+            type: "string|null",
+            description: "Top-level error, when `status` is `failed`.",
+          },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_run_spec", slug: "talonic-run-spec" },
+      { label: "talonic_get_run_results", slug: "talonic-get-run-results" },
+    ],
+    faq: [
+      {
+        question: "How long does a run take?",
+        answer:
+          "Seconds per document for extraction, plus validation and assembly stages; poll every 5–10 seconds and stop on completed or failed.",
+      },
+    ],
+    mentions: ["run status", "poll run", "pipeline progress", "run progress"],
+  },
+  {
+    slug: "talonic-get-run-results",
+    parentSlug: "tools",
+    title: "talonic_get_run_results",
+    seoTitle: "talonic_get_run_results — Read a Spec Run's Rows",
+    description:
+      "MCP tool that reads a Spec run's structured rows — one per document, with column definitions and pending-review counts.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Read a Spec run's structured rows: one row per document, with the Spec's fields as clean values, plus the `columns[]` definitions that describe each field's key, display name and data type. Cells held for review serialize as `null` until a reviewer approves them — check `pending_review_count` to see how many are still held. Pass `include: ['provenance']` for per-field source spans, or `include: ['cells']` for the heavier cell-level payload.",
+      },
+      { type: "heading", level: 3, id: "get-run-results-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "`talonic_get_run` reports `completed` — or you want to read partial rows while it is still `processing`.",
+          "You need the Spec's structured output for one document or the whole run.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-results-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Checking run progress — use `talonic_get_run`.",
+          "Per-field provenance of a single value — pass `include: ['provenance']` here, or use `talonic_field_values`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-results-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "run_id",
+            type: "string",
+            description: "Provide exactly one of `run_id` or `pipeline_id`.",
+          },
+          {
+            name: "pipeline_id",
+            type: "string",
+            description: "Provide exactly one of `run_id` or `pipeline_id`.",
+          },
+          { name: "document_id", type: "string", description: "Restrict to one document." },
+          {
+            name: "include",
+            type: "string[]",
+            description: "`cells` and/or `provenance` — extra per-field detail; heavier payload.",
+          },
+          { name: "limit", type: "number", description: "Page size (1–200, default 50)." },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque cursor from `pagination.next_cursor`.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-run-results-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "columns[].field_key",
+            type: "string",
+            description: "Stable field key, matches `data[].fields` keys.",
+          },
+          {
+            name: "columns[].display_name",
+            type: "string",
+            description: "Human-readable column label.",
+          },
+          {
+            name: "columns[].data_type",
+            type: "string",
+            description: "The field's data type (string, number, array, etc.).",
+          },
+          {
+            name: "data[].document_id",
+            type: "string",
+            description: "The document this row belongs to.",
+          },
+          { name: "data[].filename", type: "string", description: "The document's filename." },
+          {
+            name: "data[].status",
+            type: "string",
+            description: "`complete`, `partial`, `error` or `processing` for this document's row.",
+          },
+          {
+            name: "data[].fields",
+            type: "object",
+            description: "`{ field_key: value }` — the clean values; held cells are `null`.",
+          },
+          {
+            name: "pagination",
+            type: "object",
+            description: "`total`, `limit`, `has_more`, `next_cursor`.",
+          },
+          {
+            name: "pending_review_count",
+            type: "number",
+            description: "Number of held (pending-review) cells on this page.",
+          },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_get_run", slug: "talonic-get-run" },
+      { label: "talonic_field_values", slug: "talonic-field-values" },
+    ],
+    faq: [
+      {
+        question: "Why is a value null?",
+        answer:
+          "Held (pending review) cells serialize as null until a reviewer approves them; `pending_review_count` tells you how many are held on the page.",
+      },
+    ],
+    mentions: ["run results", "pipeline results", "structured rows", "columns", "pending review"],
+  },
+  {
+    slug: "talonic-ask",
+    parentSlug: "tools",
+    title: "talonic_ask",
+    seoTitle: "talonic_ask — Ask a Cited, Verified Question",
+    description:
+      "MCP tool that answers a natural-language question over the workspace's documents with a cited, verified markdown answer.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Ask a natural-language question over the workspace's documents and get a cited, verified answer in markdown. The Talonic agent plans over the structured field plane, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. The call waits up to `wait_seconds` (default 45, max 55) for the answer; if it is not ready in time, the response comes back `processing` with an `ask_id` to poll. Consumes credits.",
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        text: "Costs credits. For a known field's values use `talonic_field_values` or `talonic_filter` — they are free.",
+      },
+      { type: "heading", level: 3, id: "ask-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "The user asks an open question about their documents, e.g. 'which vendors invoiced us twice in May?'",
+          "The user wants a summary across documents.",
+          "The answer needs reasoning over several fields, not a single known value.",
+        ],
+      },
+      { type: "heading", level: 3, id: "ask-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: [
+          "Reading a known field's values — use `talonic_field_values` (free).",
+          "Filtering documents by a known value — use `talonic_filter` (free).",
+          "Locating which field holds a concept — use `talonic_find_data`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "ask-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "question",
+            type: "string",
+            required: true,
+            description: "The question, in the user's words (max 4000 characters).",
+          },
+          {
+            name: "scope",
+            type: "object",
+            description:
+              "Restrict the question to a slice of the workspace — `document_ids[]`, `schema_id`, `pipeline_id`, `data_product_id`, `document_type`, `source_id`, `tags[]`, `ingested_after`, `ingested_before`. Present fields are ANDed.",
+          },
+          {
+            name: "conversation_id",
+            type: "string",
+            description: "Continue an existing conversation; the agent sees prior turns.",
+          },
+          {
+            name: "output_format",
+            type: "object",
+            description:
+              "Shape the answer — `instruction` and/or `template`. Form only, never grounding.",
+          },
+          {
+            name: "wait_seconds",
+            type: "number",
+            default: "45",
+            description:
+              "Seconds to wait for the answer before returning `processing` (0–55, default 45).",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "ask-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          {
+            name: "ask_id",
+            type: "string",
+            description: "The ask's id — pass to `talonic_get_answer` if still processing.",
+          },
+          { name: "status", type: "string", description: "`completed`, `processing` or `error`." },
+          {
+            name: "conversation_id",
+            type: "string",
+            description: "This ask's conversation id; pass it back to continue the thread.",
+          },
+          { name: "answer", type: "string", description: "The answer, in markdown." },
+          {
+            name: "citations[].quote",
+            type: "string",
+            description: "The exact source span backing a claim.",
+          },
+          {
+            name: "citations[].document_id",
+            type: "string",
+            description: "The document the citation came from.",
+          },
+          {
+            name: "citations[].filename",
+            type: "string",
+            description: "That document's filename.",
+          },
+          {
+            name: "verification.verdict",
+            type: "string",
+            description: "Whether every load-bearing claim checked out against its citation.",
+          },
+          {
+            name: "usage.credits_charged",
+            type: "number",
+            description: "Credits consumed by this ask.",
+          },
+          {
+            name: "waited_ms",
+            type: "number",
+            description: "How long the call actually waited before returning.",
+          },
+        ],
+      },
+    ],
+    related: [
+      { label: "talonic_get_answer", slug: "talonic-get-answer" },
+      { label: "talonic_find_data", slug: "talonic-find-data" },
+      { label: "talonic_field_values", slug: "talonic-field-values" },
+    ],
+    faq: [
+      {
+        question: "What if the answer is not ready in time?",
+        answer:
+          "The tool returns status `processing` with the `ask_id`; call `talonic_get_answer` with it a few seconds later. Passing `conversation_id` lets follow-up questions see earlier turns.",
+      },
+    ],
+    mentions: ["ask", "question answering", "RAG", "cited answer", "verification", "conversation"],
+  },
+  {
+    slug: "talonic-get-answer",
+    parentSlug: "tools",
+    title: "talonic_get_answer",
+    seoTitle: "talonic_get_answer — Poll an Ask for Its Answer",
+    description:
+      "MCP tool that polls an ask started by talonic_ask for its completed, cited answer.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Poll an ask started by `talonic_ask` that was still `processing` when its wait ended. Returns the same cited, verified answer envelope once the ask completes.",
+      },
+      { type: "heading", level: 3, id: "get-answer-use-when", text: "When to use" },
+      {
+        type: "list",
+        items: [
+          "`talonic_ask` returned `status: 'processing'` with an `ask_id` — poll every few seconds until `completed` or `error`.",
+        ],
+      },
+      { type: "heading", level: 3, id: "get-answer-do-not-use", text: "When not to use" },
+      {
+        type: "list",
+        items: ["Asking a new question — use `talonic_ask`."],
+      },
+      { type: "heading", level: 3, id: "get-answer-params", text: "Parameters" },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "ask_id",
+            type: "string",
+            required: true,
+            description: "The ask id, from `talonic_ask`.",
+          },
+        ],
+      },
+      { type: "heading", level: 3, id: "get-answer-response", text: "Response shape" },
+      {
+        type: "param-table",
+        title: "Fields",
+        params: [
+          { name: "status", type: "string", description: "`completed`, `processing` or `error`." },
+          {
+            name: "answer",
+            type: "string",
+            description: "The answer, in markdown, once completed.",
+          },
+          {
+            name: "citations[]",
+            type: "array",
+            description: "Source spans backing the answer, once completed.",
+          },
+          {
+            name: "verification",
+            type: "object",
+            description: "Verdict on whether claims checked out, once completed.",
+          },
+          { name: "usage", type: "object", description: "Credits and tokens consumed." },
+          {
+            name: "poll_hint",
+            type: "string",
+            description:
+              "Present only while `status` is `processing`; a hint to poll again shortly.",
+          },
+        ],
+      },
+    ],
+    related: [{ label: "talonic_ask", slug: "talonic-ask" }],
+    faq: [
+      {
+        question: "How often should I poll?",
+        answer: "Every 2–5 seconds; most asks complete within a minute.",
+      },
+    ],
+    mentions: ["get answer", "poll ask", "answer status"],
+  },
 ]
