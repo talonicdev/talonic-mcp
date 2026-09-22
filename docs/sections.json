@@ -4,11 +4,11 @@
     "parentSlug": "mcp-overview",
     "title": "Introduction",
     "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. twenty-nine public tools and two resources for structured document extraction via the Model Context Protocol.",
+    "description": "Official Talonic MCP server for AI agents. thirty-six public tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
-        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents twenty-nine public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
+        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents thirty-six public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
       },
       {
         "type": "paragraph",
@@ -40,7 +40,7 @@
     "faq": [
       {
         "question": "What is the Talonic MCP server?",
-        "answer": "An official Model Context Protocol server that gives AI agents twenty-nine public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
+        "answer": "An official Model Context Protocol server that gives AI agents thirty-six public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
     "mentions": [
@@ -127,7 +127,7 @@
       },
       {
         "type": "paragraph",
-        "text": "All three install paths expose the same twenty-nine public tools and two resources."
+        "text": "All three install paths expose the same thirty-six public tools and two resources."
       }
     ],
     "related": [
@@ -291,7 +291,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all twenty-nine public tools and two resources."
+        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all thirty-six public tools and two resources."
       }
     ],
     "related": [

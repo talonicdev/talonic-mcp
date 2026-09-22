@@ -16,6 +16,7 @@ import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
+import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { registerFieldTools } from "./tools/fields.js"
 import { registerAgentRegistryTools } from "./tools/agent-tools.js"
@@ -106,6 +107,16 @@ export interface CreateServerOptions {
    * re-authorizes every call; this flag controls listing visibility only.
    */
   includeAdminAgentTaskTools?: boolean
+
+  /**
+   * Whether the seven decision-task tools are listed as invocable. The hosted
+   * entrypoint sets this from `tokenHasDecideScope`: an OAuth token that
+   * visibly lacks the `apps:decide` scope gets them listed but marked
+   * non-invocable, so the agent explains the missing consent instead of
+   * hitting a 403. Listing UX only; the platform decides on every call.
+   * Defaults to true.
+   */
+  decisionTasksInvocable?: boolean
 }
 
 /**
@@ -230,6 +241,15 @@ export function createServer(options: CreateServerOptions): McpServer {
         "workspace documents, file_urls for remote files) -> poll talonic_get_run until completed ->",
         "talonic_get_run_results. For open questions across documents use talonic_ask (costs credits;",
         "if it returns status processing, poll talonic_get_answer).",
+        "For External-mode app decisions, follow talonic_list_decision_tasks (by app_id) ->",
+        "talonic_claim_decision_task (the claim IS the payload: output_contract, precedents,",
+        "package descriptor) -> talonic_read_decision_package pages from package.first_cursor ->",
+        "talonic_heartbeat_decision_task while needed -> talonic_submit_decision_task with the",
+        "outcome, verbatim evidence locators and a short rationale, or release / fail it. A",
+        "tlnc_ key needs a per-app decide grant; an OAuth connector session needs the",
+        "apps:decide scope and a senior_member role or above. If a decision tool is marked NOT",
+        "INVOCABLE IN THIS SESSION, or a call returns 403, tell the user what consent or role",
+        "is missing instead of retrying.",
         "Prefer acting over explaining.",
       ].join(" "),
     },
@@ -267,6 +287,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerSpecTools(server, rawToken, baseUrl)
   registerRunTools(server, rawToken, baseUrl)
   registerAskTools(server, rawToken, baseUrl)
+  registerDecisionTaskTools(server, rawToken, baseUrl, {
+    invocable: options.decisionTasksInvocable !== false,
+  })
   if (options.includeGrowthTools) {
     registerGrowthTools(server, rawToken, baseUrl)
   }

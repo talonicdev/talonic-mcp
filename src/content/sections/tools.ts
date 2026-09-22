@@ -2286,6 +2286,640 @@ Payment terms: Net 30`,
     mentions: ["transactional submit", "AI Agent (MCP)", "mcp_agent", "typed outputs"],
   },
   {
+    slug: "talonic-list-decision-tasks",
+    parentSlug: "tools",
+    title: "talonic_list_decision_tasks",
+    seoTitle: "talonic_list_decision_tasks — External-Mode App Inbox",
+    description:
+      "MCP tool that lists one External-mode app's decision tasks — runs parked for an outside agent to decide — with status filters and cursor pagination, metadata only.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List the decision tasks of one Talonic App, newest first. A decision task is how an **External-mode** app hands a run's decision to an agent outside the platform: the run assembles its input package, freezes it, enters `awaiting_decision`, and offers a task. This tool is the polling alternative to the `app.decision_task.offered` webhook and the entry point of the decision workflow.",
+      },
+      {
+        type: "paragraph",
+        text: "Each row in `data[]` carries identifiers (`id`, `run_id`, `app_id`), the lifecycle `status`, the current `execution_epoch`, the lease settings (`lease_seconds`, `claimed_by`, `claimed_at`, `lease_expires_at`, `heartbeat_at`), the hard `sla_deadline_at`, and `submitted_at` / `created_at`. The input package is never inlined here: it is read page by page after a claim, and every page read is journaled onto the run.",
+      },
+      {
+        type: "callout",
+        text: 'Every one of these tools runs at the platform\'s `decide` tier. A `tlnc_` workspace API key needs a `decide` grant on the app. An OAuth connector session (Claude.ai) needs the `apps:decide` scope — consented in person when the connector is added, never pre-consented — plus a live workspace role of `senior_member` or above; the claim is then recorded as the client acting for that person ("Claude for Jane Doe"). Web sessions are refused. A 403 names what is missing (`decide_grant_required`, `insufficient_scope`, `insufficient_tier`); the agent should report it rather than retry.',
+      },
+      {
+        type: "heading",
+        level: 3,
+        id: "list-decision-tasks-workflow",
+        text: "The decision workflow",
+      },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          'Call `talonic_list_decision_tasks` with the `app_id` and `status: "available"`.',
+          "Claim a task with `talonic_claim_decision_task`; the claim returns the output contract, precedents and the package descriptor.",
+          "Read the frozen input package with `talonic_read_decision_package`, page by page from `package.first_cursor`.",
+          "Heartbeat with `talonic_heartbeat_decision_task` while deciding, then finish with `talonic_submit_decision_task` — or `talonic_release_decision_task` / `talonic_fail_decision_task`.",
+        ],
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "app_id",
+            type: "UUID",
+            required: true,
+            description: "The External-mode app whose inbox to read.",
+          },
+          {
+            name: "status",
+            type: "available | claimed | submitted | released | failed | timed_out | cancelled",
+            description:
+              "Optional lifecycle-state filter. Start with `available` when looking for work.",
+          },
+          {
+            name: "limit",
+            type: "integer",
+            description: "Page size from 1 to 100. Defaults to 50.",
+          },
+          {
+            name: "cursor",
+            type: "string",
+            description: "Opaque `pagination.next_cursor` from the previous page.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Tool input and response",
+        code: `// talonic_list_decision_tasks({ "app_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "status": "available", "limit": 1 })
+{
+  "data": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "customer_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "run_id": "22222222-2222-4222-8222-222222222222",
+      "app_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "status": "available",
+      "execution_epoch": 0,
+      "input_package_ref": "run",
+      "lease_seconds": 120,
+      "claimed_by": null,
+      "claimed_at": null,
+      "lease_expires_at": null,
+      "heartbeat_at": null,
+      "sla_deadline_at": "2026-09-22T10:10:00.000Z",
+      "submitted_at": null,
+      "created_at": "2026-09-22T10:00:00.000Z",
+      "updated_at": "2026-09-22T10:00:00.000Z"
+    }
+  ],
+  "pagination": { "has_more": false, "next_cursor": null }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "`sla_deadline_at` is the decision SLA (default 10 minutes, configurable per app): if no valid decision arrives by then, the platform applies the app's declared fallback policy — a resident rule set decides, the run parks as a system-raised review, or the run fails. Filtering by `claimed` or `timed_out` is useful for supervision; a task whose lease expired is eligible for reclaiming.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_decision_task", slug: "talonic-claim-decision-task" },
+      { label: "talonic_read_decision_package", slug: "talonic-read-decision-package" },
+      { label: "talonic_submit_decision_task", slug: "talonic-submit-decision-task" },
+      { label: "talonic_list_agent_tasks", slug: "talonic-list-agent-tasks" },
+    ],
+    faq: [
+      {
+        question: "How is a decision task different from an Agent task?",
+        answer:
+          "An Agent task parks one document at a pipeline stage and asks for declared output fields. A decision task parks one App run and asks for the run's decision: the outcome is validated against the app's output contract, must cite evidence from the frozen input package, and is written to the app's ledger with decided_by.type external_agent. The two protocols share the lease, heartbeat and execution-epoch mechanics.",
+      },
+      {
+        question: "Why does the tool return 403, or show as NOT INVOCABLE IN THIS SESSION?",
+        answer:
+          "The decide tier is an independent grant: operate does not imply it. A tlnc_ key needs a decide grant on that app, granted by a workspace owner. An OAuth connector session needs the apps:decide scope and a senior_member role or above, read live on every call. If the connector was added before the scope existed, its token lacks it: the hosted server then lists the seven tools marked NOT INVOCABLE IN THIS SESSION, and the fix is to remove and re-add the Talonic connector so the consent screen offers 'Claim and decide tasks'.",
+      },
+      {
+        question: "What do the decision task statuses mean?",
+        answer:
+          "available means no one holds the task; claimed means an agent holds a live lease; submitted means a decision was accepted and the run resumed; released means the claimant gave it back (it returns to available); failed means the claimant declared it undecidable and the fallback applied; timed_out means the SLA passed; cancelled means the run was cancelled or the task withdrawn.",
+      },
+    ],
+    mentions: [
+      "decision task",
+      "External mode",
+      "Talonic Apps",
+      "decide grant",
+      "cursor pagination",
+    ],
+  },
+  {
+    slug: "talonic-claim-decision-task",
+    parentSlug: "tools",
+    title: "talonic_claim_decision_task",
+    seoTitle: "talonic_claim_decision_task — Lease a Run's Decision",
+    description:
+      "MCP tool that claims an External-mode decision task and returns the decision bundle: task metadata with a fresh execution epoch, the output contract, precedents and the package descriptor.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Take the exclusive lease on a decision task. A successful claim bumps `execution_epoch`, sets `lease_expires_at`, and returns everything needed to decide except the records themselves: the `task` metadata, the `output_contract` the decision must satisfy, the `precedents` reference block (resolved reviews on similar runs), and a `package` descriptor.",
+      },
+      {
+        type: "paragraph",
+        text: "There is no separate fetch step in this protocol: claiming **is** the payload disclosure, and it is journaled onto the run. The claim is an exclusive lease with a default TTL of 120 seconds (configurable per app), clamped by the task's SLA deadline. A task whose lease lapsed can be reclaimed; the epoch moves on and the previous claimant's submit is rejected.",
+      },
+      {
+        type: "param-table",
+        params: [
+          {
+            name: "task_id",
+            type: "UUID",
+            required: true,
+            description: "Task ID from `talonic_list_decision_tasks` or the offered webhook.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Claim response",
+        code: `// talonic_claim_decision_task({ "task_id": "11111111-1111-4111-8111-111111111111" })
+{
+  "task": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "run_id": "22222222-2222-4222-8222-222222222222",
+    "app_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "status": "claimed",
+    "execution_epoch": 1,
+    "lease_seconds": 120,
+    "claimed_by": "kkkkkkkk-kkkk-4kkk-8kkk-kkkkkkkkkkkk",
+    "lease_expires_at": "2026-09-22T10:02:00.000Z",
+    "sla_deadline_at": "2026-09-22T10:10:00.000Z",
+    "...": "remaining metadata as in the list"
+  },
+  "output_contract": {
+    "type": "object",
+    "required": ["approve"],
+    "properties": {
+      "approve": { "type": "boolean" },
+      "hold_reason": { "type": "string" }
+    }
+  },
+  "precedents": [],
+  "package": {
+    "package_kind": "records",
+    "record_count": 3,
+    "page_size": 500,
+    "first_cursor": "eyJvZmZzZXQiOjB9",
+    "documents": [
+      {
+        "document_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+        "filename": "invoice-4711.pdf",
+        "mime_type": "application/pdf",
+        "file_url": "/v1/documents/dddddddd-dddd-4ddd-8ddd-dddddddddddd/file"
+      }
+    ]
+  }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "`output_contract` arrives in the manifest's own convention: a plain contract is the bare JSON Schema the `outcome` validates against; a `verdict_matrix` or `record_set` contract is wrapped with its `kind` so the agent knows which envelope to submit. `package.first_cursor` is `null` when the package has no records. `package_kind` is `mining_round` for a rule-mining round driven from outside, whose package is one record holding the round's prompts and tool listing.",
+      },
+      {
+        type: "callout",
+        text: "Save `execution_epoch` from the claim. Heartbeat, submit, release and fail all require it; a stale epoch is HTTP 409 and never enters the ledger.",
+      },
+    ],
+    related: [
+      { label: "talonic_read_decision_package", slug: "talonic-read-decision-package" },
+      { label: "talonic_heartbeat_decision_task", slug: "talonic-heartbeat-decision-task" },
+      { label: "talonic_submit_decision_task", slug: "talonic-submit-decision-task" },
+    ],
+    faq: [
+      {
+        question: "Can I inspect a decision task before claiming it?",
+        answer:
+          "Only its metadata, through the list. The platform discloses the output contract, precedents and package only to the claimant, and journals that disclosure. Claim, read, and release it if it is not yours to decide.",
+      },
+      {
+        question: "What happens when two agents claim the same task?",
+        answer:
+          "The second claim returns HTTP 409 while the first lease is live. Once the lease expires without a heartbeat, the task can be reclaimed; the epoch is bumped and any submit carrying the old epoch is rejected.",
+      },
+    ],
+    mentions: ["claim", "exclusive lease", "execution epoch", "output contract", "precedents"],
+  },
+  {
+    slug: "talonic-read-decision-package",
+    parentSlug: "tools",
+    title: "talonic_read_decision_package",
+    seoTitle: "talonic_read_decision_package — Read a Frozen Input Package",
+    description:
+      "MCP tool that reads one page of a claimed decision task's frozen input package — the records and provenance locators the decision must be made from — with opaque cursor pagination.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Read the run's frozen input package, one page at a time. The package was assembled and enriched when the run started and is served exactly as persisted; nothing is added at read time, so every claimant of the same task sees the same bytes. Only the client holding the live claim may read it (anyone else gets HTTP 409), and each page read journals a `package_read` event onto the run.",
+      },
+      {
+        type: "paragraph",
+        text: "Each record in `data[]` is `{ binding, index, record }` — the input binding alias, the record's position within it, and the record with its cells and their provenance locators. The first page (no `cursor`) additionally carries `documents`, the source documents behind the package's cells, so a surface can offer the originals without walking every page.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "cursor",
+            type: "string",
+            description:
+              "Opaque package cursor: `package.first_cursor` from the claim, then `pagination.next_cursor`. Omit for the first page.",
+          },
+          {
+            name: "limit",
+            type: "integer",
+            description:
+              "Records per page, 1 to 2,000. Defaults to the platform page size reported as `package.page_size` on the claim (500 unless the deployment configures otherwise).",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "First page",
+        code: `// talonic_read_decision_package({ "task_id": "11111111-1111-4111-8111-111111111111", "limit": 2 })
+{
+  "task_id": "11111111-1111-4111-8111-111111111111",
+  "run_id": "22222222-2222-4222-8222-222222222222",
+  "record_count": 3,
+  "page_size": 2,
+  "documents": [
+    {
+      "document_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "filename": "invoice-4711.pdf",
+      "mime_type": "application/pdf",
+      "file_url": "/v1/documents/dddddddd-dddd-4ddd-8ddd-dddddddddddd/file"
+    }
+  ],
+  "data": [
+    {
+      "binding": "invoice",
+      "index": 0,
+      "record": {
+        "invoice_total": {
+          "value": 1250.0,
+          "locator": "dp:pppppppp-pppp-4ppp-8ppp-pppppppppppp:rrrrrrrr-rrrr-4rrr-8rrr-rrrrrrrrrrrr:invoice_total",
+          "confidence": 0.97,
+          "document_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
+        },
+        "supplier_name": {
+          "value": "Acme GmbH",
+          "locator": "dp:pppppppp-pppp-4ppp-8ppp-pppppppppppp:rrrrrrrr-rrrr-4rrr-8rrr-rrrrrrrrrrrr:supplier_name",
+          "confidence": 0.99,
+          "document_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
+        }
+      }
+    }
+  ],
+  "pagination": { "has_more": true, "next_cursor": "eyJvZmZzZXQiOjJ9" }
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Keep the locators. The submit's `evidence` block must cite the package references the decision relied on, and the platform checks each one against this package — copy them verbatim rather than reconstructing them. Walk pages while `pagination.has_more` is true; the cursor is an offset into the frozen record order, so a walk is stable even across a release and reclaim.",
+      },
+      {
+        type: "callout",
+        text: "For a rule-mining round driven from outside (`package_kind: mining_round`), the package is a single record `{ system_prompt, first_turn, tools }` — what the hosted model would have seen. The round's tools are called over the platform's REST routes; this MCP surface does not wrap them yet.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_decision_task", slug: "talonic-claim-decision-task" },
+      { label: "talonic_submit_decision_task", slug: "talonic-submit-decision-task" },
+    ],
+    faq: [
+      {
+        question: "Why does reading the package return HTTP 409?",
+        answer:
+          "The package is readable by the current claimant only. Either the task was never claimed by this credential, or the lease lapsed and another agent reclaimed it. Claim (or reclaim) the task first, then read.",
+      },
+      {
+        question: "Is reading the package a side effect?",
+        answer:
+          "It changes nothing in the task or run, but each page read is journaled as package_read with the offset and count, so the run's ledger shows what the deciding agent actually looked at.",
+      },
+    ],
+    mentions: [
+      "input package",
+      "provenance locator",
+      "package_read",
+      "evidence",
+      "cursor pagination",
+    ],
+  },
+  {
+    slug: "talonic-heartbeat-decision-task",
+    parentSlug: "tools",
+    title: "talonic_heartbeat_decision_task",
+    seoTitle: "talonic_heartbeat_decision_task — Keep a Decision Lease",
+    description:
+      "MCP tool that extends the lease on a claimed decision task using the execution epoch from the claim — never past the task's SLA deadline.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Extend the lease on a claimed decision task. The lease is short by design (120 seconds by default) so an abandoned claim frees quickly; a decision that takes longer keeps its claim alive by heartbeating before `lease_expires_at`. The lease never extends past `sla_deadline_at` — that is the hard decision deadline, after which the app's fallback policy applies.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch from the current claim.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Heartbeat response",
+        code: `// talonic_heartbeat_decision_task({ "task_id": "11111111-1111-4111-8111-111111111111", "execution_epoch": 1 })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "status": "claimed",
+  "execution_epoch": 1,
+  "heartbeat_at": "2026-09-22T10:01:30.000Z",
+  "lease_expires_at": "2026-09-22T10:03:30.000Z",
+  "sla_deadline_at": "2026-09-22T10:10:00.000Z",
+  "...": "remaining metadata as in the list"
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Treat a failed heartbeat as a hard stop. HTTP 409 means the epoch is stale — the lease lapsed and the task was reclaimed, released, cancelled or timed out — so any decision you were forming belongs to a claim that no longer exists and will be rejected on submit. Discard it and return to `talonic_list_decision_tasks`.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_decision_task", slug: "talonic-claim-decision-task" },
+      { label: "talonic_submit_decision_task", slug: "talonic-submit-decision-task" },
+      { label: "talonic_release_decision_task", slug: "talonic-release-decision-task" },
+    ],
+    faq: [
+      {
+        question: "How often should an agent heartbeat a decision task?",
+        answer:
+          "Comfortably inside the lease: with the default 120-second lease, roughly every 60 seconds while the decision is still being worked on. Stop once the task is submitted, released or failed.",
+      },
+      {
+        question: "Can a heartbeat extend past the SLA deadline?",
+        answer:
+          "No. The lease is clamped to sla_deadline_at. If the decision cannot be made before then, submit what you have with an honest confidence, release the task, or fail it with a reason so the fallback policy runs deliberately rather than by timeout.",
+      },
+    ],
+    mentions: ["heartbeat", "lease expiry", "SLA deadline", "execution epoch"],
+  },
+  {
+    slug: "talonic-submit-decision-task",
+    parentSlug: "tools",
+    title: "talonic_submit_decision_task",
+    seoTitle: "talonic_submit_decision_task — Submit an Evidenced Decision",
+    description:
+      "MCP tool that submits the decision for a claimed External-mode task — outcome validated against the output contract, evidence checked against the frozen input package, a mandatory rationale — and resumes the run.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Return the decision for a claimed task. The platform verifies three things transactionally before writing anything: the `outcome` against the task's `output_contract`, every `evidence` locator against the run's frozen input package, and the presence of a `rationale`. On success the task becomes `submitted`, the run resumes through the app's threshold checks and action layer, and the sealed record names `decided_by.type: external_agent`. Talonic writes the ledger; the agent never does.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch from the current claim.",
+          },
+          {
+            name: "outcome",
+            type: "object",
+            required: true,
+            description:
+              "The decision. For a plain contract, the object its JSON Schema validates. For a `verdict_matrix` contract, `{ subjects: [{ subject_key, rule_outcomes, auto?, detail? }] }`. For a `record_set` contract, its fields-and-rows envelope.",
+          },
+          {
+            name: "evidence",
+            type: "string[]",
+            required: true,
+            description:
+              "Provenance locators the decision relied on, copied verbatim from the package (or `db:` / `ref:` locators the app holds a read grant on). Up to 10,000 entries of at most 512 characters. An empty array is accepted only when the app allows unevidenced decisions.",
+          },
+          {
+            name: "rationale",
+            type: "string",
+            required: true,
+            description:
+              "A short summary of why — never private chain-of-thought. At most 4,000 characters.",
+          },
+          {
+            name: "confidence",
+            type: "number",
+            description:
+              "Optional confidence from 0 to 1; the app's confidence floor may route a low value to review.",
+          },
+          {
+            name: "service_version",
+            type: "string",
+            description:
+              "Optional build identifier of the deciding service (at most 64 characters); recorded as `decided_by.label`.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Submit a decision",
+        code: `// talonic_submit_decision_task({
+//   "task_id": "11111111-1111-4111-8111-111111111111",
+//   "execution_epoch": 1,
+//   "outcome": { "approve": true },
+//   "evidence": [
+//     "dp:pppppppp-pppp-4ppp-8ppp-pppppppppppp:rrrrrrrr-rrrr-4rrr-8rrr-rrrrrrrrrrrr:invoice_total",
+//     "dp:pppppppp-pppp-4ppp-8ppp-pppppppppppp:rrrrrrrr-rrrr-4rrr-8rrr-rrrrrrrrrrrr:supplier_name"
+//   ],
+//   "rationale": "Total matches the purchase order and the supplier is on the approved list.",
+//   "confidence": 0.93
+// })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "run_id": "22222222-2222-4222-8222-222222222222",
+  "status": "submitted",
+  "execution_epoch": 1,
+  "submitted_at": "2026-09-22T10:02:10.000Z",
+  "...": "remaining metadata as in the list"
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "A refused submission is HTTP 422 with the reason (`Decision violates the output contract: …`, `An evidence block is required …`, a locator outside the package, or a malformed matrix envelope), is journaled as `rejected`, and changes nothing: the task stays `claimed` under your epoch, so fix the payload and submit again before the lease ends. A stale epoch is HTTP 409. A successful submit is terminal — corrections happen downstream in review, not by a second submit.",
+      },
+      {
+        type: "callout",
+        text: "The rationale is a summary for the ledger and for the humans who review it, not a transcript. For a rule-mining round driven from outside, the round's long summary travels in `outcome.summary` and the rationale is one line.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_decision_task", slug: "talonic-claim-decision-task" },
+      { label: "talonic_read_decision_package", slug: "talonic-read-decision-package" },
+      { label: "talonic_release_decision_task", slug: "talonic-release-decision-task" },
+      { label: "talonic_fail_decision_task", slug: "talonic-fail-decision-task" },
+    ],
+    faq: [
+      {
+        question: "Can the evidence cite something outside the input package?",
+        answer:
+          "Only a db: or ref: locator naming a source connection or reference table the app holds a read grant on; those are accepted as attestations and journaled. Any other off-package locator, and the reserved api: prefix, is rejected. Everything else must appear verbatim in the package.",
+      },
+      {
+        question: "What if the app's thresholds disagree with my decision?",
+        answer:
+          "The submit is still accepted. Thresholds — the confidence floor for auto-execution and value ceilings requiring approval — are enforced by the platform after the decision and before execution, for every mode. A breach routes the run to a human review; it never fails silently.",
+      },
+    ],
+    mentions: [
+      "evidence block",
+      "rationale",
+      "output contract",
+      "external_agent",
+      "transactional submit",
+    ],
+  },
+  {
+    slug: "talonic-release-decision-task",
+    parentSlug: "tools",
+    title: "talonic_release_decision_task",
+    seoTitle: "talonic_release_decision_task — Give a Decision Task Back",
+    description:
+      "MCP tool that releases a claimed decision task back to available without deciding it, so another claimant can pick it up; the next claim bumps the execution epoch.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Give a claimed decision task back. The task returns to `available` with its row intact, the release is journaled, and the next claim bumps the epoch. Use it when you cannot finish within the lease or the SLA but another agent — or you, later — could still decide it; the task is not failed and no review is raised.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch from the current claim.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Release response",
+        code: `// talonic_release_decision_task({ "task_id": "11111111-1111-4111-8111-111111111111", "execution_epoch": 1 })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "status": "available",
+  "execution_epoch": 1,
+  "claimed_by": null,
+  "lease_expires_at": null,
+  "...": "remaining metadata as in the list"
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Releasing is cheaper than letting the lease lapse: the task is immediately claimable instead of waiting out the lease, and the ledger records a deliberate give-back rather than a silent timeout. The SLA clock keeps running throughout, so a task released late in its window may time out before anyone reclaims it.",
+      },
+    ],
+    related: [
+      { label: "talonic_claim_decision_task", slug: "talonic-claim-decision-task" },
+      { label: "talonic_fail_decision_task", slug: "talonic-fail-decision-task" },
+    ],
+    faq: [
+      {
+        question: "Release or fail — which one?",
+        answer:
+          "Release when the task is decidable but not by you right now: another claimant gets the same package and contract. Fail when no claimant could decide it from this package: that raises a Human Review with your reason and applies the app's fallback policy.",
+      },
+    ],
+    mentions: ["release", "give-back", "execution epoch"],
+  },
+  {
+    slug: "talonic-fail-decision-task",
+    parentSlug: "tools",
+    title: "talonic_fail_decision_task",
+    seoTitle: "talonic_fail_decision_task — Declare a Task Undecidable",
+    description:
+      "MCP tool that reports a claimed decision task cannot be decided: raises a Human Review with the agent's reason and applies the app's declared fallback policy.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Declare that the claimed task cannot be decided. The platform raises a Human Review carrying your `reason` and applies the app's declared **fallback policy**: `rules` (a resident rule set decides — the only policy with a deterministic safety net), `hold` (the run parks as a system-raised review) or `none` (the run fails explicitly). The task ends in status `failed`; the ledger records the fallback decision with `fallback: true`.",
+      },
+      {
+        type: "param-table",
+        params: [
+          { name: "task_id", type: "UUID", required: true, description: "Claimed task ID." },
+          {
+            name: "execution_epoch",
+            type: "integer",
+            required: true,
+            description: "Exact epoch from the current claim.",
+          },
+          {
+            name: "reason",
+            type: "string",
+            required: true,
+            description:
+              "Why the task cannot be decided, at most 2,000 characters. Becomes the review's question context, so name the missing or contradictory evidence.",
+          },
+        ],
+      },
+      {
+        type: "code",
+        language: "json",
+        title: "Fail response",
+        code: `// talonic_fail_decision_task({
+//   "task_id": "11111111-1111-4111-8111-111111111111",
+//   "execution_epoch": 1,
+//   "reason": "The package carries two supplier names for one invoice and neither matches the purchase order."
+// })
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "status": "failed",
+  "execution_epoch": 1,
+  "...": "remaining metadata as in the list"
+}`,
+      },
+      {
+        type: "paragraph",
+        text: "Fail is for genuinely undecidable tasks — contradictory or insufficient input that no claimant could resolve. A decision you can make with low confidence is better submitted with `confidence` set: the app's confidence floor routes it to review if needed, and the reviewer sees your outcome and rationale instead of an empty slot. For a rule-mining round driven from outside, fail seals the round as `interrupted` with your reason and raises no review.",
+      },
+    ],
+    related: [
+      { label: "talonic_release_decision_task", slug: "talonic-release-decision-task" },
+      { label: "talonic_submit_decision_task", slug: "talonic-submit-decision-task" },
+    ],
+    faq: [
+      {
+        question: "Is failing a decision task destructive?",
+        answer:
+          "No data is deleted. The task moves to failed, a review is raised with your reason, and the fallback policy the app declared runs — which under the rules policy still produces a decision. It cannot be undone, though: a failed task is not reclaimable.",
+      },
+    ],
+    mentions: ["fail", "fallback policy", "Human Review", "undecidable"],
+  },
+  {
     slug: "talonic-list-fields",
     parentSlug: "tools",
     title: "talonic_list_fields",

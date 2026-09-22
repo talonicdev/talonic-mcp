@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The twenty-nine public tools (and what an agent should reach for)
+## The thirty-six public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -61,8 +61,17 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_get_run_results` | `run.ts` | yes | Read a run's structured rows and column definitions; readable while still processing. |
 | `talonic_ask` | `ask.ts` | no | Natural-language Q&A over the corpus with citations and verification; bounded wait, then poll. Consumes credits. |
 | `talonic_get_answer` | `ask.ts` | yes | Poll an ask that outlived `talonic_ask`'s bounded wait. |
+| `talonic_list_decision_tasks` | `decision-tasks.ts` | yes | One External-mode App's decision inbox (`GET /v1/apps/:id/decision-tasks`). Metadata only. |
+| `talonic_claim_decision_task` | `decision-tasks.ts` | no | Lease a decision task; the claim IS the payload fetch (output contract, precedents, package descriptor). No separate `get` exists on the platform. |
+| `talonic_read_decision_package` | `decision-tasks.ts` | yes | One page of the claimed run's frozen input package; claimant-only, each page journals `package_read`. |
+| `talonic_heartbeat_decision_task` | `decision-tasks.ts` | no | Extend the lease, never past `sla_deadline_at`. |
+| `talonic_submit_decision_task` | `decision-tasks.ts` | no | `outcome` (contract-shaped) + required `evidence[]` locators + required `rationale`; platform verifies transactionally, 422 on refusal. |
+| `talonic_release_decision_task` | `decision-tasks.ts` | no | Give the task back to `available`. |
+| `talonic_fail_decision_task` | `decision-tasks.ts` | no | Declare undecidable: raises a Human Review and applies the app's fallback policy. |
 
-Annotations are locked by `tests/widgets/tool-annotations.test.ts` (20 read-only lookup tools, 9 write-capable); every public tool renders a widget (`tests/widgets/all-widgets.test.ts`, 29/29) and declares Apps SDK status strings. Adding a tool = also adding a widget: one `WIDGET_URIS` key + description + status in `src/widgets/types.ts`, one entry in `src/widgets/register.ts`, `_meta: widgetToolMeta(key)` on the tool, a fixture + render test under `tests/widgets/`, and an entry in `chatgpt-app-submission.json`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
+**Decision-task auth:** the platform's `decide` tier (`AppsAccessGuard` in the platform repo) admits a `tlnc_` API key on a per-app `decide` grant, or an OAuth session on the `apps:decide` scope plus a live workspace role of `senior_member` or above (platform spec `2026-09-22-decide-for-oauth-sessions-design.md`). Web sessions are refused. Two cross-repo couplings live here: (1) `src/http-server.ts` advertises `apps:decide` in `scopes_supported` — Claude.ai requests exactly that list, and the platform's `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s; (2) `tokenHasDecideScope()` in `decision-tasks.ts` decodes an OAuth token's `scopes` claim (unverified, visibility only) and the hosted entrypoint lists the seven tools marked `NOT INVOCABLE IN THIS SESSION` with `_meta["talonic/can_invoke"]: false` when the scope is absent — a connector added before the scope existed keeps working and the agent tells the user to reconnect. Handlers always forward; the platform decides. `tlnc_` keys and undecodable tokens are always listed as invocable. The rule-mining external-driver routes (`/v1/apps/:id/mining/rounds/:runId/tools*`) are NOT wrapped yet — platform spec `docs/superpowers/specs/2026-09-22-mining-external-driver-design.md` §6.3 lists them as a follow-up here.
+
+Annotations are locked by `tests/widgets/tool-annotations.test.ts` (22 read-only lookup tools, 14 write-capable); every public tool renders a widget (`tests/widgets/all-widgets.test.ts`, 36/36) and declares Apps SDK status strings. Adding a tool = also adding a widget: one `WIDGET_URIS` key + description + status in `src/widgets/types.ts`, one entry in `src/widgets/register.ts`, `_meta: widgetToolMeta(key)` on the tool, a fixture + render test under `tests/widgets/`, and an entry in `chatgpt-app-submission.json`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 
@@ -97,7 +106,7 @@ src/
   tools/*.ts          one file per MCP tool (handle<Name> + register<Name>)
   resources/*.ts      schemas-resource.ts, webhooks-resource.ts
   content/*.ts        docs content for talonic.com/docs/mcp/* (see footgun above)
-  widgets/*.ts        ChatGPT Apps SDK widget HTML — one card per public tool (29); registry in widgets/types.ts + widgets/register.ts
+  widgets/*.ts        ChatGPT Apps SDK widget HTML — one card per public tool (36); registry in widgets/types.ts + widgets/register.ts
   favicon.ts          base64 favicon served by the hosted server
 tests/**/*.test.ts    vitest; HTTP side runs against a real http.Server on an ephemeral port,
                         tool side mocks the Talonic API at the fetch layer
@@ -118,7 +127,7 @@ npm run format:check    # prettier check
 npm run format          # prettier --write
 npm run build           # tsup → dist/{index,server,http-server,content}.js
 npm run start:http      # local hosted-MCP server on :3000
-npm run preflight:chatgpt   # boot dist/http-server.js, check 29 tools + every template like ChatGPT does
+npm run preflight:chatgpt   # boot dist/http-server.js, check 36 tools + every template like ChatGPT does
 ```
 
 Always run typecheck + test + format:check before any push.
@@ -132,7 +141,7 @@ Always run typecheck + test + format:check before any push.
 1. **Docs-drift guard** — fails if `src/tools/**`, `src/http-server.ts`, `src/server-factory.ts`, or `src/resources/**` changed without `docs/sections.json`. Opt out with `[skip docs]` in a commit message **only** for genuinely non-doc-affecting changes (refactors, internal fixes, CI, debug instrumentation). ⚠️ This guard watches the dormant `docs/sections.json` surface, not the live MCP docs surface — it does **not** enforce that `src/content/sections/*.ts` was updated when tools change. Discipline + `docs-pipeline.md` are the only enforcement there.
 2. Build, test, auto-bump patch version, sync `server.json`.
 3. `npm publish` (`NPM_TOKEN`).
-4. MCP Registry publish (`mcp-publisher`, GitHub OIDC).
+4. MCP Registry publish (`mcp-publisher`, GitHub OIDC), after waiting up to four minutes for npm to serve the new version (its replicas can lag the publish; the Registry validates against npm) and with three attempts. Soft step: a failure is a `::warning::` annotation, never a red run.
 5. GitHub Release (`gh release create`, idempotent).
 6. `repository_dispatch` → `talonicdev/website` and `talonicdev/platform` rebuild docs.
 

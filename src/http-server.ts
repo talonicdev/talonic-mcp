@@ -43,6 +43,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -134,7 +135,12 @@ const APPS_CHALLENGE_TOKEN =
  *
  * The scopes advertised are the ones our MCP tools actually exercise:
  * `extract:write` (extract, save_schema, to_markdown), `documents:read`
- * (filter, get_document, search), and `schemas:read` (list_schemas).
+ * (filter, get_document, search), `schemas:read` (list_schemas), and
+ * `apps:decide` (the seven decision-task tools; the platform's `decide`
+ * tier needs it on an OAuth session, and it is never pre-consented, so the
+ * consent page asks for it in person). Claude.ai requests exactly this
+ * list, so an entry here is a consent-screen line; the platform's
+ * `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s.
  * The Talonic authorization server supports more scopes than this; we
  * advertise only what the connector itself needs so the consent screen
  * stays tight.
@@ -148,7 +154,7 @@ function renderProtectedResourceMetadata(): {
   return {
     resource: RESOURCE_URL,
     authorization_servers: [AUTHORIZATION_SERVER],
-    scopes_supported: ["extract:write", "documents:read", "schemas:read"],
+    scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
     bearer_methods_supported: ["header"],
   }
 }
@@ -499,6 +505,9 @@ export function createRequestHandler(
       includeGrowthTools,
       includeAdminAgentTaskTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
+      // Listing UX only: an OAuth token that visibly lacks apps:decide gets
+      // the decision-task tools marked non-invocable. The platform decides.
+      decisionTasksInvocable: tokenHasDecideScope(token),
     })
     res.on("close", () => {
       void transport.close()

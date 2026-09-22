@@ -139,7 +139,44 @@ describe("HTTP server routing", () => {
     expect(text).toContain("talonic_extract")
     expect(text).toContain("talonic_get_balance")
     expect(text).toContain("talonic_list_agent_tasks")
+    expect(text).toContain("talonic_list_decision_tasks")
+    expect(text).toContain("talonic_submit_decision_task")
     expect(text).not.toContain("talonic_admin_list_agent_tasks")
+  })
+
+  it("advertises apps:decide in the protected-resource metadata so the connector requests it", async () => {
+    const res = await fetch(`${h.baseUrl}/.well-known/oauth-protected-resource`)
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { scopes_supported: string[] }
+    expect(body.scopes_supported).toEqual([
+      "extract:write",
+      "documents:read",
+      "schemas:read",
+      "apps:decide",
+    ])
+  })
+
+  it("marks the decision-task tools non-invocable for an OAuth token without apps:decide", async () => {
+    const b64 = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url")
+    const list = async (token: string) => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: { ...MCP_HEADERS, Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 3, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    const withoutScope = `${b64({ alg: "HS256" })}.${b64({ scopes: ["documents:read"] })}.sig`
+    const withScope = `${b64({ alg: "HS256" })}.${b64({ scopes: ["documents:read", "apps:decide"] })}.sig`
+
+    const marked = await list(withoutScope)
+    expect(marked).toContain("talonic_claim_decision_task")
+    expect(marked).toContain("NOT INVOCABLE IN THIS SESSION")
+    expect(marked).toContain("talonic/can_invoke")
+
+    expect(await list(withScope)).not.toContain("NOT INVOCABLE IN THIS SESSION")
+    expect(await list("tlnc_test")).not.toContain("NOT INVOCABLE IN THIS SESSION")
   })
 
   it("tools/list includes admin variants only when the access check passes", async () => {

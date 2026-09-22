@@ -36,6 +36,13 @@ const ALL_TOOLS = [
   "talonic_get_run_results",
   "talonic_ask",
   "talonic_get_answer",
+  "talonic_list_decision_tasks",
+  "talonic_claim_decision_task",
+  "talonic_read_decision_package",
+  "talonic_heartbeat_decision_task",
+  "talonic_submit_decision_task",
+  "talonic_release_decision_task",
+  "talonic_fail_decision_task",
 ]
 
 // Tools that act on a specific document must tell the model to resolve a
