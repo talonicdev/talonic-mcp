@@ -21,6 +21,11 @@ const READ_ONLY_TOOLS = [
   "talonic_invoke_agent_tool",
   "talonic_list_agent_tasks",
   "talonic_get_agent_task",
+  "talonic_list_specs",
+  "talonic_get_spec",
+  "talonic_get_run",
+  "talonic_get_run_results",
+  "talonic_get_answer",
 ]
 
 // Write-capable tools: readOnlyHint=false. None destroy data, so
@@ -42,10 +47,15 @@ const WRITE_TOOLS = [
   "talonic_claim_agent_task",
   "talonic_heartbeat_agent_task",
   "talonic_submit_agent_task",
+  "talonic_run_spec",
+  "talonic_ask",
 ]
 
 const ALL_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS]
-const OPEN_WORLD_TOOLS = ["talonic_extract", "talonic_to_markdown"]
+// talonic_extract and talonic_to_markdown fetch public file URLs (file_url
+// input); talonic_run_spec fetches public file URLs (file_urls input, the
+// remote-ingest path of the two run backends).
+const OPEN_WORLD_TOOLS = ["talonic_extract", "talonic_to_markdown", "talonic_run_spec"]
 const WORKSPACE_ONLY_TOOLS = ALL_TOOLS.filter((name) => !OPEN_WORLD_TOOLS.includes(name))
 
 describe("tool annotations conform to Apps SDK guidelines", () => {

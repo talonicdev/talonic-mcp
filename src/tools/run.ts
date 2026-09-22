@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiForm, apiJson, runTool, type QueryParams } from "./_http.js"
 import { validationError, type ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Run tools — execute a Spec's configured pipeline and read its results.
@@ -362,6 +363,7 @@ export function registerRunTools(
         destructiveHint: false,
         openWorldHint: true,
       },
+      _meta: widgetToolMeta("runSpec"),
     },
     async (args) => handleRunSpec(getToken, baseUrl, args as RunSpecArgs),
   )
@@ -372,6 +374,7 @@ export function registerRunTools(
       description: GET_RUN_DESCRIPTION,
       inputSchema: runRefInputSchema,
       annotations: { title: "Poll a Spec run", ...READ_ONLY },
+      _meta: widgetToolMeta("getRun"),
     },
     async (args) => handleGetRun(getToken, baseUrl, args as RunRefArgs),
   )
@@ -382,6 +385,7 @@ export function registerRunTools(
       description: RESULTS_DESCRIPTION,
       inputSchema: resultsInputSchema,
       annotations: { title: "Read a Spec run's rows", ...READ_ONLY },
+      _meta: widgetToolMeta("getRunResults"),
     },
     async (args) => handleGetRunResults(getToken, baseUrl, args as RunResultsArgs),
   )

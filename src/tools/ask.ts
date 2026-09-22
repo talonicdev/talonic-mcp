@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, sleep as defaultSleep } from "./_http.js"
 import { validationError, type ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Ask tools — natural-language questions over the workspace corpus, answered
@@ -179,6 +180,7 @@ export function registerAskTools(
         destructiveHint: false,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("ask"),
     },
     async (args) => handleAsk(getToken, baseUrl, args as AskArgs),
   )
@@ -195,6 +197,7 @@ export function registerAskTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("getAnswer"),
     },
     async (args) => handleGetAnswer(getToken, baseUrl, args as { ask_id: string }),
   )

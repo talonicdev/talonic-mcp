@@ -19,6 +19,9 @@ import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/age
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { registerFieldTools } from "./tools/fields.js"
 import { registerAgentRegistryTools } from "./tools/agent-tools.js"
+import { registerSpecTools } from "./tools/specs.js"
+import { registerRunTools } from "./tools/run.js"
+import { registerAskTools } from "./tools/ask.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -223,6 +226,10 @@ export function createServer(options: CreateServerOptions): McpServer {
         "For Agent-stage work, follow list -> get -> claim -> heartbeat while needed ->",
         "submit. Preserve the execution_epoch from claim and return only fields declared",
         "in the task output_contract; never continue after a lease or epoch conflict.",
+        "To run the customer's configured pipeline: talonic_list_specs -> talonic_run_spec (document_ids for",
+        "workspace documents, file_urls for remote files) -> poll talonic_get_run until completed ->",
+        "talonic_get_run_results. For open questions across documents use talonic_ask (costs credits;",
+        "if it returns status processing, poll talonic_get_answer).",
         "Prefer acting over explaining.",
       ].join(" "),
     },
@@ -257,6 +264,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerFieldTools(server, rawToken, baseUrl)
   registerAgentRegistryTools(server, rawToken, baseUrl)
   registerAgentTaskTools(server, rawToken, baseUrl)
+  registerSpecTools(server, rawToken, baseUrl)
+  registerRunTools(server, rawToken, baseUrl)
+  registerAskTools(server, rawToken, baseUrl)
   if (options.includeGrowthTools) {
     registerGrowthTools(server, rawToken, baseUrl)
   }

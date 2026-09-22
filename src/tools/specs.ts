@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, type QueryParams } from "./_http.js"
 import type { ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Spec tools — the configured pipelines a workspace runs. A Spec is the
@@ -114,6 +115,7 @@ export function registerSpecTools(
       description: LIST_DESCRIPTION,
       inputSchema: listSpecsInputSchema,
       annotations: { title: "List Specs", ...READ_ONLY },
+      _meta: widgetToolMeta("listSpecs"),
     },
     async (args) => handleListSpecs(getToken, baseUrl, args as ListSpecsArgs),
   )
@@ -124,6 +126,7 @@ export function registerSpecTools(
       description: GET_DESCRIPTION,
       inputSchema: getSpecInputSchema,
       annotations: { title: "Get a Spec's structure", ...READ_ONLY },
+      _meta: widgetToolMeta("getSpec"),
     },
     async (args) => handleGetSpec(getToken, baseUrl, args as GetSpecArgs),
   )

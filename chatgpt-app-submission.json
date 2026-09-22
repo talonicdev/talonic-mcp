@@ -243,7 +243,14 @@
         "open_world_justification": "Writes to the connected workspace's own pipeline; no public internet access.",
         "destructive_justification": "Adds new cell values validated against the task's declared contract; existing data is versioned, not deleted, and the platform rejects undeclared fields."
       }
-    }
+    },
+    "talonic_list_specs": { "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Lists the workspace's configured Specs (pipelines) with version state and counts; nothing is created or changed.", "open_world_justification": "Reads the connected Talonic workspace only; no public internet access.", "destructive_justification": "Read-only listing; nothing is deleted or overwritten." } },
+    "talonic_get_spec": { "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Reads one Spec's structure (rail, compiled phases, fields, versions); nothing is created or changed.", "open_world_justification": "Reads the connected Talonic workspace only; no public internet access.", "destructive_justification": "Read-only fetch; nothing is deleted or overwritten." } },
+    "talonic_run_spec": { "annotations": { "readOnlyHint": false, "openWorldHint": true, "destructiveHint": false }, "justifications": { "read_only_justification": "Starts a pipeline run over the user's documents or remote file URLs, creating new structured rows and consuming credits the user is shown.", "open_world_justification": "With file_urls the platform fetches the user-supplied public https URLs to ingest them; with document_ids it stays inside the workspace.", "destructive_justification": "Creates a new run and new versioned data; existing documents and rows are never deleted or overwritten." } },
+    "talonic_get_run": { "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Polls a run's status and progress; nothing is created or changed.", "open_world_justification": "Reads the connected Talonic workspace only; no public internet access.", "destructive_justification": "Read-only poll; nothing is deleted or overwritten." } },
+    "talonic_get_run_results": { "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Reads a run's structured rows and columns; nothing is created or changed.", "open_world_justification": "Reads the connected Talonic workspace only; no public internet access.", "destructive_justification": "Read-only fetch; nothing is deleted or overwritten." } },
+    "talonic_ask": { "annotations": { "readOnlyHint": false, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Starts an agent turn that may extract and persist missing field values at query time and consumes credits, so it is declared as a write.", "open_world_justification": "Answers only from the connected workspace's documents and extracted data; no public internet access.", "destructive_justification": "Adds cited answers and possibly new extracted values; nothing is deleted or overwritten." } },
+    "talonic_get_answer": { "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false }, "justifications": { "read_only_justification": "Polls a previously started ask for its answer; nothing is created or changed.", "open_world_justification": "Reads the connected Talonic workspace only; no public internet access.", "destructive_justification": "Read-only poll; nothing is deleted or overwritten." } }
   },
   "test_cases": [
     {
@@ -372,6 +379,22 @@
       "file_attachment_urls": null,
       "tools_triggered": "talonic_list_agent_tasks, talonic_get_agent_task, talonic_claim_agent_task, talonic_heartbeat_agent_task, talonic_submit_agent_task",
       "expected_output": "Shows the worklist card, the task card with instructions and output contract, the lease card with the execution epoch, and the submitted confirmation; the document resumes its pipeline.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Run the customer's configured Spec over documents already in the workspace and read the rows.",
+      "user_prompt": "Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_specs, talonic_get_spec, talonic_search, talonic_run_spec, talonic_get_run, talonic_get_run_results",
+      "expected_output": "Shows the Specs card, resolves the documents, starts the run (run-started card), polls progress (run-progress card) until completed, then shows the results table card with one row per document.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Ask a cited question over the workspace and poll if it takes long.",
+      "user_prompt": "Which vendors invoiced us more than once in April, and what were the totals?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_ask, talonic_get_answer",
+      "expected_output": "Shows the answer card with the verification verdict, the vendor list with totals, and citations into the source invoices; if the first call returns processing, polls with talonic_get_answer.",
       "expected_output_url": null
     }
   ],
