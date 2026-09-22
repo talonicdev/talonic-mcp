@@ -16,7 +16,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other twenty-one public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), plus the Agent-stage list, fetch, claim, heartbeat and submit lifecycle."
+        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other twenty-eight public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), the Agent-stage list, fetch, claim, heartbeat and submit lifecycle, Spec runs (list/get/run a Spec, poll it, read its rows) and cited question answering over the workspace."
       },
       {
         "type": "callout",
@@ -40,7 +40,7 @@
     "faq": [
       {
         "question": "What is the Talonic MCP server?",
-        "answer": "An official Model Context Protocol server that gives AI agents twenty-two public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
+        "answer": "An official Model Context Protocol server that gives AI agents twenty-nine public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
     "mentions": [
@@ -127,7 +127,7 @@
       },
       {
         "type": "paragraph",
-        "text": "All three install paths expose the same twenty-two public tools and two resources."
+        "text": "All three install paths expose the same twenty-nine public tools and two resources."
       }
     ],
     "related": [
@@ -291,7 +291,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all twenty-two public tools and two resources."
+        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all twenty-nine public tools and two resources."
       }
     ],
     "related": [
@@ -4271,7 +4271,7 @@
           {
             "name": "nodes[].type",
             "type": "string",
-            "description": "Node type in the authored rail (e.g. extract, transform, validate)."
+            "description": "Stage type in the authored rail: one of `source`, `registry`, `schema`, `resolve`, `valid`, `assembly`, `deliver`, `reconcile`, `sanitize`, `triage`, `switch`."
           },
           {
             "name": "nodes[].name",
@@ -4286,7 +4286,7 @@
           {
             "name": "phases[].type",
             "type": "string",
-            "description": "Phase type (e.g. extraction, validation, assembly)."
+            "description": "Compiled phase type, derived from the rail stage it came from (`rail_stage_id` joins back to `nodes[].node_id`); Source and Data Product stages produce no phase, and a validation checkpoint expands to one phase per gate."
           },
           {
             "name": "phases[].name",
@@ -4501,7 +4501,7 @@
     "faq": [
       {
         "question": "Does this cost credits?",
-        "answer": "Yes — each ingested document and each pipeline stage meters credits like a run started in the app; check `talonic_get_balance` first for large batches."
+        "answer": "Yes — ingestion/OCR and extraction meter credits per document exactly as a run started in the app does; validation and delivery stages are free. Check `talonic_get_pricing` and `talonic_get_balance` before a large batch."
       }
     ],
     "mentions": [
@@ -4638,7 +4638,7 @@
     "faq": [
       {
         "question": "How long does a run take?",
-        "answer": "Seconds per document for extraction, plus validation and assembly stages; poll every 5–10 seconds and stop on completed or failed."
+        "answer": "Seconds per document for the extraction stage, plus whatever validation, resolution, assembly or delivery stages the Spec's rail contains; poll every 5–10 seconds and stop on completed or failed."
       }
     ],
     "mentions": [

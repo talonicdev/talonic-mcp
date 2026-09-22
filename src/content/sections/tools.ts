@@ -3197,7 +3197,8 @@ Payment terms: Net 30`,
           {
             name: "nodes[].type",
             type: "string",
-            description: "Node type in the authored rail (e.g. extract, transform, validate).",
+            description:
+              "Stage type in the authored rail: one of `source`, `registry`, `schema`, `resolve`, `valid`, `assembly`, `deliver`, `reconcile`, `sanitize`, `triage`, `switch`.",
           },
           { name: "nodes[].name", type: "string", description: "Node display name." },
           {
@@ -3208,7 +3209,8 @@ Payment terms: Net 30`,
           {
             name: "phases[].type",
             type: "string",
-            description: "Phase type (e.g. extraction, validation, assembly).",
+            description:
+              "Compiled phase type, derived from the rail stage it came from (`rail_stage_id` joins back to `nodes[].node_id`); Source and Data Product stages produce no phase, and a validation checkpoint expands to one phase per gate.",
           },
           { name: "phases[].name", type: "string", description: "Phase display name." },
           {
@@ -3370,7 +3372,7 @@ Payment terms: Net 30`,
       {
         question: "Does this cost credits?",
         answer:
-          "Yes — each ingested document and each pipeline stage meters credits like a run started in the app; check `talonic_get_balance` first for large batches.",
+          "Yes — ingestion/OCR and extraction meter credits per document exactly as a run started in the app does; validation and delivery stages are free. Check `talonic_get_pricing` and `talonic_get_balance` before a large batch.",
       },
     ],
     mentions: [
@@ -3482,7 +3484,7 @@ Payment terms: Net 30`,
       {
         question: "How long does a run take?",
         answer:
-          "Seconds per document for extraction, plus validation and assembly stages; poll every 5–10 seconds and stop on completed or failed.",
+          "Seconds per document for the extraction stage, plus whatever validation, resolution, assembly or delivery stages the Spec's rail contains; poll every 5–10 seconds and stop on completed or failed.",
       },
     ],
     mentions: ["run status", "poll run", "pipeline progress", "run progress"],
