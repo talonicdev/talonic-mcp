@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
+
 ### Added
 
 - **Specs, Run and Ask tools (7 new, 36 public).** `talonic_list_specs` / `talonic_get_spec` read the workspace's configured pipelines; `talonic_run_spec` runs one over `document_ids` (`POST /v1/pipelines`) or `file_urls` (`POST /v1/run`) behind a single normalised RunEnvelope; `talonic_get_run` polls status + progress and `talonic_get_run_results` reads the rows; `talonic_ask` answers questions over the corpus with citations and verification (bounded wait) and `talonic_get_answer` polls long asks. Each has a ChatGPT card; documented on both docs surfaces; manifest and preflight at 36.
@@ -259,7 +261,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Note
 
-- Versions 0.1.40–0.1.44 were patch bumps from the docs-sync / dispatch-token pipeline verification burst and an env-gated debug-instrumentation pass (added in `3f7fb98`, removed in `4755142`) used to measure the Claude.ai connector argument cap. No public tool-surface changes.
+- Versions 0.1.40–0.1.44 were patch bumps from the docs-sync / dispatch-token pipeline verification burst. No public tool-surface changes.
+- Also added and removed within this release: an env-gated debug-instrumentation pass (`talonic_debug_echo` and two sibling tools, added in `3f7fb98`, removed in `4755142`) used to measure the Claude.ai connector argument cap ahead of the browser-handoff design above.
 
 ## [0.1.39] - 2026-05-19
 

@@ -1,6 +1,6 @@
 # Claude Connectors Directory — resubmission package (2026-09)
 
-Prepared 2026-09-22 against `@talonic/mcp` **0.1.79** — local `main` at commit `4f27996`, 50 commits ahead of `origin/main`. `origin/main` (and the live server) is currently 0.1.78 (verified: `curl -s https://mcp.talonic.com/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`, `npm view @talonic/mcp version` → `0.1.78`). **Publish before submitting**, so the portal's automatic scan reads all 36 tools, not 29. Portal: https://claude.ai/admin-settings/directory/submissions/new. Pre-submission checklist: https://claude.com/docs/connectors/building/review-criteria.
+Prepared 2026-09-22 against `@talonic/mcp` **0.1.79** — local `main`, unpublished; publish 0.1.79 first. `origin/main` (and the live server) is currently 0.1.78 (verified: `curl -s https://mcp.talonic.com/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`, `npm view @talonic/mcp version` → `0.1.78`). **Publish before submitting**, so the portal's automatic scan reads all 36 tools, not 29. Portal: https://claude.ai/admin-settings/directory/submissions/new. Pre-submission checklist: https://claude.com/docs/connectors/building/review-criteria.
 
 ## 0. Before you open the portal
 

@@ -174,7 +174,7 @@ export async function handleListAgentTools(
 
 const INVOKE_DESCRIPTION = [
   "Invoke ONE named tool from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
-  "READ-ONLY BY CONSTRUCTION: API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential, so this tool reads and never mutates workspace data.",
+  "READ-ONLY BY CONSTRUCTION: API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential, so through an API-key credential this tool reads and never mutates workspace data.",
   "Target API: Talonic agent tool registry — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
   "",
   "USE WHEN: talonic_list_agent_tools showed a tool with can_invoke: true that does what you need. Pass exactly the `args` its input_schema declares.",

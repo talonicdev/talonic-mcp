@@ -3579,7 +3579,7 @@ Payment terms: Net 30`,
     content: [
       {
         type: "paragraph",
-        text: "Invoke **one named tool** from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself: `query_data` for a read-only SQL `SELECT` over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text. Denied capabilities come back as an error naming the capability required; the platform re-checks every call. API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential.",
+        text: "Invoke **one named tool** from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself: `query_data` for a read-only SQL `SELECT` over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text. Denied capabilities come back as an error naming the capability required; the platform re-checks every call. API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential, so through an API-key credential this tool reads and never mutates workspace data.",
       },
       {
         type: "callout",

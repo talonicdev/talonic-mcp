@@ -144,6 +144,7 @@ Always run typecheck + test + format:check before any push.
 4. MCP Registry publish (`mcp-publisher`, GitHub OIDC), after waiting up to four minutes for npm to serve the new version (its replicas can lag the publish; the Registry validates against npm) and with three attempts. Soft step: a failure is a `::warning::` annotation, never a red run.
 5. GitHub Release (`gh release create`, idempotent).
 6. `repository_dispatch` → `talonicdev/website` and `talonicdev/platform` rebuild docs.
+7. **Manual, on the next commit:** promote CHANGELOG `[Unreleased]` → `## [<new version>] - <date>` (the changelog lock tolerates one unpromoted release, no more).
 
 **A push to `main` ships to npm and redeploys `mcp.talonic.com`.** Treat it as a release. Manual trigger: `gh workflow run publish.yml -r main`.
 

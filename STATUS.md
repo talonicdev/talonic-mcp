@@ -9,7 +9,7 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 ## TL;DR
 
-**Re-audited 2026-09-22.** `@talonic/mcp` **0.1.78** is live on npm, on the official MCP Registry (`io.github.talonicdev/talonic-mcp`, isLatest 0.1.78, published 2026-09-22T16:37:58Z), and on `mcp.talonic.com` (`/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`). Local `main` (`dc56b95`) is **44 commits ahead of `origin/main`**, unpublished — a push to `main` is a release and waits for Hamlet's go; the next push publishes **0.1.79**. Local main carries **36 public tools** (22 read-only, 14 write-capable; superadmin growth/admin tools stay hidden behind an access probe), one ChatGPT Apps SDK widget per tool (36/36), Apps SDK status/description metadata everywhere, User-Agent surface tagging on every outbound call, the Specs / Run / Ask tool set, the seven `talonic_*_decision_task` tools for External-mode Apps, docs on both surfaces for all 36 tools, a 36-tool ChatGPT submission manifest, and a preflight script that checks `tools/list` plus every widget template the way ChatGPT does (`npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK"). `npm test` — 858 tests / 60 files, green; `npm run format:check` clean; `npm run build` clean. Release history is complete and tag-accurate in `CHANGELOG.md` (0.1.53 → 0.1.78, plus everything recorded back to 0.1.3). The Claude.ai file-upload blocker that used to have its own banner at the top of this file was solved by `talonic_request_upload`, shipped in **0.1.45** (2026-05-27), with the poll-target alignment (poll for `completed`, not `uploaded`) landing in **0.1.48** (2026-05-28) — 0.1.46 and 0.1.47 were bump-only re-publishes with no code change; full record in `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
+**Re-audited 2026-09-22.** `@talonic/mcp` **0.1.78** is live on npm, on the official MCP Registry (`io.github.talonicdev/talonic-mcp`, isLatest 0.1.78, published 2026-09-22T16:37:58Z), and on `mcp.talonic.com` (`/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`). Local `main` is unpublished on `origin/main` (`git log origin/main..main`) — a push to `main` is a release and waits for Hamlet's go; the next push publishes **0.1.79**. Local main carries **36 public tools** (22 read-only, 14 write-capable; superadmin growth/admin tools stay hidden behind an access probe), one ChatGPT Apps SDK widget per tool (36/36), Apps SDK status/description metadata everywhere, User-Agent surface tagging on every outbound call, the Specs / Run / Ask tool set, the seven `talonic_*_decision_task` tools for External-mode Apps, docs on both surfaces for all 36 tools, a 36-tool ChatGPT submission manifest, and a preflight script that checks `tools/list` plus every widget template the way ChatGPT does (`npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK"). Tests, format and build all green — see Surfaces for the current count and the commit it was measured at. Release history is complete and tag-accurate in `CHANGELOG.md` (0.1.53 → 0.1.78, plus everything recorded back to 0.1.3). The Claude.ai file-upload blocker that used to have its own banner at the top of this file was solved by `talonic_request_upload`, shipped in **0.1.45** (2026-05-27), with the poll-target alignment (poll for `completed`, not `uploaded`) landing in **0.1.48** (2026-05-28) — 0.1.46 and 0.1.47 were bump-only re-publishes with no code change; full record in `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
 
 **Headline changes since the previous audit (2026-06-03):**
 
@@ -25,13 +25,13 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 | Item | State (2026-09-22) |
 | --- | --- |
-| Repo | local `main` (`dc56b95`), 44 commits ahead of `origin/main` (origin = 0.1.78); unpushed work = the 2026-09-22 housekeeping/widget-parity/Specs-Run-Ask program. A push is a release and waits for Hamlet's go. |
+| Repo | unpublished on local `main` (`git log origin/main..main`); origin = 0.1.78; unpushed work = the 2026-09-22 housekeeping/widget-parity/Specs-Run-Ask program. A push is a release and waits for Hamlet's go. |
 | package.json / server.json version | 0.1.78 (auto-bumps to 0.1.79 on the next push) |
 | npm published version | 0.1.78 |
 | Hosted endpoint | `https://mcp.talonic.com` serving 0.1.78; `/health` ok |
-| Tests | `npm test` — 858 tests / 60 files, green (verified 2026-09-22); `npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK" |
+| Tests | `npm test` — 864 tests / 60 files, green, measured at the fix-wave commit of 2026-09-22 (`npm test`); `npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK" |
 | Format check | clean (verified 2026-09-22) |
-| Typecheck | not re-run this audit (docs-only change; `npm test` and `npm run build` ran clean) |
+| Typecheck | green, measured at the fix-wave commit of 2026-09-22 (`npm run typecheck`) |
 | Build | clean (verified 2026-09-22) |
 | docs/sections.json | 50 total entries (36 tool entries + 14); maintained-but-dormant — nothing renders this mirror, but the publish workflow's docs-drift guard requires it to track `src/tools/**` |
 | Tools (local main) | 36 public (22 read-only, 14 write-capable): `talonic_extract`, `talonic_request_upload`, `talonic_to_markdown`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`, `talonic_list_fields`, `talonic_get_field`, `talonic_field_values`, `talonic_find_data`, `talonic_list_agent_tools`, `talonic_invoke_agent_tool`, `talonic_list_agent_tasks`, `talonic_get_agent_task`, `talonic_claim_agent_task`, `talonic_heartbeat_agent_task`, `talonic_submit_agent_task`, `talonic_list_specs`, `talonic_get_spec`, `talonic_run_spec`, `talonic_get_run`, `talonic_get_run_results`, `talonic_ask`, `talonic_get_answer`, `talonic_list_decision_tasks`, `talonic_claim_decision_task`, `talonic_read_decision_package`, `talonic_heartbeat_decision_task`, `talonic_submit_decision_task`, `talonic_release_decision_task`, `talonic_fail_decision_task` — plus 4 `talonic_growth_*` and 5 `talonic_admin_*` superadmin tools, registered only after an access-probe passes, hidden from normal keys and from public docs |
@@ -54,7 +54,7 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 | Item | State (2026-09-22) |
 | --- | --- |
-| Repo | local `main` (`3bc9f30`), 5 commits ahead of `origin/main`, unpushed — 36 MCP tool pages wired locally |
+| Repo | unpublished on local `main` (`git log origin/main..main`) — 36 MCP tool pages wired locally |
 | Dependency pins (`package.json`) | `@talonic/mcp` declared `^0.1.24` (lockfile-resolved / installed: **0.1.76**); `@talonic/node` declared `^0.1.11` (installed 0.1.24); `@talonic/docs` declared `^0.21.28` (installed 0.21.43) |
 | MCP tool pages | 36 wired locally; **22 render fully today** — as many as the installed 0.1.76 `@talonic/mcp` package knows about. The 14 newer pages (7 decision-task + 7 Specs/Run/Ask) render breadcrumbs/H1 only until the pin advances past their publish version. |
 | `/.well-known/mcp.json` | lists 22 tools live in production; 36 in the local, unpushed commit |
@@ -78,7 +78,7 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 ## Open items (2026-09-22)
 
-1. **Release 0.1.79** — one push of local `main` (`dc56b95`, 44 commits ahead) ships the 36-tool/36-widget surface, the Specs/Run/Ask and decision-task tool sets, and this housekeeping pass; needs Hamlet's go. Push order: talonic-mcp → CI publishes 0.1.79 → website's `@talonic/mcp` pin bumps → website push. Afterwards: reconnect the ChatGPT connector and walk `docs/chatgpt-apps-sdk/developer-mode-testing.md`'s 36-row card checklist; live-smoke `talonic_get_run_results` with `pipeline_id` **and** `run_id` together (the combined-scope query param is only mock-tested today).
+1. **Release 0.1.79** — one push of local `main` (unpublished on local `main`, `git log origin/main..main`) ships the 36-tool/36-widget surface, the Specs/Run/Ask and decision-task tool sets, and this housekeeping pass; needs Hamlet's go. Push order: talonic-mcp → CI publishes 0.1.79 → website's `@talonic/mcp` pin bumps → website push. Afterwards: reconnect the ChatGPT connector and walk `docs/chatgpt-apps-sdk/developer-mode-testing.md`'s 36-row card checklist; live-smoke `talonic_get_run_results` with `pipeline_id` **and** `run_id` together (the combined-scope query param is only mock-tested today); promote CHANGELOG `[Unreleased]` → `## [0.1.79] - <date>` in the next commit (the changelog lock tolerates one unpromoted release, no more).
 2. **Claude Connectors Directory** — resubmit through the portal using the package prepared in this release at `docs/claude-connectors-directory/` (test account + icon are Hamlet's inputs).
 3. **Cowork plugin submission** — decide; the install snippet and description already exist.
 4. **Python SDK publish** — PyPI Trusted Publisher config still pending (separate repo, not part of this release).
@@ -283,7 +283,7 @@ The historical follow-up lists below are kept as dated records.
 
 > Superseded by "Open items (2026-09-22)" above (the Claude directory process moved to Anthropic's portal); kept as the 2026-05 record.
 
-_None blocking._ The former #1 item — the Claude.ai file-upload cap — is **resolved and verified live** via the browser-handoff flow (`talonic_request_upload`); Resolved and shipped (talonic_request_upload 0.1.45, poll-target alignment 0.1.48; verified live 2026-06-03); current open items are in "Open items (2026-09-22)" above. Remaining work is optional polish only.
+_None blocking._ The former #1 item — the Claude.ai file-upload cap — is **resolved and shipped** via the browser-handoff flow (`talonic_request_upload` 0.1.45, poll-target alignment 0.1.48; verified live 2026-06-03); current open items are in "Open items (2026-09-22)" above. Remaining work is optional polish only.
 
 **Optional polish (non-blocking):**
 

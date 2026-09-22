@@ -28,39 +28,41 @@ and every extraction is auditable via a stable extraction ID.
 - "Show me my Talonic credit balance"
 - "Re-extract document doc_abc123 with my Contract schema"
 
-## Tool list (22)
+## Tool list (36)
 
-**Extraction & documents**
+Order matches `chatgpt-app-submission.json`'s `tools` object (the manifest's actual registration order, which does not follow the section headings below in a strict block — `talonic_get_balance` and `talonic_get_pricing`/`talonic_get_usage` are metering tools registered apart from each other, for example).
+
+**Documents & schemas**
 
 1. `talonic_extract` — structured data extraction with schema validation (widget-enabled)
 2. `talonic_request_upload` — browser-handoff upload: returns a link the user opens to drop a file (for hosted clients past the tool-arg size cap), plus a document_id to poll (widget-enabled)
 3. `talonic_to_markdown` — OCR-converted markdown for a document (ingests the file if not already in the workspace) (widget-enabled)
-4. `talonic_get_document` — fetch document metadata and processing status (widget-enabled)
+4. `talonic_save_schema` — save a schema for reuse (widget-enabled)
 5. `talonic_search` — search documents, fields, sources and schemas by content (widget-enabled)
 6. `talonic_filter` — filter documents by extracted field values (widget-enabled)
+7. `talonic_get_document` — fetch document metadata and processing status (widget-enabled)
+8. `talonic_list_schemas` — list saved schemas in the workspace (widget-enabled)
 
-**Schemas**
-
-7. `talonic_list_schemas` — list saved schemas in the workspace (widget-enabled)
-8. `talonic_save_schema` — save a schema for reuse (widget-enabled)
-
-**Metering**
+**Metering — balance**
 
 9. `talonic_get_balance` — workspace credit balance, tier, burn rate and projected runway (widget-enabled)
-10. `talonic_get_pricing` — per-unit credit pricing catalog for estimating cost before running work (widget-enabled)
-11. `talonic_get_usage` — credits consumed per function over a trailing window (widget-enabled)
 
 **Field Registry**
 
-12. `talonic_list_fields` — list Field Registry concepts with maturity, data type and synonyms (widget-enabled)
-13. `talonic_get_field` — one concept's definition, synonyms, occurrence stats and example values (widget-enabled)
-14. `talonic_field_values` — one concept's captured values across documents, with source provenance (widget-enabled)
-15. `talonic_find_data` — locate the fields, values, documents and passages behind a concept (widget-enabled)
+10. `talonic_list_fields` — list Field Registry concepts with maturity, data type and synonyms (widget-enabled)
+11. `talonic_get_field` — one concept's definition, synonyms, occurrence stats and example values (widget-enabled)
+12. `talonic_field_values` — one concept's captured values across documents, with source provenance (widget-enabled)
+13. `talonic_find_data` — locate the fields, values, documents and passages behind a concept (widget-enabled)
 
 **Platform agent tools**
 
-16. `talonic_list_agent_tools` — catalog of platform agent tools this credential may invoke (widget-enabled)
-17. `talonic_invoke_agent_tool` — run one read-only platform agent tool with caller-supplied arguments (widget-enabled)
+14. `talonic_list_agent_tools` — catalog of platform agent tools this credential may invoke (widget-enabled)
+15. `talonic_invoke_agent_tool` — run one read-only platform agent tool with caller-supplied arguments (widget-enabled)
+
+**Metering — pricing & usage**
+
+16. `talonic_get_pricing` — per-unit credit pricing catalog for estimating cost before running work (widget-enabled)
+17. `talonic_get_usage` — credits consumed per function over a trailing window (widget-enabled)
 
 **Agent tasks**
 
@@ -69,6 +71,29 @@ and every extraction is auditable via a stable extraction ID.
 20. `talonic_claim_agent_task` — take a time-limited lease on an available task (widget-enabled)
 21. `talonic_heartbeat_agent_task` — extend the lease on a task this agent already claimed (widget-enabled)
 22. `talonic_submit_agent_task` — submit declared outputs for a claimed task and resume the parked document (widget-enabled)
+
+**Specs & Runs**
+
+23. `talonic_list_specs` — list the workspace's Specs (configured pipelines) with version state and field/stage counts (widget-enabled)
+24. `talonic_get_spec` — one Spec's structure: schema, rail stages, compiled phases and fields (widget-enabled)
+25. `talonic_run_spec` — run a Spec over documents by id or public URL, in one call (widget-enabled)
+26. `talonic_get_run` — poll a Spec run's status and document/phase progress (widget-enabled)
+27. `talonic_get_run_results` — read a Spec run's structured rows, one per document (widget-enabled)
+
+**Ask**
+
+28. `talonic_ask` — ask a natural-language question over the workspace and get a cited, verified answer (widget-enabled)
+29. `talonic_get_answer` — poll an ask that was still processing when the wait ended (widget-enabled)
+
+**Decision tasks (External-mode Apps)**
+
+30. `talonic_list_decision_tasks` — list an External-mode app's decision-task inbox (widget-enabled)
+31. `talonic_claim_decision_task` — claim an available decision task and receive its output contract and input-package descriptor (widget-enabled)
+32. `talonic_read_decision_package` — read one page of a claimed task's frozen input package (widget-enabled)
+33. `talonic_heartbeat_decision_task` — extend the lease on a claimed decision task (widget-enabled)
+34. `talonic_submit_decision_task` — submit the decision for a claimed decision task; the run resumes (widget-enabled)
+35. `talonic_release_decision_task` — release a claimed decision task back to available without deciding it (widget-enabled)
+36. `talonic_fail_decision_task` — report a decision task undecidable; raises a Human Review and applies the app's fallback (widget-enabled)
 
 ## MCP server
 

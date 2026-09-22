@@ -62,10 +62,8 @@ mode enabled — that's outside what the local test suite can cover.
 - [ ] Tool descriptions contain no promotional language.
 - [ ] No extraneous fields beyond what each tool needs (audited at
       `src/tools/*.ts` — looks clean as of this plan).
-- [ ] `TALONIC_DEBUG_TOOLS` is NOT set in the production deploy — the debug
-      tools (`talonic_debug_echo`, etc.) must not be exposed to reviewers.
 
-## Post-release card checklist (22)
+## Post-release card checklist (36)
 
 Run after every deploy that changes the tool surface or widgets. Reconnect
 the connector first (ChatGPT caches `tools/list` at connect time). Prompts
@@ -96,3 +94,17 @@ show" is taken from `WIDGET_DESCRIPTIONS` in `src/widgets/types.ts`.
 | `talonic_claim_agent_task` | Are there any Talonic agent tasks waiting for me? If so, claim the first one, tell me what it needs, and submit an approval decision of 'approve' with a short note. | Lease card confirming the claim: execution epoch to keep, lease expiry, and the task's instructions and contract. | [ ] |
 | `talonic_heartbeat_agent_task` | Are there any Talonic agent tasks waiting for me? If so, claim the first one, tell me what it needs, and submit an approval decision of 'approve' with a short note. | Lease card confirming the lease was extended, with the new expiry and execution epoch. | [ ] |
 | `talonic_submit_agent_task` | Are there any Talonic agent tasks waiting for me? If so, claim the first one, tell me what it needs, and submit an approval decision of 'approve' with a short note. | Confirmation that the declared outputs were submitted and the parked document resumed its pipeline. | [ ] |
+| `talonic_list_specs` | Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table. | **Talonic Specs** card: table of the workspace's Specs (configured pipelines) with version state, field and stage counts, and last update. | [ ] |
+| `talonic_get_spec` | Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table. | **Talonic Spec** card: version state, the schema it materializes onto, the rail's stages in order, the compiled phases, and its fields. | [ ] |
+| `talonic_run_spec` | Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table. | **Talonic Run Started** card: run kind, input count, spec/pipeline/run ids, status, and how to poll it. | [ ] |
+| `talonic_get_run` | Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table. | **Talonic Run Progress** card: normalised status, documents completed / total / errors, and per-phase progress when available. | [ ] |
+| `talonic_get_run_results` | Run my Purchase Order pipeline on the two POs I uploaded yesterday and show me the resulting table. | **Talonic Run Results** card: one row per document with the Spec's fields, plus review holds and pagination. | [ ] |
+| `talonic_ask` | Which vendors invoiced us more than once in April, and what were the totals? | **Talonic Answer** card: the answer text, verification verdict, source citations, artifacts and credit usage. | [ ] |
+| `talonic_get_answer` | Which vendors invoiced us more than once in April, and what were the totals? | **Talonic Answer (polled)** card: the same cited answer with verification and citations, or a still-processing notice. | [ ] |
+| `talonic_list_decision_tasks` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Tasks** card: worklist of the app's decision tasks with status, run, epoch, lease expiry and SLA deadline. | [ ] |
+| `talonic_claim_decision_task` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Task Claimed** card: the lease and epoch, the output contract to satisfy, precedents, and the input-package descriptor with its source documents. | [ ] |
+| `talonic_read_decision_package` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Package** card: one page of the claimed task's frozen input package, the records to decide from, page position, and source documents on the first page. | [ ] |
+| `talonic_heartbeat_decision_task` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Task Lease** card confirming the lease was extended, with the new expiry and SLA deadline. | [ ] |
+| `talonic_submit_decision_task` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Submitted** card confirming the decision was submitted and verified; the run resumes. | [ ] |
+| `talonic_release_decision_task` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Task Released** card confirming the task was released back to available for another claimant. | [ ] |
+| `talonic_fail_decision_task` | Any decisions waiting for the Invoice Approval app? Claim the first one, show me the package, and approve it if the total is under 5,000. | **Talonic Decision Task Failed** card confirming the task was reported undecidable: a Human Review is raised and the app's fallback applies. | [ ] |
