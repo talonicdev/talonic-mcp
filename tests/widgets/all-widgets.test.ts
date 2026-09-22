@@ -69,11 +69,10 @@ describe("every widget resource is registered correctly", () => {
 })
 
 describe("widget coverage is complete", () => {
-  it("registers exactly one widget per tool (11 total)", () => {
+  it("declares 22 widget URIs (resources are locked per tool above)", () => {
+    expect(Object.values(WIDGET_URIS)).toHaveLength(22)
     const server = buildServer()
-    const widgetUris = Object.values(WIDGET_URIS)
-    expect(widgetUris).toHaveLength(11)
-    for (const uri of widgetUris) {
+    for (const [, uri] of TOOL_WIDGET_MAP) {
       expect(server._registeredResources[uri], `missing widget ${uri}`).toBeDefined()
     }
   })
