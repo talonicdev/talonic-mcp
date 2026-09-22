@@ -15,7 +15,10 @@ const PROBE = buildWidgetHtml({
       + '<div id="table">' + dataTable(payload.rows) + '</div>'
       + '<div id="tiles">' + kvTiles(payload.obj) + '</div>'
       + '<div id="tree">' + jsonTree(payload.tree) + '</div>'
-      + '<div id="flags">' + isFlat(payload.obj) + '|' + isFlat(payload.tree) + '|' + isRowArray(payload.rows) + '|' + isRowArray([1,2]) + '</div>';
+      + '<div id="flags">' + isFlat(payload.obj) + '|' + isFlat(payload.tree) + '|' + isRowArray(payload.rows) + '|' + isRowArray([1,2]) + '</div>'
+      + '<div id="wide">' + dataTable(payload.wide) + '</div>'
+      + '<div id="deep">' + jsonTree(payload.deep) + '</div>'
+      + '<div id="huge">' + jsonTree(payload.huge) + '</div>';
   `,
 })
 
@@ -29,6 +32,13 @@ describe("shared widget helpers", () => {
     rows: Array.from({ length: 60 }, (_, i) => ({ a: i, b: `row ${i}`, nested: { x: i } })),
     obj: { alpha: 1, beta: "two", gamma: null, delta: { deep: true } },
     tree: { level1: { level2: { level3: [1, 2, { level5: "leaf" }] } }, scalar: 42 },
+    // 15 columns: exercises dataTable's >12-column cap.
+    wide: [Object.fromEntries(Array.from({ length: 15 }, (_, i) => [`c${i}`, i]))],
+    // 8 levels of object nesting: exercises jsonTree's depth>=6 fallback.
+    deep: { lvl1: { lvl2: { lvl3: { lvl4: { lvl5: { lvl6: { lvl7: { lvl8: "leaf" } } } } } } } },
+    // 450 nested-object children: each recursive jsonTree call consumes the
+    // shared 400-node budget, so the tail gets cut off with the "…" marker.
+    huge: Object.fromEntries(Array.from({ length: 450 }, (_, i) => [`k${i}`, { leaf: i }])),
   })
   const q = (sel: string) => r.document.querySelector(sel)!
 
@@ -73,6 +83,35 @@ describe("shared widget helpers", () => {
 
   it("isFlat / isRowArray classify shapes", () => {
     expect(q("#flags").textContent).toBe("false|false|true|false")
+  })
+
+  it("dataTable caps columns at 12 with a '+N more columns' footer", () => {
+    expect(q("#wide thead").querySelectorAll("th")).toHaveLength(12)
+    expect(q("#wide").textContent).toContain("+3 more columns")
+  })
+
+  it("jsonTree truncates at depth 6 with a clamped-JSON fallback and no deeper nesting", () => {
+    const trees = q("#deep").querySelectorAll("details.tree")
+    expect(trees).toHaveLength(6)
+    const innermost = trees[trees.length - 1]!
+    const fallback = innermost.lastElementChild!
+    expect(fallback.className).toBe("muted")
+    expect(fallback.textContent).toBe('{"lvl7":{"lvl8":"leaf"}}')
+    // A 7-deep chain of the same compound selector only matches elements with
+    // >=6 ".tree" ancestors, i.e. a 7th nesting level. None exists.
+    expect(
+      q("#deep").querySelectorAll(
+        "details.tree details.tree details.tree details.tree details.tree details.tree details.tree",
+      ),
+    ).toHaveLength(0)
+  })
+
+  it("jsonTree stops at the 400-node budget and marks the cutoff", () => {
+    const markers = Array.from(q("#huge").querySelectorAll(".muted")).filter(
+      (el) => el.textContent === "…",
+    )
+    expect(markers.length).toBeGreaterThan(0)
+    expect(q("#huge").querySelectorAll(".node").length).toBeLessThan(450)
   })
 })
 
