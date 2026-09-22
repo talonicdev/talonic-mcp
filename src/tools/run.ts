@@ -21,7 +21,8 @@ export type RunStatus = "processing" | "completed" | "failed"
 /** Fold the two routes' status vocabularies into processing | completed | failed. */
 export function mapRunStatus(raw: unknown): RunStatus {
   if (raw === "completed") return "completed"
-  if (raw === "failed" || raw === "error" || raw === "cancelled") return "failed"
+  if (raw === "failed" || raw === "error" || raw === "cancelled" || raw === "canceled")
+    return "failed"
   return "processing"
 }
 
@@ -31,7 +32,7 @@ const RUN_DESCRIPTION = [
   "USE WHEN: the user wants to 'run the invoice pipeline on these documents', process files through their Spec, or produce the Spec's structured rows.",
   "NOT FOR: one-off extraction with an ad-hoc schema (talonic_extract), or checking progress (talonic_get_run) / reading rows (talonic_get_run_results).",
   "ARGS: `spec_id` (talonic_list_specs); exactly one of `document_ids[]` (1–500) or `file_urls[]` (1–20, https); optional `name`, `pipeline_mode` (`new` default | `append` to the Spec's existing pipeline); `batch_id` and flat `metadata` only with file_urls.",
-  "RETURNS: RunEnvelope { run_kind ('pipeline'|'run'), run_id, pipeline_id, spec_id, status ('processing'|'completed'|'failed'), raw_status, input_count, documents?, message?, links }. Then poll talonic_get_run every 5–10 s with the pipeline_id (or run_id) until status is completed/failed, then talonic_get_run_results.",
+  "RETURNS: RunEnvelope { run_kind ('pipeline'|'run'), run_id, pipeline_id, spec_id, status ('processing'|'completed'|'failed'), raw_status, input_count, documents?, message?, links }. Then poll talonic_get_run with the `pipeline_id` when run_kind is 'pipeline', or with the `run_id` when it is 'run', every 5–10 s until status is completed/failed, then talonic_get_run_results.",
 ].join("\n")
 
 const GET_RUN_DESCRIPTION = [
@@ -48,7 +49,7 @@ const RESULTS_DESCRIPTION = [
   "",
   "USE WHEN: talonic_get_run reports `completed` (partial rows are also readable while `processing`).",
   "NOT FOR: progress (talonic_get_run) or per-field provenance of a single value (include: ['provenance'] here, or talonic_field_values).",
-  "ARGS: exactly one of `pipeline_id` or `run_id`; optional `document_id` (one document), `include` (['cells','provenance'] — heavier payload), `limit` (1–200, default 50), `cursor`.",
+  "ARGS: exactly one of `pipeline_id` (run_kind 'pipeline', optionally with the envelope's `run_id` to scope to that submission) or `run_id` alone (run_kind 'run'); optional `document_id` (one document), `include` (['cells','provenance'] — heavier payload), `limit` (1–200, default 50), `cursor`.",
   "RETURNS: { run_kind, status, columns[] of { field_key, display_name, data_type }, data[] of { document_id, filename, record_id, status ('complete'|'partial'|'error'|'processing'), completed_at, fields { field_key: value }, cells?, provenance? }, pagination, pending_review_count, links }.",
 ].join("\n")
 
@@ -119,6 +120,12 @@ export interface RunRefArgs {
   pipeline_id?: string
 }
 
+/**
+ * Unlike `RunRefArgs` elsewhere, `pipeline_id` and `run_id` are not mutually
+ * exclusive here: `pipeline_id` alone (or with `run_id`) reads the pipelines
+ * results route, `run_id` alone reads the run results route, and `run_id`
+ * accompanying `pipeline_id` scopes the pipeline's results to one submission.
+ */
 export interface RunResultsArgs extends RunRefArgs {
   document_id?: string
   include?: Array<"cells" | "provenance">
@@ -319,22 +326,26 @@ export async function handleGetRunResults(
   baseUrl: string | undefined,
   args: RunResultsArgs,
 ): Promise<ToolResult> {
-  const ref = pickRef(args)
-  if (!ref) return validationError("provide exactly one of run_id or pipeline_id.")
+  const hasPipe = typeof args.pipeline_id === "string" && args.pipeline_id.length > 0
+  const hasRun = typeof args.run_id === "string" && args.run_id.length > 0
+  if (!hasPipe && !hasRun) return validationError("provide exactly one of run_id or pipeline_id.")
   return runTool(async () => {
+    const kind: "pipeline" | "run" = hasPipe ? "pipeline" : "run"
     const params: QueryParams = {
-      ...(ref.kind === "pipeline" ? { view: "documents" } : {}),
+      ...(kind === "pipeline"
+        ? { view: "documents", run_id: hasRun ? args.run_id : undefined }
+        : {}),
       document_id: args.document_id,
       include: args.include?.length ? args.include.join(",") : undefined,
       limit: args.limit,
       cursor: args.cursor,
     }
     const path =
-      ref.kind === "run"
-        ? `/v1/run/${encodeURIComponent(ref.id)}/results`
-        : `/v1/pipelines/${encodeURIComponent(ref.id)}/results`
+      kind === "run"
+        ? `/v1/run/${encodeURIComponent(args.run_id as string)}/results`
+        : `/v1/pipelines/${encodeURIComponent(args.pipeline_id as string)}/results`
     const body = await apiJson<Record<string, unknown>>(getToken, baseUrl, "GET", path, { params })
-    return { run_kind: ref.kind, ...body }
+    return { run_kind: kind, ...body }
   })
 }
 

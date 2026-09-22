@@ -64,7 +64,7 @@ export async function apiJson<T = unknown>(
   baseUrl: string | undefined,
   method: HttpMethod,
   path: string,
-  opts: { params?: QueryParams; body?: unknown } = {},
+  opts: { params?: QueryParams; body?: unknown; signal?: AbortSignal } = {},
 ): Promise<T> {
   const url = buildUrl(baseUrl, path, opts.params)
   const res = await resolveFetch(getToken)(url, {
@@ -75,6 +75,7 @@ export async function apiJson<T = unknown>(
       ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
     },
     ...(opts.body !== undefined ? { body: JSON.stringify(opts.body) } : {}),
+    ...(opts.signal ? { signal: opts.signal } : {}),
   })
   if (!res.ok) {
     const text = await res.text().catch(() => "")
@@ -95,6 +96,7 @@ export async function apiForm<T = unknown>(
   baseUrl: string | undefined,
   path: string,
   fields: FormFields,
+  opts: { signal?: AbortSignal } = {},
 ): Promise<T> {
   const form = new FormData()
   for (const [key, value] of Object.entries(fields)) {
@@ -106,6 +108,7 @@ export async function apiForm<T = unknown>(
     method: "POST",
     headers: { Authorization: `Bearer ${getToken()}`, Accept: "application/json" },
     body: form,
+    ...(opts.signal ? { signal: opts.signal } : {}),
   })
   if (!res.ok) {
     const text = await res.text().catch(() => "")

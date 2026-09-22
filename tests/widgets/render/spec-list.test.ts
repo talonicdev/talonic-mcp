@@ -23,6 +23,13 @@ describe("spec-list widget", () => {
     )
   })
 
+  it("shows the empty state for a non-object payload", () => {
+    expect(renderWidget(getSpecListWidgetHtml(), "garbage").text).toBe(
+      "No Specs in this workspace.",
+    )
+    expect(renderWidget(getSpecListWidgetHtml(), 42).text).toBe("No Specs in this workspace.")
+  })
+
   it("survives a malformed payload", () => {
     expect(
       renderWidget(getSpecListWidgetHtml(), {

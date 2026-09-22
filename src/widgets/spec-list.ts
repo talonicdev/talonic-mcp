@@ -12,6 +12,7 @@ export function getSpecListWidgetHtml(): string {
 }
 
 const RENDER_BODY = `
+    if (!payload || typeof payload !== "object") { empty("No Specs in this workspace."); return; }
     var rows = Array.isArray(payload.data) ? payload.data : [];
     var pg = payload.pagination && typeof payload.pagination === "object" ? payload.pagination : {};
     if (!rows.length) { empty("No Specs in this workspace."); return; }

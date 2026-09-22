@@ -86,4 +86,8 @@ describe("tool descriptions are tight and decision-oriented", () => {
     expect(d["talonic_filter"]).toContain("TEXT FILTERS")
     expect(d["talonic_filter"]).toContain("warnings[]")
   })
+
+  it("get_run_results carries the run_kind polling rule (review F-B)", () => {
+    expect(d["talonic_get_run_results"]).toContain("run_kind")
+  })
 })

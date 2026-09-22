@@ -15,10 +15,12 @@ const RENDER_BODY = `
     function tone(s) { return s === "completed" ? "good" : s === "failed" ? "bad" : "info"; }
     var status = typeof payload.status === "string" ? payload.status : "processing";
     var pr = payload.progress && typeof payload.progress === "object" ? payload.progress : {};
-    var total = typeof pr.total_documents === "number" ? pr.total_documents : (typeof payload.input_count === "number" ? payload.input_count : 0);
-    var done = typeof pr.completed_documents === "number" ? pr.completed_documents : 0;
-    var errs = typeof pr.error_documents === "number" ? pr.error_documents : 0;
-    var pct = total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : (status === "completed" ? 100 : 0);
+    var total = typeof pr.total_documents === "number" ? pr.total_documents : null;
+    var done = typeof pr.completed_documents === "number" ? pr.completed_documents : null;
+    var errs = typeof pr.error_documents === "number" ? pr.error_documents : null;
+    var pct = total == null ? 0 : (total > 0 ? Math.max(0, Math.min(100, Math.round(((done || 0) / total) * 100))) : (status === "completed" ? 100 : 0));
+    var totalText = total == null ? "—" : String(total);
+    var doneText = done == null ? "—" : String(done);
     var phases = Array.isArray(pr.phases) ? pr.phases : [];
     var docs = Array.isArray(payload.documents) ? payload.documents : [];
     var pending = Array.isArray(pr.finalization_pending) ? pr.finalization_pending : [];
@@ -31,7 +33,7 @@ const RENDER_BODY = `
     root.innerHTML = ''
       + '<div class="header"><div><div class="title">' + esc(payload.name || "Spec run") + '</div><div class="subtitle">' + esc(payload.run_kind === "run" ? "run " + shortId(payload.run_id) : "pipeline " + shortId(payload.pipeline_id)) + (payload.raw_status && payload.raw_status !== status ? ' · ' + esc(payload.raw_status) : "") + '</div></div>'
       + '<div>' + chip(status, tone(status)) + '</div></div>'
-      + '<div class="progress"><span class="bar ' + (errs ? "warn" : "") + '"><span style="width:' + pct + '%"></span></span><span class="val">' + done + ' of ' + total + ' documents</span>' + (errs ? '<span class="muted small">· ' + errs + ' error' + (errs === 1 ? "" : "s") + '</span>' : "") + '</div>'
+      + '<div class="progress"><span class="bar ' + (errs ? "warn" : "") + '"><span style="width:' + pct + '%"></span></span><span class="val">' + doneText + ' of ' + totalText + ' documents</span>' + (errs ? '<span class="muted small">· ' + errs + ' error' + (errs === 1 ? "" : "s") + '</span>' : "") + '</div>'
       + (pending.length ? '<div class="muted small" style="margin-top:6px">Finalizing: ' + esc(pending.join(", ")) + '</div>' : "")
       + (payload.error_message ? '<div class="small" style="margin-top:8px;color:var(--bad)">' + esc(payload.error_message) + '</div>' : "")
       + phaseHtml + docHtml;

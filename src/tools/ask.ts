@@ -118,10 +118,10 @@ export async function handleAsk(
   }
   const sleep = deps.sleep ?? defaultSleep
   const now = deps.now ?? Date.now
-  const waitS = Math.max(
-    0,
-    Math.min(ASK_MAX_WAIT_S, Math.floor(args.wait_seconds ?? ASK_DEFAULT_WAIT_S)),
-  )
+  const requestedWaitS = Number.isFinite(args.wait_seconds)
+    ? (args.wait_seconds as number)
+    : ASK_DEFAULT_WAIT_S
+  const waitS = Math.max(0, Math.min(ASK_MAX_WAIT_S, Math.floor(requestedWaitS)))
   return runTool(async () => {
     const created = await apiJson<AskCreateResponse>(getToken, baseUrl, "POST", "/v1/ask", {
       body: {
@@ -130,12 +130,16 @@ export async function handleAsk(
         ...(args.conversation_id ? { conversation_id: args.conversation_id } : {}),
         ...(args.output_format ? { output_format: args.output_format } : {}),
       },
+      signal: AbortSignal.timeout(15000),
     })
     const pollPath = `/v1/ask/${encodeURIComponent(created.ask_id)}`
     const start = now()
     const deadline = start + waitS * 1000
     for (;;) {
-      const body = await apiJson<AskPollResponse>(getToken, baseUrl, "GET", pollPath)
+      const pollTimeoutMs = Math.max(1000, Math.min(15000, deadline - now()))
+      const body = await apiJson<AskPollResponse>(getToken, baseUrl, "GET", pollPath, {
+        signal: AbortSignal.timeout(pollTimeoutMs),
+      })
       const t = now()
       if (body.status !== "processing" || t >= deadline) {
         return { ...withHint(body), ask_id: body.ask_id ?? created.ask_id, waited_ms: t - start }
@@ -158,7 +162,7 @@ export async function handleGetAnswer(
       "GET",
       `/v1/ask/${encodeURIComponent(args.ask_id)}`,
     )
-    return withHint(body)
+    return { ...withHint(body), ask_id: body.ask_id ?? args.ask_id }
   })
 }
 

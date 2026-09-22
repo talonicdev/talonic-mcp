@@ -35,6 +35,7 @@ describe("mapRunStatus", () => {
     ["failed", "failed"],
     ["error", "failed"],
     ["cancelled", "failed"],
+    ["canceled", "failed"],
     ["active", "processing"],
     ["running", "processing"],
     ["finalizing", "processing"],
@@ -386,5 +387,32 @@ describe("talonic_get_run_results", () => {
   it("rejects both ids missing", async () => {
     const res = await handleGetRunResults(getToken, undefined, {} as any)
     expect((res as any).isError).toBe(true)
+  })
+
+  it("pipeline_id + run_id -> GET /v1/pipelines/{id}/results?view=documents&run_id=... scoped to one submission", async () => {
+    const calls = stubFetch([
+      [
+        `/v1/pipelines/${PIPE}/results`,
+        {
+          pipeline_id: PIPE,
+          run_id: RUN,
+          spec_id: SPEC,
+          status: "completed",
+          view: "documents",
+          columns: [],
+          data: [],
+          pagination: { total: 0, limit: 50, has_more: false, next_cursor: null },
+          pending_review_count: 0,
+          links: {},
+        },
+      ],
+    ])
+    const body = parsed(
+      await handleGetRunResults(getToken, undefined, { pipeline_id: PIPE, run_id: RUN }),
+    )
+    expect(calls[0].url).toBe(
+      `https://api.talonic.com/v1/pipelines/${PIPE}/results?view=documents&run_id=${RUN}`,
+    )
+    expect(body.run_kind).toBe("pipeline")
   })
 })

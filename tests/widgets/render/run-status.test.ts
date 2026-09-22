@@ -44,6 +44,17 @@ describe("run-status widget", () => {
     expect(failed.text).toContain("Spec has no composed rail")
   })
 
+  it("renders unknown counters as em dashes, not zeroes", () => {
+    const r = renderWidget(getRunStatusWidgetHtml(), {
+      run_kind: "pipeline",
+      pipeline_id: "p1pe0001-0000-4000-8000-000000000001",
+      status: "processing",
+      progress: { total_documents: null, completed_documents: null, error_documents: null },
+    })
+    expect(r.text).toContain("— of — documents")
+    expect(r.document.querySelector(".bar span")?.getAttribute("style")).toContain("width:0%")
+  })
+
   it("empty and malformed payloads", () => {
     expect(renderWidget(getRunStatusWidgetHtml(), {}).text).toBe("No run to show.")
     expect(

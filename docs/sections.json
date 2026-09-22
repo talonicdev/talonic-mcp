@@ -4344,7 +4344,7 @@
     "content": [
       {
         "type": "paragraph",
-        "text": "Run a Spec — the customer's configured pipeline — over a set of documents in one call. Provide exactly one of `document_ids` (documents already in the workspace) or `file_urls` (public https files, max 20 — Talonic ingests them first). The call returns a RunEnvelope that normalizes two different backends (`/v1/pipelines` for `document_ids`, `/v1/run` for `file_urls`) into one shape, so the agent never has to know which route ran. Running a Spec consumes credits."
+        "text": "Run a Spec — the customer's configured pipeline — over a set of documents in one call. Provide exactly one of `document_ids` (documents already in the workspace) or `file_urls` (public https files, max 20 — Talonic ingests them first). The call returns a RunEnvelope that normalizes two different backends (`/v1/pipelines` for `document_ids`, `/v1/run` for `file_urls`) into one shape, so the agent never has to know which route ran — only which id to poll with: poll `talonic_get_run` with `pipeline_id` when `run_kind` is `pipeline`, or with `run_id` when it is `run`. Running a Spec consumes credits."
       },
       {
         "type": "callout",
@@ -4457,6 +4457,11 @@
             "description": "The Spec that ran."
           },
           {
+            "name": "spec_name",
+            "type": "string|null",
+            "description": "The Spec's display name, when the backend returned one; null otherwise."
+          },
+          {
             "name": "status",
             "type": "string",
             "description": "`processing`, `completed` or `failed`, normalized across both backends."
@@ -4472,9 +4477,24 @@
             "description": "Number of documents or URLs submitted."
           },
           {
+            "name": "enqueued_documents",
+            "type": "number|null",
+            "description": "Documents enqueued for processing on the `document_ids` route; absent on the `file_urls` route."
+          },
+          {
+            "name": "appended",
+            "type": "boolean",
+            "description": "Whether this run appended to the Spec's existing pipeline (`pipeline_mode: 'append'`); present on the `document_ids` route only."
+          },
+          {
             "name": "documents[]",
             "type": "array",
             "description": "Per-document detail, present on the `file_urls` route."
+          },
+          {
+            "name": "message",
+            "type": "string|null",
+            "description": "Informational message from the API, e.g. 'Pipeline created and queued for processing.'; null when not provided."
           },
           {
             "name": "links",
@@ -4522,7 +4542,7 @@
     "content": [
       {
         "type": "paragraph",
-        "text": "Poll a Spec run started by `talonic_run_spec`: a normalized `status`, document-level progress, and — for pipeline runs — per-phase progress. Pass exactly one of `run_id` or `pipeline_id`, whichever the RunEnvelope returned."
+        "text": "Poll a Spec run started by `talonic_run_spec`: a normalized `status`, document-level progress, and — for pipeline runs — per-phase progress. Pass exactly one of `run_id` or `pipeline_id` — poll with `pipeline_id` when `run_kind` is `pipeline`, or with `run_id` when it is `run`."
       },
       {
         "type": "heading",
@@ -4697,12 +4717,12 @@
           {
             "name": "run_id",
             "type": "string",
-            "description": "Provide exactly one of `run_id` or `pipeline_id`."
+            "description": "From a `run_kind: 'run'` envelope, alone — or accompanying `pipeline_id` to scope that pipeline's results to one submission."
           },
           {
             "name": "pipeline_id",
             "type": "string",
-            "description": "Provide exactly one of `run_id` or `pipeline_id`."
+            "description": "From a `run_kind: 'pipeline'` envelope. Optionally pass `run_id` alongside it to scope results to one submission within the pipeline."
           },
           {
             "name": "document_id",

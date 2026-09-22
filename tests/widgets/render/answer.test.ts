@@ -62,6 +62,17 @@ describe("answer widgets", () => {
     ).toBeGreaterThan(0)
   })
 
+  it("never renders a javascript: artifact link as a button", () => {
+    const r = renderWidget(getAnswerWidgetHtml(), {
+      ask_id: "a",
+      status: "completed",
+      answer: "x",
+      artifacts: [{ type: "table", id: "art-1", label: "Bad link", link: "javascript:alert(1)" }],
+    })
+    expect(r.text).toContain("Bad link")
+    expect(r.document.querySelector("a.btn")).toBeNull()
+  })
+
   it("the two templates differ only in headline", () => {
     const a = getAnswerWidgetHtml().replace('"Answer"', "X").replace("Talonic — Answer", "T")
     const b = getAnswerPolledWidgetHtml()

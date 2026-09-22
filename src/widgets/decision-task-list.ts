@@ -9,6 +9,7 @@ export function getDecisionTaskListWidgetHtml(): string {
 const RENDER_BODY =
   DECISION_JS +
   `
+    if (!payload || typeof payload !== "object") { empty("No decision tasks for this app."); return; }
     var rows = Array.isArray(payload.data) ? payload.data : [];
     var pg = payload.pagination && typeof payload.pagination === "object" ? payload.pagination : {};
     if (!rows.length) { empty("No decision tasks for this app."); return; }

@@ -6,6 +6,7 @@ export function getRunResultsWidgetHtml(): string {
 }
 
 const RENDER_BODY = `
+    if (!payload || typeof payload !== "object") { empty("No result rows yet."); return; }
     var cols = Array.isArray(payload.columns) ? payload.columns.filter(function (c) { return c && typeof c === "object"; }) : [];
     var rows = Array.isArray(payload.data) ? payload.data : [];
     var pg = payload.pagination && typeof payload.pagination === "object" ? payload.pagination : {};

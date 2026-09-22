@@ -70,6 +70,16 @@ describe("agent-tool-result widget", () => {
     expect(oneKey.text).toContain("1 key")
   })
 
+  it("never renders a javascript: artifact link as a button", () => {
+    const r = renderWidget(getAgentToolResultWidgetHtml(), {
+      tool: "query_data",
+      result: { rows: 1 },
+      artifacts: [{ type: "table", id: "art-1", label: "Bad link", link: "javascript:alert(1)" }],
+    })
+    expect(r.text).toContain("Bad link")
+    expect(r.document.querySelector("a.btn")).toBeNull()
+  })
+
   it("survives a malformed payload", () => {
     const r = renderWidget(getAgentToolResultWidgetHtml(), {
       tool: 12345,

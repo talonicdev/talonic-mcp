@@ -22,6 +22,7 @@ describe("run-results widget", () => {
       "No result rows yet.",
     )
     expect(renderWidget(getRunResultsWidgetHtml(), {}).text).toBe("No result rows yet.")
+    expect(renderWidget(getRunResultsWidgetHtml(), "garbage").text).toBe("No result rows yet.")
     expect(
       renderWidget(getRunResultsWidgetHtml(), {
         columns: "x",

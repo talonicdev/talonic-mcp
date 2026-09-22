@@ -25,6 +25,12 @@ describe("decision-task-list widget", () => {
     )
   })
 
+  it("shows the empty state for a non-object payload", () => {
+    expect(renderWidget(getDecisionTaskListWidgetHtml(), "garbage").text).toBe(
+      "No decision tasks for this app.",
+    )
+  })
+
   it("survives malformed rows", () => {
     const r = renderWidget(getDecisionTaskListWidgetHtml(), {
       data: [null, "x", { status: "released" }],

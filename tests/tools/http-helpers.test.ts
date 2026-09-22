@@ -63,6 +63,16 @@ describe("apiJson method union", () => {
     expect((fetchFn.mock.calls[0][1] as RequestInit).method).toBe("PATCH")
     expect((fetchFn.mock.calls[1][1] as RequestInit).method).toBe("DELETE")
   })
+
+  it("forwards an AbortSignal to the fetch init", async () => {
+    const fetchFn = vi.fn(
+      async () => new Response("{}", { headers: { "content-type": "application/json" } }),
+    )
+    vi.stubGlobal("fetch", fetchFn)
+    const controller = new AbortController()
+    await apiJson(getToken, undefined, "GET", "/v1/x", { signal: controller.signal })
+    expect((fetchFn.mock.calls[0][1] as RequestInit).signal).toBe(controller.signal)
+  })
 })
 
 describe("sleep", () => {

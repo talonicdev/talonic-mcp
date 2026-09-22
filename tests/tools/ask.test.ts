@@ -125,6 +125,50 @@ describe("talonic_ask", () => {
     expect(parsed(res).status).toBe("processing")
   })
 
+  it("clamps wait_seconds above the max, bounding waited_ms and the GET count, with a signal on every call", async () => {
+    const calls = stubSequence([PROCESSING])
+    let t = 0
+    const res = await handleAsk(
+      getToken,
+      undefined,
+      { question: "q", wait_seconds: 999 },
+      {
+        sleep: async (ms) => {
+          t += ms
+        },
+        now: () => t,
+      },
+    )
+    const body = parsed(res)
+    expect(body.status).toBe("processing")
+    expect(body.waited_ms).toBeLessThanOrEqual(55000)
+    const gets = calls.filter((c) => c.init.method !== "POST")
+    expect(gets.length).toBeLessThanOrEqual(29)
+    expect(calls[0].init.signal).toBeInstanceOf(AbortSignal)
+    for (const c of gets) expect(c.init.signal).toBeInstanceOf(AbortSignal)
+  })
+
+  it("wait_seconds: NaN falls back to the default wait instead of NaN deadline math", async () => {
+    const calls = stubSequence([PROCESSING])
+    let t = 0
+    const res = await handleAsk(
+      getToken,
+      undefined,
+      { question: "q", wait_seconds: NaN },
+      {
+        sleep: async (ms) => {
+          t += ms
+        },
+        now: () => t,
+      },
+    )
+    const body = parsed(res)
+    expect(body.status).toBe("processing")
+    expect(body.waited_ms).toBeGreaterThan(0)
+    expect(body.waited_ms).toBeLessThanOrEqual(45000)
+    expect(calls.filter((c) => c.init.method !== "POST").length).toBeGreaterThan(0)
+  }, 2000)
+
   it("clamps wait_seconds above the maximum and returns an error envelope on API failure", async () => {
     vi.stubGlobal(
       "fetch",
@@ -162,5 +206,16 @@ describe("talonic_get_answer", () => {
     const second = parsed(await handleGetAnswer(getToken, undefined, { ask_id: ASK }))
     expect(second.status).toBe("completed")
     expect(second.poll_hint).toBeUndefined()
+  })
+
+  it("backfills ask_id from the request args when the body omits it", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ status: "processing", conversation_id: CONV })),
+    )
+    const body = parsed(await handleGetAnswer(getToken, undefined, { ask_id: ASK }))
+    expect(body.ask_id).toBe(ASK)
+    expect(body.status).toBe("processing")
+    expect(body.conversation_id).toBe(CONV)
   })
 })
