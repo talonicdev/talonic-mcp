@@ -66,6 +66,8 @@ describe("apiJson method union", () => {
 })
 
 describe("sleep", () => {
+  afterEach(() => vi.useRealTimers())
+
   it("resolves after the given delay", async () => {
     vi.useFakeTimers()
     const p = sleep(500)
