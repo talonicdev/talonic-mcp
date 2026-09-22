@@ -1,0 +1,7 @@
+{
+  "tool": "describe_data",
+  "result": {
+    "tables": [{ "name": "invoices", "columns": [{ "name": "vendor", "type": "text" }, { "name": "total", "type": "numeric" }] }],
+    "row_count": 5549
+  }
+}

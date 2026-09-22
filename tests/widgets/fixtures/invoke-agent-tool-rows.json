@@ -1,0 +1,11 @@
+{
+  "tool": "query_data",
+  "result": [
+    { "vendor": "Musterfirma AG", "invoice_count": 12, "total": 14890.5 },
+    { "vendor": "Beispiel GmbH", "invoice_count": 3, "total": 2100 }
+  ],
+  "citations": [
+    { "quote": "Total amount due: 1,299.00 EUR", "document_id": "d0c00001-0000-4000-8000-000000000001", "filename": "invoice-0421.pdf" }
+  ],
+  "artifacts": [{ "type": "table", "id": "art-1", "label": "Vendor totals", "link": "https://app.talonic.com/artifacts/art-1" }]
+}

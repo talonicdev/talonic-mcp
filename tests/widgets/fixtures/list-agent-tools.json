@@ -1,0 +1,10 @@
+{
+  "tools": [
+    { "name": "workspace_overview", "description": "Get a high-level count of what exists in this workspace: schemas, documents, pipelines, and extracted data cells.", "impact": "read", "capability": "data.read", "can_invoke": true },
+    { "name": "query_data", "description": "Run a read-only SQL SELECT over the extracted data.", "impact": "read", "capability": "data.read", "can_invoke": true },
+    { "name": "spec2_put_draft", "description": "Save a Spec draft.", "impact": "draft_mutation", "capability": "spec.author", "can_invoke": false },
+    { "name": "run_spec_pipeline", "description": "Run a Spec as a pipeline over documents.", "impact": "live_mutation", "capability": "pipeline.run", "can_invoke": false }
+  ],
+  "invocable_count": 2,
+  "totalCount": 69
+}
