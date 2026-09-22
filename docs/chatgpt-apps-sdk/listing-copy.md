@@ -28,17 +28,47 @@ and every extraction is auditable via a stable extraction ID.
 - "Show me my Talonic credit balance"
 - "Re-extract document doc_abc123 with my Contract schema"
 
-## Tool list (9)
+## Tool list (22)
+
+**Extraction & documents**
 
 1. `talonic_extract` — structured data extraction with schema validation (widget-enabled)
-2. `talonic_search` — search documents by content
-3. `talonic_filter` — filter documents by extracted field values
-4. `talonic_get_document` — fetch document metadata
-5. `talonic_to_markdown` — OCR-converted markdown for a document (ingests the file if not already in the workspace)
-6. `talonic_list_schemas` — list saved schemas in the workspace
-7. `talonic_save_schema` — save a schema for reuse
-8. `talonic_get_balance` — workspace credit balance
-9. `talonic_request_upload` — browser-handoff upload: returns a link the user opens to drop a file (for hosted clients past the tool-arg size cap), plus a document_id to poll
+2. `talonic_request_upload` — browser-handoff upload: returns a link the user opens to drop a file (for hosted clients past the tool-arg size cap), plus a document_id to poll (widget-enabled)
+3. `talonic_to_markdown` — OCR-converted markdown for a document (ingests the file if not already in the workspace) (widget-enabled)
+4. `talonic_get_document` — fetch document metadata and processing status (widget-enabled)
+5. `talonic_search` — search documents, fields, sources and schemas by content (widget-enabled)
+6. `talonic_filter` — filter documents by extracted field values (widget-enabled)
+
+**Schemas**
+
+7. `talonic_list_schemas` — list saved schemas in the workspace (widget-enabled)
+8. `talonic_save_schema` — save a schema for reuse (widget-enabled)
+
+**Metering**
+
+9. `talonic_get_balance` — workspace credit balance, tier, burn rate and projected runway (widget-enabled)
+10. `talonic_get_pricing` — per-unit credit pricing catalog for estimating cost before running work (widget-enabled)
+11. `talonic_get_usage` — credits consumed per function over a trailing window (widget-enabled)
+
+**Field Registry**
+
+12. `talonic_list_fields` — list Field Registry concepts with maturity, data type and synonyms (widget-enabled)
+13. `talonic_get_field` — one concept's definition, synonyms, occurrence stats and example values (widget-enabled)
+14. `talonic_field_values` — one concept's captured values across documents, with source provenance (widget-enabled)
+15. `talonic_find_data` — locate the fields, values, documents and passages behind a concept (widget-enabled)
+
+**Platform agent tools**
+
+16. `talonic_list_agent_tools` — catalog of platform agent tools this credential may invoke (widget-enabled)
+17. `talonic_invoke_agent_tool` — run one read-only platform agent tool with caller-supplied arguments (widget-enabled)
+
+**Agent tasks**
+
+18. `talonic_list_agent_tasks` — worklist of Agent-stage tasks visible to this workspace credential (widget-enabled)
+19. `talonic_get_agent_task` — one task's immutable input snapshot, instructions and output contract (widget-enabled)
+20. `talonic_claim_agent_task` — take a time-limited lease on an available task (widget-enabled)
+21. `talonic_heartbeat_agent_task` — extend the lease on a task this agent already claimed (widget-enabled)
+22. `talonic_submit_agent_task` — submit declared outputs for a claimed task and resume the parked document (widget-enabled)
 
 ## MCP server
 

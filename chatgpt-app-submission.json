@@ -187,6 +187,62 @@
         "open_world_justification": "Only reads private Talonic workspace data over the authenticated API and never touches public internet state.",
         "destructive_justification": "Cannot delete, overwrite, revoke access, or perform irreversible actions: the platform enforces the read-only capability matrix on every invocation."
       }
+    },
+    "talonic_get_pricing": {
+      "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Only reads Talonic's public credit pricing catalog so the assistant can estimate cost before running work.",
+        "open_world_justification": "Reads a fixed Talonic pricing endpoint; it does not reach the public internet or modify external state.",
+        "destructive_justification": "Read-only catalog lookup; nothing is created, changed, or deleted."
+      }
+    },
+    "talonic_get_usage": {
+      "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Only reads the workspace's own per-function credit consumption over a trailing window.",
+        "open_world_justification": "Reads private Talonic usage data for the connected workspace only; no public internet access.",
+        "destructive_justification": "Read-only usage report; nothing is created, changed, or deleted."
+      }
+    },
+    "talonic_list_agent_tasks": {
+      "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Lists Agent-stage task metadata (status, lease, timeout) visible to the connected workspace credential; it never returns payload data.",
+        "open_world_justification": "Reads the connected workspace's own task worklist only; no public internet access.",
+        "destructive_justification": "Metadata listing; nothing is claimed, changed, or deleted."
+      }
+    },
+    "talonic_get_agent_task": {
+      "annotations": { "readOnlyHint": true, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Fetches one task's immutable input snapshot, instructions and output contract; the read is audited by the platform.",
+        "open_world_justification": "Reads the connected workspace's own task; no public internet access.",
+        "destructive_justification": "Read-only fetch; the task, its lease and its document are unchanged."
+      }
+    },
+    "talonic_claim_agent_task": {
+      "annotations": { "readOnlyHint": false, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Takes a time-limited lease on an available task so this agent can work it; the platform rejects conflicting claims with HTTP 409.",
+        "open_world_justification": "Acts on the connected workspace's own task queue; no public internet access.",
+        "destructive_justification": "A lease is reversible: it expires automatically and can be reclaimed; no data is deleted or overwritten."
+      }
+    },
+    "talonic_heartbeat_agent_task": {
+      "annotations": { "readOnlyHint": false, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Extends the current lease on a task this agent already claimed, using the execution epoch from the claim.",
+        "open_world_justification": "Acts on the connected workspace's own task; no public internet access.",
+        "destructive_justification": "Only moves the lease expiry forward; nothing is deleted or overwritten."
+      }
+    },
+    "talonic_submit_agent_task": {
+      "annotations": { "readOnlyHint": false, "openWorldHint": false, "destructiveHint": false },
+      "justifications": {
+        "read_only_justification": "Writes the declared output fields for a claimed task and resumes the parked document's pipeline.",
+        "open_world_justification": "Writes to the connected workspace's own pipeline; no public internet access.",
+        "destructive_justification": "Adds new cell values validated against the task's declared contract; existing data is versioned, not deleted, and the platform rejects undeclared fields."
+      }
     }
   },
   "test_cases": [
@@ -300,6 +356,22 @@
       "file_attachment_urls": null,
       "tools_triggered": "talonic_list_agent_tools, talonic_invoke_agent_tool",
       "expected_output": "Lists the invocable agent tools, then returns the query_data result rows.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Estimate cost before a batch using the pricing catalog and current usage.",
+      "user_prompt": "How much would it cost to extract 200 invoices, and how many credits did we use this month?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_get_pricing, talonic_get_usage, talonic_get_balance",
+      "expected_output": "Shows the pricing card with per-unit credit rates, the usage breakdown card for the trailing 30 days, and the balance card, then answers with an estimate.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Work the Agent-stage task loop end to end.",
+      "user_prompt": "Are there any Talonic agent tasks waiting for me? If so, claim the first one, tell me what it needs, and submit an approval decision of 'approve' with a short note.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_agent_tasks, talonic_get_agent_task, talonic_claim_agent_task, talonic_heartbeat_agent_task, talonic_submit_agent_task",
+      "expected_output": "Shows the worklist card, the task card with instructions and output contract, the lease card with the execution epoch, and the submitted confirmation; the document resumes its pipeline.",
       "expected_output_url": null
     }
   ],

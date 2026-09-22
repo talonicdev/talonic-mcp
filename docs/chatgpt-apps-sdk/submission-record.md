@@ -180,3 +180,9 @@ one-widget-per-tool parity is restored.
 tools are added to an already-approved app, or whether the directory listing
 auto-tracks the live surface. Reconnect the connector after the deploy (ChatGPT
 caches `tools/list` at connect time).
+
+## 2026-09-22 — widget parity restored at 22 tools
+
+The live surface grew to 22 tools (0.1.75 agent tasks, 0.1.76 Field Registry) while only the original 11 had cards. This change adds the eleven missing widgets, `openai/toolInvocation/*` status strings on every tool, `openai/widgetDescription` + `openai/widgetPrefersBorder` on every widget resource, and brings `chatgpt-app-submission.json` to the full 22 (test-locked against the server: `tests/submission-manifest.test.ts`).
+
+OpenAI's current guidance (developers.openai.com/apps-sdk/deploy/submission): tool definitions are re-fetched periodically — "New and changed tool definitions become available after automated checks pass" — while listing metadata changes "require a new version, review, and publication". So: the new cards go live on their own after the deploy; only if we change the listing text do we resubmit. Reconnect the connector after deploy (ChatGPT caches `tools/list` at connect time), then run the 22-row checklist in `developer-mode-testing.md`.

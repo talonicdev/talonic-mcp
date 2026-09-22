@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Talonic — Filter Results</title>
+<style>
+
+  :root {
+    --bg: #ffffff; --fg: #111827; --muted: #6b7280; --border: #e5e7eb;
+    --accent: #4f46e5; --good: #16a34a; --warn: #d97706; --bad: #dc2626;
+    --chip: #f3f4f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115; --fg: #f3f4f6; --muted: #9ca3af; --border: #1f2937;
+      --chip: #1f2937;
+    }
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .root { padding: 20px; box-sizing: border-box; }
+  * { box-sizing: border-box; }
+  .empty { color: var(--muted); padding: 28px; text-align: center; }
+  .muted { color: var(--muted); }
+  .small { font-size: 12px; }
+  .header { display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 16px; }
+  .title { font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
+    vertical-align: top; font-size: 13px; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  th:first-child, td:first-child { padding-left: 0; }
+  th:last-child, td:last-child { padding-right: 0; }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .val { font-variant-numeric: tabular-nums; word-break: break-word; }
+  .bar { display: inline-block; width: 60px; height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden; vertical-align: middle; }
+  .bar > span { display: block; height: 100%; background: var(--good); }
+  .bar.warn > span { background: var(--warn); }
+  .bar.bad > span { background: var(--bad); }
+  .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  button, a.btn { background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer;
+    text-decoration: none; display: inline-block; }
+  button:hover, a.btn:hover { border-color: var(--accent); }
+  a.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .chip { display: inline-block; background: var(--chip); border-radius: 999px;
+    padding: 1px 8px; font-size: 12px; margin: 2px 4px 2px 0; }
+  .big { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px; margin-top: 14px; }
+  /* Stat tile: label stacked above value, padded, never crowding an edge. */
+  .kv { display: flex; flex-direction: column; gap: 3px;
+    background: var(--chip); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; min-width: 0; }
+  .kv .k { color: var(--muted); font-size: 12px; }
+  .kv .val { font-weight: 500; }
+  pre.md { background: var(--chip); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; max-height: 360px; overflow: auto; white-space: pre-wrap;
+    word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; }
+
+
+</style>
+<script>window.openai={toolOutput:{"data":[{"filename":"INV412166.pdf","fields":{"invoice_total":2450,"invoice_currency":"USD"}},{"filename":"Invoice-Scan.pdf","fields":{"invoice_total":1890.5,"invoice_currency":"EUR"}},{"filename":"March-2024.pdf","fields":{"invoice_total":3120,"invoice_currency":"USD"}},{"filename":"Acme-Q2.pdf","fields":{"invoice_total":1575,"invoice_currency":"GBP"}}],"total":4}};</script><style>
+      :root{
+        color-scheme: light;
+        --bg:#ffffff!important; --fg:#1f2328!important; --muted:#59636e!important;
+        --border:#d1d9e0!important; --accent:#4f46e5!important; --good:#1a7f37!important;
+        --warn:#9a6700!important; --bad:#cf222e!important; --chip:#f6f8fa!important;
+      }
+      html,body{ width:353px!important; margin:0!important; background:#ffffff!important; color:#1f2328!important; }
+      /* Screenshot-only vertical tightening so taller cards stay under the
+         directory's 860px PNG height cap. Content unchanged; spacing only. */
+      .root{ padding:14px!important; }
+      .header{ margin-bottom:8px!important; }
+      th,td{ padding-top:7px!important; padding-bottom:7px!important; }
+      .kv{ padding:8px 10px!important; }
+      .grid{ gap:7px!important; margin-top:8px!important; }
+      .actions{ margin-top:8px!important; }
+    </style><script>addEventListener("load",function(){requestAnimationFrame(function(){document.title="HH"+document.body.scrollHeight+"HH";});});</script>
+</head>
+<body>
+<div id="root" class="root"><div class="empty">Waiting for result…</div></div>
+<script>
+(function () {
+
+  var root = document.getElementById("root");
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function fmt(v) {
+    if (v == null) return "";
+    return typeof v === "object" ? JSON.stringify(v) : String(v);
+  }
+  function confClass(v) {
+    if (typeof v !== "number") return "";
+    if (v >= 0.85) return "";
+    if (v >= 0.7) return "warn";
+    return "bad";
+  }
+  function confBar(v) {
+    if (typeof v !== "number") return '<span class="muted small">—</span>';
+    var p = Math.round(v * 100);
+    return '<span class="bar ' + confClass(v) + '"><span style="width:' + p + '%"></span></span> <span class="muted small">' + p + '%</span>';
+  }
+  function empty(msg) { root.innerHTML = '<div class="empty">' + esc(msg) + '</div>'; }
+  function copyButton(id, text) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener("click", function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+    });
+  }
+
+  function render(payload) {
+
+    var data = Array.isArray(payload.data) ? payload.data : [];
+    var total = typeof payload.total === "number" ? payload.total : data.length;
+    var warnings = Array.isArray(payload.warnings) ? payload.warnings : [];
+
+    var warnHtml = warnings.map(function (w) {
+      var msg = w.message || w.code || "Warning";
+      var sug = w.suggestion ? '<div class="small">' + esc(w.suggestion) + '</div>' : "";
+      return '<div class="kv" style="border-color:var(--warn)"><span class="val" style="color:var(--warn)">⚠ ' + esc(msg) + '</span></div>' + sug;
+    }).join("");
+
+    // Union of field keys across matches, for stable table columns (cap at 4).
+    var keys = [];
+    data.forEach(function (d) {
+      Object.keys(d.fields || {}).forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); });
+    });
+    keys = keys.slice(0, 4);
+
+    var head = '<tr><th>Document</th>' + keys.map(function (k) { return '<th>' + esc(k) + '</th>'; }).join("") + '</tr>';
+    var rows = data.map(function (d) {
+      var f = d.fields || {};
+      return '<tr><td class="val">' + esc(d.filename || d.document_id || "") + '</td>'
+        + keys.map(function (k) { return '<td class="val">' + esc(fmt(f[k])) + '</td>'; }).join("")
+        + '</tr>';
+    }).join("");
+
+    root.innerHTML = ''
+      + '<div class="header"><div class="title">Filtered documents</div><span class="chip">' + total + '</span></div>'
+      + (warnHtml ? '<div style="margin-bottom:8px">' + warnHtml + '</div>' : "")
+      + (data.length
+          ? '<table><thead>' + head + '</thead><tbody>' + rows + '</tbody></table>'
+          : '<div class="empty">No documents matched the filter.</div>');
+
+  }
+
+  function payloadFromHost() {
+    return (window.openai && window.openai.toolOutput) || null;
+  }
+  function renderFromHost() {
+    var p = payloadFromHost();
+    if (!p) return;
+    try { render(p); } catch (e) { empty("Could not render this result."); }
+  }
+  renderFromHost();
+  window.addEventListener("openai:set_globals", function (event) {
+    var globals = event && event.detail && event.detail.globals;
+    var output = globals && globals.toolOutput;
+    if (output) { window.openai = window.openai || {}; window.openai.toolOutput = output; }
+    renderFromHost();
+  }, { passive: true });
+  window.addEventListener("message", function (event) {
+    if (event.source !== window.parent) return;
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    if (!msg || msg.method !== "ui/notifications/tool-result") return;
+    var sc = msg.params && msg.params.structuredContent;
+    if (sc) { window.openai = window.openai || {}; window.openai.toolOutput = sc; renderFromHost(); }
+  });
+
+})();
+</script>
+</body>
+</html>
