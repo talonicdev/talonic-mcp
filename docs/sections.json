@@ -4,11 +4,11 @@
     "parentSlug": "mcp-overview",
     "title": "Introduction",
     "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. Twenty-two public tools and two resources for structured document extraction via the Model Context Protocol.",
+    "description": "Official Talonic MCP server for AI agents. Twenty-nine public tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
-        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents twenty-two public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
+        "text": "The `@talonic/mcp` package is the official Talonic MCP server. It gives AI agents twenty-nine public tools and two resources for extracting structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io)."
       },
       {
         "type": "paragraph",
@@ -16,7 +16,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other twenty-one public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), plus the Agent-stage list, fetch, claim, heartbeat and submit lifecycle."
+        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other twenty-eight public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), the Agent-stage list, fetch, claim, heartbeat and submit lifecycle, plus the External-mode decision-task protocol for Talonic Apps (list an app's inbox, claim, read the frozen input package, heartbeat, submit, release, fail)."
       },
       {
         "type": "callout",
@@ -40,7 +40,7 @@
     "faq": [
       {
         "question": "What is the Talonic MCP server?",
-        "answer": "An official Model Context Protocol server that gives AI agents twenty-two public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
+        "answer": "An official Model Context Protocol server that gives AI agents twenty-nine public tools for document extraction, search, filtering, schema management, and credit-balance lookup via the Talonic API."
       }
     ],
     "mentions": [
@@ -127,7 +127,7 @@
       },
       {
         "type": "paragraph",
-        "text": "All three install paths expose the same twenty-two public tools and two resources."
+        "text": "All three install paths expose the same twenty-nine public tools and two resources."
       }
     ],
     "related": [
@@ -291,7 +291,7 @@
       },
       {
         "type": "paragraph",
-        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all twenty-two public tools and two resources."
+        "text": "Fully restart Claude Desktop (Cmd+Q on macOS, not just close the window). Talonic appears in the connected servers list with all twenty-nine public tools and two resources."
       }
     ],
     "related": [

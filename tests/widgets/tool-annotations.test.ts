@@ -15,6 +15,8 @@ const READ_ONLY_TOOLS = [
   "talonic_get_usage",
   "talonic_list_agent_tasks",
   "talonic_get_agent_task",
+  "talonic_list_decision_tasks",
+  "talonic_read_decision_package",
 ]
 
 // Write-capable tools: readOnlyHint=false. None destroy data, so
@@ -36,6 +38,11 @@ const WRITE_TOOLS = [
   "talonic_claim_agent_task",
   "talonic_heartbeat_agent_task",
   "talonic_submit_agent_task",
+  "talonic_claim_decision_task",
+  "talonic_heartbeat_decision_task",
+  "talonic_submit_decision_task",
+  "talonic_release_decision_task",
+  "talonic_fail_decision_task",
 ]
 
 const ALL_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS]

@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The twenty-two public tools (and what an agent should reach for)
+## The twenty-nine public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -54,8 +54,17 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_claim_agent_task` | `agent-tasks.ts` | no | Acquire or reclaim a leased task and execution epoch. |
 | `talonic_heartbeat_agent_task` | `agent-tasks.ts` | no | Extend the current claim lease using its epoch. |
 | `talonic_submit_agent_task` | `agent-tasks.ts` | no | Submit declared typed outputs transactionally and resume the document. |
+| `talonic_list_decision_tasks` | `decision-tasks.ts` | yes | One External-mode App's decision inbox (`GET /v1/apps/:id/decision-tasks`). Metadata only. |
+| `talonic_claim_decision_task` | `decision-tasks.ts` | no | Lease a decision task; the claim IS the payload fetch (output contract, precedents, package descriptor). No separate `get` exists on the platform. |
+| `talonic_read_decision_package` | `decision-tasks.ts` | yes | One page of the claimed run's frozen input package; claimant-only, each page journals `package_read`. |
+| `talonic_heartbeat_decision_task` | `decision-tasks.ts` | no | Extend the lease, never past `sla_deadline_at`. |
+| `talonic_submit_decision_task` | `decision-tasks.ts` | no | `outcome` (contract-shaped) + required `evidence[]` locators + required `rationale`; platform verifies transactionally, 422 on refusal. |
+| `talonic_release_decision_task` | `decision-tasks.ts` | no | Give the task back to `available`. |
+| `talonic_fail_decision_task` | `decision-tasks.ts` | no | Declare undecidable: raises a Human Review and applies the app's fallback policy. |
 
-Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — nine lookup tools have `readOnlyHint: true`; the seven write-capable tools have it `false`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
+**Decision-task auth:** the platform's `decide` tier (`AppsAccessGuard` in the platform repo) admits a `tlnc_` API key on a per-app `decide` grant, or an OAuth session on the `apps:decide` scope plus a live workspace role of `senior_member` or above (platform spec `2026-09-22-decide-for-oauth-sessions-design.md`). Web sessions are refused. Two cross-repo couplings live here: (1) `src/http-server.ts` advertises `apps:decide` in `scopes_supported` — Claude.ai requests exactly that list, and the platform's `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s; (2) `tokenHasDecideScope()` in `decision-tasks.ts` decodes an OAuth token's `scopes` claim (unverified, visibility only) and the hosted entrypoint lists the seven tools marked `NOT INVOCABLE IN THIS SESSION` with `_meta["talonic/can_invoke"]: false` when the scope is absent — a connector added before the scope existed keeps working and the agent tells the user to reconnect. Handlers always forward; the platform decides. `tlnc_` keys and undecodable tokens are always listed as invocable. The rule-mining external-driver routes (`/v1/apps/:id/mining/rounds/:runId/tools*`) are NOT wrapped yet — platform spec `docs/superpowers/specs/2026-09-22-mining-external-driver-design.md` §6.3 lists them as a follow-up here.
+
+Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — eleven lookup tools have `readOnlyHint: true`; the twelve write-capable tools have it `false`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 

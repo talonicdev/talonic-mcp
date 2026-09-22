@@ -49,6 +49,13 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
       { id: "talonic-claim-agent-task", label: "talonic_claim_agent_task" },
       { id: "talonic-heartbeat-agent-task", label: "talonic_heartbeat_agent_task" },
       { id: "talonic-submit-agent-task", label: "talonic_submit_agent_task" },
+      { id: "talonic-list-decision-tasks", label: "talonic_list_decision_tasks" },
+      { id: "talonic-claim-decision-task", label: "talonic_claim_decision_task" },
+      { id: "talonic-read-decision-package", label: "talonic_read_decision_package" },
+      { id: "talonic-heartbeat-decision-task", label: "talonic_heartbeat_decision_task" },
+      { id: "talonic-submit-decision-task", label: "talonic_submit_decision_task" },
+      { id: "talonic-release-decision-task", label: "talonic_release_decision_task" },
+      { id: "talonic-fail-decision-task", label: "talonic_fail_decision_task" },
     ],
   },
   {

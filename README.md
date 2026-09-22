@@ -5,7 +5,7 @@
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Eleven established document tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector); this branch adds five public Agent-stage worklist tools. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
+> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Twenty-two established tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector); this branch adds seven public decision-task tools for External-mode Talonic Apps, not yet production-verified, which run at the platform's `decide` tier (a `tlnc_` key with a per-app `decide` grant, or an OAuth session with the `apps:decide` scope and a `senior_member` role or above). Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
 ---
 
@@ -32,6 +32,18 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_find_data`** | Resolve a concept in the user's words to the fields, values, documents and passages that carry it — by meaning, not by name. |
 | **`talonic_list_agent_tools`** | The platform's agent tool registry (`query_data` SQL, `describe_data`, document markdown, …) with schemas and per-credential invocability. |
 | **`talonic_invoke_agent_tool`** | Run one platform agent tool directly with your own arguments — no model in the loop. |
+| **`talonic_list_agent_tasks`** | Agent-stage worklist: documents parked at a pipeline stage waiting for an external agent's declared outputs. |
+| **`talonic_get_agent_task`** | One Agent task's immutable input snapshot, instructions and output contract (audited disclosure). |
+| **`talonic_claim_agent_task`** | Take or reclaim the lease on an Agent task; returns the payload and the `execution_epoch`. |
+| **`talonic_heartbeat_agent_task`** | Extend a claimed Agent task's lease. |
+| **`talonic_submit_agent_task`** | Submit the declared, typed outputs and resume the document. |
+| **`talonic_list_decision_tasks`** | One External-mode App's decision inbox: runs parked for an outside agent to decide (`decide` tier: per-app grant on a `tlnc_` key, or the `apps:decide` OAuth scope). |
+| **`talonic_claim_decision_task`** | Lease a decision task; the claim returns the output contract, precedents and the input-package descriptor. |
+| **`talonic_read_decision_package`** | Page through the claimed run's frozen input package with its provenance locators. |
+| **`talonic_heartbeat_decision_task`** | Extend a decision-task lease, never past its SLA deadline. |
+| **`talonic_submit_decision_task`** | Submit the decision: `outcome` against the contract, verbatim `evidence` locators, a short `rationale`. |
+| **`talonic_release_decision_task`** | Give a decision task back to `available` undecided. |
+| **`talonic_fail_decision_task`** | Declare a decision task undecidable: raises a Human Review and applies the app's fallback policy. |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
@@ -93,7 +105,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all sixteen public tools.
+Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all twenty-nine public tools.
 </details>
 
 <details>
@@ -150,8 +162,8 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 1. Open [claude.ai/settings/connectors](https://claude.ai/settings/connectors) → **Add custom connector**.
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
-4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`). Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All twenty-two public tools appear.
+4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`, and `apps:decide` for the decision-task tools). Connectors added before `apps:decide` existed keep working; the seven decision tools show as not invocable until you remove and re-add the connector. Pick a workspace if you have multiple.
+5. You're returned to Claude.ai. All twenty-nine public tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 
