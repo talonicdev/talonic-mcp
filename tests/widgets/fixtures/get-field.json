@@ -1,0 +1,56 @@
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "canonical_name": "invoice_number",
+  "display_name": "Invoice Number",
+  "data_type": "string",
+  "tier": 1,
+  "maturity": "core",
+  "admission_state": "canonical",
+  "description": null,
+  "synonyms": ["invoice_no", "inv_number", "rechnungsnummer"],
+  "cluster_name": "invoice_number",
+  "occurrence_count": 1116,
+  "master_instruction": "Extract the invoice number exactly as printed, including prefixes.",
+  "superseded_by": null,
+  "created_at": "2026-06-17T23:39:29.785Z",
+  "updated_at": "2026-09-10T11:10:00.664Z",
+  "links": { "self": "/v1/fields/11111111-1111-4111-8111-111111111111" },
+  "redirected_from": [],
+  "definition": {
+    "description": null,
+    "instruction": "Extract the invoice number exactly as printed, including prefixes.",
+    "variance_notes": "Prefixes vary between INV- and RE-.",
+    "synonyms": ["invoice_no", "inv_number", "rechnungsnummer"],
+    "aliases": []
+  },
+  "identity": {
+    "pinned": false,
+    "source": null,
+    "link_key": true,
+    "link_key_category": "document_reference",
+    "superseded_by": null,
+    "absorbed": []
+  },
+  "occurrence": {
+    "occurrence_count": 1116,
+    "document_count": 855,
+    "occurrence_rate": 0.1541,
+    "first_seen_at": "2026-06-17T23:39:29.785Z",
+    "last_seen_at": "2026-09-21T19:00:58.221Z",
+    "promoted_at": "2026-06-28T15:18:27.247Z",
+    "document_type_distribution": { "Invoice": 800, "Credit Note": 55 }
+  },
+  "values": {
+    "total": 1116,
+    "distinct_count": 164,
+    "visible_document_count": 855,
+    "top": [
+      { "value": "INV-2026-04417", "count": 728, "share": 0.6523 },
+      { "value": "RE-88120", "count": 91, "share": 0.0815 },
+      { "value": "INV-2026-00021", "count": 40, "share": 0.0358 }
+    ],
+    "examples": ["INV-2026-04417", "RE-88120"]
+  },
+  "usage": { "schema_count": 1, "schema_field_count": 1 },
+  "resolution": { "matched_by": "synonym", "redirected_from": ["invoice_no"] }
+}

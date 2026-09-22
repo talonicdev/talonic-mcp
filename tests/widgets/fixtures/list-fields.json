@@ -1,0 +1,59 @@
+{
+  "data": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "canonical_name": "invoice_number",
+      "display_name": "Invoice Number",
+      "data_type": "string",
+      "tier": 1,
+      "maturity": "core",
+      "admission_state": "canonical",
+      "description": null,
+      "synonyms": ["invoice_no", "inv_number"],
+      "cluster_name": "invoice_number",
+      "occurrence_count": 1116,
+      "master_instruction": "Extract the invoice number exactly as printed.",
+      "superseded_by": null,
+      "created_at": "2026-06-17T23:39:29.785Z",
+      "updated_at": "2026-09-10T11:10:00.664Z",
+      "links": { "self": "/v1/fields/11111111-1111-4111-8111-111111111111" }
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "canonical_name": "total_amount",
+      "display_name": "Total Amount",
+      "data_type": "number",
+      "tier": 2,
+      "maturity": "proven",
+      "admission_state": "canonical",
+      "description": "Grand total including tax.",
+      "synonyms": ["grand_total"],
+      "cluster_name": "total_amount",
+      "occurrence_count": 640,
+      "master_instruction": null,
+      "superseded_by": null,
+      "created_at": "2026-06-20T10:00:00.000Z",
+      "updated_at": "2026-09-01T09:00:00.000Z",
+      "links": { "self": "/v1/fields/22222222-2222-4222-8222-222222222222" }
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "canonical_name": "vendor_vat_id",
+      "display_name": null,
+      "data_type": "string",
+      "tier": 3,
+      "maturity": "candidate",
+      "admission_state": "candidate",
+      "description": null,
+      "synonyms": [],
+      "cluster_name": null,
+      "occurrence_count": 3,
+      "master_instruction": null,
+      "superseded_by": "22222222-2222-4222-8222-222222222222",
+      "created_at": "2026-09-15T08:00:00.000Z",
+      "updated_at": "2026-09-15T08:00:00.000Z",
+      "links": { "self": "/v1/fields/33333333-3333-4333-8333-333333333333" }
+    }
+  ],
+  "pagination": { "total": 8406, "limit": 3, "has_more": true, "next_cursor": "opaque-cursor" }
+}
