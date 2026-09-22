@@ -66,6 +66,20 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     padding: 12px; max-height: 360px; overflow: auto; white-space: pre-wrap;
     word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; }
+  .chip.good { background: rgba(22,163,74,.12); color: var(--good); }
+  .chip.warn { background: rgba(217,119,6,.14); color: var(--warn); }
+  .chip.bad { background: rgba(220,38,38,.12); color: var(--bad); }
+  .chip.info { background: rgba(79,70,229,.12); color: var(--accent); }
+  .plane { margin-top: 14px; }
+  .plane .subtitle { margin-bottom: 4px; }
+  .num { text-align: right; }
+  .tree-body { padding-left: 12px; border-left: 1px solid var(--border); margin: 2px 0 2px 2px; }
+  .node { padding: 2px 0; font-size: 13px; word-break: break-word; }
+  .node .k, .tree-body summary .k { color: var(--muted); }
+  details.tree { margin: 2px 0; }
+  details.tree > summary { cursor: pointer; font-size: 13px; list-style: none; }
+  details.tree > summary::before { content: "▸ "; color: var(--muted); }
+  details.tree[open] > summary::before { content: "▾ "; }
 
 
 </style>
@@ -102,6 +116,102 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     if (btn) btn.addEventListener("click", function () {
       if (navigator.clipboard) navigator.clipboard.writeText(text);
     });
+  }
+  function chip(text, tone) {
+    if (text == null || text === "") return "";
+    return '<span class="chip' + (tone ? " " + tone : "") + '">' + esc(text) + '</span>';
+  }
+  function clamp(s, n) {
+    var t = String(s == null ? "" : s);
+    return t.length > n ? t.slice(0, n - 1) + "…" : t;
+  }
+  function shortId(id) {
+    var s = String(id == null ? "" : id);
+    if (!s) return "—";
+    return s.length > 8 ? s.slice(0, 8) : s;
+  }
+  function idChip(id) {
+    var s = String(id == null ? "" : id);
+    if (!s) return '<span class="muted">—</span>';
+    return '<span class="mono" title="' + esc(s) + '">' + esc(shortId(s)) + '</span>';
+  }
+  function relTime(iso) {
+    if (!iso) return "—";
+    var t = Date.parse(iso);
+    if (isNaN(t)) return String(iso);
+    var d = Math.round((t - Date.now()) / 1000);
+    var a = Math.abs(d);
+    var n, u;
+    if (a < 60) { n = a; u = "s"; }
+    else if (a < 3600) { n = Math.round(a / 60); u = "m"; }
+    else if (a < 86400) { n = Math.round(a / 3600); u = "h"; }
+    else { n = Math.round(a / 86400); u = "d"; }
+    return d >= 0 ? "in " + n + u : n + u + " ago";
+  }
+  function isFlat(obj) {
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
+    return Object.keys(obj).every(function (k) { var v = obj[k]; return v == null || typeof v !== "object"; });
+  }
+  function isRowArray(v) {
+    return Array.isArray(v) && v.length > 0 && v.every(function (r) { return !!r && typeof r === "object" && !Array.isArray(r); });
+  }
+  function dataTable(rows, columns) {
+    if (!Array.isArray(rows) || !rows.length) return "";
+    var cols = columns ? columns.slice() : [];
+    if (!columns) {
+      rows.forEach(function (r) {
+        if (r && typeof r === "object" && !Array.isArray(r)) {
+          Object.keys(r).forEach(function (k) { if (cols.indexOf(k) < 0) cols.push(k); });
+        }
+      });
+    }
+    var extraCols = cols.length > 12 ? cols.length - 12 : 0;
+    cols = cols.slice(0, 12);
+    var shown = rows.slice(0, 50);
+    var html = '<table><thead><tr>' + cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>';
+    shown.forEach(function (r) {
+      html += '<tr>' + cols.map(function (c) {
+        var v = r && typeof r === "object" && !Array.isArray(r) ? r[c] : r;
+        var cell = v != null && typeof v === "object" ? clamp(JSON.stringify(v), 80) : fmt(v);
+        return '<td class="val">' + esc(cell) + '</td>';
+      }).join("") + '</tr>';
+    });
+    html += '</tbody></table>';
+    var more = [];
+    if (rows.length > shown.length) more.push("+" + (rows.length - shown.length) + " more rows");
+    if (extraCols) more.push("+" + extraCols + " more columns");
+    if (more.length) html += '<div class="muted small" style="margin-top:6px">' + esc(more.join(" · ")) + '</div>';
+    return html;
+  }
+  function kvTiles(obj) {
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) return "";
+    var keys = Object.keys(obj);
+    if (!keys.length) return "";
+    return '<div class="grid">' + keys.map(function (k) {
+      var v = obj[k];
+      var text = v != null && typeof v === "object" ? clamp(JSON.stringify(v), 120) : fmt(v);
+      return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="val">' + esc(text === "" ? "—" : text) + '</span></div>';
+    }).join("") + '</div>';
+  }
+  function jsonTree(value, depth, budget) {
+    depth = depth || 0;
+    budget = budget || { n: 400 };
+    if (budget.n-- <= 0) return '<span class="muted">…</span>';
+    if (value == null || typeof value !== "object") return '<span class="val mono">' + esc(fmt(value)) + '</span>';
+    if (depth >= 6) return '<span class="muted">' + esc(clamp(JSON.stringify(value), 80)) + '</span>';
+    var isArr = Array.isArray(value);
+    var keys = isArr ? value.map(function (_, i) { return String(i); }) : Object.keys(value);
+    if (!keys.length) return '<span class="muted">' + (isArr ? "[]" : "{}") + '</span>';
+    var inner = keys.map(function (k) {
+      var v = value[k];
+      var label = '<span class="k mono">' + esc(k) + '</span>';
+      if (v == null || typeof v !== "object") {
+        return '<div class="node">' + label + ' <span class="val mono">' + esc(fmt(v)) + '</span></div>';
+      }
+      var size = Array.isArray(v) ? "[" + v.length + "]" : "{" + Object.keys(v).length + "}";
+      return '<details class="tree"' + (depth < 1 ? " open" : "") + '><summary>' + label + ' <span class="muted small">' + size + '</span></summary>' + jsonTree(v, depth + 1, budget) + '</details>';
+    }).join("");
+    return '<div class="tree-body">' + inner + '</div>';
   }
 
   function render(payload) {
