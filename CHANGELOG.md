@@ -245,9 +245,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.46] - 2026-05-28
 
-### Added
+### Note
 
-- **`talonic_request_upload` — browser-handoff upload for hosted AI agents.** A new tool that routes file delivery around two structural limits of hosted connectors (Claude.ai web, ChatGPT): the ~32 KB tool-call argument cap and the sandbox egress allowlist. It returns a pre-allocated `document_id`, a browser-openable `upload_url` (`https://app.talonic.com/u/<token>`), and an `expires_at`. The user opens the link and drops the file; the agent polls `talonic_get_document` until `status === "completed"`, then calls `talonic_extract` with the `document_id`. Tool count: 8 → 9. `talonic_extract`'s description gained a "large files / hosted environments" note pointing at the new flow. Verified end-to-end against production Claude.ai.
+- Version-bump-only release (`caf5ba7`): no commits landed between it and `v0.1.45` — an immediate re-publish with no code or doc changes.
 
 ## [0.1.45] - 2026-05-27
 
@@ -255,6 +255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ChatGPT Apps SDK widget for `talonic_extract`.** New extraction-result widget (`ui://widget/extraction-result.html`, `src/widgets/`) registered as an MCP resource with MIME `text/html;profile=mcp-app`. `talonic_extract` declares `_meta["openai/outputTemplate"]` pointing at it, so ChatGPT renders extraction results as an inline card: document metadata, extracted fields, overall + per-field confidence bars, and copy/download-JSON controls. Pure HTML+CSS+vanilla-JS embedded as a string — no bundler, no new runtime dependencies. Render-only; no secrets cross into the iframe (asserted by tests). Other MCP clients ignore the widget resource and `outputTemplate` hint — no behavior change for them.
 - **Tool-annotation regression test** (`tests/widgets/tool-annotations.test.ts`) locking the Apps-SDK-required hint contract: five pure-lookup tools are `readOnlyHint: true`; `extract`, `save_schema`, and `to_markdown` are `readOnlyHint: false`. (`to_markdown` is intentionally not read-only — its file-input path ingests a document via extract, uploading and consuming credits.)
+- **`talonic_request_upload` — browser-handoff upload for hosted AI agents.** A new tool that routes file delivery around two structural limits of hosted connectors (Claude.ai web, ChatGPT): the ~32 KB tool-call argument cap and the sandbox egress allowlist. It returns a pre-allocated `document_id`, a browser-openable `upload_url` (`https://app.talonic.com/u/<token>`), and an `expires_at`. The user opens the link and drops the file; the agent polls `talonic_get_document` until `status === "completed"`, then calls `talonic_extract` with the `document_id`. Tool count: 8 → 9. `talonic_extract`'s description gained a "large files / hosted environments" note pointing at the new flow. Verified end-to-end against production Claude.ai.
 
 ### Note
 
