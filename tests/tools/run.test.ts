@@ -267,6 +267,33 @@ describe("talonic_get_run", () => {
     })
   })
 
+  it("pipeline_id -> missing progress counters normalise to null, not 0", async () => {
+    stubFetch([
+      [`/v1/pipelines/${PIPE}/progress`, { pipelineId: PIPE, status: "active" }],
+      [
+        `/v1/pipelines/${PIPE}`,
+        {
+          id: PIPE,
+          name: "smoke",
+          status: "active",
+          schema: { id: SPEC },
+          phase_count: 1,
+          created_at: "2026-09-22T10:00:00Z",
+          links: {},
+        },
+      ],
+    ])
+    const env = parsed(await handleGetRun(getToken, undefined, { pipeline_id: PIPE }))
+    expect(env.status).toBe("processing")
+    expect(env.progress).toEqual({
+      total_documents: null,
+      completed_documents: null,
+      error_documents: null,
+      finalization_pending: null,
+      phases: [],
+    })
+  })
+
   it.each([[{}], [{ run_id: RUN, pipeline_id: PIPE }]])(
     "rejects %j — exactly one id",
     async (args) => {
