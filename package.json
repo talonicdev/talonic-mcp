@@ -70,6 +70,7 @@
     "clean": "rm -rf dist coverage",
     "start": "node dist/server.js",
     "start:http": "node dist/http-server.js",
+    "preflight:chatgpt": "node scripts/chatgpt-preflight.mjs",
     "prepublishOnly": "npm run typecheck && npm run build && npm test"
   },
   "dependencies": {

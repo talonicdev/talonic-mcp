@@ -55,7 +55,7 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_heartbeat_agent_task` | `agent-tasks.ts` | no | Extend the current claim lease using its epoch. |
 | `talonic_submit_agent_task` | `agent-tasks.ts` | no | Submit declared typed outputs transactionally and resume the document. |
 
-Read-only hints are locked by a regression test (`tests/widgets/tool-annotations.test.ts`) — nine lookup tools have `readOnlyHint: true`; the seven write-capable tools have it `false`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
+Annotations are locked by `tests/widgets/tool-annotations.test.ts` (15 read-only lookup tools, 7 write-capable); every public tool renders a widget (`tests/widgets/all-widgets.test.ts`, 22/22) and declares Apps SDK status strings. Adding a tool = also adding a widget: one `WIDGET_URIS` key + description + status in `src/widgets/types.ts`, one entry in `src/widgets/register.ts`, `_meta: widgetToolMeta(key)` on the tool, a fixture + render test under `tests/widgets/`, and an entry in `chatgpt-app-submission.json`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 
@@ -90,7 +90,7 @@ src/
   tools/*.ts          one file per MCP tool (handle<Name> + register<Name>)
   resources/*.ts      schemas-resource.ts, webhooks-resource.ts
   content/*.ts        docs content for talonic.com/docs/mcp/* (see footgun above)
-  widgets/*.ts        ChatGPT Apps SDK widget HTML (extraction-result card)
+  widgets/*.ts        ChatGPT Apps SDK widget HTML — one card per public tool (22); registry in widgets/types.ts + widgets/register.ts
   favicon.ts          base64 favicon served by the hosted server
 tests/**/*.test.ts    vitest; HTTP side runs against a real http.Server on an ephemeral port,
                         tool side mocks the Talonic API at the fetch layer
@@ -111,6 +111,7 @@ npm run format:check    # prettier check
 npm run format          # prettier --write
 npm run build           # tsup → dist/{index,server,http-server,content}.js
 npm run start:http      # local hosted-MCP server on :3000
+npm run preflight:chatgpt   # boot dist/http-server.js, check 22 tools + every template like ChatGPT does
 ```
 
 Always run typecheck + test + format:check before any push.

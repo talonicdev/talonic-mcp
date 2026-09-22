@@ -5,7 +5,7 @@
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Eleven established document tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector); this branch adds five public Agent-stage worklist tools. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
+> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Twenty-two public tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector), each tool rendering its own ChatGPT Apps SDK widget card. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
 ---
 
