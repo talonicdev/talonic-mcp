@@ -1,0 +1,8 @@
+{
+  "period_days": 30,
+  "total_credits": 3120,
+  "by_function": [
+    { "operation_type": "extract", "operations": 412, "credits": 2480 },
+    { "operation_type": "to_markdown", "operations": 88, "credits": 640 }
+  ]
+}

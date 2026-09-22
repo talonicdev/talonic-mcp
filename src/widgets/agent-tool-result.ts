@@ -35,7 +35,7 @@ const RENDER_BODY = `
       a = obj(a);
       var link = typeof a.link === "string" && /^https:\\/\\//.test(a.link) ? a.link : "";
       return '<div class="kv"><span class="val">' + esc(a.label || a.type || a.id || "artifact") + '</span>'
-        + (link ? '<a class="btn small" href="' + esc(link) + '" target="_blank" rel="noopener">Open</a>' : "") + '</div>';
+        + (link ? '<a class="btn small" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Open</a>' : "") + '</div>';
     }).join("") + '</div>' : "";
     var count = "";
     if (!isEmptyResult) {

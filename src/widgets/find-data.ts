@@ -53,7 +53,7 @@ const RENDER_BODY = `
       return '<div class="kv"><span class="small muted">' + esc(p.filename || shortId(p.document_id)) + ' ' + scoreBar(p.score) + '</span><span class="small">' + esc(clamp(p.text, 220)) + '</span></div>';
     });
     root.innerHTML = ''
-      + '<div class="header"><div><div class="title">Data behind “' + esc(query || "your concept") + '”</div><div class="subtitle">' + total + ' matches' + (res.semantic ? " · semantic + lexical" : "") + '</div></div></div>'
+      + '<div class="header"><div><div class="title">Data behind “' + esc(query || "your concept") + '”</div><div class="subtitle">' + total + (total === 1 ? ' match' : ' matches') + (res.semantic ? " · semantic + lexical" : "") + '</div></div></div>'
       + fieldsHtml + valuesHtml + docsHtml + passagesHtml;
 `
 

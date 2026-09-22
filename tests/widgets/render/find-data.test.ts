@@ -32,7 +32,8 @@ describe("find-data widget", () => {
       },
     })
     expect(r.document.querySelectorAll(".plane")).toHaveLength(1)
-    expect(r.text).toContain("1 matches")
+    expect(r.text).toContain("1 match")
+    expect(r.text).not.toContain("1 matches")
   })
 
   it("shows the empty state when nothing matched", () => {

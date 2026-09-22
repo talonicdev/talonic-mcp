@@ -27,7 +27,7 @@ const RENDER_BODY = `
     var top = Array.isArray(vals.top) ? vals.top.slice(0, 8) : [];
     var topHtml = top.map(function (t) {
       t = t && typeof t === "object" ? t : {};
-      var share = typeof t.share === "number" ? Math.round(t.share * 100) : null;
+      var share = typeof t.share === "number" ? Math.max(0, Math.min(100, Math.round(t.share * 100))) : null;
       return '<tr><td class="val mono">' + esc(clamp(fmt(t.value), 60)) + '</td><td class="val num">' + esc(t.count != null ? t.count : "") + '</td><td>'
         + (share == null ? "" : '<span class="bar"><span style="width:' + share + '%"></span></span> <span class="muted small">' + share + '%</span>') + '</td></tr>';
     }).join("");

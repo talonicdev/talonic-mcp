@@ -479,7 +479,13 @@ export function createRequestHandler(
     // is fixed for the request, so a plain provider returning it suffices.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
     const [includeGrowthTools, includeAdminAgentTaskTools] = await Promise.all([
-      (options.growthAccess ?? growthAccessCached)(token),
+      (
+        options.growthAccess ??
+        ((currentToken: string) =>
+          growthAccessCached(currentToken, (candidate) =>
+            probeGrowthAccess(candidate, process.env["TALONIC_BASE_URL"]),
+          ))
+      )(token),
       (
         options.adminAgentTaskAccess ??
         ((currentToken: string) =>
@@ -492,6 +498,7 @@ export function createRequestHandler(
       tokenProvider: () => token,
       includeGrowthTools,
       includeAdminAgentTaskTools,
+      ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
     })
     res.on("close", () => {
       void transport.close()

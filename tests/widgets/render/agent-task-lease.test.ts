@@ -31,6 +31,27 @@ describe("agent-task lease widgets", () => {
     )
   })
 
+  it("survives a malformed payload (claim and heartbeat)", () => {
+    const malformed = {
+      id: 5,
+      status: 3,
+      execution_epoch: "four",
+      lease_expires_at: {},
+      document_id: 1,
+      pipeline_id: 2,
+      phase_index: "x",
+      timeout_at: [1, 2],
+      instructions: 5,
+      output_contract: {},
+      input_snapshot: "not-an-object",
+      timeout_fallthrough: [1],
+    }
+    const claim = renderWidget(getAgentTaskClaimWidgetHtml(), malformed)
+    const heartbeat = renderWidget(getAgentTaskHeartbeatWidgetHtml(), malformed)
+    expect(claim.text.length).toBeGreaterThan(0)
+    expect(heartbeat.text.length).toBeGreaterThan(0)
+  })
+
   it("the two templates differ only in headline", () => {
     const a = getAgentTaskClaimWidgetHtml()
       .replace("Task claimed", "X")

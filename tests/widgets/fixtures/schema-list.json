@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "id": "sch-invoice",
+      "short_id": "SCH-00000001",
+      "name": "Invoice Schema",
+      "description": "Core invoice fields.",
+      "field_count": 6,
+      "version": 3
+    },
+    {
+      "id": "sch-receipt",
+      "short_id": "SCH-00000002",
+      "name": "Receipt Schema",
+      "description": null,
+      "field_count": 4,
+      "version": 1
+    }
+  ],
+  "pagination": { "total": 2, "limit": 50, "has_more": false, "next_cursor": null }
+}

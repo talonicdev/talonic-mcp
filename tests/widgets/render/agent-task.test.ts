@@ -36,4 +36,23 @@ describe("agent-task widget", () => {
   it("shows the empty state", () => {
     expect(renderWidget(getAgentTaskWidgetHtml(), {}).text).toBe("No agent task.")
   })
+
+  it("survives a malformed payload", () => {
+    const r = renderWidget(getAgentTaskWidgetHtml(), {
+      id: 5,
+      status: 7,
+      created_at: 12345,
+      document_id: 999,
+      pipeline_id: [1, 2, 3],
+      phase_index: "two",
+      execution_epoch: "four",
+      lease_expires_at: 123,
+      timeout_at: {},
+      instructions: 42,
+      output_contract: "not-an-array",
+      input_snapshot: [1, 2, 3],
+      timeout_fallthrough: 99,
+    })
+    expect(r.text.length).toBeGreaterThan(0)
+  })
 })

@@ -1,0 +1,32 @@
+{
+  "documents": [
+    {
+      "id": "d0c00001-0000-4000-8000-000000000010",
+      "name": "invoice-0421.pdf",
+      "sourceId": "src-1",
+      "sourceName": "Uploads"
+    }
+  ],
+  "fieldMatches": [
+    {
+      "resolvedFieldId": "fld-total-amount",
+      "displayName": "Total Amount",
+      "matchedValue": "1299.00",
+      "documentCount": 640,
+      "filterable": true,
+      "dataType": "number"
+    }
+  ],
+  "sources": [{ "id": "src-1", "name": "Uploads" }],
+  "schemas": [{ "id": "sch-invoice", "name": "Invoice Schema" }],
+  "fields": [
+    {
+      "id": "fld-vendor-name",
+      "canonicalName": "vendor_name",
+      "displayName": "Vendor Name",
+      "documentCount": 212,
+      "filterable": true,
+      "dataType": "string"
+    }
+  ]
+}

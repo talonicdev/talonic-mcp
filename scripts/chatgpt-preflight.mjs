@@ -37,8 +37,9 @@ try {
     try {
       up = (await fetch(`${base}/health`, { signal: AbortSignal.timeout(1_000) })).ok
     } catch {
-      await sleep(100)
+      up = false
     }
+    if (!up) await sleep(100)
   }
   if (!up) throw new Error(`server did not come up on ${base}\n${logs}`)
 

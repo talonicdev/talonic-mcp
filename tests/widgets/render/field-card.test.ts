@@ -37,4 +37,22 @@ describe("field-card widget", () => {
   it("shows the empty state for an empty payload", () => {
     expect(renderWidget(getFieldCardWidgetHtml(), {}).text).toBe("No field card.")
   })
+
+  it("survives a malformed payload", () => {
+    const r = renderWidget(getFieldCardWidgetHtml(), {
+      id: 5,
+      canonical_name: 123,
+      display_name: 456,
+      data_type: 7,
+      maturity: 42,
+      tier: ["not", "a", "number"],
+      definition: "not an object",
+      occurrence: "not an object",
+      values: { top: "not an array" },
+      usage: "not an object",
+      identity: "not an object",
+      resolution: "not an object",
+    })
+    expect(r.text.length).toBeGreaterThan(0)
+  })
 })

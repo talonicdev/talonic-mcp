@@ -1,0 +1,40 @@
+{
+  "extraction_id": "ext-9001",
+  "request_id": "req-9001",
+  "status": "complete",
+  "document": {
+    "id": "d0c00001-0000-4000-8000-000000000010",
+    "filename": "invoice-0421.pdf",
+    "pages": 2,
+    "size_bytes": 184320,
+    "mime_type": "application/pdf",
+    "type_detected": "invoice",
+    "language_detected": "en"
+  },
+  "data": {
+    "vendor_name": "Musterfirma AG",
+    "invoice_number": "INV-2026-04417",
+    "total_amount": 1299.0,
+    "currency": "EUR"
+  },
+  "schema": {
+    "source": "inline",
+    "id": null
+  },
+  "confidence": {
+    "overall": 0.92,
+    "fields": {
+      "vendor_name": 0.95,
+      "invoice_number": 0.97,
+      "total_amount": 0.88,
+      "currency": 0.99
+    }
+  },
+  "cost": {
+    "costCredits": 12,
+    "costEur": 0.012,
+    "balanceCredits": 48820,
+    "cellsResolvedRegistry": 2,
+    "cellsResolvedAi": 2
+  }
+}

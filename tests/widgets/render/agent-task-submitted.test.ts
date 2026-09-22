@@ -16,4 +16,19 @@ describe("agent-task-submitted widget", () => {
   it("shows the empty state", () => {
     expect(renderWidget(getAgentTaskSubmittedWidgetHtml(), {}).text).toBe("No submission recorded.")
   })
+
+  it("survives a malformed payload", () => {
+    const r = renderWidget(getAgentTaskSubmittedWidgetHtml(), {
+      id: 5,
+      status: 8,
+      submitted_at: {},
+      document_id: 42,
+      pipeline_id: "abc",
+      phase_index: [1],
+      execution_epoch: null,
+      lease_expires_at: 5,
+      timeout_at: 6,
+    })
+    expect(r.text.length).toBeGreaterThan(0)
+  })
 })

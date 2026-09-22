@@ -34,4 +34,17 @@ describe("agent-tools widget", () => {
       "No agent tools are visible to this credential.",
     )
   })
+
+  it("survives a malformed payload", () => {
+    const r = renderWidget(getAgentToolsWidgetHtml(), {
+      tools: [
+        { name: 123, description: 456, impact: 7, capability: true, can_invoke: "yes" },
+        "not-an-object",
+        42,
+      ],
+      invocable_count: "two",
+      totalCount: "lots",
+    })
+    expect(r.text.length).toBeGreaterThan(0)
+  })
 })

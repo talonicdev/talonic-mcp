@@ -1,0 +1,9 @@
+{
+  "currency": "EUR",
+  "credits_per_eur": 1000,
+  "multipliers": { "realtime": 1, "batch": 0.5 },
+  "units": [
+    { "unit": "extract_cell_ai", "label": "AI-resolved cell", "credits": 2, "eur": 0.002, "free": false },
+    { "unit": "extract_cell_registry", "label": "Registry-resolved cell", "credits": 0, "eur": 0, "free": true }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "document_id": "d0c00001-0000-4000-8000-000000000010",
+  "markdown": "# Invoice INV-2026-04417\n\nVendor: Musterfirma AG\nTotal: 1,299.00 EUR",
+  "cost": {
+    "costCredits": 4,
+    "costEur": 0.004,
+    "balanceCredits": 48824,
+    "cellsResolvedRegistry": 0,
+    "cellsResolvedAi": 1
+  }
+}

@@ -69,4 +69,14 @@ describe("agent-tool-result widget", () => {
     })
     expect(oneKey.text).toContain("1 key")
   })
+
+  it("survives a malformed payload", () => {
+    const r = renderWidget(getAgentToolResultWidgetHtml(), {
+      tool: 12345,
+      result: [{ a: { nested: true }, b: [1, 2, 3] }, "string-row", 42],
+      citations: "not-array",
+      artifacts: [{ label: 5, link: 12345 }, "bad"],
+    })
+    expect(r.text.length).toBeGreaterThan(0)
+  })
 })

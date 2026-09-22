@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "document_id": "d0c00001-0000-4000-8000-000000000010",
+      "filename": "invoice-0421.pdf",
+      "fields": { "vendor_name": "Musterfirma AG", "total_amount": 1299.0 }
+    },
+    {
+      "document_id": "d0c00001-0000-4000-8000-000000000011",
+      "filename": "invoice-0422.pdf",
+      "fields": { "vendor_name": "Beispiel GmbH", "total_amount": 430.5 }
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "pagination": { "total": 2, "limit": 50, "has_more": false, "next_cursor": null },
+  "warnings": [
+    {
+      "code": "numeric_op_on_string_field",
+      "message": "total_amount is typed as string; numeric comparisons may not sort correctly.",
+      "field": "total_amount",
+      "suggestion": "Re-type total_amount as number in the schema."
+    }
+  ]
+}
