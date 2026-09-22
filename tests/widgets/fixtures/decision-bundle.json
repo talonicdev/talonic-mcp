@@ -1,0 +1,39 @@
+{
+  "task": {
+    "id": "7d3c0001-0000-4000-8000-000000000001",
+    "run_id": "a9000001-0000-4000-8000-000000000001",
+    "app_id": "app00001-0000-4000-8000-000000000001",
+    "status": "claimed",
+    "execution_epoch": 2,
+    "claimed_by": "external_agent:mcp",
+    "claimed_at": "2026-09-22T09:10:00.000Z",
+    "lease_expires_at": "2099-01-01T00:00:00.000Z",
+    "sla_deadline_at": "2099-01-02T00:00:00.000Z",
+    "lease_seconds": 900
+  },
+  "output_contract": {
+    "type": "object",
+    "required": ["approve"],
+    "properties": {
+      "approve": { "type": "boolean" },
+      "note": { "type": "string" }
+    }
+  },
+  "precedents": [
+    {
+      "task_id": "7d3c0000-0000-4000-8000-000000000000",
+      "outcome": { "approve": true },
+      "rationale": "Vendor known, total under threshold."
+    }
+  ],
+  "package": {
+    "package_kind": "records",
+    "record_count": 3,
+    "page_size": 500,
+    "first_cursor": "eyJvZmZzZXQiOjB9",
+    "documents": [
+      { "document_id": "d0c00001-0000-4000-8000-000000000001", "filename": "invoice-0421.pdf" },
+      { "document_id": "d0c00001-0000-4000-8000-000000000002", "filename": "po-1042.pdf" }
+    ]
+  }
+}

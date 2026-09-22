@@ -49,6 +49,13 @@ export const WIDGET_URIS = {
   getRunResults: "ui://widget/run-results.html",
   ask: "ui://widget/answer.html",
   getAnswer: "ui://widget/answer-polled.html",
+  listDecisionTasks: "ui://widget/decision-task-list.html",
+  claimDecisionTask: "ui://widget/decision-bundle.html",
+  readDecisionPackage: "ui://widget/decision-package.html",
+  heartbeatDecisionTask: "ui://widget/decision-task-heartbeat.html",
+  submitDecisionTask: "ui://widget/decision-task-submitted.html",
+  releaseDecisionTask: "ui://widget/decision-task-released.html",
+  failDecisionTask: "ui://widget/decision-task-failed.html",
 } as const
 
 /** A key of {@link WIDGET_URIS}. @public */
@@ -64,7 +71,7 @@ export const EXTRACTION_RESULT_WIDGET_URI = WIDGET_URIS.extract
 
 /**
  * Public tool name → widget key. This is the single source of truth for
- * "which card does this tool render"; tests derive the 29-tool lock from it.
+ * "which card does this tool render"; tests derive the 36-tool lock from it.
  * Talonic-internal tools (`talonic_growth_*`, `talonic_admin_*`) have no
  * widget and are deliberately absent.
  *
@@ -100,6 +107,13 @@ export const TOOL_WIDGET_KEYS: Readonly<Record<string, WidgetKey>> = {
   talonic_get_run_results: "getRunResults",
   talonic_ask: "ask",
   talonic_get_answer: "getAnswer",
+  talonic_list_decision_tasks: "listDecisionTasks",
+  talonic_claim_decision_task: "claimDecisionTask",
+  talonic_read_decision_package: "readDecisionPackage",
+  talonic_heartbeat_decision_task: "heartbeatDecisionTask",
+  talonic_submit_decision_task: "submitDecisionTask",
+  talonic_release_decision_task: "releaseDecisionTask",
+  talonic_fail_decision_task: "failDecisionTask",
 }
 
 /** Status text ChatGPT shows while a tool runs and once it has finished. @public */
@@ -149,6 +163,16 @@ export const TOOL_INVOCATION_STATUS: Readonly<Record<WidgetKey, ToolInvocationSt
   getRunResults: { invoking: "Loading run results…", invoked: "Run results ready" },
   ask: { invoking: "Asking Talonic over your documents…", invoked: "Answer ready" },
   getAnswer: { invoking: "Checking for the answer…", invoked: "Answer status ready" },
+  listDecisionTasks: { invoking: "Loading decision tasks…", invoked: "Decision tasks listed" },
+  claimDecisionTask: { invoking: "Claiming decision task…", invoked: "Decision task claimed" },
+  readDecisionPackage: { invoking: "Reading the decision package…", invoked: "Package page ready" },
+  heartbeatDecisionTask: { invoking: "Extending the decision lease…", invoked: "Lease extended" },
+  submitDecisionTask: { invoking: "Submitting the decision…", invoked: "Decision submitted" },
+  releaseDecisionTask: { invoking: "Releasing the decision task…", invoked: "Task released" },
+  failDecisionTask: {
+    invoking: "Reporting the task as undecidable…",
+    invoked: "Task failed",
+  },
 }
 
 /**
@@ -212,6 +236,19 @@ export const WIDGET_DESCRIPTIONS: Readonly<Record<WidgetKey, string>> = {
   ask: "Cited answer card: the answer text, verification verdict, source citations, artifacts and credit usage.",
   getAnswer:
     "Polled answer card: the same cited answer with verification and citations, or a still-processing notice.",
+  listDecisionTasks:
+    "Worklist of an External-mode app's decision tasks with status, run, epoch, lease expiry and SLA deadline.",
+  claimDecisionTask:
+    "Claim bundle: the task's lease and epoch, the output contract to satisfy, precedents, and the input-package descriptor with its source documents.",
+  readDecisionPackage:
+    "One page of a claimed task's frozen input package: the records to decide from, page position, and the source documents on the first page.",
+  heartbeatDecisionTask:
+    "Lease card confirming the decision task's lease was extended, with the new expiry and SLA deadline.",
+  submitDecisionTask: "Confirmation that the decision was submitted and verified; the run resumes.",
+  releaseDecisionTask:
+    "Confirmation that the decision task was released back to available for another claimant.",
+  failDecisionTask:
+    "Confirmation that the task was reported undecidable: a Human Review is raised and the app's fallback applies.",
 }
 
 /**

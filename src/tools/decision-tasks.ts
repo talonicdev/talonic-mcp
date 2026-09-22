@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool } from "./_http.js"
 import type { ToolResult } from "./_shared.js"
+import { widgetToolMeta, type WidgetKey } from "../widgets/types.js"
 
 /**
  * External-mode decision-task tools (platform `docs/APPS-SPEC.md` §B4).
@@ -371,9 +372,12 @@ export function registerDecisionTaskTools(
 ): void {
   const invocable = options.invocable !== false
   const describe = (text: string): string => (invocable ? text : NOT_INVOCABLE_PREFIX + text)
-  const meta = invocable
-    ? {}
-    : { _meta: { "talonic/can_invoke": false, "talonic/required_scope": DECIDE_SCOPE } }
+  const metaFor = (key: WidgetKey): { _meta: Record<string, unknown> } => ({
+    _meta: {
+      ...widgetToolMeta(key),
+      ...(invocable ? {} : { "talonic/can_invoke": false, "talonic/required_scope": DECIDE_SCOPE }),
+    },
+  })
 
   server.registerTool(
     "talonic_list_decision_tasks",
@@ -382,7 +386,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.list),
       inputSchema: listInput,
       annotations: { title: "List Decision Tasks", ...READ_ONLY },
-      ...meta,
+      ...metaFor("listDecisionTasks"),
     },
     async (args: ListDecisionTasksArgs) => handleListDecisionTasks(getToken, baseUrl, args),
   )
@@ -393,7 +397,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.claim),
       inputSchema: idInput,
       annotations: { title: "Claim Decision Task", ...MUTATING },
-      ...meta,
+      ...metaFor("claimDecisionTask"),
     },
     async (args: DecisionTaskIdArgs) => handleClaimDecisionTask(getToken, baseUrl, args),
   )
@@ -404,7 +408,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.package),
       inputSchema: packageInput,
       annotations: { title: "Read Decision Package", ...READ_ONLY },
-      ...meta,
+      ...metaFor("readDecisionPackage"),
     },
     async (args: ReadDecisionPackageArgs) => handleReadDecisionPackage(getToken, baseUrl, args),
   )
@@ -415,7 +419,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.heartbeat),
       inputSchema: epochInput,
       annotations: { title: "Heartbeat Decision Task", ...MUTATING },
-      ...meta,
+      ...metaFor("heartbeatDecisionTask"),
     },
     async (args: DecisionTaskEpochArgs) => handleHeartbeatDecisionTask(getToken, baseUrl, args),
   )
@@ -426,7 +430,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.submit),
       inputSchema: submitInput,
       annotations: { title: "Submit Decision Task", ...MUTATING },
-      ...meta,
+      ...metaFor("submitDecisionTask"),
     },
     async (args: SubmitDecisionTaskArgs) => handleSubmitDecisionTask(getToken, baseUrl, args),
   )
@@ -437,7 +441,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.release),
       inputSchema: epochInput,
       annotations: { title: "Release Decision Task", ...MUTATING },
-      ...meta,
+      ...metaFor("releaseDecisionTask"),
     },
     async (args: DecisionTaskEpochArgs) => handleReleaseDecisionTask(getToken, baseUrl, args),
   )
@@ -448,7 +452,7 @@ export function registerDecisionTaskTools(
       description: describe(DESCRIPTIONS.fail),
       inputSchema: failInput,
       annotations: { title: "Fail Decision Task", ...MUTATING },
-      ...meta,
+      ...metaFor("failDecisionTask"),
     },
     async (args: FailDecisionTaskArgs) => handleFailDecisionTask(getToken, baseUrl, args),
   )

@@ -1,0 +1,24 @@
+{
+  "task_id": "7d3c0001-0000-4000-8000-000000000001",
+  "run_id": "a9000001-0000-4000-8000-000000000001",
+  "record_count": 3,
+  "page_size": 2,
+  "documents": [
+    { "document_id": "d0c00001-0000-4000-8000-000000000001", "filename": "invoice-0421.pdf" }
+  ],
+  "data": [
+    {
+      "locator": "cell:inv-0421/total_amount",
+      "field": "total_amount",
+      "value": 1299,
+      "document_id": "d0c00001-0000-4000-8000-000000000001"
+    },
+    {
+      "locator": "cell:po-1042/total_amount",
+      "field": "total_amount",
+      "value": 1299,
+      "document_id": "d0c00001-0000-4000-8000-000000000002"
+    }
+  ],
+  "pagination": { "has_more": true, "next_cursor": "eyJvZmZzZXQiOjJ9" }
+}

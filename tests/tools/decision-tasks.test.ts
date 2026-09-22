@@ -336,12 +336,15 @@ describe("decide-scope listing", () => {
         marked._registeredTools[name].description.startsWith("NOT INVOCABLE IN THIS SESSION"),
       ).toBe(true)
       expect(marked._registeredTools[name].description).toContain("apps:decide")
-      expect(marked._registeredTools[name]._meta).toEqual({
+      expect(marked._registeredTools[name]._meta).toMatchObject({
         "talonic/can_invoke": false,
         "talonic/required_scope": "apps:decide",
       })
+      expect(typeof marked._registeredTools[name]._meta["openai/outputTemplate"]).toBe("string")
       expect(plain._registeredTools[name].description).not.toContain("NOT INVOCABLE")
-      expect(plain._registeredTools[name]._meta).toBeUndefined()
+      expect(plain._registeredTools[name]._meta).toBeDefined()
+      expect(typeof plain._registeredTools[name]._meta["openai/outputTemplate"]).toBe("string")
+      expect(plain._registeredTools[name]._meta).not.toHaveProperty("talonic/can_invoke")
     }
     // Other tools are untouched by the marker.
     expect(marked._registeredTools["talonic_list_agent_tasks"].description).not.toContain(

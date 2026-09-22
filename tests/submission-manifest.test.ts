@@ -20,7 +20,7 @@ const publicTools = Object.keys(server._registeredTools).filter(
 describe("ChatGPT submission manifest mirrors the live public tool surface", () => {
   it("lists exactly the public tools", () => {
     expect(Object.keys(manifest.tools).sort()).toEqual([...publicTools].sort())
-    expect(publicTools).toHaveLength(29)
+    expect(publicTools).toHaveLength(36)
   })
 
   it.each(publicTools)("%s annotations match the server", (name) => {

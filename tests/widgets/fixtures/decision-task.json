@@ -1,0 +1,18 @@
+{
+  "id": "7d3c0001-0000-4000-8000-000000000001",
+  "customer_id": "c0000000-0000-4000-8000-000000000001",
+  "run_id": "a9000001-0000-4000-8000-000000000001",
+  "app_id": "app00001-0000-4000-8000-000000000001",
+  "status": "claimed",
+  "execution_epoch": 2,
+  "input_package_ref": "pkg:run/a9000001",
+  "lease_seconds": 900,
+  "claimed_by": "external_agent:mcp",
+  "claimed_at": "2026-09-22T09:10:00.000Z",
+  "lease_expires_at": "2099-01-01T00:00:00.000Z",
+  "heartbeat_at": "2026-09-22T09:12:00.000Z",
+  "sla_deadline_at": "2099-01-02T00:00:00.000Z",
+  "submitted_at": null,
+  "created_at": "2026-09-22T09:00:00.000Z",
+  "updated_at": "2026-09-22T09:12:00.000Z"
+}

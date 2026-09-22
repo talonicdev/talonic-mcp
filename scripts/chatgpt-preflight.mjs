@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Boots the built hosted server on a free port and checks what ChatGPT's
-// renderer and model will see: tools/list (29 public tools, each with an
+// renderer and model will see: tools/list (36 public tools, each with an
 // outputTemplate + status strings) and every widget template fetched through
 // the UNAUTHENTICATED fast path with a JSON-only Accept header.
 // Usage: npm run build && npm run preflight:chatgpt
@@ -8,7 +8,7 @@ import { spawn } from "node:child_process"
 import { createServer } from "node:net"
 import { setTimeout as sleep } from "node:timers/promises"
 
-const EXPECTED_TOOLS = 29
+const EXPECTED_TOOLS = 36
 
 const port = await new Promise((resolve, reject) => {
   const s = createServer()

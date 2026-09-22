@@ -28,6 +28,15 @@ import { getRunStartedWidgetHtml } from "./run-started.js"
 import { getRunStatusWidgetHtml } from "./run-status.js"
 import { getRunResultsWidgetHtml } from "./run-results.js"
 import { getAnswerWidgetHtml, getAnswerPolledWidgetHtml } from "./answer.js"
+import { getDecisionTaskListWidgetHtml } from "./decision-task-list.js"
+import { getDecisionBundleWidgetHtml } from "./decision-bundle.js"
+import { getDecisionPackageWidgetHtml } from "./decision-package.js"
+import {
+  getDecisionHeartbeatWidgetHtml,
+  getDecisionSubmittedWidgetHtml,
+  getDecisionReleasedWidgetHtml,
+  getDecisionFailedWidgetHtml,
+} from "./decision-task-card.js"
 
 interface WidgetEntry {
   /** MCP resource name. */
@@ -163,6 +172,41 @@ const WIDGET_REGISTRY: Readonly<Record<WidgetKey, WidgetEntry>> = {
     name: "answer-polled-widget",
     title: "Talonic Answer (polled)",
     html: getAnswerPolledWidgetHtml,
+  },
+  listDecisionTasks: {
+    name: "decision-task-list-widget",
+    title: "Talonic Decision Tasks",
+    html: getDecisionTaskListWidgetHtml,
+  },
+  claimDecisionTask: {
+    name: "decision-bundle-widget",
+    title: "Talonic Decision Task Claimed",
+    html: getDecisionBundleWidgetHtml,
+  },
+  readDecisionPackage: {
+    name: "decision-package-widget",
+    title: "Talonic Decision Package",
+    html: getDecisionPackageWidgetHtml,
+  },
+  heartbeatDecisionTask: {
+    name: "decision-task-heartbeat-widget",
+    title: "Talonic Decision Task Lease",
+    html: getDecisionHeartbeatWidgetHtml,
+  },
+  submitDecisionTask: {
+    name: "decision-task-submitted-widget",
+    title: "Talonic Decision Submitted",
+    html: getDecisionSubmittedWidgetHtml,
+  },
+  releaseDecisionTask: {
+    name: "decision-task-released-widget",
+    title: "Talonic Decision Task Released",
+    html: getDecisionReleasedWidgetHtml,
+  },
+  failDecisionTask: {
+    name: "decision-task-failed-widget",
+    title: "Talonic Decision Task Failed",
+    html: getDecisionFailedWidgetHtml,
   },
 }
 

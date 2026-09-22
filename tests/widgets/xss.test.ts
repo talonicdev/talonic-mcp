@@ -7,7 +7,7 @@ import { loadFixture, renderWidget } from "./render/harness"
  * Generic hostile-payload lock: every widget must render a fully-escaped
  * card even when every string in its payload is an XSS attempt. This does
  * not replace the widget-specific tests (which assert real content); it is
- * a blanket net across all 29 widgets so a future widget that forgets `esc()`
+ * a blanket net across all 36 widgets so a future widget that forgets `esc()`
  * fails loudly here.
  */
 const HOSTILE = "<img src=x onerror=window.__pwned=1>\"'<svg/onload=1>"
@@ -59,6 +59,13 @@ const FIXTURE_BY_WIDGET_KEY: Readonly<Record<WidgetKey, string>> = {
   getRunResults: "run-results",
   ask: "answer",
   getAnswer: "answer",
+  listDecisionTasks: "decision-tasks",
+  claimDecisionTask: "decision-bundle",
+  readDecisionPackage: "decision-package",
+  heartbeatDecisionTask: "decision-task",
+  submitDecisionTask: "decision-task",
+  releaseDecisionTask: "decision-task",
+  failDecisionTask: "decision-task",
 }
 
 describe("widget XSS lock: hostile string payloads never inject markup or execute", () => {

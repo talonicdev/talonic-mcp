@@ -1,0 +1,41 @@
+{
+  "data": [
+    {
+      "id": "7d3c0001-0000-4000-8000-000000000001",
+      "run_id": "a9000001-0000-4000-8000-000000000001",
+      "app_id": "app00001-0000-4000-8000-000000000001",
+      "status": "available",
+      "execution_epoch": 1,
+      "claimed_by": null,
+      "claimed_at": null,
+      "lease_expires_at": null,
+      "sla_deadline_at": "2099-01-02T00:00:00.000Z",
+      "created_at": "2026-09-22T09:00:00.000Z"
+    },
+    {
+      "id": "7d3c0002-0000-4000-8000-000000000002",
+      "run_id": "a9000002-0000-4000-8000-000000000002",
+      "app_id": "app00001-0000-4000-8000-000000000001",
+      "status": "claimed",
+      "execution_epoch": 3,
+      "claimed_by": "external_agent:mcp",
+      "claimed_at": "2026-09-22T09:10:00.000Z",
+      "lease_expires_at": "2099-01-01T00:00:00.000Z",
+      "sla_deadline_at": "2099-01-02T00:00:00.000Z",
+      "created_at": "2026-09-22T08:00:00.000Z"
+    },
+    {
+      "id": "7d3c0003-0000-4000-8000-000000000003",
+      "run_id": "a9000003-0000-4000-8000-000000000003",
+      "app_id": "app00001-0000-4000-8000-000000000001",
+      "status": "failed",
+      "execution_epoch": 2,
+      "claimed_by": null,
+      "claimed_at": null,
+      "lease_expires_at": null,
+      "sla_deadline_at": "2026-09-21T00:00:00.000Z",
+      "created_at": "2026-09-20T08:00:00.000Z"
+    }
+  ],
+  "pagination": { "has_more": true, "next_cursor": "opaque" }
+}
