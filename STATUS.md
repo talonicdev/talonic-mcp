@@ -31,7 +31,7 @@ This document captures the live state of the four Talonic developer surfaces: `@
 | Hosted endpoint | `https://mcp.talonic.com` serving 0.1.78; `/health` ok |
 | Tests | `npm test` — 858 tests / 60 files, green (verified 2026-09-22); `npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK" |
 | Format check | clean (verified 2026-09-22) |
-| Typecheck | not re-run this audit (see concerns in the task report) |
+| Typecheck | not re-run this audit (docs-only change; `npm test` and `npm run build` ran clean) |
 | Build | clean (verified 2026-09-22) |
 | docs/sections.json | 50 total entries (36 tool entries + 14); maintained-but-dormant — nothing renders this mirror, but the publish workflow's docs-drift guard requires it to track `src/tools/**` |
 | Tools (local main) | 36 public (22 read-only, 14 write-capable): `talonic_extract`, `talonic_request_upload`, `talonic_to_markdown`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`, `talonic_list_fields`, `talonic_get_field`, `talonic_field_values`, `talonic_find_data`, `talonic_list_agent_tools`, `talonic_invoke_agent_tool`, `talonic_list_agent_tasks`, `talonic_get_agent_task`, `talonic_claim_agent_task`, `talonic_heartbeat_agent_task`, `talonic_submit_agent_task`, `talonic_list_specs`, `talonic_get_spec`, `talonic_run_spec`, `talonic_get_run`, `talonic_get_run_results`, `talonic_ask`, `talonic_get_answer`, `talonic_list_decision_tasks`, `talonic_claim_decision_task`, `talonic_read_decision_package`, `talonic_heartbeat_decision_task`, `talonic_submit_decision_task`, `talonic_release_decision_task`, `talonic_fail_decision_task` — plus 4 `talonic_growth_*` and 5 `talonic_admin_*` superadmin tools, registered only after an access-probe passes, hidden from normal keys and from public docs |
@@ -84,8 +84,6 @@ This document captures the live state of the four Talonic developer surfaces: `@
 4. **Python SDK publish** — PyPI Trusted Publisher config still pending (separate repo, not part of this release).
 5. **Platform-side items to raise with the platform team** (found during the 2026-09-22 live smoke, `npm run smoke:live` — these are platform behaviors, not MCP bugs): a completed 1/1 pipeline returned 0 result rows in both views; `GET /v1/pipelines/{id}/results?run_id=` returned 404 "Run not found on pipeline" for the `run_id` that `POST /v1/pipelines` had itself returned; `talonic_ask` scoped to one document answered workspace-wide and charged 100 credits.
 6. **Follow-ups noted in review:** type raw-fetch registrars as `TokenSource`; JSON-envelope parsing in `toolError` for raw-fetch errors; `docs/sections.json` remains dormant (nothing renders it) — keep mirroring but do not invest further.
-
-The historical follow-up lists below are kept as dated records.
 
 ## Live end-to-end tests against production
 
@@ -205,9 +203,13 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 **Result: verified.** Save returns new UUID and SCH- short id. Agent correctly skips creation when an equivalent schema already exists (defensive behavior from the decision guide). Three audit-created schemas can be cleaned from the dashboard: `Audit Test Receipt v2` (SCH-E98F14F3), `test schema 8b` (SCH-442DE261), `Quick Test` (SCH-727E970D). The earlier `AUDIT_TEST_SCHEMA` (SCH-DC88ABBB) from yesterday's curl test is still present.
 
+The historical follow-up lists below are kept as dated records.
+
 ## Follow-ups (ordered by leverage)
 
 ### Active workstream
+
+> Superseded by "Open items (2026-09-22)" above (the Claude directory process moved to Anthropic's portal); kept as the 2026-05 record.
 
 **Claude Connectors Directory submission (submitted 2026-05-12, awaiting Anthropic review).** Submitted `@talonic/mcp` as a Remote MCP via the form at `https://clau.de/mcp-directory-submission`. Compliance audited against Anthropic's Software Directory Policy, Software Directory Terms, and the pre-submission checklist at `https://claude.com/docs/connectors/building/review-criteria`. Anthropic's status surface in Claude.ai is not yet live; escalate via `mcp-review@anthropic.com` only if no response after two weeks (so on or after 2026-05-26).
 
@@ -268,7 +270,7 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 - [x] Populate the reviewer workspace with sample documents and saved schemas. **Done 2026-05-13.** The reviewer account is `demo-user@talonic.ai` (updated from the original `mcp-reviewer@talonic.ai`); the workspace has the sample documents and schemas a reviewer needs to drive the connector end-to-end.
 - [x] Nudge `https://www.google.com/s2/favicons?domain=mcp.talonic.com&sz=64` from a browser so Google's scraper refreshes; verify the Talonic logo renders within a few hours. **Done 2026-05-13.**
-- [ ] If no response from Anthropic within two weeks (i.e. on or after 2026-05-26), escalate via `mcp-review@anthropic.com`.
+- [ ] If no response from Anthropic within two weeks (i.e. on or after 2026-05-26), escalate via `mcp-review@anthropic.com` — superseded 2026-09-22: see Open items (portal resubmission + escalation email package in `docs/claude-connectors-directory/`).
 
 **References.**
 
@@ -279,7 +281,9 @@ Variants run: direct save with full schema, iterative design with user confirmat
 
 ### Highest-priority unresolved
 
-_None blocking._ The former #1 item — the Claude.ai file-upload cap — is **resolved and verified live** via the browser-handoff flow (`talonic_request_upload`); see the banner at the top and the Resolved section below. Remaining work is optional polish only.
+> Superseded by "Open items (2026-09-22)" above (the Claude directory process moved to Anthropic's portal); kept as the 2026-05 record.
+
+_None blocking._ The former #1 item — the Claude.ai file-upload cap — is **resolved and verified live** via the browser-handoff flow (`talonic_request_upload`); Resolved and shipped (talonic_request_upload 0.1.45, poll-target alignment 0.1.48; verified live 2026-06-03); current open items are in "Open items (2026-09-22)" above. Remaining work is optional polish only.
 
 **Optional polish (non-blocking):**
 
@@ -305,7 +309,7 @@ Next step: re-test option 2's API behavior on the current production surface (`t
 
 ### Distribution
 
-12. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority.
+12. **Glama listing release** (`https://glama.ai/mcp/servers/talonicdev/talonic-mcp`). Build was kicked off; status unknown. Low priority. — resolved: live as of the 2026-09-22 audit (see Surfaces → Directories).
 13. **Cowork plugin submission.** Not yet done. Submission process: similar to a Cursor / Cline directory entry; needs an install snippet (already in the README), a screenshot or icon (use `Logo 400px.png`), and a short description (use the Connectors Directory tagline: "Extract validated structured data from any doc").
 14. **Done:** Cursor Directory (live), Smithery (live, `https://smithery.ai/servers/talonic/talonic`), mcp.so (live), Glama listing page (live; Inspector previously failed at the Glama proxy because clients were hitting `/` instead of `/mcp` — fixed 0.1.37, see [Resolved 2026-05-18](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain)), Official MCP Registry (live; CI auto-publish wired 2026-05-18; catches up from 0.1.28 → latest on next workflow run).
 
