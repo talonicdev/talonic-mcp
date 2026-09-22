@@ -403,3 +403,201 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ```
 
 ---
+
+### Task 3: Review-criteria wording on `talonic_invoke_agent_tool` and `talonic_list_agent_tools`
+
+**Files:**
+- Modify: `src/tools/agent-tools.ts` (`INVOKE_DESCRIPTION`, `LIST_TOOLS_DESCRIPTION`), `src/content/sections/tools.ts` (the `talonic-invoke-agent-tool` and `talonic-list-agent-tools` sections), `docs/sections.json` (the two mirror entries), `tests/tools/descriptions.test.ts`
+
+- [ ] **Step 1: Failing test** — append to `tests/tools/descriptions.test.ts` (inside the existing `describe("tool descriptions are tight and decision-oriented")` or as a new describe):
+
+```ts
+describe("Anthropic review criteria — custom-query tools name their API and their read-only guarantee", () => {
+  const d = descriptions()
+  it("invoke_agent_tool states the platform's read-only restriction for API keys and links the API docs", () => {
+    expect(d["talonic_invoke_agent_tool"]).toMatch(/read-only/i)
+    expect(d["talonic_invoke_agent_tool"]).toContain("data.read")
+    expect(d["talonic_invoke_agent_tool"]).toContain("https://talonic.com/docs/api")
+    expect(d["talonic_invoke_agent_tool"]).toContain("/v1/agent/tools/{name}/invoke")
+  })
+  it("list_agent_tools links the API docs", () => {
+    expect(d["talonic_list_agent_tools"]).toContain("https://talonic.com/docs/api")
+  })
+  it.each(["talonic_invoke_agent_tool", "talonic_list_agent_tools"])("%s stays under the length budget", (name) => {
+    expect(d[name].length).toBeLessThanOrEqual(1500)
+  })
+})
+```
+
+Run: `npx vitest run tests/tools/descriptions.test.ts` → FAIL (3 new assertions).
+
+- [ ] **Step 2: Descriptions** — in `src/tools/agent-tools.ts`:
+
+`INVOKE_DESCRIPTION`: after the first (WHAT) line insert two lines:
+
+```ts
+  "READ-ONLY BY CONSTRUCTION: API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential, so this tool reads and never mutates workspace data.",
+  "Target API: Talonic agent tool registry — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
+```
+
+`LIST_TOOLS_DESCRIPTION`: after the first line insert:
+
+```ts
+  "Target API: https://talonic.com/docs/api (GET /v1/agent/tools).",
+```
+
+If either description now exceeds 1500 characters, shorten its `RETURNS:` line (keep field names, drop prose) until it fits; report the final lengths.
+
+- [ ] **Step 3: Mirror the wording** — in `src/content/sections/tools.ts` add, to the `talonic-invoke-agent-tool` section's first paragraph, the sentence "API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential." and a `callout` block (variant "info") "Target API: [Talonic API reference](https://talonic.com/docs/api) — `POST /v1/agent/tools/{name}/invoke`." Add the equivalent one-line callout to `talonic-list-agent-tools`. Apply the same two edits to the matching entries in `docs/sections.json` (`mcp-talonic-invoke-agent-tool`, `mcp-talonic-list-agent-tools`) by hand (JSON, 2-space indent) — this is a real doc content change, so this commit needs NO `[skip docs]`.
+
+- [ ] **Step 4: Run** — `npx vitest run tests/tools/descriptions.test.ts tests/content` → PASS. `npm run typecheck && npm run format && npm test` → green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/tools/agent-tools.ts src/content/sections/tools.ts docs/sections.json tests/tools/descriptions.test.ts
+git commit -m "docs(tools): invoke/list agent tools state the read-only capability restriction and name the target API (Anthropic review criteria)
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 4: Claude Connectors Directory resubmission package
+
+**Files:**
+- Create: `docs/claude-connectors-directory/README.md`, `docs/claude-connectors-directory/resubmission-2026-09.md`, `docs/claude-connectors-directory/escalation-email.md`
+
+- [ ] **Step 1: Facts to pull first (read-only):** the OAuth answers Anthropic already has — `STATUS.md` section "Claude Connectors Directory submission (submitted 2026-05-12…)" → "Form inputs as submitted" (around lines 243–300): copy the Authentication answers verbatim into the package. Verify the endpoints still respond: `curl -s https://mcp.talonic.com/.well-known/oauth-protected-resource` (expect JSON with `authorization_servers`) and `curl -s -o /dev/null -w '%{http_code}' https://talonic.com/privacy` (200). Count the current public tools and split read/write from `tests/widgets/tool-annotations.test.ts`'s lists (20 read-only, 9 write-capable after sub-project 2).
+
+- [ ] **Step 2: `README.md`**
+
+```md
+# Claude Connectors Directory — submission collateral
+
+Sibling of `../chatgpt-apps-sdk/` (the ChatGPT App Directory record). This folder holds what Anthropic's submission portal asks for, pre-filled from the live server, so a resubmission is a copy-paste exercise.
+
+- `resubmission-2026-09.md` — every portal step with our answers (portal: https://claude.ai/admin-settings/directory/submissions/new — Team/Enterprise Owner only).
+- `escalation-email.md` — the note to `mcp-review@anthropic.com` about the stranded 2026-05-12 legacy-form submission (slug `pending-talonic`).
+
+Process facts (from claude.com/docs/connectors, fetched 2026-09-22): a submitted server is scanned automatically and listed as a **Community** connector by default; **Verified** review is escalated automatically for highly useful servers. Status and reviewer feedback live in the submissions dashboard (https://claude.ai/admin-settings/directory/submissions); the URL slug is permanent once published. Update this folder whenever the tool surface, listing text, docs URL or privacy URL changes; the tool list itself syncs from the live server at submission time.
+```
+
+- [ ] **Step 3: `resubmission-2026-09.md`** — write the full document with these sections and pre-filled answers (fill the counts from Step 1):
+
+```md
+# Claude Connectors Directory — resubmission package (2026-09)
+
+Prepared 2026-09-22 against `@talonic/mcp` 0.1.77 (local `main`; publish before submitting so the portal syncs 29 tools). Portal: https://claude.ai/admin-settings/directory/submissions/new. Pre-submission checklist: https://claude.com/docs/connectors/building/review-criteria.
+
+## 0. Before you open the portal
+- [ ] Release 0.1.77 is live (`curl -s https://mcp.talonic.com/health` shows the version).
+- [ ] `npm run preflight:chatgpt` and `npm run smoke:live` green on that build.
+- [ ] Test account: a Talonic workspace with a populated corpus (≥ 20 processed documents, ≥ 1 published Spec, a saved schema) and an API key — Anthropic requires "a fully populated account". Credentials go in step 9, never in this repo.
+- [ ] Icon: `Logo 400px.png` (square PNG; Hamlet has it — path outside this repo).
+
+## 1. Connection
+- Server URL: `https://mcp.talonic.com/mcp` (Streamable HTTP; the root `/` also serves MCP).
+- Transport: Streamable HTTP.
+- How users reach the server: **Universal URL** (one URL for everyone).
+
+## 2. Tools (auto-synced from the server)
+29 public tools, every one with `title`, `readOnlyHint` and `destructiveHint` (Anthropic's portal groups by these). Read-only (20): list_schemas, get_document, search, filter, get_balance, get_pricing, get_usage, list_fields, get_field, field_values, find_data, list_agent_tools, invoke_agent_tool (pass-through restricted by the platform to `data.read` tools — description states it), list_agent_tasks, get_agent_task, list_specs, get_spec, get_run, get_run_results, get_answer. Write (9): extract, request_upload, to_markdown (ingests when given a file), save_schema, claim_agent_task, heartbeat_agent_task, submit_agent_task, run_spec, ask. None destructive. Internal `talonic_growth_*` / `talonic_admin_*` tools are probe-gated and will not appear for the test account.
+
+## 3. Listing
+- Server name (≤ 100): **Talonic**
+- Tagline (≤ 55): **Extract validated structured data from any document** (50 chars)
+- Description (≤ 2000): [write ~1200 chars: what Talonic is (document → schema-validated JSON with confidence + provenance), what the connector lets Claude do (extract from any PDF/scan/image/DOCX; search/filter the workspace; run the customer's configured Spec pipelines; ask cited questions over the corpus; manage schemas; check credits/pricing), the browser-handoff upload for large files, free tier, hosted at mcp.talonic.com with OAuth 2.1, docs at talonic.com/docs/mcp. No internal metrics, no customer names.]
+- Categories (1–5): Productivity; Developer Tools; Data & Analytics (choose the portal's closest labels).
+- Documentation URL: `https://talonic.com/docs/mcp`
+- Privacy policy URL: `https://talonic.com/privacy`
+- Support contact: `info@talonic.ai`
+- Icon: `Logo 400px.png`
+- URL slug: `talonic` (permanent once published; the legacy submission holds `pending-talonic` — if the portal refuses `talonic`, use `talonic-mcp` and note it here).
+
+## 4. Use cases
+1. Turn a PDF, scan or photo into schema-validated JSON (with confidence and source provenance) in the chat, or via the browser upload link for files over the hosted size cap.
+2. Work the workspace: search and filter documents by extracted values, read field values across documents, explore the Field Registry.
+3. Run the customer's own configured pipeline (Spec) over documents and ask cited questions across the corpus.
+- Prerequisites: a Talonic account (free tier available) — users authenticate with OAuth in Claude or paste an API key for local installs.
+- Reads and writes data: **both** (writes = extraction runs, saved schemas, Spec runs, agent-task leases/submissions).
+
+## 5. Company
+Talonic — https://talonic.com — primary contact pre-filled from the account (Hamlet Hayrapetyan, Head of Product).
+
+## 6. Authentication
+OAuth 2.1 — copy the answers recorded in `STATUS.md` ("Form inputs as submitted", 2026-05-12) here verbatim: [paste], and confirm `https://mcp.talonic.com/.well-known/oauth-protected-resource` still returns the authorization server (`https://api.talonic.com`). No per-tool on-demand auth.
+
+## 7. Data handling
+- Underlying API: **our own** (api.talonic.com).
+- Personal health data: no (customers may upload documents of their choosing; Talonic does not target PHI).
+- Sponsored content: no.
+
+## 8. Allowed link URIs
+- `https://app.talonic.com` (the `talonic_request_upload` browser-handoff page and `app_url` citations)
+- `https://talonic.com` (docs links)
+
+## 9. Test & launch
+- Test account instructions text: [write the step list a reviewer follows: sign in / connect via OAuth with the provided credentials; the workspace already contains documents; suggested prompts per tool group — one per the 29 tools, reusing `chatgpt-app-submission.json`'s test cases].
+- Credentials: entered in the portal only.
+- Confirmation that every tool was exercised: MCP Inspector pass (record date + who) and the Claude.ai custom-connector test (record date).
+
+## 10. Compliance (seven acknowledgements)
+Directory guidelines; first-party API; no financial transactions; no AI media generation; no prompt-injection patterns in tool descriptions (our descriptions describe the tool and redirect to sibling tools only); no conversation-data collection beyond the tool call; public documentation exists. All true — tick all seven.
+
+## 11. After submitting
+Track at https://claude.ai/admin-settings/directory/submissions. Expect a Community listing after the automated scan; Verified review is Anthropic's call. Do not resubmit while pending. Escalations: `mcp-review@anthropic.com`.
+```
+
+Write the Description and the Test-account instruction text out in full (no placeholders); keep them free of internal metrics and customer names.
+
+- [ ] **Step 4: `escalation-email.md`**
+
+```md
+Subject: Legacy directory submission "Talonic" (slug pending-talonic) — resubmit via portal or advance?
+
+Hello Anthropic MCP review team,
+
+We submitted the Talonic remote MCP server (https://mcp.talonic.com) to the Connectors Directory through the original form on 2026-05-12. In the new submissions dashboard it appears as "Talonic (legacy form submission)", slug pending-talonic, review state "In review", health "Not live", and it has not moved since.
+
+Since then the server has grown from 11 to 29 public tools — all with titles and read-only/destructive hints, every tool functionally tested — with OAuth 2.1, public documentation (https://talonic.com/docs/mcp), a privacy policy (https://talonic.com/privacy) and a security disclosure channel (safety@talonic.ai). It is already live in the ChatGPT App Directory and the official MCP Registry.
+
+Could you tell us whether the legacy entry can be advanced, or whether we should withdraw it and resubmit through the portal (we have the full submission prepared)? If the slug "talonic" can be released for the new submission, that would be ideal.
+
+Thank you,
+Hamlet Hayrapetyan — Head of Product, Talonic (hamlet@talonic.ai)
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/claude-connectors-directory
+git commit -m "docs(directory): Claude Connectors Directory resubmission package + escalation email
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 5: Consistency sweep and final verification
+
+- [ ] **Step 1: Sweep** — run and fix every present-tense hit (leave dated history):
+
+```bash
+rg -n -i -E "\b(eleven|sixteen|twenty-two)\b|\b(11|16|22) (public )?tools\b|0\.1\.7[0-6]\b" README.md AGENTS.md CLAUDE.md STATUS.md docs/*.md docs/architecture docs/chatgpt-apps-sdk/*.md src/content/sections docs/sections.json smithery.yaml glama.json mcp.json server.json 2>/dev/null
+```
+
+Rules: `server.json`/`package.json` versions are managed by CI — do not edit. `docs/chatgpt-apps-sdk/submission-record.md` history stays; its top summary (if any) says 29. `STATUS.md` "Resolved …" sections stay. Anything else that states the CURRENT count/version wrong → fix.
+
+- [ ] **Step 2: Final verification** — `npm run typecheck && npm run format:check && npm test && npm run build && npm run preflight:chatgpt` → all green; record the totals. `git status --short` → clean (only intended changes committed).
+
+- [ ] **Step 3: Commit** (only if the sweep changed files)
+
+```bash
+git add -u README.md AGENTS.md CLAUDE.md STATUS.md docs src/content
+git commit -m "docs: consistency sweep — 29 tools everywhere, no stale versions
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+**Do not push.** Report: commits, the sweep's before/after hit counts, final test totals, preflight line, and the exact list of what Hamlet must do himself (push = release; portal steps 0, 3-icon, 6-verify, 9-credentials; send the email).
