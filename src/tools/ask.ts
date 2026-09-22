@@ -136,10 +136,21 @@ export async function handleAsk(
     const start = now()
     const deadline = start + waitS * 1000
     for (;;) {
-      const pollTimeoutMs = Math.max(1000, Math.min(15000, deadline - now()))
-      const body = await apiJson<AskPollResponse>(getToken, baseUrl, "GET", pollPath, {
-        signal: AbortSignal.timeout(pollTimeoutMs),
-      })
+      const pollTimeoutMs = Math.max(5000, Math.min(15000, deadline - now()))
+      let body: AskPollResponse
+      try {
+        body = await apiJson<AskPollResponse>(getToken, baseUrl, "GET", pollPath, {
+          signal: AbortSignal.timeout(pollTimeoutMs),
+        })
+      } catch {
+        // The ask keeps running server-side and credits are already spent —
+        // a poll failure (e.g. this abort budget) must not lose the ask_id.
+        return {
+          ...withHint({ status: "processing", ask_id: created.ask_id }),
+          ask_id: created.ask_id,
+          waited_ms: now() - start,
+        }
+      }
       const t = now()
       if (body.status !== "processing" || t >= deadline) {
         return { ...withHint(body), ask_id: body.ask_id ?? created.ask_id, waited_ms: t - start }

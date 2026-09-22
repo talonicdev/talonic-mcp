@@ -4,7 +4,7 @@
     "parentSlug": "mcp-overview",
     "title": "Introduction",
     "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. thirty-six public tools and two resources for structured document extraction via the Model Context Protocol.",
+    "description": "Official Talonic MCP server for AI agents. Thirty-six public tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
@@ -16,7 +16,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other thirty-five public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), the Agent-stage list, fetch, claim, heartbeat and submit lifecycle, Spec runs (list/get/run a Spec, poll it, read its rows) and cited question answering over the workspace."
+        "text": "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. The other thirty-five public tools cover browser-handoff upload, workspace search and filtering, document metadata and OCR markdown, schema management, balance, pricing and usage, the Field Registry as a source of truth (list, concept card, values across documents, find-data by meaning, and the platform agent tool registry), the Agent-stage list, fetch, claim, heartbeat and submit lifecycle, the External-mode decision-task protocol for Talonic Apps (list an app's inbox, claim, read the frozen input package, heartbeat, submit, release, fail), Spec runs (list/get/run a Spec, poll it, read its rows) and cited question answering over the workspace."
       },
       {
         "type": "callout",

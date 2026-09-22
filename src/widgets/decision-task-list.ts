@@ -20,7 +20,7 @@ const RENDER_BODY =
         + '<td class="val">' + esc(t.lease_expires_at ? relTime(t.lease_expires_at) : "—") + '</td>'
         + '<td class="val">' + esc(t.sla_deadline_at ? relTime(t.sla_deadline_at) : "—") + '</td></tr>';
     }).join("");
-    var counts = {};
+    var counts = Object.create(null);
     rows.forEach(function (t) { var s = t && typeof t === "object" && t.status ? t.status : "unknown"; counts[s] = (counts[s] || 0) + 1; });
     var summary = Object.keys(counts).map(function (s) { return chip(counts[s] + " " + s, decisionTone(s)); }).join("");
     var app = rows[0] && typeof rows[0] === "object" ? rows[0].app_id : null;

@@ -95,7 +95,16 @@ const runRefInputSchema = {
 }
 
 const resultsInputSchema = {
-  ...runRefInputSchema,
+  run_id: uuid
+    .optional()
+    .describe(
+      "The RunEnvelope's run_id. Alone: a run_kind 'run' submission (/v1/run). With pipeline_id: scopes the pipeline's rows to that submission.",
+    ),
+  pipeline_id: uuid
+    .optional()
+    .describe(
+      "The RunEnvelope's pipeline_id (run_kind 'pipeline'); rows come from /v1/pipelines/{id}/results.",
+    ),
   document_id: uuid.optional().describe("Restrict to one document."),
   include: z
     .array(z.enum(["cells", "provenance"]))
@@ -328,7 +337,8 @@ export async function handleGetRunResults(
 ): Promise<ToolResult> {
   const hasPipe = typeof args.pipeline_id === "string" && args.pipeline_id.length > 0
   const hasRun = typeof args.run_id === "string" && args.run_id.length > 0
-  if (!hasPipe && !hasRun) return validationError("provide exactly one of run_id or pipeline_id.")
+  if (!hasPipe && !hasRun)
+    return validationError("provide pipeline_id (optionally with run_id) or run_id.")
   return runTool(async () => {
     const kind: "pipeline" | "run" = hasPipe ? "pipeline" : "run"
     const params: QueryParams = {

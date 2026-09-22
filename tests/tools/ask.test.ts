@@ -185,6 +185,115 @@ describe("talonic_ask", () => {
     expect((res as any).isError).toBe(true)
     expect(calls).toHaveLength(0)
   })
+
+  /** Sequenced fetch whose GET (but never POST) throws on the nth GET call. */
+  function stubGetFailsOnNth(rejectOnNthGet: number) {
+    const calls: Call[] = []
+    let g = 0
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init: RequestInit) => {
+        calls.push({ url, init })
+        if (init.method === "POST")
+          return jsonResponse(
+            {
+              ask_id: ASK,
+              status: "processing",
+              poll_url: `/v1/ask/${ASK}`,
+              conversation_id: CONV,
+            },
+            202,
+          )
+        g++
+        if (g === rejectOnNthGet)
+          throw Object.assign(new Error("aborted"), { name: "TimeoutError" })
+        return jsonResponse(PROCESSING)
+      }),
+    )
+    return calls
+  }
+
+  it("returns the processing envelope, not an error, when the final poll GET aborts", async () => {
+    // wait_seconds: 4 with a 2s poll interval means the 3rd GET lands exactly
+    // at the deadline — the one whose ~1s-old budget used to abort.
+    const calls = stubGetFailsOnNth(3)
+    let t = 0
+    const res = await handleAsk(
+      getToken,
+      undefined,
+      { question: "q", wait_seconds: 4 },
+      {
+        sleep: async (ms) => {
+          t += ms
+        },
+        now: () => t,
+      },
+    )
+    expect((res as any).isError).toBeUndefined()
+    const body = parsed(res)
+    expect(body.ask_id).toBe(ASK)
+    expect(body.status).toBe("processing")
+    expect(body.poll_hint).toMatch(/talonic_get_answer/)
+    expect(body.waited_ms).toBe(4000)
+    expect(calls.filter((c) => c.init.method !== "POST")).toHaveLength(3)
+  })
+
+  it("survives a GET that aborts on the very first poll — ask_id still comes back", async () => {
+    const calls = stubGetFailsOnNth(1)
+    let t = 0
+    const res = await handleAsk(
+      getToken,
+      undefined,
+      { question: "q", wait_seconds: 30 },
+      {
+        sleep: async (ms) => {
+          t += ms
+        },
+        now: () => t,
+      },
+    )
+    expect((res as any).isError).toBeUndefined()
+    const body = parsed(res)
+    expect(body.ask_id).toBe(ASK)
+    expect(body.status).toBe("processing")
+    expect(body.waited_ms).toBe(0)
+    expect(calls.filter((c) => c.init.method !== "POST")).toHaveLength(1)
+  })
+
+  it("still returns a tool error when the initial POST itself rejects (no ask_id exists yet)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        if (init.method === "POST") throw new Error("network down")
+        throw new Error("should never GET without an ask_id")
+      }),
+    )
+    const res = await handleAsk(getToken, undefined, { question: "q" })
+    expect((res as any).isError).toBe(true)
+    expect(res.content[0].text).toMatch(/network down/)
+  })
+
+  it("raises the per-poll AbortSignal timeout floor to 5000 ms (was 1000), even with little wait left", async () => {
+    stubSequence([PROCESSING])
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout")
+    let t = 0
+    await handleAsk(
+      getToken,
+      undefined,
+      { question: "q", wait_seconds: 1 },
+      {
+        sleep: async (ms) => {
+          t += ms
+        },
+        now: () => t,
+      },
+    )
+    // calls[0] is the POST's fixed 15000 ms budget; the rest are the GET polls.
+    const pollTimeouts = timeoutSpy.mock.calls.slice(1).map((c) => c[0])
+    expect(pollTimeouts.length).toBeGreaterThan(0)
+    for (const ms of pollTimeouts) expect(ms).toBeGreaterThanOrEqual(5000)
+    timeoutSpy.mockRestore()
+  })
 })
 
 describe("talonic_get_answer", () => {

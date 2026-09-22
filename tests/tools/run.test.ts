@@ -387,6 +387,7 @@ describe("talonic_get_run_results", () => {
   it("rejects both ids missing", async () => {
     const res = await handleGetRunResults(getToken, undefined, {} as any)
     expect((res as any).isError).toBe(true)
+    expect(res.content[0].text).toMatch(/provide pipeline_id \(optionally with run_id\) or run_id/)
   })
 
   it("pipeline_id + run_id -> GET /v1/pipelines/{id}/results?view=documents&run_id=... scoped to one submission", async () => {
