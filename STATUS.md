@@ -3,120 +3,89 @@
 > **📐 Architecture map for docs:** `docs/architecture/docs-pipeline.md` is the canonical reference for how content flows from this repo (and from `talonic-node` + platform) into `talonic.com/docs/*`. Read it before any non-trivial doc change — the repo carries two parallel docs surfaces feeding *different* parts of the website, and editing the wrong one is a silent no-op. The doc covers the end-to-end pipeline, the four-file checklist for adding a new MCP tool, the failure-mode table, and the CI token map.
 
 
-> **✅ SHIPPED & VERIFIED LIVE 2026-06-03 — Browser-handoff file upload (`talonic_request_upload`).**
-> The Claude.ai file-upload blocker is **solved end-to-end in production.** Background: the 2026-05-20→27 measurement burst established two hard, structural limits on hosted connectors — (1) tool-call arguments truncate at **~32 KB decoded / ~43 KB base64** (not the long-assumed "~1 KB"); (2) the agent sandbox **cannot PUT out-of-band** (egress allowlist; `*.amazonaws.com` → 403). The fix is **browser-handoff**: `talonic_request_upload` returns a tokenised `app.talonic.com/u/<token>` link, the user drops the file in their own browser, the upload enqueues extraction, and the agent polls `talonic_get_document` until `status === "completed"` before calling `talonic_extract`.
->
-> **Shipped:** MCP tool `talonic_request_upload` (0.1.46), poll-target alignment + tests (0.1.47), null-tolerant `get_document` outputSchema + hardened polling guidance (0.1.49), MCP-docs propagation (0.1.50). Platform: `POST /v1/documents/upload-session` + public `POST /v1/upload/:token` + `pending_upload` status + enqueue-on-upload + GC (platform `6625b38a`, `3f7cf402`). Web: `app/u/[token]/page.tsx`.
->
-> **Verified 2026-06-03:** full flow reproduced live (request_upload → browser upload → `queued → extracting → completed` → schema extract returns correct data) and confirmed in a real Claude.ai chat. Note: end-to-end latency is a few minutes (worker pickup + the ~155 s exhaustive field-capture step); the agent polls patiently and it completes. Optional future polish (not blocking): a light OCR-only path for handoff uploads to cut latency, and hardening the early-extract race. Full record: `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
-
-**Last audit:** 2026-06-03 (documentation refresh — README/AGENTS/CLAUDE/CHANGELOG/STATUS + MCP docs surface brought in line with the shipped 9-tool surface and the verified browser-handoff flow). Earlier full audit: 2026-05-19. **Audited by:** Claude (assisting Hamlet). **Scope:** sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
+**Last audit:** 2026-09-22 (full re-audit: 36 tools / 36 widgets, the Specs/Run/Ask and decision-task tool sets, 0.1.78 live on npm/Registry/hosted-endpoint, directory status, changelog-anchored release history, open items). Earlier: 2026-06-03, 2026-05-19. **Audited by:** Claude (assisting Hamlet). **Scope:** sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
 
 This document captures the live state of the four Talonic developer surfaces: `@talonic/mcp`, `@talonic/node`, the website, and the official MCP Registry. Update before each release.
 
 ## TL;DR
 
-`@talonic/mcp` is at **0.1.71** on npm, `@talonic/node` is at **0.1.23** on npm. **All 11 MCP tools and 2 resources** are stable in production via both stdio and the hosted endpoint. OAuth 2.1 connector flow on Claude.ai is live and verified. The hosted MCP endpoint serves Streamable HTTP at both `/` and `/mcp`; `mcp-publisher` and `gh release create` are wired into the publish workflow via GitHub OIDC; `talonic_filter` surfaces the API `warnings` array and the preventive `dataType` guard closes the schema-typing footgun end-to-end. **The Claude.ai file-upload blocker is solved and verified live (2026-06-03):** `talonic_request_upload` implements the browser-handoff flow (see the banner above). **Every one of the 11 tools now renders a branded ChatGPT Apps SDK widget** — the two metering tools (`talonic_get_pricing`, `talonic_get_usage`, added post-approval in 0.1.67) received their widgets in the 2026-07-07 alignment pass, restoring full one-widget-per-tool parity. Everything is resolved or operational; remaining items are optional polish (handoff latency, early-extract race hardening).
+**Re-audited 2026-09-22.** `@talonic/mcp` **0.1.78** is live on npm, on the official MCP Registry (`io.github.talonicdev/talonic-mcp`, isLatest 0.1.78, published 2026-09-22T16:37:58Z), and on `mcp.talonic.com` (`/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`). Local `main` (`dc56b95`) is **44 commits ahead of `origin/main`**, unpublished — a push to `main` is a release and waits for Hamlet's go; the next push publishes **0.1.79**. Local main carries **36 public tools** (22 read-only, 14 write-capable; superadmin growth/admin tools stay hidden behind an access probe), one ChatGPT Apps SDK widget per tool (36/36), Apps SDK status/description metadata everywhere, User-Agent surface tagging on every outbound call, the Specs / Run / Ask tool set, the seven `talonic_*_decision_task` tools for External-mode Apps, docs on both surfaces for all 36 tools, a 36-tool ChatGPT submission manifest, and a preflight script that checks `tools/list` plus every widget template the way ChatGPT does (`npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK"). `npm test` — 858 tests / 60 files, green; `npm run format:check` clean; `npm run build` clean. Release history is complete and tag-accurate in `CHANGELOG.md` (0.1.53 → 0.1.78, plus everything recorded back to 0.1.3). The Claude.ai file-upload blocker that used to have its own banner at the top of this file was solved by `talonic_request_upload`, shipped in **0.1.45** (2026-05-27), with the poll-target alignment (poll for `completed`, not `uploaded`) landing in **0.1.48** (2026-05-28) — 0.1.46 and 0.1.47 were bump-only re-publishes with no code change; full record in `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
 
-**Headline changes since the previous audit:**
+**Headline changes since the previous audit (2026-06-03):**
 
-0. **Hosted MCP now serves Streamable HTTP at `/` and `/mcp`** (0.1.37). The root path discriminates by method/Accept: plain `GET /` still returns the discovery JSON, but POST/DELETE and SSE GETs at `/` route through the same transport that serves `/mcp`. Closes a class of bug where directory listings (Glama's hosted MCP Inspector, etc.) register the bare origin and receive the discovery JSON when they expect a JSON-RPC frame. Verified against an isolated `http.Server` harness in `tests/http-server.test.ts`.
-0. **`mcp-publisher` chained into the publish workflow** (commit `1e87668`). Authenticates via GitHub Actions OIDC (`id-token: write`, `mcp-publisher login github-oidc`); both install + publish steps run with `continue-on-error: true` so a Registry hiccup never blocks the website / platform-docs rebuilds. Pinned to `mcp-publisher v1.7.9`. The chain fires on the next change matching `paths: src/** | docs/** | package.json`; until then, the Registry remains at 0.1.28.
-1. **`talonic_get_balance` tool shipped** (0.1.25). Wraps `GET /v1/credits/balance` so agents can make budget-aware decisions. Tool count: 7 → 8.
-2. **Per-call `cost` block** on `talonic_extract` and `talonic_to_markdown` responses (0.1.25). Parsed from the API's `X-Talonic-Cost-*` headers by `@talonic/node@0.1.10+`.
-3. **`is_not_empty` filter operator re-exposed** (0.1.29). The upstream materialized-values index now updates within seconds of extraction.
-4. **OAuth 2.1 hosted-MCP path** complete with per-request bearer extraction, `/.well-known/oauth-protected-resource`, `WWW-Authenticate` header, and token rotation (shipped 0.1.18–0.1.19; verified end-to-end on Claude.ai 2026-05-08).
-5. **Compliance hardening for the Claude Connectors Directory submission** (0.1.34–0.1.35): Origin-header allowlist (DNS-rebinding mitigation), `SECURITY.md` with `safety@talonic.ai` disclosure channel and 30-day fix target, and `/favicon.ico` + `/favicon.png` served from the hosted MCP.
-6. **Three QA-reported `-32602 Output validation error` failures fixed** (0.1.22–0.1.23): `description`, `mime_type`, and `fields[].id` accept `null` where the API legitimately returns it. Regression tests added.
-
-**Older follow-ups still open:**
-
-- ~~**Pre-signed upload URLs / browser-handoff.**~~ **SHIPPED & VERIFIED LIVE 2026-06-03.** Delivered as `talonic_request_upload` (MCP, 0.1.46–0.1.50) plus the platform `upload-session` + public file-receiver endpoints and the `app.talonic.com/u/<token>` page. Full flow reproduced end-to-end and confirmed in a real Claude.ai chat. See the banner at the top of this file and `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`. Only optional polish remains (handoff latency, early-extract race).
-- **Cowork (Claude Cowork) directory submission.** Not yet done.
-
-**Resolved since the previous audit:**
-
-- Hosted MCP root-path routing: `POST /` and `DELETE /` (and `GET /` with `Accept: text/event-stream`) now route through the same transport as `/mcp`. Plain `GET /` still returns discovery JSON. Shipped 0.1.37 (commit `2cf0c43`). See [Resolved 2026-05-18: hosted MCP at root + Registry CI chain](#resolved-2026-05-18-hosted-mcp-at-root--registry-ci-chain).
-- `mcp-publisher` chained into `.github/workflows/publish.yml` via GitHub OIDC (commit `1e87668`). Verified end-to-end on 2026-05-18: Registry now auto-tracks npm; current Registry isLatest is 0.1.44.
-- Auto-create GitHub Releases on bump wired into `publish.yml` (commit `c18f652`). Verified by six successful Releases (v0.1.39 → v0.1.44) cut during the 2026-05-18 dispatch-token testing burst. Glama and other surfaces that track GitHub Releases now stay current automatically.
-- Schema-typing footgun option 1 shipped: `warnings` field added to `talonic_filter`'s outputSchema (`src/tools/filter.ts`), plus a tool-description nudge telling agents to surface `warnings[].message` (and `suggestion`, when present) to the user rather than silently retrying. Shipped 0.1.38 (commit `eedbe11`). The schema-typing trap is now visible to agents that hit it.
-- **`talonic-node` auto-release CI parity** (2026-05-26, commit `9ce4665` on `talonicdev/talonic-node`). Added `workflow_dispatch:` trigger and a `Create GitHub Release` step after `Publish to npm`, mirroring the pattern in `talonic-mcp`'s `publish.yml`. Same idempotent tag-exists check, same `continue-on-error: true` to keep downstream dispatch steps running. The next SDK publish will produce a GitHub Release for the first time; existing 0.1.16–0.1.22 versions remain untagged but the gap closes from here forward. Glama and similar surfaces that track GitHub Releases for SDK packages will start picking it up.
-- **Schema-typing footgun option 2 shipped end-to-end** (2026-05-20). API side: Nikolas Adamopoulos's commit `c16f2656` on `talonicdev/platform` adds `dataType` to every entry of `/v1/documents/search`'s `fieldMatches[]` and `fields[]` response arrays, mirroring what `autocompleteFields` already returns. Hot-fix `0689c1b2` added `fr.data_type` to the `GROUP BY` clause that the original commit had missed. MCP side: commit `7a123f9` (queued for 0.1.45) extends `talonic_search`'s outputSchema with `dataType: z.string().nullable().optional()` on both arrays so the field survives Zod's strip mode in `structuredContent`, and `talonic_filter`'s SCHEMA TYPING block now carries a **preventive → reactive** pair: agents check `field.dataType === "number"` from search before constructing a numeric operator (`gt`/`gte`/`lt`/`lte`/`between`); the `warnings[]` surface from option 1 remains the safety net. The schema-typing footgun is now closed from both sides. Verified live via `scripts/probe-field-type.mjs` against a real workspace.
-- `talonic_filter` schema-typing footgun: tool description now carries a SCHEMA TYPING block (0.1.16) and the API returns a `warnings` array when a numeric operator is applied to a string-typed field. Surface the `warnings` array in the filter outputSchema as a small follow-up (see [Schema-typing footgun options](#schema-typing-footgun-options)).
-- `is_not_empty` filter operator: re-exposed in 0.1.29; checks the materialized-values index.
-- Cost / EUR / balance and per-field provenance not surfaced: closed by `talonic_get_balance` (0.1.25), per-call `cost` block (0.1.25), and `include_provenance` on `talonic_extract` (0.1.14).
-- `SECURITY.md` disclosure policy: shipped 0.1.35; reports go to `safety@talonic.ai`.
-- Favicon for the Connectors Directory listing: shipped 0.1.35 at `/favicon.ico` and `/favicon.png` (inlined as base64 in `src/favicon.ts`).
-- Origin-header allowlist for DNS-rebinding mitigation: shipped 0.1.34 via `src/origin.ts`. Allowlists three Claude.ai variants plus four MCP-directory surfaces; rejects everything else with a structured 403. Empty Origin passes through (native + server-to-server clients).
-- Three QA-reported `-32602 Output validation error` failures (descriptions, mime_type, fields[].id null acceptance): fixed in 0.1.22–0.1.23 with regression tests.
-- Hosted MCP root endpoint advertising `https://docs.talonic.com`: now points at `https://talonic.com/docs/mcp` (0.1.21).
-- SDK `WithRateLimit<T>.rateLimit` sentinel zeros: nullable in `@talonic/node@0.1.8+`.
+1. **Tool surface 11 → 36.** 0.1.68 pricing/usage (9→11 public); 0.1.75 Agent task workflow, 5 tenant tools + 5 admin variants hidden behind a superadmin probe (11→16 public); 0.1.76 Field Registry + agent-tool registry, 6 tools (16→22 public); 0.1.77 External-mode decision-task protocol, 7 tools (22→29 public); unreleased Specs/Run/Ask, 7 tools (29→36 public, local main only).
+2. **Widget parity restored end-to-end (36/36 with this release).** 0.1.56 gave the original 9-tool surface a card each; 0.1.72 closed the pricing/usage gap (11/11); the unreleased work adds cards for the Field Registry / agent-tool / agent-task tools, the seven decision-task tools, and the Specs/Run/Ask tools. Single registry in `src/widgets/types.ts` + `register.ts`, hostile-payload XSS lock (`tests/widgets/xss.test.ts`), jsdom render tests per widget (`tests/widgets/render/`), and `scripts/chatgpt-preflight.mjs` confirming ChatGPT can fetch all 36 templates.
+3. **Distribution.** npm trusted publishing via OIDC (0.1.76, no long-lived `NPM_TOKEN`); provenance attestations + `smithery.yaml` (0.1.73); the official Registry auto-tracks npm via `mcp-publisher` in CI — except 0.1.77 never reached it, refused with a 404 because npm's read replicas lagged the publish by about 70 seconds; 0.1.78 (PR #23) makes the CI step poll `npm view` for up to four minutes, retry three times, and warn instead of silently staying stale. Smithery / Glama / mcp.so listings live.
+4. **ChatGPT.** Approved 2026-06-16 on the original 9-tool surface; OpenAI auto-re-fetches tool definitions on redeploy, so new tool cards go live automatically — a listing-text/metadata change needs a new version + review. Reconnect the connector and re-walk `docs/chatgpt-apps-sdk/developer-mode-testing.md`'s card checklist once 0.1.79 publishes the decision-task and Specs/Run/Ask tools.
+5. **Claude Connectors Directory.** The 2026-05-12 legacy-form submission (slug `pending-talonic`) is still "In review"; Anthropic moved to a Team-admin portal that lists servers as *Community* after an automatic scan. A resubmission package is prepared in this release at `docs/claude-connectors-directory/` (Task 4 of the 2026-09-22 housekeeping plan).
 
 ## Surfaces
 
 ### `@talonic/mcp`
 
-| Item                        | State                                                                                                                                                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Repo                        | clean, on main, pushed                                                                                                                                                                                                 |
-| package.json version        | 0.1.71                                                                                                                                                                                                                 |
-| server.json version         | 0.1.71                                                                                                                                                                                                                 |
-| npm published version       | 0.1.71 (auto-bump pipeline; in sync with the Registry)                                                                                                                                                                 |
-| Auto-bump pipeline          | working; granular npm token with bypass-2FA in place; auto-bumps patch on every src/docs/package.json change. Also runs `mcp-publisher publish` (OIDC) and `gh release create` (OIDC, default GITHUB_TOKEN) after npm publish; both soft-fail. |
-| Tests                       | 180 pass, 2 skipped (covers all 11 tools incl. `talonic_request_upload`, a branded Apps SDK widget per tool + the tool-annotation contract, and `/` + `/mcp` HTTP routing; symlink tests skip when `dist/` is older than `package.json`; verified 2026-07-07) |
-| Format check                | clean                                                                                                                                                                                                                  |
-| Typecheck                   | clean                                                                                                                                                                                                                  |
-| Build                       | clean                                                                                                                                                                                                                  |
-| docs/sections.json          | up to date with v1 surface (decision guide, examples, troubleshooting, post-OAuth install reframing, code-rich content sweep through 0.1.31)                                                                          |
-| Tools                       | 11 stable: `talonic_extract`, `talonic_request_upload`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_to_markdown`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage` |
-| Resources                   | 2: `talonic://schemas`, `talonic://webhooks/reference`                                                                                                                                                                  |
-| Tool descriptions           | all 8 carry STATUS: stable; honest known limitations                                                                                                                                                                   |
-| Tool annotations            | all 8 carry `readOnlyHint`, `destructiveHint`, `openWorldHint`; read-only tools (search, filter, list_schemas, get_document, get_balance) marked `readOnlyHint: true`; write tools (extract, to_markdown, save_schema) marked false |
-| MCP-layer schema validation | enforced; schema-less calls rejected fast                                                                                                                                                                              |
-| OAuth 2.1 (hosted)          | live; per-request bearer extraction; `/.well-known/oauth-protected-resource`; `WWW-Authenticate` header on 401 (RFC 9728); token rotation supported                                                                    |
-| Origin allowlist (hosted)   | live in `src/origin.ts`; allows Claude.ai (3 variants) + MCP-directory surfaces; rejects others with structured 403; empty Origin passes through                                                                       |
-| SECURITY.md                 | live; disclosure to `safety@talonic.ai`, 30-day fix target                                                                                                                                                              |
-| Favicon                     | served at `/favicon.ico` and `/favicon.png` from the hosted MCP (inlined in `src/favicon.ts`)                                                                                                                          |
-| Privacy Policy              | live in README                                                                                                                                                                                                         |
+| Item | State (2026-09-22) |
+| --- | --- |
+| Repo | local `main` (`dc56b95`), 44 commits ahead of `origin/main` (origin = 0.1.78); unpushed work = the 2026-09-22 housekeeping/widget-parity/Specs-Run-Ask program. A push is a release and waits for Hamlet's go. |
+| package.json / server.json version | 0.1.78 (auto-bumps to 0.1.79 on the next push) |
+| npm published version | 0.1.78 |
+| Hosted endpoint | `https://mcp.talonic.com` serving 0.1.78; `/health` ok |
+| Tests | `npm test` — 858 tests / 60 files, green (verified 2026-09-22); `npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK" |
+| Format check | clean (verified 2026-09-22) |
+| Typecheck | not re-run this audit (see concerns in the task report) |
+| Build | clean (verified 2026-09-22) |
+| docs/sections.json | 50 total entries (36 tool entries + 14); maintained-but-dormant — nothing renders this mirror, but the publish workflow's docs-drift guard requires it to track `src/tools/**` |
+| Tools (local main) | 36 public (22 read-only, 14 write-capable): `talonic_extract`, `talonic_request_upload`, `talonic_to_markdown`, `talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`, `talonic_save_schema`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`, `talonic_list_fields`, `talonic_get_field`, `talonic_field_values`, `talonic_find_data`, `talonic_list_agent_tools`, `talonic_invoke_agent_tool`, `talonic_list_agent_tasks`, `talonic_get_agent_task`, `talonic_claim_agent_task`, `talonic_heartbeat_agent_task`, `talonic_submit_agent_task`, `talonic_list_specs`, `talonic_get_spec`, `talonic_run_spec`, `talonic_get_run`, `talonic_get_run_results`, `talonic_ask`, `talonic_get_answer`, `talonic_list_decision_tasks`, `talonic_claim_decision_task`, `talonic_read_decision_package`, `talonic_heartbeat_decision_task`, `talonic_submit_decision_task`, `talonic_release_decision_task`, `talonic_fail_decision_task` — plus 4 `talonic_growth_*` and 5 `talonic_admin_*` superadmin tools, registered only after an access-probe passes, hidden from normal keys and from public docs |
+| Widgets | 36/36 (`tests/widgets/all-widgets.test.ts`), XSS lock (`tests/widgets/xss.test.ts`), template hygiene, hosted fast path parametrised |
+| Annotations | every tool: title + `readOnlyHint` / `destructiveHint` / `openWorldHint` (22 read-only, 14 write-capable) |
+| Docs surfaces | `src/content/sections/tools.ts` + `seo.ts` nav: 36 tool sections; `docs/sections.json` mirror: 36 tool entries (50 total); content lock `tests/content/tool-sections.test.ts` |
+| ChatGPT manifest | `chatgpt-app-submission.json`: 36 tools, test-locked to server annotations (`tests/submission-manifest.test.ts`) |
+| Resources | 2: `talonic://schemas`, `talonic://webhooks/reference` |
+| OAuth 2.1 (hosted) | live; per-request bearer extraction; `/.well-known/oauth-protected-resource`; advertises `apps:decide` alongside the original three scopes (for the decision-task tools); `WWW-Authenticate` header on 401 (RFC 9728); token rotation supported |
+| Origin allowlist / SECURITY.md / favicon / privacy | unchanged, live (`safety@talonic.ai`; privacy at `talonic.com/privacy` and README §Privacy) |
 
 ### `@talonic/node`
 
-| Item                  | State                                                                                                                |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Repo                  | clean, on main, pushed                                                                                               |
-| package.json version  | 0.1.22                                                                                                               |
-| npm published version | 0.1.22 (last functional release was 0.1.16 — 2026-05-11; 0.1.17 → 0.1.22 were dispatch-token churn bumps on 2026-05-18 with no source-code changes) |
-| Tests                 | 122 pass, 2 skipped (last verified during the previous audit; re-run on next SDK touch)                              |
-| `npm run check:spec`  | passes; SDK call sites match the OpenAPI spec                                                                        |
-| docs/sections.json    | reflects current surface (`WithRateLimit<T>`, `CostInfo`, `Credits` resource, `DocumentTriage`, `autoPopulateRequired`) |
-| SDK surface added     | `talonic.credits.getBalance()` + `EnhancedBalance`, `CostInfo` parsed from `X-Talonic-Cost-*` headers, `DocumentTriage` with named fields, `Document.mime_type` nullable |
-| SDK CLI               | `npx -y @talonic/node@latest schemas list` works against production                                                  |
+| Item | State (2026-09-22) |
+| --- | --- |
+| Version | 0.1.24 on npm (`npm view @talonic/node version`) |
+| Coverage gap | no `specs` / `run` / `ask` / `agent` / decision-task resources — the MCP calls those routes raw (`src/tools/_http.ts`); SDK catch-up is a separate initiative |
 
-### Website (`/Users/macman/Downloads/Talonic/website`)
+### Website (`~/Talonic/website`)
 
-| Item                         | State                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------- |
-| Repo                         | clean (after one fix this audit)                                                   |
-| `update-docs.yml` workflow   | running on every package publish; recent commits visible in main                   |
-| `package-lock.json`          | `@talonic/mcp@0.1.12`, `@talonic/node@0.1.7`                                       |
-| `npm run check:ai-discovery` | passes after this audit's fix                                                      |
-| `/.well-known/mcp.json`      | tool list now matches @talonic/mcp registrations (9 registered, 9 declared)        |
-| `/.well-known/agent.json`    | 5 skills declared                                                                  |
-| `/.well-known/api-catalog`   | exists                                                                             |
-| `/llms-full.txt`             | mentions hosted MCP, confidence scores, npx install                                |
-| Build                        | not verified in audit (sandbox network restriction); run on dev machine to confirm |
-
-Audit fix during this run: `talonic://webhooks/reference` was missing from `/.well-known/mcp.json`; added in commit `455889d`.
+| Item | State (2026-09-22) |
+| --- | --- |
+| Repo | local `main` (`3bc9f30`), 5 commits ahead of `origin/main`, unpushed — 36 MCP tool pages wired locally |
+| Dependency pins (`package.json`) | `@talonic/mcp` declared `^0.1.24` (lockfile-resolved / installed: **0.1.76**); `@talonic/node` declared `^0.1.11` (installed 0.1.24); `@talonic/docs` declared `^0.21.28` (installed 0.21.43) |
+| MCP tool pages | 36 wired locally; **22 render fully today** — as many as the installed 0.1.76 `@talonic/mcp` package knows about. The 14 newer pages (7 decision-task + 7 Specs/Run/Ask) render breadcrumbs/H1 only until the pin advances past their publish version. |
+| `/.well-known/mcp.json` | lists 22 tools live in production; 36 in the local, unpushed commit |
+| Push order | talonic-mcp → CI publishes 0.1.79 → `update-docs.yml` bumps the website's `@talonic/mcp` pin → website push |
 
 ### Official MCP Registry
 
-| Item                 | State                                                                                                                                                                                                                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Listing URL          | `https://registry.modelcontextprotocol.io/v0/servers?search=io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                   |
-| Listed name          | `io.github.talonicdev/talonic-mcp`                                                                                                                                                                                                                                                                                              |
-| Listed version       | 0.1.44 (latest, isLatest=true, published 2026-05-18). In sync with npm; the Registry now auto-tracks via the wired `mcp-publisher publish` step in CI.                                                                                                                                                                          |
-| Install instructions | npx command and `TALONIC_API_KEY` env var, both correct                                                                                                                                                                                                                                                                         |
-| Standing follow-up   | none.                                                                                                                                                                                                                                                                                                                           |
+| Item | State (2026-09-22) |
+| --- | --- |
+| Listing | `io.github.talonicdev/talonic-mcp`, isLatest **0.1.78** (published 2026-09-22T16:37:58Z), status active; auto-tracked by `mcp-publisher` in `publish.yml` |
+| Note | 0.1.77 never reached the Registry — npm read-replica lag made `mcp-publisher publish` 404 against the just-published version; 0.1.78 (PR #23) added a poll/retry/warn step so future gaps are visible instead of silently staying stale |
+
+### Directories
+
+| Directory | State (2026-09-22) |
+| --- | --- |
+| ChatGPT Apps / Plugins | approved and live since 2026-06-16; auto-tracks the tool list (OpenAI re-fetches on redeploy); a metadata/listing-text change needs a new version + review; reconnect + walk `docs/chatgpt-apps-sdk/developer-mode-testing.md` after 0.1.79 |
+| Claude Connectors Directory | legacy submission "In review" since 2026-05-12 (slug `pending-talonic`); Anthropic's process changed to a portal (`claude.ai/admin-settings/directory/submissions/new`) with automatic scanning and a "Community" label; resubmission package prepared in this release at `docs/claude-connectors-directory/` (Task 4) |
+| Smithery / Glama / mcp.so | live |
+| Cowork plugin | not submitted (decision pending) |
+
+## Open items (2026-09-22)
+
+1. **Release 0.1.79** — one push of local `main` (`dc56b95`, 44 commits ahead) ships the 36-tool/36-widget surface, the Specs/Run/Ask and decision-task tool sets, and this housekeeping pass; needs Hamlet's go. Push order: talonic-mcp → CI publishes 0.1.79 → website's `@talonic/mcp` pin bumps → website push. Afterwards: reconnect the ChatGPT connector and walk `docs/chatgpt-apps-sdk/developer-mode-testing.md`'s 36-row card checklist; live-smoke `talonic_get_run_results` with `pipeline_id` **and** `run_id` together (the combined-scope query param is only mock-tested today).
+2. **Claude Connectors Directory** — resubmit through the portal using the package prepared in this release at `docs/claude-connectors-directory/` (test account + icon are Hamlet's inputs).
+3. **Cowork plugin submission** — decide; the install snippet and description already exist.
+4. **Python SDK publish** — PyPI Trusted Publisher config still pending (separate repo, not part of this release).
+5. **Platform-side items to raise with the platform team** (found during the 2026-09-22 live smoke, `npm run smoke:live` — these are platform behaviors, not MCP bugs): a completed 1/1 pipeline returned 0 result rows in both views; `GET /v1/pipelines/{id}/results?run_id=` returned 404 "Run not found on pipeline" for the `run_id` that `POST /v1/pipelines` had itself returned; `talonic_ask` scoped to one document answered workspace-wide and charged 100 credits.
+6. **Follow-ups noted in review:** type raw-fetch registrars as `TokenSource`; JSON-envelope parsing in `toolError` for raw-fetch errors; `docs/sections.json` remains dormant (nothing renders it) — keep mirroring but do not invest further.
+
+The historical follow-up lists below are kept as dated records.
 
 ## Live end-to-end tests against production
 
