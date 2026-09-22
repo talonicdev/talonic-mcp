@@ -15,8 +15,11 @@ export function getAgentToolResultWidgetHtml(): string {
 const RENDER_BODY = `
     var result = payload && typeof payload === "object" ? payload.result : undefined;
     var toolName = (payload && payload.tool) || "agent tool";
+    var isEmptyResult = result == null || result === ""
+      || (Array.isArray(result) && result.length === 0)
+      || (typeof result === "object" && !Array.isArray(result) && Object.keys(result).length === 0);
     var body;
-    if (result == null || result === "") body = '<div class="empty">The tool returned no data.</div>';
+    if (isEmptyResult) body = '<div class="empty">The tool returned no data.</div>';
     else if (isRowArray(result)) body = dataTable(result);
     else if (isFlat(result)) body = kvTiles(result);
     else if (typeof result === "object") body = jsonTree(result);
@@ -34,7 +37,14 @@ const RENDER_BODY = `
       return '<div class="kv"><span class="val">' + esc(a.label || a.type || a.id || "artifact") + '</span>'
         + (link ? '<a class="btn small" href="' + esc(link) + '" target="_blank" rel="noopener">Open</a>' : "") + '</div>';
     }).join("") + '</div>' : "";
-    var count = isRowArray(result) ? result.length + " rows" : (result && typeof result === "object" && !Array.isArray(result) ? Object.keys(result).length + " keys" : "");
+    var count = "";
+    if (!isEmptyResult) {
+      if (isRowArray(result)) count = result.length + (result.length === 1 ? " row" : " rows");
+      else if (result && typeof result === "object" && !Array.isArray(result)) {
+        var keyCount = Object.keys(result).length;
+        count = keyCount + (keyCount === 1 ? " key" : " keys");
+      }
+    }
     root.innerHTML = ''
       + '<div class="header"><div><div class="title mono">' + esc(toolName) + '</div>' + (count ? '<div class="subtitle">' + esc(count) + '</div>' : "") + '</div></div>'
       + body + citeHtml + artHtml;

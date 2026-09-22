@@ -43,4 +43,30 @@ describe("agent-tool-result widget", () => {
       "The tool returned no data.",
     )
   })
+
+  it("shows the no-data state for empty objects and empty arrays, not a bare shell", () => {
+    const emptyObj = renderWidget(getAgentToolResultWidgetHtml(), { tool: "x", result: {} })
+    expect(emptyObj.text).toContain("The tool returned no data.")
+    expect(emptyObj.text).not.toContain("keys")
+    expect(emptyObj.text).not.toContain("rows")
+
+    const emptyArr = renderWidget(getAgentToolResultWidgetHtml(), { tool: "x", result: [] })
+    expect(emptyArr.text).toContain("The tool returned no data.")
+    expect(emptyArr.text).not.toContain("keys")
+    expect(emptyArr.text).not.toContain("rows")
+  })
+
+  it("pluralises the row/key count for a single row or key", () => {
+    const oneRow = renderWidget(getAgentToolResultWidgetHtml(), {
+      tool: "query_data",
+      result: [{ vendor: "Musterfirma AG" }],
+    })
+    expect(oneRow.text).toContain("1 row")
+
+    const oneKey = renderWidget(getAgentToolResultWidgetHtml(), {
+      tool: "workspace_overview",
+      result: { schemas: 212 },
+    })
+    expect(oneKey.text).toContain("1 key")
+  })
 })
