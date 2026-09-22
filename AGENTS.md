@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The twenty-two public tools (and what an agent should reach for)
+## The twenty-nine public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -54,8 +54,15 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 | `talonic_claim_agent_task` | `agent-tasks.ts` | no | Acquire or reclaim a leased task and execution epoch. |
 | `talonic_heartbeat_agent_task` | `agent-tasks.ts` | no | Extend the current claim lease using its epoch. |
 | `talonic_submit_agent_task` | `agent-tasks.ts` | no | Submit declared typed outputs transactionally and resume the document. |
+| `talonic_list_specs` | `specs.ts` | yes | The workspace's configured Specs (pipelines): name, schema_id, version/materialized_version, field/node counts. |
+| `talonic_get_spec` | `specs.ts` | yes | One Spec's full structure — `nodes[]` (authored rail), `phases[]` (compiled run order), `fields[]`; optional version history. |
+| `talonic_run_spec` | `run.ts` | no | Runs a Spec over `document_ids` (`POST /v1/pipelines`) or `file_urls` (`POST /v1/run`) behind one normalised RunEnvelope. Consumes credits. |
+| `talonic_get_run` | `run.ts` | yes | Poll a run's status plus document- and phase-level progress, by `pipeline_id` or `run_id`. |
+| `talonic_get_run_results` | `run.ts` | yes | Read a run's structured rows and column definitions; readable while still processing. |
+| `talonic_ask` | `ask.ts` | no | Natural-language Q&A over the corpus with citations and verification; bounded wait, then poll. Consumes credits. |
+| `talonic_get_answer` | `ask.ts` | yes | Poll an ask that outlived `talonic_ask`'s bounded wait. |
 
-Annotations are locked by `tests/widgets/tool-annotations.test.ts` (15 read-only lookup tools, 7 write-capable); every public tool renders a widget (`tests/widgets/all-widgets.test.ts`, 22/22) and declares Apps SDK status strings. Adding a tool = also adding a widget: one `WIDGET_URIS` key + description + status in `src/widgets/types.ts`, one entry in `src/widgets/register.ts`, `_meta: widgetToolMeta(key)` on the tool, a fixture + render test under `tests/widgets/`, and an entry in `chatgpt-app-submission.json`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
+Annotations are locked by `tests/widgets/tool-annotations.test.ts` (20 read-only lookup tools, 9 write-capable); every public tool renders a widget (`tests/widgets/all-widgets.test.ts`, 29/29) and declares Apps SDK status strings. Adding a tool = also adding a widget: one `WIDGET_URIS` key + description + status in `src/widgets/types.ts`, one entry in `src/widgets/register.ts`, `_meta: widgetToolMeta(key)` on the tool, a fixture + render test under `tests/widgets/`, and an entry in `chatgpt-app-submission.json`. Five additional `talonic_admin_*_agent_task` variants are Talonic-internal and appear only after the superadmin access probe passes; every platform call is re-authorized, and payload calls require interactive OAuth, a named tenant, reason, and TOTP step-up.
 
 Two resources: `talonic://schemas` and `talonic://webhooks/reference` (`src/resources/`).
 
@@ -90,7 +97,7 @@ src/
   tools/*.ts          one file per MCP tool (handle<Name> + register<Name>)
   resources/*.ts      schemas-resource.ts, webhooks-resource.ts
   content/*.ts        docs content for talonic.com/docs/mcp/* (see footgun above)
-  widgets/*.ts        ChatGPT Apps SDK widget HTML — one card per public tool (22); registry in widgets/types.ts + widgets/register.ts
+  widgets/*.ts        ChatGPT Apps SDK widget HTML — one card per public tool (29); registry in widgets/types.ts + widgets/register.ts
   favicon.ts          base64 favicon served by the hosted server
 tests/**/*.test.ts    vitest; HTTP side runs against a real http.Server on an ephemeral port,
                         tool side mocks the Talonic API at the fetch layer
@@ -111,7 +118,7 @@ npm run format:check    # prettier check
 npm run format          # prettier --write
 npm run build           # tsup → dist/{index,server,http-server,content}.js
 npm run start:http      # local hosted-MCP server on :3000
-npm run preflight:chatgpt   # boot dist/http-server.js, check 22 tools + every template like ChatGPT does
+npm run preflight:chatgpt   # boot dist/http-server.js, check 29 tools + every template like ChatGPT does
 ```
 
 Always run typecheck + test + format:check before any push.

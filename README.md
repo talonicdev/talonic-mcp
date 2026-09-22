@@ -5,7 +5,7 @@
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
 [![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
 
-> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Twenty-two public tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector), each tool rendering its own ChatGPT Apps SDK widget card. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
+> **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Twenty-nine public tools and two resources are verified end-to-end against production (including the Claude.ai hosted connector), each tool rendering its own ChatGPT Apps SDK widget card. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
 ---
 
@@ -37,6 +37,13 @@ One install gives an agent the whole document-extraction workflow:
 | **`talonic_claim_agent_task`** | Acquire or reclaim a leased Agent task and its execution epoch. |
 | **`talonic_heartbeat_agent_task`** | Extend the current claim lease on an Agent task using its epoch. |
 | **`talonic_submit_agent_task`** | Submit an Agent task's declared typed outputs transactionally and resume the document. |
+| **`talonic_list_specs`** | List the workspace's configured Specs (pipelines) — name, schema, version, field/node counts. |
+| **`talonic_get_spec`** | Get one Spec's full structure: nodes, compiled phases, fields, and (optionally) its version history. |
+| **`talonic_run_spec`** | Run a Spec over documents already in the workspace or public file URLs — one call, either backend. |
+| **`talonic_get_run`** | Poll a Spec run's status and progress until it completes. |
+| **`talonic_get_run_results`** | Read a Spec run's structured rows, one per document, with column definitions. |
+| **`talonic_ask`** | Ask a natural-language question over the workspace's documents and get a cited, verified answer. |
+| **`talonic_get_answer`** | Poll a long-running `talonic_ask` for its finished answer. |
 
 Plus two resources for clients that browse them (Claude Desktop, Cowork render these in-UI):
 
@@ -98,7 +105,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all twenty-two public tools.
+Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all twenty-nine public tools.
 </details>
 
 <details>
@@ -156,7 +163,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
 4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`). Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All twenty-two public tools appear.
+5. You're returned to Claude.ai. All twenty-nine public tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 
