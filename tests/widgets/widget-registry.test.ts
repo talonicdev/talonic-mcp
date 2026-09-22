@@ -11,18 +11,18 @@ import {
 const KEYS = Object.keys(WIDGET_URIS) as Array<keyof typeof WIDGET_URIS>
 
 describe("widget registry tables", () => {
-  it("defines exactly 22 widgets with unique ui://widget/ URIs", () => {
-    expect(KEYS).toHaveLength(22)
+  it("defines exactly 29 widgets with unique ui://widget/ URIs", () => {
+    expect(KEYS).toHaveLength(29)
     const uris = Object.values(WIDGET_URIS)
-    expect(new Set(uris).size).toBe(22)
+    expect(new Set(uris).size).toBe(29)
     for (const uri of uris) expect(uri).toMatch(/^ui:\/\/widget\/[a-z-]+\.html$/)
   })
 
   it("maps every public tool to a widget key, one tool per widget", () => {
     const tools = Object.keys(TOOL_WIDGET_KEYS)
-    expect(tools).toHaveLength(22)
+    expect(tools).toHaveLength(29)
     for (const t of tools) expect(t).toMatch(/^talonic_[a-z_]+$/)
-    expect(new Set(Object.values(TOOL_WIDGET_KEYS)).size).toBe(22)
+    expect(new Set(Object.values(TOOL_WIDGET_KEYS)).size).toBe(29)
     for (const key of Object.values(TOOL_WIDGET_KEYS)) expect(KEYS).toContain(key)
   })
 

@@ -42,6 +42,13 @@ export const WIDGET_URIS = {
   claimAgentTask: "ui://widget/agent-task-claim.html",
   heartbeatAgentTask: "ui://widget/agent-task-heartbeat.html",
   submitAgentTask: "ui://widget/agent-task-submitted.html",
+  listSpecs: "ui://widget/spec-list.html",
+  getSpec: "ui://widget/spec-card.html",
+  runSpec: "ui://widget/run-started.html",
+  getRun: "ui://widget/run-status.html",
+  getRunResults: "ui://widget/run-results.html",
+  ask: "ui://widget/answer.html",
+  getAnswer: "ui://widget/answer-polled.html",
 } as const
 
 /** A key of {@link WIDGET_URIS}. @public */
@@ -57,7 +64,7 @@ export const EXTRACTION_RESULT_WIDGET_URI = WIDGET_URIS.extract
 
 /**
  * Public tool name → widget key. This is the single source of truth for
- * "which card does this tool render"; tests derive the 22-tool lock from it.
+ * "which card does this tool render"; tests derive the 29-tool lock from it.
  * Talonic-internal tools (`talonic_growth_*`, `talonic_admin_*`) have no
  * widget and are deliberately absent.
  *
@@ -86,6 +93,13 @@ export const TOOL_WIDGET_KEYS: Readonly<Record<string, WidgetKey>> = {
   talonic_claim_agent_task: "claimAgentTask",
   talonic_heartbeat_agent_task: "heartbeatAgentTask",
   talonic_submit_agent_task: "submitAgentTask",
+  talonic_list_specs: "listSpecs",
+  talonic_get_spec: "getSpec",
+  talonic_run_spec: "runSpec",
+  talonic_get_run: "getRun",
+  talonic_get_run_results: "getRunResults",
+  talonic_ask: "ask",
+  talonic_get_answer: "getAnswer",
 }
 
 /** Status text ChatGPT shows while a tool runs and once it has finished. @public */
@@ -128,6 +142,13 @@ export const TOOL_INVOCATION_STATUS: Readonly<Record<WidgetKey, ToolInvocationSt
   claimAgentTask: { invoking: "Claiming agent task…", invoked: "Agent task claimed" },
   heartbeatAgentTask: { invoking: "Extending task lease…", invoked: "Lease extended" },
   submitAgentTask: { invoking: "Submitting task outputs…", invoked: "Task submitted" },
+  listSpecs: { invoking: "Loading Specs…", invoked: "Specs listed" },
+  getSpec: { invoking: "Loading Spec structure…", invoked: "Spec structure ready" },
+  runSpec: { invoking: "Starting the Spec run…", invoked: "Run started" },
+  getRun: { invoking: "Checking run progress…", invoked: "Run progress ready" },
+  getRunResults: { invoking: "Loading run results…", invoked: "Run results ready" },
+  ask: { invoking: "Asking Talonic over your documents…", invoked: "Answer ready" },
+  getAnswer: { invoking: "Checking for the answer…", invoked: "Answer status ready" },
 }
 
 /**
@@ -178,6 +199,19 @@ export const WIDGET_DESCRIPTIONS: Readonly<Record<WidgetKey, string>> = {
     "Lease card confirming the lease was extended, with the new expiry and execution epoch.",
   submitAgentTask:
     "Confirmation that the declared outputs were submitted and the parked document resumed its pipeline.",
+  listSpecs:
+    "Table of the workspace's Specs (configured pipelines) with version state, field and stage counts, and last update.",
+  getSpec:
+    "Card for one Spec: version state, the schema it materializes onto, the rail's stages in order, the compiled phases, and its fields.",
+  runSpec:
+    "Confirmation that a Spec run started: run kind, input count, spec/pipeline/run ids, status, and how to poll it.",
+  getRun:
+    "Progress card for a Spec run: normalised status, documents completed / total / errors, and per-phase progress when available.",
+  getRunResults:
+    "Table of a Spec run's structured rows — one row per document with the Spec's fields — plus review holds and pagination.",
+  ask: "Cited answer card: the answer text, verification verdict, source citations, artifacts and credit usage.",
+  getAnswer:
+    "Polled answer card: the same cited answer with verification and citations, or a still-processing notice.",
 }
 
 /**

@@ -22,6 +22,12 @@ import { getAgentTaskListWidgetHtml } from "./agent-task-list.js"
 import { getAgentTaskWidgetHtml } from "./agent-task.js"
 import { getAgentTaskClaimWidgetHtml, getAgentTaskHeartbeatWidgetHtml } from "./agent-task-lease.js"
 import { getAgentTaskSubmittedWidgetHtml } from "./agent-task-submitted.js"
+import { getSpecListWidgetHtml } from "./spec-list.js"
+import { getSpecCardWidgetHtml } from "./spec-card.js"
+import { getRunStartedWidgetHtml } from "./run-started.js"
+import { getRunStatusWidgetHtml } from "./run-status.js"
+import { getRunResultsWidgetHtml } from "./run-results.js"
+import { getAnswerWidgetHtml, getAnswerPolledWidgetHtml } from "./answer.js"
 
 interface WidgetEntry {
   /** MCP resource name. */
@@ -134,6 +140,29 @@ const WIDGET_REGISTRY: Readonly<Record<WidgetKey, WidgetEntry>> = {
     name: "agent-task-submitted-widget",
     title: "Talonic Agent Task Submitted",
     html: getAgentTaskSubmittedWidgetHtml,
+  },
+  listSpecs: { name: "spec-list-widget", title: "Talonic Specs", html: getSpecListWidgetHtml },
+  getSpec: { name: "spec-card-widget", title: "Talonic Spec", html: getSpecCardWidgetHtml },
+  runSpec: {
+    name: "run-started-widget",
+    title: "Talonic Run Started",
+    html: getRunStartedWidgetHtml,
+  },
+  getRun: {
+    name: "run-status-widget",
+    title: "Talonic Run Progress",
+    html: getRunStatusWidgetHtml,
+  },
+  getRunResults: {
+    name: "run-results-widget",
+    title: "Talonic Run Results",
+    html: getRunResultsWidgetHtml,
+  },
+  ask: { name: "answer-widget", title: "Talonic Answer", html: getAnswerWidgetHtml },
+  getAnswer: {
+    name: "answer-polled-widget",
+    title: "Talonic Answer (polled)",
+    html: getAnswerPolledWidgetHtml,
   },
 }
 
