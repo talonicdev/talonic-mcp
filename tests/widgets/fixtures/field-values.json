@@ -1,0 +1,47 @@
+{
+  "field_id": "11111111-1111-4111-8111-111111111111",
+  "canonical_name": "invoice_number",
+  "concept_ids": ["11111111-1111-4111-8111-111111111111"],
+  "data": [
+    {
+      "occurrence_id": "aaaaaaa1-0000-4000-8000-000000000001",
+      "document_id": "d0c00001-0000-4000-8000-000000000001",
+      "document_filename": "invoice-0421.pdf",
+      "document_type": "Invoice",
+      "value": "INV-2026-04417",
+      "data_type": "string",
+      "confidence": 0.95,
+      "provenance": {
+        "raw_field_name": "invoice_number",
+        "source_text": "Invoice No. INV-2026-04417",
+        "resolved_by": "label_cache",
+        "needs_confirmation": false,
+        "bound_field_id": "11111111-1111-4111-8111-111111111111",
+        "via_redirect": false
+      },
+      "created_at": "2026-09-21T19:00:58.221Z",
+      "links": { "document": "/v1/documents/d0c00001-0000-4000-8000-000000000001" }
+    },
+    {
+      "occurrence_id": "aaaaaaa1-0000-4000-8000-000000000002",
+      "document_id": "d0c00001-0000-4000-8000-000000000002",
+      "document_filename": "credit-note-17.pdf",
+      "document_type": "Credit Note",
+      "value": "RE-88120",
+      "data_type": "string",
+      "confidence": 0.62,
+      "provenance": {
+        "raw_field_name": "rechnungsnummer",
+        "source_text": "Rechnungsnummer: RE-88120",
+        "resolved_by": "synonym",
+        "needs_confirmation": true,
+        "bound_field_id": "11111111-1111-4111-8111-111111111111",
+        "via_redirect": true
+      },
+      "created_at": "2026-09-20T10:00:00.000Z",
+      "links": { "document": "/v1/documents/d0c00001-0000-4000-8000-000000000002" }
+    }
+  ],
+  "pagination": { "total": 1116, "limit": 2, "has_more": true, "next_cursor": "opaque" },
+  "resolution": { "matched_by": "canonical_name", "redirected_from": [] }
+}

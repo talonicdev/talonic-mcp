@@ -1,0 +1,66 @@
+{
+  "tool": "find_data",
+  "result": {
+    "query": "total amount on invoices",
+    "semantic": true,
+    "fields": [
+      {
+        "plane": "field",
+        "canonical_name": "total_amount",
+        "display_name": "Total Amount",
+        "data_type": "number",
+        "tier": 2,
+        "occurrence_count": 640,
+        "match": "semantic",
+        "score": 0.8132,
+        "field_keys": ["total_amount"],
+        "samples": [
+          { "value": "1299.00", "document_id": "d0c00001-0000-4000-8000-000000000001" },
+          { "value": "88.50", "document_id": "d0c00001-0000-4000-8000-000000000002" }
+        ]
+      },
+      {
+        "plane": "field",
+        "canonical_name": "net_amount",
+        "display_name": null,
+        "data_type": "number",
+        "tier": 3,
+        "occurrence_count": 12,
+        "match": "lexical",
+        "score": 0.41,
+        "field_keys": ["net_amount"],
+        "samples": []
+      }
+    ],
+    "values": [
+      {
+        "plane": "value",
+        "canonical_name": "total_amount",
+        "value": "1299.00",
+        "document_id": "d0c00001-0000-4000-8000-000000000001",
+        "filename": "invoice-0421.pdf",
+        "score": 0.77
+      }
+    ],
+    "documents": [
+      {
+        "document_id": "d0c00001-0000-4000-8000-000000000001",
+        "filename": "invoice-0421.pdf",
+        "score": 0.5083,
+        "best_passage": "Total amount due: 1,299.00 EUR",
+        "char_offset": 464
+      }
+    ],
+    "passages": [
+      {
+        "plane": "passage",
+        "document_id": "d0c00001-0000-4000-8000-000000000001",
+        "filename": "invoice-0421.pdf",
+        "text": "Subtotal 1,092.00 EUR. VAT 19% 207.00 EUR. Total amount due: 1,299.00 EUR.",
+        "char_offset": 464,
+        "match": "semantic",
+        "score": 0.5083
+      }
+    ]
+  }
+}
