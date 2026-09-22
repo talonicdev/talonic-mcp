@@ -7,29 +7,197 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> 0.1.77 shipped the decision-task tools (PR #22) and 0.1.78 the registry-wait CI fix (PR #23), both 2026-09-22; the next push publishes 0.1.79.
-
 ### Added
 
 - **Specs, Run and Ask tools (7 new, 36 public).** `talonic_list_specs` / `talonic_get_spec` read the workspace's configured pipelines; `talonic_run_spec` runs one over `document_ids` (`POST /v1/pipelines`) or `file_urls` (`POST /v1/run`) behind a single normalised RunEnvelope; `talonic_get_run` polls status + progress and `talonic_get_run_results` reads the rows; `talonic_ask` answers questions over the corpus with citations and verification (bounded wait) and `talonic_get_answer` polls long asks. Each has a ChatGPT card; documented on both docs surfaces; manifest and preflight at 36.
-- **External-mode decision-task protocol for Talonic Apps — seven new tools** (`src/tools/decision-tasks.ts`) wrapping the platform's `/v1/decision-tasks` surface (APPS-SPEC §B4): `talonic_list_decision_tasks` (one app's inbox, `GET /v1/apps/:id/decision-tasks`), `talonic_claim_decision_task` (the exclusive lease; the claim returns the output contract, precedents and the package descriptor — there is no separate get), `talonic_read_decision_package` (pages of the run's frozen input package with provenance locators, claimant-only, journaled), `talonic_heartbeat_decision_task`, `talonic_submit_decision_task` (contract-shaped `outcome`, required verbatim `evidence[]` locators, required `rationale`, optional `confidence` / `service_version`), `talonic_release_decision_task`, and `talonic_fail_decision_task` (raises a Human Review and applies the app's fallback policy). The platform's `decide` tier admits a `tlnc_` key holding a per-app `decide` grant, or an OAuth session carrying the `apps:decide` scope with a live `senior_member`-or-above role; every description says so. The hosted server now advertises `apps:decide` in its protected-resource `scopes_supported` (so Claude.ai's consent screen offers "Claim and decide tasks"), and lists the seven tools marked `NOT INVOCABLE IN THIS SESSION` (`_meta["talonic/can_invoke"]: false`) when an OAuth token visibly lacks the scope — a connector added before the scope existed keeps working, and the agent asks the user to reconnect. Handlers always forward; the platform decides. Docs sections, nav, README, AGENTS, and the server `instructions` string carry the list → claim → package → heartbeat → submit/release/fail flow. The rule-mining external-driver tool routes stay a follow-up.
 - **Decision-task widgets.** The seven `talonic_*_decision_task` tools shipped in 0.1.77 get ChatGPT cards (worklist, claim bundle, package page, and lease/submit/release/fail metadata cards), manifest entries, mirror docs and website pages.
 - **Widget parity for every public tool (36 with this release).** Eleven new ChatGPT Apps SDK cards: Field Registry list / concept card / values, find-data planes, agent-tool registry, shape-adaptive agent-tool result, agent-task worklist, task card, lease card (claim + heartbeat) and submit confirmation. Every public tool now declares `openai/toolInvocation/invoking|invoked` status text; every widget resource carries `openai/widgetDescription` and `openai/widgetPrefersBorder`. Locked by `tests/widgets/all-widgets.test.ts` (36/36), jsdom render tests per widget (`tests/widgets/render/`), template hygiene and hosted fast-path tests, and `scripts/chatgpt-preflight.mjs`.
 - **`chatgpt-app-submission.json` describes all public tools** and is test-locked to the server's annotations (`tests/submission-manifest.test.ts`).
-- **Field Registry as a source of truth for agents — six new read-only tools.** `talonic_list_fields` (concepts with stable ids, named maturity `core`/`proven`/`candidate`, synonyms, `superseded_by`), `talonic_get_field` (the concept card: definition, aliases, occurrence stats, value distribution, schema usage, identity links; accepts a NAME and resolves it through synonyms / merge aliases / the registry spelling fold, following redirects), `talonic_field_values` (one concept's current values across every document with provenance), `talonic_find_data` (the platform agent's concept→data retrieval, by meaning), and `talonic_list_agent_tools` + `talonic_invoke_agent_tool` (the whole platform agent tool registry — e.g. `query_data` SQL — callable with the caller's own arguments; the platform enforces the capability matrix). Backed by the new `/v1/fields/resolve`, `/v1/fields/:id/{card,values,history}` routes and `/v1/agent/tools`.
-- **Branded inline widgets for every tool.** All eleven tools now render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), `talonic_get_pricing` (pricing-catalog table with per-unit rates, EUR, free badges, and multiplier chips), `talonic_get_usage` (per-function credit breakdown with proportion bars), and `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]` pointing at its widget resource. Non-widget tool calls previously rendered as a generic "api_tool" entry in ChatGPT; now every call is branded.
-- **Widgets for the two metering tools** (`talonic_get_pricing`, `talonic_get_usage`) — these were added after the App Directory approval (0.1.67) without widgets, leaving them the only two bare tools; the 2026-07-07 alignment pass gives them cards matching the other nine, restoring one-widget-per-tool parity. Also added their entries to the MCP docs nav (`src/content/seo.ts`), which had been missed.
 
 ### Fixed
 
 - **Raw-fetch tools now carry the `talonic-mcp/<v> <client>` User-Agent tag.** Field Registry, agent-tool, agent-task, upload-session and webhook-reference calls bypassed the tagged fetch, so the platform funnel could not attribute their client surface.
-- **Docs accuracy pass over `src/content/sections/*.ts`** (the surface behind `talonic.com/docs/mcp/*`). Configuration claimed the server rejects a key whose prefix is not `tlnc_` at startup; `server.ts` only checks the variable is set, so a malformed key boots and fails on the first tool call with a `401`. Known Limitations claimed cost, EUR price, and balance "are not surfaced" and routed users to the dashboard, which predates the `cost` object on `talonic_extract` responses and the `talonic_get_balance`/`get_pricing`/`get_usage` tools. Two links to `talonic.com/docs/sdk/introduction` returned 404 (the SDK hub is `/docs/sdk`). Stale "v0.1" framing removed.
-- **Corrected the docs-pipeline map** in `docs/architecture/docs-pipeline.md`, `AGENTS.md`, and `CLAUDE.md`. `docs/sections.json` does not feed `/docs/{sdk,api,platform}/*`: the platform sync lands it in `@talonic/docs` as that package's `mcp` domain, which no page currently renders. It is maintained-but-dormant — the publish drift guard still requires it to track `src/tools/**`.
+- **Run/Ask review fixes.** `talonic_get_run_results` now accepts `pipeline_id` alone, `run_id` alone, or `pipeline_id` together with `run_id` to scope a pipeline's rows to one submission (previously the two together were rejected); `talonic_run_spec`'s description states the actual polling rule — poll `talonic_get_run` with `pipeline_id` when `run_kind` is `pipeline`, `run_id` when it is `run`. The run-status widget renders unknown `total_documents` / `completed_documents` counters as `—` instead of a misleading `0`. `talonic_ask` bounds every poll request with its own timeout (not just the overall wait), guards `wait_seconds` against non-finite input, and keeps the `ask_id` on an aborted poll instead of losing it — the ask keeps running server-side and credits are already spent; `talonic_get_answer` now backfills `ask_id` onto its response too. `mapRunStatus` folds the API's `canceled` spelling, as well as `cancelled`, into `failed`.
+
+## [0.1.78] - 2026-09-22
 
 ### Changed
 
-- **SEO metadata across all 32 doc sections** now sits within the 50-60 character `seoTitle` and 150-160 character `description` targets, with no dead `related[]` links. Configuration also documents the env vars the self-hosted HTTP transport reads (`PORT`, `MCP_RESOURCE_URL`, `OAUTH_AUTHORIZATION_SERVER`).
-- **Refactored widget scaffolding into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP), and a `registerWidget()` helper. Each widget supplies only its `render(payload)` body via `buildWidgetHtml()`. `registerWidgets()` registers all eleven.
+- **CI: the MCP Registry publish waits up to four minutes for npm to serve the new version, retries three times, and warns instead of failing** (`.github/workflows/publish.yml`). `mcp-publisher publish` validates the release against npm, and npm's read replicas can lag `npm publish` by minutes — the 0.1.77 release was refused with a 404 about 70 seconds after the publish returned, and because the step is `continue-on-error` the run stayed green while the Registry silently kept the previous version. The workflow now polls `npm view @talonic/mcp@<version>` for up to four minutes before publishing to the Registry, retries the Registry publish three times, and emits a `::warning::` annotation when it still fails so the gap is visible in the run summary instead of hiding behind a green check. A new failure-mode row in `docs/architecture/docs-pipeline.md` documents the symptom and the manual recovery (`mcp-publisher login github && mcp-publisher publish`); the step stays soft — npm remains the source of truth for installs.
+
+## [0.1.77] - 2026-09-22
+
+### Added
+
+- **External-mode decision-task protocol for Talonic Apps — seven new tools** (`src/tools/decision-tasks.ts`) wrapping the platform's `/v1/decision-tasks` surface (APPS-SPEC §B4): `talonic_list_decision_tasks` (one app's inbox, `GET /v1/apps/:id/decision-tasks`), `talonic_claim_decision_task` (the exclusive lease; the claim returns the output contract, precedents and the package descriptor — there is no separate get), `talonic_read_decision_package` (pages of the run's frozen input package with provenance locators, claimant-only, journaled), `talonic_heartbeat_decision_task`, `talonic_submit_decision_task` (contract-shaped `outcome`, required verbatim `evidence[]` locators, required `rationale`, optional `confidence` / `service_version`), `talonic_release_decision_task`, and `talonic_fail_decision_task` (raises a Human Review and applies the app's fallback policy). The platform's `decide` tier admits a `tlnc_` key holding a per-app `decide` grant, or an OAuth session carrying the `apps:decide` scope with a live `senior_member`-or-above role; every description says so. The hosted server now advertises `apps:decide` in its protected-resource `scopes_supported` (so Claude.ai's consent screen offers "Claim and decide tasks"), and lists the seven tools marked `NOT INVOCABLE IN THIS SESSION` (`_meta["talonic/can_invoke"]: false`) when an OAuth token visibly lacks the scope — a connector added before the scope existed keeps working, and the agent asks the user to reconnect. Handlers always forward; the platform decides. Docs sections, nav, README, AGENTS, and the server `instructions` string carry the list → claim → package → heartbeat → submit/release/fail flow. The rule-mining external-driver tool routes stay a follow-up.
+
+## [0.1.76] - 2026-09-05
+
+### Added
+
+- **Field Registry as a source of truth for agents — six new read-only tools.** `talonic_list_fields` (concepts with stable ids, named maturity `core`/`proven`/`candidate`, synonyms, `superseded_by`), `talonic_get_field` (the concept card: definition, aliases, occurrence stats, value distribution, schema usage, identity links; accepts a NAME and resolves it through synonyms / merge aliases / the registry spelling fold, following redirects), `talonic_field_values` (one concept's current values across every document with provenance), `talonic_find_data` (the platform agent's concept→data retrieval, by meaning), and `talonic_list_agent_tools` + `talonic_invoke_agent_tool` (the whole platform agent tool registry — e.g. `query_data` SQL — callable with the caller's own arguments; the platform enforces the capability matrix). Backed by the new `/v1/fields/resolve`, `/v1/fields/:id/{card,values,history}` routes and `/v1/agent/tools`. Tool count 16 → 22.
+- npm publishing switched to **trusted publishing (OIDC)** — no long-lived `NPM_TOKEN` in CI.
+
+### Fixed
+
+- **Docs accuracy pass over `src/content/sections/*.ts`** (the surface behind `talonic.com/docs/mcp/*`): Configuration claimed the server rejects a key whose prefix is not `tlnc_` at startup (it only checks the variable is set); Known Limitations claimed cost / EUR / balance are not surfaced (they are, since 0.1.25 / 0.1.68); two dead links to `talonic.com/docs/sdk/introduction`; stale "v0.1" framing.
+- **Corrected the docs-pipeline map** in `docs/architecture/docs-pipeline.md`, `AGENTS.md` and `CLAUDE.md`: `docs/sections.json` feeds the `mcp` domain of `@talonic/docs`, which no page renders; the live MCP docs come from `src/content/sections/*.ts`.
+
+### Changed
+
+- **SEO metadata across all 32 doc sections** within the 50–60 character `seoTitle` and 150–160 character `description` targets, no dead `related[]` links; Configuration documents `PORT`, `MCP_RESOURCE_URL`, `OAUTH_AUTHORIZATION_SERVER`.
+- ChatGPT submission manifest lists the six registry tools.
+
+## [0.1.75] - 2026-08-19
+
+### Added
+
+- **Agent task workflow.** Five tenant tools — `talonic_list_agent_tasks`, `talonic_get_agent_task`, `talonic_claim_agent_task`, `talonic_heartbeat_agent_task`, `talonic_submit_agent_task` — turn the MCP into a worklist for external agents: a pipeline parks a document at an Agent stage, the agent claims it under a lease with an execution epoch, heartbeats while working, and submits declared output fields to resume the document. Five `talonic_admin_*_agent_task` variants are Talonic-internal, registered only after a superadmin access probe passes, and require a named tenant, a reason and a fresh TOTP code per payload call. Tool count 11 → 16.
+
+## [0.1.74] - 2026-08-17
+
+### Added
+
+- **Superadmin-only growth analytics tools** (`talonic_growth_*`), registered conditionally after `probeGrowthAccess()` passes; invisible to normal keys; absent from the public docs by design.
+
+### Fixed
+
+- Browser-handoff lifecycle documents the transient `uploading` status and the terminal failures (`error`, `ocr_failed`, `extraction_failed`) so agents stop polling on failure instead of stalling.
+
+## [0.1.73] - 2026-07-22
+
+### Added
+
+- npm **provenance attestations** on publish; `smithery.yaml` for the Smithery directory.
+
+### Changed
+
+- High-value npm keywords for discoverability.
+
+## [0.1.72] - 2026-07-07
+
+### Added
+
+- **Widgets for the two metering tools** (`talonic_get_pricing`, `talonic_get_usage`) — added after the App Directory approval (0.1.67) without cards, they were the only two bare tools; this alignment pass restores one-widget-per-tool parity (11/11) and adds their missing MCP docs nav entries.
+
+### Changed
+
+- **Widget scaffolding refactored into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP) and a `registerWidget()` helper; each widget supplies only its `render(payload)` body.
+
+## [0.1.71] - 2026-06-23
+
+### Added
+
+- Outbound API calls carry `User-Agent: talonic-mcp/<version> <client>` (client name from the MCP initialize handshake) so the platform can attribute usage to Claude Desktop / Cursor / ChatGPT etc.
+
+## [0.1.70] - 2026-06-21
+
+### Added
+
+- MCP docs pages for `talonic_get_pricing` and `talonic_get_usage`.
+
+## [0.1.69] - 2026-06-21
+
+### Changed
+
+- Formatting only (prettier pass on the pricing tool).
+
+## [0.1.68] - 2026-06-21
+
+### Added
+
+- **`talonic_get_pricing`** — the public per-unit credit pricing catalog with EUR values and multipliers, so agents can predict spend before running; **`talonic_get_usage`** — per-function credit consumption over a trailing window (default 30 days). Tool count 9 → 11.
+
+## [0.1.67] - 2026-06-20
+
+### Changed
+
+- **Phase 1 retrieval tuning:** broadened the semantic signal and softened the schema-required rule (decisions D1/D2/D3) so more real-world queries land.
+- ChatGPT App Directory **approval** recorded (`docs/chatgpt-apps-sdk/submission-record.md`), with the approved submission JSON and screenshot tooling preserved.
+
+## [0.1.66] - 2026-06-12
+
+### Fixed
+
+- **Search / filter query contract:** `talonic_search` descriptions teach the literal-keyword, singular-term contract and a zero-result hint, so models stop concluding a workspace is empty after a sentence-shaped query.
+
+## [0.1.65] - 2026-06-12
+
+### Fixed
+
+- **Widget templates fetchable from the ChatGPT sandbox:** the hosted server answers `resources/read` for `ui://widget/*` templates without auth and with a JSON-only `Accept` header (the review failure "Error loading app, failed to fetch the template"); origin allowlist extended for the sandbox.
+
+## [0.1.64] - 2026-06-09
+
+### Changed
+
+- **Agent-facing tool descriptions rewritten** — a one-line WHAT, `USE WHEN` / `NOT FOR` redirects to sibling tools, and explicit chaining cues (by-name → `talonic_search`), replacing the ~2.5k-character prose blocks that made models hesitate (design in `docs/superpowers/specs`).
+
+## [0.1.63] - 2026-06-09
+
+### Fixed
+
+- `talonic_get_document` accepts `null` scalars on documents still pre-processing (no more `-32602` output-validation errors while polling).
+
+## [0.1.62] - 2026-06-09
+
+### Fixed
+
+- **Stateless MCP transport** on the hosted server — sessions survive restarts and redeploys; ChatGPT no longer goes dead after every deploy.
+
+## [0.1.61] - 2026-06-08
+
+### Changed
+
+- Apps SDK domain-verification challenge token updated to the current value.
+
+## [0.1.60] - 2026-06-08
+
+### Fixed
+
+- `talonic_filter` condition schema clarified (clears the "Unclear Arguments" review flag).
+
+## [0.1.59] - 2026-06-08
+
+### Added
+
+- Hosted server serves the **ChatGPT Apps SDK domain-verification challenge**.
+
+## [0.1.58] - 2026-06-08
+
+### Fixed
+
+- **Submission-hardening pass:** accurate `readOnlyHint` / `destructiveHint` / `openWorldHint` on every tool, widget CSP + origin fixes, and the widget ↔ host bridge.
+
+## [0.1.57] - 2026-06-03
+
+### Changed
+
+- Widget styling: padded stat tiles, larger margins, responsive grid.
+
+## [0.1.56] - 2026-06-03
+
+### Added
+
+- **Branded inline widgets for every tool.** All nine tools render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]`.
+
+## [0.1.55] - 2026-06-03
+
+### Fixed
+
+- Widget resources declare the widget domain (required for App Directory submission); docs count corrected to nine tools.
+
+## [0.1.54] - 2026-06-03
+
+### Changed
+
+- Comprehensive docs refresh (README / AGENTS / CLAUDE / STATUS / MCP docs) for the nine-tool surface and the verified browser-handoff upload flow.
+
+## [0.1.53] - 2026-06-03
+
+### Fixed
+
+- Extraction-result widget reads tool output through `window.openai.toolOutput` (the Apps SDK data channel) and declares its CSP; the postMessage bridge stays as a fallback.
 
 ## [0.1.52] - 2026-06-01
 
