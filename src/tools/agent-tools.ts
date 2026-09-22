@@ -101,6 +101,7 @@ export async function handleFindData(
 
 const LIST_TOOLS_DESCRIPTION = [
   "List the platform's agent tool registry — every retrieval, provenance and analysis primitive the in-product Talonic agent runs on (find_data, describe_data, query_data for read-only SQL over the extracted data, get_document_markdown, workspace_overview, …) with its input schema and whether THIS credential may invoke it.",
+  "Target API: https://talonic.com/docs/api (GET /v1/agent/tools).",
   "",
   "USE WHEN: you want a capability talonic_* tools do not cover directly (e.g. SQL over the structured data, a workspace overview, cohort discovery) — list here, then call talonic_invoke_agent_tool with the tool name and its args.",
   "NOT FOR: discovering fields (talonic_list_fields / talonic_find_data) or documents (talonic_search) — those are shaped for you.",
@@ -173,6 +174,8 @@ export async function handleListAgentTools(
 
 const INVOKE_DESCRIPTION = [
   "Invoke ONE named tool from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
+  "READ-ONLY BY CONSTRUCTION: API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential, so this tool reads and never mutates workspace data.",
+  "Target API: Talonic agent tool registry — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
   "",
   "USE WHEN: talonic_list_agent_tools showed a tool with can_invoke: true that does what you need. Pass exactly the `args` its input_schema declares.",
   "NOT FOR: anything a dedicated talonic_* tool already does (prefer those — they are shaped for you).",

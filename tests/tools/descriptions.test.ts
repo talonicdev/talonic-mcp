@@ -91,3 +91,22 @@ describe("tool descriptions are tight and decision-oriented", () => {
     expect(d["talonic_get_run_results"]).toContain("run_kind")
   })
 })
+
+describe("Anthropic review criteria — custom-query tools name their API and their read-only guarantee", () => {
+  const d = descriptions()
+  it("invoke_agent_tool states the platform's read-only restriction for API keys and links the API docs", () => {
+    expect(d["talonic_invoke_agent_tool"]).toMatch(/read-only/i)
+    expect(d["talonic_invoke_agent_tool"]).toContain("data.read")
+    expect(d["talonic_invoke_agent_tool"]).toContain("https://talonic.com/docs/api")
+    expect(d["talonic_invoke_agent_tool"]).toContain("/v1/agent/tools/{name}/invoke")
+  })
+  it("list_agent_tools links the API docs", () => {
+    expect(d["talonic_list_agent_tools"]).toContain("https://talonic.com/docs/api")
+  })
+  it.each(["talonic_invoke_agent_tool", "talonic_list_agent_tools"])(
+    "%s stays under the length budget",
+    (name) => {
+      expect(d[name].length).toBeLessThanOrEqual(1500)
+    },
+  )
+})

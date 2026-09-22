@@ -2551,6 +2551,11 @@
         "text": "List the platform's **agent tool registry**: every retrieval, provenance and analysis primitive the in-product Talonic agent runs on (`find_data`, `describe_data`, `query_data` for read-only SQL over the extracted data, `get_document_markdown`, `workspace_overview`, …), each with its JSON input schema and whether **this** credential may invoke it. An API key reaches the read-only subset; the platform enforces the capability matrix on every call."
       },
       {
+        "type": "callout",
+        "variant": "info",
+        "text": "Target API: [Talonic API reference](https://talonic.com/docs/api) — `GET /v1/agent/tools`."
+      },
+      {
         "type": "heading",
         "level": 3,
         "text": "When to use"
@@ -2674,7 +2679,12 @@
     "content": [
       {
         "type": "paragraph",
-        "text": "Invoke **one named tool** from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself: `query_data` for a read-only SQL `SELECT` over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text. Denied capabilities come back as an error naming the capability required; the platform re-checks every call."
+        "text": "Invoke **one named tool** from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself: `query_data` for a read-only SQL `SELECT` over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text. Denied capabilities come back as an error naming the capability required; the platform re-checks every call. API-key credentials are restricted by the platform to the registry's read-only tools (capability `data.read`); write-capable registry tools are never invocable through this credential."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Target API: [Talonic API reference](https://talonic.com/docs/api) — `POST /v1/agent/tools/{name}/invoke`."
       },
       {
         "type": "heading",
