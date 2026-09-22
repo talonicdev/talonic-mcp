@@ -27,6 +27,12 @@ export function resolveFetch(getToken: () => string): typeof fetch {
 /** Query-string values a raw-fetch tool may forward; `undefined`/empty are dropped. */
 export type QueryParams = Record<string, string | number | boolean | undefined>
 
+/** HTTP methods raw-fetch tools may use. */
+export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE"
+
+/** Multipart fields; arrays repeat the key (`file_urls`), `undefined` is skipped. */
+export type FormFields = Record<string, string | string[] | undefined>
+
 /**
  * Build a `/v1/...` URL with the defined query params only.
  *
@@ -56,7 +62,7 @@ export function buildUrl(
 export async function apiJson<T = unknown>(
   getToken: () => string,
   baseUrl: string | undefined,
-  method: "GET" | "POST",
+  method: HttpMethod,
   path: string,
   opts: { params?: QueryParams; body?: unknown } = {},
 ): Promise<T> {
@@ -75,6 +81,42 @@ export async function apiJson<T = unknown>(
     throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
   }
   return (await res.json()) as T
+}
+
+/**
+ * Raw multipart/form-data POST against the Talonic API (used by `/v1/run`,
+ * which accepts files and `file_urls` only as form fields). Do NOT set
+ * Content-Type: undici derives the boundary from the FormData body.
+ *
+ * @internal
+ */
+export async function apiForm<T = unknown>(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  path: string,
+  fields: FormFields,
+): Promise<T> {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue
+    if (Array.isArray(value)) for (const item of value) form.append(key, item)
+    else form.append(key, value)
+  }
+  const res = await resolveFetch(getToken)(buildUrl(baseUrl, path), {
+    method: "POST",
+    headers: { Authorization: `Bearer ${getToken()}`, Accept: "application/json" },
+    body: form,
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => "")
+    throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
+  }
+  return (await res.json()) as T
+}
+
+/** Promise-based delay; injectable in tests. @internal */
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
