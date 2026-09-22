@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, type QueryParams } from "./_http.js"
 import { validationError, type ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Field Registry tools — the workspace's canonical vocabulary as a source of
@@ -246,6 +247,7 @@ export function registerFieldTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("listFields"),
     },
     async (args) => handleListFields(getToken, baseUrl, args as ListFieldsArgs),
   )
@@ -261,6 +263,7 @@ export function registerFieldTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("getField"),
     },
     async (args) => handleGetField(getToken, baseUrl, args as GetFieldArgs),
   )
@@ -276,6 +279,7 @@ export function registerFieldTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("fieldValues"),
     },
     async (args) => handleFieldValues(getToken, baseUrl, args as FieldValuesArgs),
   )

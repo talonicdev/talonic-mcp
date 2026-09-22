@@ -44,8 +44,7 @@ import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { isOriginAllowed } from "./origin.js"
-import { getWidgetTemplateHtml } from "./widgets/register.js"
-import { widgetMeta } from "./widgets/shared.js"
+import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -450,7 +449,7 @@ export function createRequestHandler(
                 uri: widgetRead.uri,
                 mimeType: "text/html;profile=mcp-app",
                 text: html,
-                _meta: widgetMeta(),
+                _meta: getWidgetTemplateMeta(widgetRead.uri),
               },
             ],
           },

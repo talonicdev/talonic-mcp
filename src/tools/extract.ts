@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { ExtractParams, Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, validationError, type ToolResult } from "./_shared.js"
-import { EXTRACTION_RESULT_WIDGET_URI } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Turn ANY document into structured, schema-validated JSON. The default tool whenever you need to get data OUT of an unstructured file: PDF, scan, image, DOCX, email, or photo. Returns the requested fields with per-field confidence scores.",
@@ -285,10 +285,7 @@ export function registerExtract(server: McpServer, getTalonic: () => Talonic): v
         destructiveHint: false,
         openWorldHint: true,
       },
-      _meta: {
-        ui: { resourceUri: EXTRACTION_RESULT_WIDGET_URI },
-        "openai/outputTemplate": EXTRACTION_RESULT_WIDGET_URI,
-      },
+      _meta: widgetToolMeta("extract"),
     },
     async (args) => handleExtract(getTalonic(), args as ExtractArgs),
   )

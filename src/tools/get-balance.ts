@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Read the workspace's Talonic credit balance, EUR value, tier, 30-day burn, and projected runway.",
@@ -57,10 +57,7 @@ export function registerGetBalance(server: McpServer, getTalonic: () => Talonic)
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.getBalance },
-        "openai/outputTemplate": WIDGET_URIS.getBalance,
-      },
+      _meta: widgetToolMeta("getBalance"),
     },
     async () => handleGetBalance(getTalonic()),
   )

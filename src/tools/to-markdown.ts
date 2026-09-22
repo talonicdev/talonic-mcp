@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { TalonicError, type Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Get the OCR-converted markdown text of a document.",
@@ -155,10 +155,7 @@ export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic)
         destructiveHint: false,
         openWorldHint: true,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.toMarkdown },
-        "openai/outputTemplate": WIDGET_URIS.toMarkdown,
-      },
+      _meta: widgetToolMeta("toMarkdown"),
     },
     async (args) => handleToMarkdown(getTalonic(), args as ToMarkdownArgs),
   )

@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Find documents, fields, schemas, or sources in the workspace. One call returns ranked results across all types.",
@@ -147,10 +147,7 @@ export function registerSearch(server: McpServer, getTalonic: () => Talonic): vo
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.search },
-        "openai/outputTemplate": WIDGET_URIS.search,
-      },
+      _meta: widgetToolMeta("search"),
     },
     async (args) => handleSearch(getTalonic(), args),
   )

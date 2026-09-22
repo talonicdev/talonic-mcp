@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic, FilterCondition, FilterSort } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Find documents by their extracted field VALUES using composable conditions (e.g. 'invoices where total > 1000').",
@@ -207,10 +207,7 @@ export function registerFilter(server: McpServer, getTalonic: () => Talonic): vo
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.filter },
-        "openai/outputTemplate": WIDGET_URIS.filter,
-      },
+      _meta: widgetToolMeta("filter"),
     },
     async (args) => handleFilter(getTalonic(), args as FilterArgs),
   )

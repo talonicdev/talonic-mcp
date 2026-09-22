@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool } from "./_http.js"
 import type { ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Wrappers over the platform's agent tool registry (`/v1/agent/tools`) — the
@@ -241,6 +242,7 @@ export function registerAgentRegistryTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("findData"),
     },
     async (args) => handleFindData(getToken, baseUrl, args as FindDataArgs),
   )
@@ -256,6 +258,7 @@ export function registerAgentRegistryTools(
         idempotentHint: true,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("listAgentTools"),
     },
     async (args) => handleListAgentTools(getToken, baseUrl, args as ListAgentToolsArgs),
   )
@@ -271,6 +274,7 @@ export function registerAgentRegistryTools(
         idempotentHint: false,
         openWorldHint: false,
       },
+      _meta: widgetToolMeta("invokeAgentTool"),
     },
     async (args) => handleInvokeAgentTool(getToken, baseUrl, args as InvokeAgentToolArgs),
   )

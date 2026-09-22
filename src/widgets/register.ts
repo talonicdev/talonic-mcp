@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
-import { registerWidget } from "./shared.js"
-import { WIDGET_URIS } from "./types.js"
+import { registerWidget, widgetMeta } from "./shared.js"
+import { WIDGET_DESCRIPTIONS, WIDGET_URIS, widgetKeyForUri, type WidgetKey } from "./types.js"
 import { getExtractionResultWidgetHtml } from "./extraction-result.js"
 import { getBalanceWidgetHtml } from "./balance.js"
 import { getUploadLinkWidgetHtml } from "./upload-link.js"
@@ -12,6 +12,130 @@ import { getSearchResultsWidgetHtml } from "./search-results.js"
 import { getFilterResultsWidgetHtml } from "./filter-results.js"
 import { getPricingWidgetHtml } from "./pricing.js"
 import { getUsageWidgetHtml } from "./usage.js"
+import { getFieldListWidgetHtml } from "./field-list.js"
+import { getFieldCardWidgetHtml } from "./field-card.js"
+import { getFieldValuesWidgetHtml } from "./field-values.js"
+import { getFindDataWidgetHtml } from "./find-data.js"
+import { getAgentToolsWidgetHtml } from "./agent-tools.js"
+import { getAgentToolResultWidgetHtml } from "./agent-tool-result.js"
+import { getAgentTaskListWidgetHtml } from "./agent-task-list.js"
+import { getAgentTaskWidgetHtml } from "./agent-task.js"
+import { getAgentTaskClaimWidgetHtml, getAgentTaskHeartbeatWidgetHtml } from "./agent-task-lease.js"
+import { getAgentTaskSubmittedWidgetHtml } from "./agent-task-submitted.js"
+
+interface WidgetEntry {
+  /** MCP resource name. */
+  name: string
+  /** Human-readable resource title. */
+  title: string
+  /** Template factory (templates are static; the factory keeps import order lazy). */
+  html: () => string
+}
+
+/**
+ * The one table every widget consumer reads from: resource registration,
+ * the hosted server's public template fast path, and the tests. Adding a
+ * widget = one `WIDGET_URIS` key (types.ts, with its description and status
+ * strings) + one entry here + `_meta: widgetToolMeta(key)` on the tool.
+ *
+ * @internal
+ */
+const WIDGET_REGISTRY: Readonly<Record<WidgetKey, WidgetEntry>> = {
+  extract: {
+    name: "extraction-result-widget",
+    title: "Talonic Extraction Result",
+    html: getExtractionResultWidgetHtml,
+  },
+  search: {
+    name: "search-results-widget",
+    title: "Talonic Search Results",
+    html: getSearchResultsWidgetHtml,
+  },
+  filter: {
+    name: "filter-results-widget",
+    title: "Talonic Filter Results",
+    html: getFilterResultsWidgetHtml,
+  },
+  getDocument: {
+    name: "document-meta-widget",
+    title: "Talonic Document",
+    html: getDocumentMetaWidgetHtml,
+  },
+  toMarkdown: {
+    name: "markdown-view-widget",
+    title: "Talonic Markdown",
+    html: getMarkdownViewWidgetHtml,
+  },
+  listSchemas: {
+    name: "schema-list-widget",
+    title: "Talonic Schemas",
+    html: getSchemaListWidgetHtml,
+  },
+  saveSchema: {
+    name: "schema-saved-widget",
+    title: "Talonic Schema Saved",
+    html: getSchemaSavedWidgetHtml,
+  },
+  getBalance: { name: "balance-widget", title: "Talonic Balance", html: getBalanceWidgetHtml },
+  getPricing: { name: "pricing-widget", title: "Talonic Pricing", html: getPricingWidgetHtml },
+  getUsage: { name: "usage-widget", title: "Talonic Usage", html: getUsageWidgetHtml },
+  requestUpload: {
+    name: "upload-link-widget",
+    title: "Talonic Upload Link",
+    html: getUploadLinkWidgetHtml,
+  },
+  listFields: {
+    name: "field-list-widget",
+    title: "Talonic Field Registry",
+    html: getFieldListWidgetHtml,
+  },
+  getField: {
+    name: "field-card-widget",
+    title: "Talonic Field Card",
+    html: getFieldCardWidgetHtml,
+  },
+  fieldValues: {
+    name: "field-values-widget",
+    title: "Talonic Field Values",
+    html: getFieldValuesWidgetHtml,
+  },
+  findData: { name: "find-data-widget", title: "Talonic Find Data", html: getFindDataWidgetHtml },
+  listAgentTools: {
+    name: "agent-tools-widget",
+    title: "Talonic Agent Tools",
+    html: getAgentToolsWidgetHtml,
+  },
+  invokeAgentTool: {
+    name: "agent-tool-result-widget",
+    title: "Talonic Agent Tool Result",
+    html: getAgentToolResultWidgetHtml,
+  },
+  listAgentTasks: {
+    name: "agent-task-list-widget",
+    title: "Talonic Agent Tasks",
+    html: getAgentTaskListWidgetHtml,
+  },
+  getAgentTask: {
+    name: "agent-task-widget",
+    title: "Talonic Agent Task",
+    html: getAgentTaskWidgetHtml,
+  },
+  claimAgentTask: {
+    name: "agent-task-claim-widget",
+    title: "Talonic Agent Task Claimed",
+    html: getAgentTaskClaimWidgetHtml,
+  },
+  heartbeatAgentTask: {
+    name: "agent-task-heartbeat-widget",
+    title: "Talonic Agent Task Lease",
+    html: getAgentTaskHeartbeatWidgetHtml,
+  },
+  submitAgentTask: {
+    name: "agent-task-submitted-widget",
+    title: "Talonic Agent Task Submitted",
+    html: getAgentTaskSubmittedWidgetHtml,
+  },
+}
 
 /**
  * Widget template HTML by resource URI. Used by the http-server's public
@@ -23,20 +147,30 @@ import { getUsageWidgetHtml } from "./usage.js"
  * @internal
  */
 export function getWidgetTemplateHtml(uri: string): string | undefined {
-  const map: Record<string, () => string> = {
-    [WIDGET_URIS.extract]: getExtractionResultWidgetHtml,
-    [WIDGET_URIS.search]: getSearchResultsWidgetHtml,
-    [WIDGET_URIS.filter]: getFilterResultsWidgetHtml,
-    [WIDGET_URIS.getDocument]: getDocumentMetaWidgetHtml,
-    [WIDGET_URIS.toMarkdown]: getMarkdownViewWidgetHtml,
-    [WIDGET_URIS.listSchemas]: getSchemaListWidgetHtml,
-    [WIDGET_URIS.saveSchema]: getSchemaSavedWidgetHtml,
-    [WIDGET_URIS.getBalance]: getBalanceWidgetHtml,
-    [WIDGET_URIS.getPricing]: getPricingWidgetHtml,
-    [WIDGET_URIS.getUsage]: getUsageWidgetHtml,
-    [WIDGET_URIS.requestUpload]: getUploadLinkWidgetHtml,
-  }
-  return map[uri]?.()
+  const key = widgetKeyForUri(uri)
+  return key ? WIDGET_REGISTRY[key].html() : undefined
+}
+
+/**
+ * The `_meta` the fast path must attach to a template — identical to what
+ * `registerWidget` emits for the same URI (domain, CSP, description, border).
+ *
+ * @internal
+ */
+export function getWidgetTemplateMeta(uri: string): Record<string, unknown> | undefined {
+  const key = widgetKeyForUri(uri)
+  return key ? widgetMeta(WIDGET_DESCRIPTIONS[key]) : undefined
+}
+
+function registerOne(server: McpServer, key: WidgetKey): void {
+  const entry = WIDGET_REGISTRY[key]
+  registerWidget(server, {
+    name: entry.name,
+    uri: WIDGET_URIS[key],
+    title: entry.title,
+    description: WIDGET_DESCRIPTIONS[key],
+    html: entry.html(),
+  })
 }
 
 /**
@@ -48,103 +182,16 @@ export function getWidgetTemplateHtml(uri: string): string | undefined {
  * @internal
  */
 export function registerExtractionResultWidget(server: McpServer): void {
-  registerWidget(server, {
-    name: "extraction-result-widget",
-    uri: WIDGET_URIS.extract,
-    title: "Talonic Extraction Result",
-    description: "Inline view of extracted data, document metadata, and per-field confidence.",
-    html: getExtractionResultWidgetHtml(),
-  })
+  registerOne(server, "extract")
 }
 
 /**
  * Register every tool widget as an MCP resource. Each tool opts into its
- * widget by declaring `_meta["openai/outputTemplate"]` with the matching
- * `WIDGET_URIS` entry in its `registerTool` config.
+ * widget by declaring `_meta: widgetToolMeta(key)` in its `registerTool`
+ * config.
  *
  * @internal
  */
 export function registerWidgets(server: McpServer): void {
-  registerExtractionResultWidget(server)
-
-  registerWidget(server, {
-    name: "search-results-widget",
-    uri: WIDGET_URIS.search,
-    title: "Talonic Search Results",
-    description: "Inline view of documents, fields, schemas, and sources matching a query.",
-    html: getSearchResultsWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "filter-results-widget",
-    uri: WIDGET_URIS.filter,
-    title: "Talonic Filter Results",
-    description: "Inline table of documents matching a filter, with any API warnings.",
-    html: getFilterResultsWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "document-meta-widget",
-    uri: WIDGET_URIS.getDocument,
-    title: "Talonic Document",
-    description: "Inline view of a document's metadata, status, and triage flags.",
-    html: getDocumentMetaWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "markdown-view-widget",
-    uri: WIDGET_URIS.toMarkdown,
-    title: "Talonic Markdown",
-    description: "Inline view of a document's OCR-converted markdown.",
-    html: getMarkdownViewWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "schema-list-widget",
-    uri: WIDGET_URIS.listSchemas,
-    title: "Talonic Schemas",
-    description: "Inline table of saved schemas in the workspace.",
-    html: getSchemaListWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "schema-saved-widget",
-    uri: WIDGET_URIS.saveSchema,
-    title: "Talonic Schema Saved",
-    description: "Inline confirmation of a newly saved schema.",
-    html: getSchemaSavedWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "balance-widget",
-    uri: WIDGET_URIS.getBalance,
-    title: "Talonic Balance",
-    description: "Inline view of the workspace credit balance, tier, burn, and runway.",
-    html: getBalanceWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "pricing-widget",
-    uri: WIDGET_URIS.getPricing,
-    title: "Talonic Pricing",
-    description:
-      "Inline view of the credit pricing catalog: per-unit rates, EUR values, and multipliers.",
-    html: getPricingWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "usage-widget",
-    uri: WIDGET_URIS.getUsage,
-    title: "Talonic Usage",
-    description: "Inline breakdown of credit consumption per function over the trailing window.",
-    html: getUsageWidgetHtml(),
-  })
-
-  registerWidget(server, {
-    name: "upload-link-widget",
-    uri: WIDGET_URIS.requestUpload,
-    title: "Talonic Upload Link",
-    description: "Inline browser-handoff upload link with document ID and expiry.",
-    html: getUploadLinkWidgetHtml(),
-  })
+  for (const key of Object.keys(WIDGET_REGISTRY) as WidgetKey[]) registerOne(server, key)
 }

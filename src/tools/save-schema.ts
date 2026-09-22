@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Save a reusable schema to the workspace for use across future extractions.",
@@ -87,10 +87,7 @@ export function registerSaveSchema(server: McpServer, getTalonic: () => Talonic)
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.saveSchema },
-        "openai/outputTemplate": WIDGET_URIS.saveSchema,
-      },
+      _meta: widgetToolMeta("saveSchema"),
     },
     async (args) => handleSaveSchema(getTalonic(), args),
   )

@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { Talonic } from "@talonic/node"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Fetch a single document's metadata and processing status from the workspace.",
@@ -110,10 +110,7 @@ export function registerGetDocument(server: McpServer, getTalonic: () => Talonic
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.getDocument },
-        "openai/outputTemplate": WIDGET_URIS.getDocument,
-      },
+      _meta: widgetToolMeta("getDocument"),
     },
     async (args) => handleGetDocument(getTalonic(), args),
   )

@@ -1,39 +1,41 @@
 import { describe, expect, it } from "vitest"
 import { createServer } from "../../src/server-factory"
-import { WIDGET_URIS, WIDGET_MIME } from "../../src/widgets/types"
+import {
+  TOOL_INVOCATION_STATUS,
+  TOOL_WIDGET_KEYS,
+  WIDGET_DESCRIPTIONS,
+  WIDGET_MIME,
+  WIDGET_URIS,
+  type WidgetKey,
+} from "../../src/widgets/types"
 
-// Every tool now renders a branded inline widget. This locks the full mapping:
-// tool name -> outputTemplate URI -> a registered widget resource.
-const TOOL_WIDGET_MAP: Array<[string, string]> = [
-  ["talonic_extract", WIDGET_URIS.extract],
-  ["talonic_search", WIDGET_URIS.search],
-  ["talonic_filter", WIDGET_URIS.filter],
-  ["talonic_get_document", WIDGET_URIS.getDocument],
-  ["talonic_to_markdown", WIDGET_URIS.toMarkdown],
-  ["talonic_list_schemas", WIDGET_URIS.listSchemas],
-  ["talonic_save_schema", WIDGET_URIS.saveSchema],
-  ["talonic_get_balance", WIDGET_URIS.getBalance],
-  ["talonic_get_pricing", WIDGET_URIS.getPricing],
-  ["talonic_get_usage", WIDGET_URIS.getUsage],
-  ["talonic_request_upload", WIDGET_URIS.requestUpload],
-]
+// Every public tool renders a branded inline widget. The mapping lives in
+// TOOL_WIDGET_KEYS; this suite locks tool -> outputTemplate URI -> registered
+// widget resource for all of them.
+const TOOL_WIDGET_MAP: Array<[string, WidgetKey, string]> = Object.entries(TOOL_WIDGET_KEYS).map(
+  ([tool, key]) => [tool, key, WIDGET_URIS[key]],
+)
 
 function buildServer() {
   return createServer({ apiKey: "tlnc_test" }) as any
 }
 
 describe("every tool declares its widget as outputTemplate", () => {
-  it.each(TOOL_WIDGET_MAP)("%s -> %s", (toolName, uri) => {
+  it.each(TOOL_WIDGET_MAP)("%s -> %s", (toolName, key, uri) => {
     const server = buildServer()
     const tool = server._registeredTools[toolName]
     expect(tool, `${toolName} not registered`).toBeDefined()
     expect(tool._meta?.ui?.resourceUri).toBe(uri)
     expect(tool._meta?.["openai/outputTemplate"]).toBe(uri)
+    expect(tool._meta?.["openai/toolInvocation/invoking"]).toBe(
+      TOOL_INVOCATION_STATUS[key].invoking,
+    )
+    expect(tool._meta?.["openai/toolInvocation/invoked"]).toBe(TOOL_INVOCATION_STATUS[key].invoked)
   })
 })
 
 describe("every widget resource is registered correctly", () => {
-  it.each(TOOL_WIDGET_MAP)("resource for %s (%s)", async (_toolName, uri) => {
+  it.each(TOOL_WIDGET_MAP)("resource for %s (%s)", async (_toolName, key, uri) => {
     const server = buildServer()
     const resource = server._registeredResources[uri]
     expect(resource, `no resource registered at ${uri}`).toBeDefined()
@@ -41,11 +43,8 @@ describe("every widget resource is registered correctly", () => {
     const result = await resource.readCallback(new URL(uri))
     const item = result.contents[0]
 
-    // Correct MIME and self-referential URI.
     expect(item.mimeType).toBe(WIDGET_MIME)
     expect(item.uri).toBe(uri)
-
-    // Valid, self-contained HTML document.
     expect(item.text).toMatch(/^<!doctype html>/i)
 
     // Reads the Apps SDK data channel (not just the postMessage fallback).
@@ -59,21 +58,41 @@ describe("every widget resource is registered correctly", () => {
     expect(item.text).not.toMatch(/tlnc_[a-z]/i)
     expect(item.text).not.toContain("Authorization")
 
-    // Submission metadata: unique domain + CSP, modern keys + OpenAI aliases.
+    // Submission metadata: unique domain + CSP, modern keys + OpenAI aliases,
+    // model-facing description, bordered card.
     const meta = item._meta
     expect(meta.ui?.domain).toBe("https://talonic.com")
     expect(meta.ui?.csp?.connectDomains).toEqual([])
     expect(meta["openai/widgetDomain"]).toBe("https://talonic.com")
     expect(meta["openai/widgetCSP"]?.connect_domains).toEqual([])
+    expect(meta["openai/widgetDescription"]).toBe(WIDGET_DESCRIPTIONS[key])
+    expect(meta["openai/widgetPrefersBorder"]).toBe(true)
   })
 })
 
 describe("widget coverage is complete", () => {
-  it("declares 22 widget URIs (resources are locked per tool above)", () => {
-    expect(Object.values(WIDGET_URIS)).toHaveLength(22)
+  it("registers exactly one widget per public tool (22 total) and nothing else under ui://widget/", () => {
     const server = buildServer()
-    for (const [, uri] of TOOL_WIDGET_MAP) {
+    expect(TOOL_WIDGET_MAP).toHaveLength(22)
+    expect(Object.values(WIDGET_URIS)).toHaveLength(22)
+    for (const uri of Object.values(WIDGET_URIS)) {
       expect(server._registeredResources[uri], `missing widget ${uri}`).toBeDefined()
+    }
+    const registeredWidgetUris = Object.keys(server._registeredResources).filter((u) =>
+      u.startsWith("ui://widget/"),
+    )
+    expect(registeredWidgetUris.sort()).toEqual([...Object.values(WIDGET_URIS)].sort())
+  })
+
+  it("internal tools have no widget", () => {
+    const server = createServer({
+      apiKey: "tlnc_test",
+      includeAdminAgentTaskTools: true,
+    }) as any
+    for (const name of Object.keys(server._registeredTools)) {
+      if (name.startsWith("talonic_admin_")) {
+        expect(server._registeredTools[name]._meta?.["openai/outputTemplate"]).toBeUndefined()
+      }
     }
   })
 })

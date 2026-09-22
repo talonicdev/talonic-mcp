@@ -13,6 +13,12 @@ const READ_ONLY_TOOLS = [
   "talonic_get_balance",
   "talonic_get_pricing",
   "talonic_get_usage",
+  "talonic_list_fields",
+  "talonic_get_field",
+  "talonic_field_values",
+  "talonic_find_data",
+  "talonic_list_agent_tools",
+  "talonic_invoke_agent_tool",
   "talonic_list_agent_tasks",
   "talonic_get_agent_task",
 ]
@@ -107,5 +113,17 @@ describe("conditional admin Agent-task annotations", () => {
       destructiveHint: false,
       openWorldHint: false,
     })
+  })
+})
+
+describe("Apps SDK invocation status strings", () => {
+  it.each(ALL_TOOLS)("%s declares invoking/invoked text ≤ 64 chars", (name) => {
+    const server = createServer({ apiKey: "tlnc_test" }) as any
+    const meta = server._registeredTools[name]?._meta ?? {}
+    for (const k of ["openai/toolInvocation/invoking", "openai/toolInvocation/invoked"]) {
+      expect(typeof meta[k], `${name} ${k}`).toBe("string")
+      expect(meta[k].length, `${name} ${k}`).toBeGreaterThan(0)
+      expect(meta[k].length, `${name} ${k}`).toBeLessThanOrEqual(64)
+    }
   })
 })

@@ -11,6 +11,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { createServer as createHttpServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
 import { createRequestHandler, type CreateRequestHandlerOptions } from "../src/http-server"
+import { WIDGET_URIS } from "../src/widgets/types"
 
 interface HarnessServer {
   server: Server
@@ -155,29 +156,30 @@ describe("HTTP server routing", () => {
     expect(text).toContain("talonic_admin_submit_agent_task")
   })
 
-  it("widget template resources/read works WITHOUT auth and with JSON-only Accept (review fix)", async () => {
-    // OpenAI review failed test case #4 with "Error loading app, failed to
-    // fetch the template". Widget templates are static, secret-free HTML;
-    // their fetch must never die on a missing/stale token (401) or a missing
-    // text/event-stream Accept (406). Served via a public fast path.
-    const res = await fetch(`${h.baseUrl}/mcp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 7,
-        method: "resources/read",
-        params: { uri: "ui://widget/markdown-view.html" },
-      }),
-    })
-    expect(res.status).toBe(200)
-    expect(res.headers.get("content-type")).toContain("application/json")
-    const body = (await res.json()) as any
-    expect(body.id).toBe(7)
-    expect(body.result.contents[0].mimeType).toBe("text/html;profile=mcp-app")
-    expect(body.result.contents[0].text).toMatch(/^<!doctype html>/i)
-    expect(body.result.contents[0]._meta?.["openai/widgetDomain"]).toBe("https://talonic.com")
-  })
+  it.each(Object.values(WIDGET_URIS))(
+    "widget template %s is served WITHOUT auth and with JSON-only Accept (review fix)",
+    async (uri) => {
+      // OpenAI review failed test case #4 with "Error loading app, failed to
+      // fetch the template". Widget templates are static, secret-free HTML;
+      // their fetch must never die on a missing/stale token (401) or a missing
+      // text/event-stream Accept (406). Served via a public fast path.
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "resources/read", params: { uri } }),
+      })
+      expect(res.status).toBe(200)
+      expect(res.headers.get("content-type")).toContain("application/json")
+      const body = (await res.json()) as any
+      expect(body.id).toBe(7)
+      expect(body.result.contents[0].uri).toBe(uri)
+      expect(body.result.contents[0].mimeType).toBe("text/html;profile=mcp-app")
+      expect(body.result.contents[0].text).toMatch(/^<!doctype html>/i)
+      expect(body.result.contents[0]._meta?.["openai/widgetDomain"]).toBe("https://talonic.com")
+      expect(typeof body.result.contents[0]._meta?.["openai/widgetDescription"]).toBe("string")
+      expect(body.result.contents[0]._meta?.["openai/widgetPrefersBorder"]).toBe(true)
+    },
+  )
 
   it("non-widget resources/read still requires auth (fast path is widgets-only)", async () => {
     const res = await fetch(`${h.baseUrl}/mcp`, {

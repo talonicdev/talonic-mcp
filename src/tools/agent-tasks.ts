@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 /**
  * Agent-stage worklist tools.
@@ -391,6 +392,7 @@ export function registerAgentTaskTools(
       description: DESCRIPTIONS.list,
       inputSchema: listInput,
       annotations: { title: "List Agent Tasks", ...READ_ONLY },
+      _meta: widgetToolMeta("listAgentTasks"),
     },
     async (args: ListAgentTasksArgs) => handleListAgentTasks(getToken, baseUrl, args),
   )
@@ -401,6 +403,7 @@ export function registerAgentTaskTools(
       description: DESCRIPTIONS.get,
       inputSchema: idInput,
       annotations: { title: "Get Agent Task", ...READ_ONLY },
+      _meta: widgetToolMeta("getAgentTask"),
     },
     async (args: AgentTaskIdArgs) => handleGetAgentTask(getToken, baseUrl, args),
   )
@@ -411,6 +414,7 @@ export function registerAgentTaskTools(
       description: DESCRIPTIONS.claim,
       inputSchema: idInput,
       annotations: { title: "Claim Agent Task", ...MUTATING },
+      _meta: widgetToolMeta("claimAgentTask"),
     },
     async (args: AgentTaskIdArgs) => handleClaimAgentTask(getToken, baseUrl, args),
   )
@@ -421,6 +425,7 @@ export function registerAgentTaskTools(
       description: DESCRIPTIONS.heartbeat,
       inputSchema: heartbeatInput,
       annotations: { title: "Heartbeat Agent Task", ...MUTATING },
+      _meta: widgetToolMeta("heartbeatAgentTask"),
     },
     async (args: HeartbeatAgentTaskArgs) => handleHeartbeatAgentTask(getToken, baseUrl, args),
   )
@@ -431,6 +436,7 @@ export function registerAgentTaskTools(
       description: DESCRIPTIONS.submit,
       inputSchema: submitInput,
       annotations: { title: "Submit Agent Task", ...MUTATING },
+      _meta: widgetToolMeta("submitAgentTask"),
     },
     async (args: SubmitAgentTaskArgs) => handleSubmitAgentTask(getToken, baseUrl, args),
   )

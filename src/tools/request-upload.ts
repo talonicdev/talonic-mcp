@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { jsonOk, toolError, type ToolResult } from "./_shared.js"
-import { WIDGET_URIS } from "../widgets/types.js"
+import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
   "Get a browser upload link the user opens to add a file to their workspace. Returns the link plus a pre-allocated document_id.",
@@ -94,10 +94,7 @@ export function registerRequestUpload(
         destructiveHint: false,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: WIDGET_URIS.requestUpload },
-        "openai/outputTemplate": WIDGET_URIS.requestUpload,
-      },
+      _meta: widgetToolMeta("requestUpload"),
     },
     async (args) => handleRequestUpload(getToken, baseUrl, args as RequestUploadArgs),
   )
