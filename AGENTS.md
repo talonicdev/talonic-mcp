@@ -133,7 +133,7 @@ Always run typecheck + test + format:check before any push.
 1. **Docs-drift guard** — fails if `src/tools/**`, `src/http-server.ts`, `src/server-factory.ts`, or `src/resources/**` changed without `docs/sections.json`. Opt out with `[skip docs]` in a commit message **only** for genuinely non-doc-affecting changes (refactors, internal fixes, CI, debug instrumentation). ⚠️ This guard watches the dormant `docs/sections.json` surface, not the live MCP docs surface — it does **not** enforce that `src/content/sections/*.ts` was updated when tools change. Discipline + `docs-pipeline.md` are the only enforcement there.
 2. Build, test, auto-bump patch version, sync `server.json`.
 3. `npm publish` (`NPM_TOKEN`).
-4. MCP Registry publish (`mcp-publisher`, GitHub OIDC).
+4. MCP Registry publish (`mcp-publisher`, GitHub OIDC), after waiting up to four minutes for npm to serve the new version (its replicas can lag the publish; the Registry validates against npm) and with three attempts. Soft step: a failure is a `::warning::` annotation, never a red run.
 5. GitHub Release (`gh release create`, idempotent).
 6. `repository_dispatch` → `talonicdev/website` and `talonicdev/platform` rebuild docs.
 

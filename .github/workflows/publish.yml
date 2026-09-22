@@ -164,11 +164,42 @@ jobs:
           mcp-publisher --version
         continue-on-error: true
 
+      # mcp-publisher validates that npm serves the version before it will
+      # register it. npm's read replicas can lag the publish by a few minutes
+      # (0.1.77, 2026-09-22: refused with a 404 ~70 s after `npm publish`
+      # returned, leaving the Registry silently stale). Poll until npm serves
+      # the version, for up to four minutes. Soft: on timeout the publish
+      # below still runs, and it retries on its own.
+      - name: Wait for npm to serve the published version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          for attempt in $(seq 1 24); do
+            if npm view "@talonic/mcp@${VERSION}" version --prefer-online >/dev/null 2>&1; then
+              echo "npm serves @talonic/mcp@${VERSION} (attempt ${attempt})"
+              exit 0
+            fi
+            echo "npm does not serve @talonic/mcp@${VERSION} yet (attempt ${attempt}/24); sleeping 10s"
+            sleep 10
+          done
+          echo "::warning::npm still does not serve @talonic/mcp@${VERSION} after 4 minutes; attempting the Registry publish anyway"
+        continue-on-error: true
+
       - name: Publish to MCP Registry
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mcp-publisher login github-oidc
-          mcp-publisher publish
+          for attempt in 1 2 3; do
+            if mcp-publisher publish; then
+              exit 0
+            fi
+            echo "mcp-publisher publish failed (attempt ${attempt}/3); sleeping 30s"
+            sleep 30
+          done
+          # continue-on-error hides the red X, so surface the outcome as a
+          # run annotation: npm is live and installs work, only the Registry
+          # listing is behind until the next release or a manual publish.
+          echo "::warning::MCP Registry publish failed after 3 attempts; the Registry stays at the previous version until the next release or a manual 'mcp-publisher publish'"
+          exit 1
         continue-on-error: true
 
       # GitHub Release is what Glama tracks for its "Recent Releases" panel
