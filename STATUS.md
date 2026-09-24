@@ -3,13 +3,13 @@
 > **📐 Architecture map for docs:** `docs/architecture/docs-pipeline.md` is the canonical reference for how content flows from this repo (and from `talonic-node` + platform) into `talonic.com/docs/*`. Read it before any non-trivial doc change — the repo carries two parallel docs surfaces feeding *different* parts of the website, and editing the wrong one is a silent no-op. The doc covers the end-to-end pipeline, the four-file checklist for adding a new MCP tool, the failure-mode table, and the CI token map.
 
 
-**Last audit:** 2026-09-22 (full re-audit: 36 tools / 36 widgets, the Specs/Run/Ask and decision-task tool sets, 0.1.79 live on npm/Registry/hosted-endpoint, directory status, changelog-anchored release history, open items). Earlier: 2026-06-03, 2026-05-19. **Audited by:** Claude (assisting Hamlet). **Scope:** sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
+**Last audit:** 2026-09-22 (full re-audit: 36 tools / 36 widgets, the Specs/Run/Ask and decision-task tool sets, 0.1.80 live on npm/Registry/hosted-endpoint, directory status, changelog-anchored release history, open items). Earlier: 2026-06-03, 2026-05-19. **Audited by:** Claude (assisting Hamlet). **Scope:** sync versions, follow-ups, and resolved items across `@talonic/mcp`, `@talonic/node`, website, and the official MCP Registry.
 
 This document captures the live state of the four Talonic developer surfaces: `@talonic/mcp`, `@talonic/node`, the website, and the official MCP Registry. Update before each release.
 
 ## TL;DR
 
-**Re-audited 2026-09-22.** `@talonic/mcp` **0.1.79** is live on npm, on the official MCP Registry (`io.github.talonicdev/talonic-mcp`, isLatest 0.1.79, published 2026-09-22T16:37:58Z), and on `mcp.talonic.com` (`/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`). Local `main` is unpublished on `origin/main` (`git log origin/main..main`) — a push to `main` is a release and waits for Hamlet's go; the next push publishes **0.1.79**. Local main carries **36 public tools** (22 read-only, 14 write-capable; superadmin growth/admin tools stay hidden behind an access probe), one ChatGPT Apps SDK widget per tool (36/36), Apps SDK status/description metadata everywhere, User-Agent surface tagging on every outbound call, the Specs / Run / Ask tool set, the seven `talonic_*_decision_task` tools for External-mode Apps, docs on both surfaces for all 36 tools, a 36-tool ChatGPT submission manifest, and a preflight script that checks `tools/list` plus every widget template the way ChatGPT does (`npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK"). Tests, format and build all green — see Surfaces for the current count and the commit it was measured at. Release history is complete and tag-accurate in `CHANGELOG.md` (0.1.53 → 0.1.78, plus everything recorded back to 0.1.3). The Claude.ai file-upload blocker that used to have its own banner at the top of this file was solved by `talonic_request_upload`, shipped in **0.1.45** (2026-05-27), with the poll-target alignment (poll for `completed`, not `uploaded`) landing in **0.1.48** (2026-05-28) — 0.1.46 and 0.1.47 were bump-only re-publishes with no code change; full record in `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
+**Re-audited 2026-09-22.** `@talonic/mcp` **0.1.80** is live on npm, on the official MCP Registry (`io.github.talonicdev/talonic-mcp`, isLatest 0.1.80, published 2026-09-22T16:37:58Z), and on `mcp.talonic.com` (`/health` → `{"status":"ok","server":"talonic","version":"0.1.78"}`). Local `main` is unpublished on `origin/main` (`git log origin/main..main`) — a push to `main` is a release and waits for Hamlet's go; the next push publishes **0.1.79**. Local main carries **36 public tools** (22 read-only, 14 write-capable; superadmin growth/admin tools stay hidden behind an access probe), one ChatGPT Apps SDK widget per tool (36/36), Apps SDK status/description metadata everywhere, User-Agent surface tagging on every outbound call, the Specs / Run / Ask tool set, the seven `talonic_*_decision_task` tools for External-mode Apps, docs on both surfaces for all 36 tools, a 36-tool ChatGPT submission manifest, and a preflight script that checks `tools/list` plus every widget template the way ChatGPT does (`npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK"). Tests, format and build all green — see Surfaces for the current count and the commit it was measured at. Release history is complete and tag-accurate in `CHANGELOG.md` (0.1.53 → 0.1.78, plus everything recorded back to 0.1.3). The Claude.ai file-upload blocker that used to have its own banner at the top of this file was solved by `talonic_request_upload`, shipped in **0.1.45** (2026-05-27), with the poll-target alignment (poll for `completed`, not `uploaded`) landing in **0.1.48** (2026-05-28) — 0.1.46 and 0.1.47 were bump-only re-publishes with no code change; full record in `docs/superpowers/specs/2026-05-27-claude-file-upload-report.md`.
 
 **Headline changes since the previous audit (2026-06-03):**
 
@@ -25,10 +25,10 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 | Item | State (2026-09-22) |
 | --- | --- |
-| Repo | `main` = `origin/main` = v0.1.79 (published 2026-09-22); shipped in that release: the 2026-09-22 housekeeping/widget-parity/Specs-Run-Ask program. A push is a release and waits for Hamlet's go. |
-| package.json / server.json version | 0.1.79 (CI auto-bumps on the next publishing push) |
-| npm published version | 0.1.79 (2026-09-22, trusted publishing) |
-| Hosted endpoint | `https://mcp.talonic.com` serving 0.1.79; `/health` ok |
+| Repo | `main` = `origin/main` = v0.1.80 (published 2026-09-24; 0.1.79 on 2026-09-22); shipped in that release: the 2026-09-22 housekeeping/widget-parity/Specs-Run-Ask program. A push is a release and waits for Hamlet's go. |
+| package.json / server.json version | 0.1.80 (CI auto-bumps on the next publishing push) |
+| npm published version | 0.1.80 (2026-09-24, trusted publishing; 0.1.79 on 2026-09-22) |
+| Hosted endpoint | `https://mcp.talonic.com` serving 0.1.80; `/health` ok |
 | Tests | `npm test` — 864 tests / 60 files, green, measured at the fix-wave commit of 2026-09-22 (`npm test`); `npm run preflight:chatgpt` → "36 public tools, 36 templates fetched — PREFLIGHT OK" |
 | Format check | clean (verified 2026-09-22) |
 | Typecheck | green, measured at the fix-wave commit of 2026-09-22 (`npm run typecheck`) |
@@ -64,7 +64,7 @@ This document captures the live state of the four Talonic developer surfaces: `@
 
 | Item | State (2026-09-22) |
 | --- | --- |
-| Listing | `io.github.talonicdev/talonic-mcp`, isLatest **0.1.79** (published 2026-09-22T20:26Z), status active; auto-tracked by `mcp-publisher` in `publish.yml` |
+| Listing | `io.github.talonicdev/talonic-mcp`, isLatest **0.1.80** (published 2026-09-24), status active; auto-tracked by `mcp-publisher` in `publish.yml` |
 | Note | 0.1.77 never reached the Registry — npm read-replica lag made `mcp-publisher publish` 404 against the just-published version; 0.1.78 (PR #23) added a poll/retry/warn step so future gaps are visible instead of silently staying stale |
 
 ### Directories
