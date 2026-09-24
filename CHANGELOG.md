@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
-_No unpublished changes yet._
+### Fixed
+
+- **RFC 9728 path-suffixed protected-resource metadata.** The hosted server now also serves `/.well-known/oauth-protected-resource/mcp` with `resource` set to the exact `https://mcp.talonic.com/mcp` URL, and every `401` names the metadata document that matches the endpoint the client used (`/mcp` → the path-suffixed document, `/` → the root one) with `error="invalid_token"`. Claude's connector review requires the advertised `resource` to equal the server URL exactly as entered, path included; previously only the root document existed and the `/mcp` lookup returned 404. No change to the authorization server, scopes, or token handling.
 
 ## [0.1.79] - 2026-09-22
 

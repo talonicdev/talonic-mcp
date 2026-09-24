@@ -100,7 +100,7 @@ src/
   server.ts           stdio entrypoint (npx @talonic/mcp)
   http-server.ts      Streamable HTTP entrypoint for mcp.talonic.com
                         · serves MCP at both / and /mcp (root-routing fix, 0.1.37)
-                        · OAuth 2.1 protected-resource metadata at /.well-known/oauth-protected-resource
+                        · OAuth 2.1 protected-resource metadata at /.well-known/oauth-protected-resource (root) and …/oauth-protected-resource/mcp (resource = the exact /mcp URL, RFC 9728 §3.1); 401s point at the one matching the endpoint used
                         · Origin allowlist (DNS-rebinding mitigation, src/origin.ts)
   server-factory.ts   createServer() — shared by both entrypoints; registers tools/resources/widgets
   tools/*.ts          one file per MCP tool (handle<Name> + register<Name>)

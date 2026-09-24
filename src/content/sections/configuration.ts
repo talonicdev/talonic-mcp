@@ -123,7 +123,7 @@ export const sections: RawSection[] = [
             name: "MCP_RESOURCE_URL",
             type: "string",
             description:
-              "Public URL this deployment advertises as its OAuth protected-resource identifier.",
+              "Public URL this deployment advertises as its OAuth protected-resource identifier. Served at /.well-known/oauth-protected-resource (root) and /.well-known/oauth-protected-resource/mcp (resource = <URL>/mcp, per RFC 9728); 401 responses point at the document matching the endpoint the client used.",
             default: "https://mcp.talonic.com",
           },
           {

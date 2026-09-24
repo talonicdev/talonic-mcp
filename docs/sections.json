@@ -3183,7 +3183,7 @@
       },
       {
         "type": "paragraph",
-        "text": "No environment variables needed. The API key is passed via the `Authorization` header on every request."
+        "text": "No environment variables needed. The API key is passed via the `Authorization` header on every request. The hosted transport publishes its OAuth protected-resource metadata at `/.well-known/oauth-protected-resource` (root) and `/.well-known/oauth-protected-resource/mcp` (resource = the exact `/mcp` URL, RFC 9728); a `401` names the document that matches the endpoint the client used."
       }
     ],
     "related": [

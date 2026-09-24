@@ -145,14 +145,14 @@ const APPS_CHALLENGE_TOKEN =
  * advertise only what the connector itself needs so the consent screen
  * stays tight.
  */
-function renderProtectedResourceMetadata(): {
+function renderProtectedResourceMetadata(resourcePath = ""): {
   resource: string
   authorization_servers: string[]
   scopes_supported: string[]
   bearer_methods_supported: string[]
 } {
   return {
-    resource: RESOURCE_URL,
+    resource: `${RESOURCE_URL}${resourcePath}`,
     authorization_servers: [AUTHORIZATION_SERVER],
     scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
     bearer_methods_supported: ["header"],
@@ -188,8 +188,22 @@ function extractBearerToken(req: {
   return undefined
 }
 
-/** WWW-Authenticate header value for 401 responses, per RFC 9728. */
-const WWW_AUTHENTICATE = `Bearer resource_metadata="${RESOURCE_URL}/.well-known/oauth-protected-resource"`
+/**
+ * WWW-Authenticate header value for 401 responses, per RFC 6750 + RFC 9728.
+ * The `resource_metadata` pointer is scoped to the endpoint the client used:
+ * `/mcp` points at the path-suffixed document (RFC 9728 §3.1, which clients
+ * try first for a resource with a path component) whose `resource` is the
+ * exact `/mcp` URL; the root endpoint points at the root document.
+ */
+function wwwAuthenticate(path: string): string {
+  const suffix = isMcpPath(path) ? "/mcp" : ""
+  return `Bearer error="invalid_token", resource_metadata="${RESOURCE_URL}/.well-known/oauth-protected-resource${suffix}"`
+}
+
+/** True for the `/mcp` MCP endpoint (with or without a trailing slash). */
+function isMcpPath(path: string): boolean {
+  return path === "/mcp" || path === "/mcp/"
+}
 
 /**
  * If the parsed JSON-RPC body is a single `resources/read` for a
@@ -301,6 +315,17 @@ export function createRequestHandler(
         "Cache-Control": "public, max-age=3600",
       })
       res.end(JSON.stringify(renderProtectedResourceMetadata()))
+      return
+    }
+    // Path-suffixed variant (RFC 9728 §3.1): clients connecting to `/mcp`
+    // look here first, and Claude requires the `resource` value to equal
+    // the server URL exactly as the user entered it, path included.
+    if (path === "/.well-known/oauth-protected-resource/mcp") {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600",
+      })
+      res.end(JSON.stringify(renderProtectedResourceMetadata("/mcp")))
       return
     }
 
@@ -469,7 +494,7 @@ export function createRequestHandler(
     if (!token) {
       res.writeHead(401, {
         "Content-Type": "application/json",
-        "WWW-Authenticate": WWW_AUTHENTICATE,
+        "WWW-Authenticate": wwwAuthenticate(path),
       })
       res.end(
         JSON.stringify({

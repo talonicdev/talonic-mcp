@@ -156,6 +156,43 @@ describe("HTTP server routing", () => {
     ])
   })
 
+  it("serves the path-suffixed protected-resource metadata for /mcp with the exact /mcp resource", async () => {
+    const res = await fetch(`${h.baseUrl}/.well-known/oauth-protected-resource/mcp`)
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { resource: string; authorization_servers: string[] }
+    expect(body.resource).toMatch(/\/mcp$/)
+    expect(body.authorization_servers).toHaveLength(1)
+    const root = (await (
+      await fetch(`${h.baseUrl}/.well-known/oauth-protected-resource`)
+    ).json()) as {
+      resource: string
+    }
+    expect(root.resource).not.toMatch(/\/mcp$/)
+    expect(body.resource).toBe(`${root.resource}/mcp`)
+  })
+
+  it("401 on /mcp points at the path-suffixed metadata document; 401 on / points at the root one", async () => {
+    const post = (path: string) =>
+      fetch(`${h.baseUrl}${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+      })
+    const onMcp = await post("/mcp")
+    expect(onMcp.status).toBe(401)
+    expect(onMcp.headers.get("www-authenticate")).toMatch(
+      /^Bearer error="invalid_token", resource_metadata="https:\/\/[^"]+\/\.well-known\/oauth-protected-resource\/mcp"$/,
+    )
+    const onRoot = await post("/")
+    expect(onRoot.status).toBe(401)
+    expect(onRoot.headers.get("www-authenticate")).toMatch(
+      /^Bearer error="invalid_token", resource_metadata="https:\/\/[^"]+\/\.well-known\/oauth-protected-resource"$/,
+    )
+  })
+
   it("marks the decision-task tools non-invocable for an OAuth token without apps:decide", async () => {
     const b64 = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url")
     const list = async (token: string) => {
