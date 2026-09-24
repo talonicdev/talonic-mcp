@@ -103,6 +103,18 @@ describe("tool annotations conform to Apps SDK guidelines", () => {
   })
 })
 
+describe("directory listing: every public tool carries annotations.title", () => {
+  // Anthropic's submission portal reads annotations.title (not the top-level
+  // title) as the human-readable name and flags tools without it.
+  it.each(ALL_TOOLS)("%s has a non-empty annotations.title", (name) => {
+    const server = createServer({ apiKey: "tlnc_test" }) as any
+    const tool = server._registeredTools[name]
+    expect(tool, `${name} not registered`).toBeDefined()
+    expect(typeof tool.annotations?.title).toBe("string")
+    expect(tool.annotations.title.trim().length).toBeGreaterThan(0)
+  })
+})
+
 describe("conditional admin Agent-task annotations", () => {
   const server = createServer({
     apiKey: "tlnc_test",

@@ -2395,9 +2395,10 @@ Payment terms: Net 30`,
           "An Agent task parks one document at a pipeline stage and asks for declared output fields. A decision task parks one App run and asks for the run's decision: the outcome is validated against the app's output contract, must cite evidence from the frozen input package, and is written to the app's ledger with decided_by.type external_agent. The two protocols share the lease, heartbeat and execution-epoch mechanics.",
       },
       {
-        question: "Why does the tool return 403, or show as NOT INVOCABLE IN THIS SESSION?",
+        question:
+          "Why does the tool return 403 insufficient_scope, or carry talonic/can_invoke: false in its _meta?",
         answer:
-          "The decide tier is an independent grant: operate does not imply it. A tlnc_ key needs a decide grant on that app, granted by a workspace owner. An OAuth connector session needs the apps:decide scope and a senior_member role or above, read live on every call. If the connector was added before the scope existed, its token lacks it: the hosted server then lists the seven tools marked NOT INVOCABLE IN THIS SESSION, and the fix is to remove and re-add the Talonic connector so the consent screen offers 'Claim and decide tasks'.",
+          "The decide tier is an independent grant: operate does not imply it. A tlnc_ key needs a decide grant on that app, granted by a workspace owner. An OAuth connector session needs the apps:decide scope and a senior_member role or above, read live on every call. If the connector was added before the scope existed, its token lacks it: the hosted server then lists the seven tools flagged with _meta.talonic/can_invoke: false (descriptions stay unchanged), and the fix is to remove and re-add the Talonic connector so the consent screen offers 'Claim and decide tasks'.",
       },
       {
         question: "What do the decision task statuses mean?",

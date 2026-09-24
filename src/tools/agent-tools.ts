@@ -236,10 +236,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_find_data",
     {
-      title: "Find the data behind a concept",
+      title: "Find Data by Concept",
       description: FIND_DESCRIPTION,
       inputSchema: findDataInputSchema,
       annotations: {
+        title: "Find Data by Concept",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -252,10 +253,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_list_agent_tools",
     {
-      title: "List the platform agent tools",
+      title: "List Platform Agent Tools",
       description: LIST_TOOLS_DESCRIPTION,
       inputSchema: listAgentToolsInputSchema,
       annotations: {
+        title: "List Platform Agent Tools",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -268,10 +270,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_invoke_agent_tool",
     {
-      title: "Invoke a platform agent tool",
+      title: "Invoke Platform Agent Tool",
       description: INVOKE_DESCRIPTION,
       inputSchema: invokeAgentToolInputSchema,
       annotations: {
+        title: "Invoke Platform Agent Tool",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,

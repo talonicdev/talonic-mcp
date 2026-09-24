@@ -291,16 +291,16 @@ const MUTATING = {
 const AUTH_NOTE =
   "AUTH: a tlnc_ key needs a per-app 'decide' grant; an OAuth connector session needs the apps:decide scope (consented at connect) and a live workspace role of senior_member or above. A 403 (decide_grant_required, insufficient_scope, insufficient_tier) names what is missing — tell the user, do not retry."
 
-const NOT_INVOCABLE_PREFIX =
-  "NOT INVOCABLE IN THIS SESSION: the connector's OAuth token lacks the apps:decide scope. Ask the user to reconnect the Talonic connector and approve 'Claim and decide tasks' before calling this; a call now returns 403 insufficient_scope.\n\n"
-
 /** Options for {@link registerDecisionTaskTools}. */
 export interface DecisionTaskToolOptions {
   /**
-   * `false` lists the seven tools marked non-invocable: description prefixed
-   * with the missing-consent explanation and `_meta["talonic/can_invoke"]`
-   * false. Handlers still forward to the platform, which decides. Defaults
-   * to true.
+   * `false` lists the seven tools marked non-invocable via
+   * `_meta["talonic/can_invoke"]: false` (+ `talonic/required_scope`).
+   * Descriptions never change per session: directory scanners and clients
+   * that cache `tools/list` must see the same text as an authorised
+   * session, and each description's AUTH line already tells the agent what
+   * a 403 means. Handlers still forward to the platform, which decides.
+   * Defaults to true.
    */
   invocable?: boolean
 }
@@ -371,7 +371,6 @@ export function registerDecisionTaskTools(
   options: DecisionTaskToolOptions = {},
 ): void {
   const invocable = options.invocable !== false
-  const describe = (text: string): string => (invocable ? text : NOT_INVOCABLE_PREFIX + text)
   const metaFor = (key: WidgetKey): { _meta: Record<string, unknown> } => ({
     _meta: {
       ...widgetToolMeta(key),
@@ -383,7 +382,7 @@ export function registerDecisionTaskTools(
     "talonic_list_decision_tasks",
     {
       title: "List Decision Tasks",
-      description: describe(DESCRIPTIONS.list),
+      description: DESCRIPTIONS.list,
       inputSchema: listInput,
       annotations: { title: "List Decision Tasks", ...READ_ONLY },
       ...metaFor("listDecisionTasks"),
@@ -394,7 +393,7 @@ export function registerDecisionTaskTools(
     "talonic_claim_decision_task",
     {
       title: "Claim Decision Task",
-      description: describe(DESCRIPTIONS.claim),
+      description: DESCRIPTIONS.claim,
       inputSchema: idInput,
       annotations: { title: "Claim Decision Task", ...MUTATING },
       ...metaFor("claimDecisionTask"),
@@ -405,7 +404,7 @@ export function registerDecisionTaskTools(
     "talonic_read_decision_package",
     {
       title: "Read Decision Package",
-      description: describe(DESCRIPTIONS.package),
+      description: DESCRIPTIONS.package,
       inputSchema: packageInput,
       annotations: { title: "Read Decision Package", ...READ_ONLY },
       ...metaFor("readDecisionPackage"),
@@ -416,7 +415,7 @@ export function registerDecisionTaskTools(
     "talonic_heartbeat_decision_task",
     {
       title: "Heartbeat Decision Task",
-      description: describe(DESCRIPTIONS.heartbeat),
+      description: DESCRIPTIONS.heartbeat,
       inputSchema: epochInput,
       annotations: { title: "Heartbeat Decision Task", ...MUTATING },
       ...metaFor("heartbeatDecisionTask"),
@@ -427,7 +426,7 @@ export function registerDecisionTaskTools(
     "talonic_submit_decision_task",
     {
       title: "Submit Decision Task",
-      description: describe(DESCRIPTIONS.submit),
+      description: DESCRIPTIONS.submit,
       inputSchema: submitInput,
       annotations: { title: "Submit Decision Task", ...MUTATING },
       ...metaFor("submitDecisionTask"),
@@ -438,7 +437,7 @@ export function registerDecisionTaskTools(
     "talonic_release_decision_task",
     {
       title: "Release Decision Task",
-      description: describe(DESCRIPTIONS.release),
+      description: DESCRIPTIONS.release,
       inputSchema: epochInput,
       annotations: { title: "Release Decision Task", ...MUTATING },
       ...metaFor("releaseDecisionTask"),
@@ -449,7 +448,7 @@ export function registerDecisionTaskTools(
     "talonic_fail_decision_task",
     {
       title: "Fail Decision Task",
-      description: describe(DESCRIPTIONS.fail),
+      description: DESCRIPTIONS.fail,
       inputSchema: failInput,
       annotations: { title: "Fail Decision Task", ...MUTATING },
       ...metaFor("failDecisionTask"),

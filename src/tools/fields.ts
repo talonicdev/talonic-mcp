@@ -238,10 +238,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_list_fields",
     {
-      title: "List registry fields",
+      title: "List Registry Fields",
       description: LIST_DESCRIPTION,
       inputSchema: listFieldsInputSchema,
       annotations: {
+        title: "List Registry Fields",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -254,10 +255,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_get_field",
     {
-      title: "Get a field's concept card",
+      title: "Get Field Concept Card",
       description: GET_DESCRIPTION,
       inputSchema: getFieldInputSchema,
       annotations: {
+        title: "Get Field Concept Card",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -270,10 +272,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_field_values",
     {
-      title: "Read a field's values across documents",
+      title: "Read Field Values",
       description: VALUES_DESCRIPTION,
       inputSchema: fieldValuesInputSchema,
       annotations: {
+        title: "Read Field Values",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

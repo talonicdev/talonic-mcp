@@ -209,11 +209,12 @@ describe("HTTP server routing", () => {
 
     const marked = await list(withoutScope)
     expect(marked).toContain("talonic_claim_decision_task")
-    expect(marked).toContain("NOT INVOCABLE IN THIS SESSION")
     expect(marked).toContain("talonic/can_invoke")
+    // Descriptions never carry a session-dependent prefix (directory scanners cache them).
+    expect(marked).not.toContain("NOT INVOCABLE IN THIS SESSION")
 
-    expect(await list(withScope)).not.toContain("NOT INVOCABLE IN THIS SESSION")
-    expect(await list("tlnc_test")).not.toContain("NOT INVOCABLE IN THIS SESSION")
+    expect(await list(withScope)).not.toContain("talonic/can_invoke")
+    expect(await list("tlnc_test")).not.toContain("talonic/can_invoke")
   })
 
   it("tools/list includes admin variants only when the access check passes", async () => {

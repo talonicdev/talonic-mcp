@@ -332,9 +332,12 @@ describe("decide-scope listing", () => {
       "talonic_release_decision_task",
       "talonic_fail_decision_task",
     ]) {
-      expect(
-        marked._registeredTools[name].description.startsWith("NOT INVOCABLE IN THIS SESSION"),
-      ).toBe(true)
+      // Descriptions are session-independent (directory scanners cache them);
+      // the marker lives in _meta only.
+      expect(marked._registeredTools[name].description).not.toContain("NOT INVOCABLE")
+      expect(marked._registeredTools[name].description).toBe(
+        plain._registeredTools[name].description,
+      )
       expect(marked._registeredTools[name].description).toContain("apps:decide")
       expect(marked._registeredTools[name]._meta).toMatchObject({
         "talonic/can_invoke": false,
@@ -347,8 +350,8 @@ describe("decide-scope listing", () => {
       expect(plain._registeredTools[name]._meta).not.toHaveProperty("talonic/can_invoke")
     }
     // Other tools are untouched by the marker.
-    expect(marked._registeredTools["talonic_list_agent_tasks"].description).not.toContain(
-      "NOT INVOCABLE",
+    expect(marked._registeredTools["talonic_list_agent_tasks"]._meta ?? {}).not.toHaveProperty(
+      "talonic/can_invoke",
     )
 
     // The handler still forwards: the platform, not the listing, is the boundary.
