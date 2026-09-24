@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+_No unpublished changes yet._
+
+## [0.1.81] - 2026-09-24
+
 ### Fixed
 
 - **`annotations.title` on every public tool.** The six Field Registry / agent-tool registrations (`talonic_list_fields`, `talonic_get_field`, `talonic_field_values`, `talonic_find_data`, `talonic_list_agent_tools`, `talonic_invoke_agent_tool`) set only the top-level `title`; Anthropic's Connectors Directory portal reads `annotations.title` and flagged them ("Missing title annotation"). All 36 tools now carry it, locked by `tests/widgets/tool-annotations.test.ts`.
