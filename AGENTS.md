@@ -30,6 +30,8 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 
 **Internal exception — `src/tools/growth.ts`** registers four Talonic-internal, superadmin-only growth-analytics tools (`talonic_growth_*`) against the platform's `/v1/growth/*` surface. They are registered CONDITIONALLY: both entrypoints call `probeGrowthAccess()` and include them only when the session's credential passes the platform's superadmin gate (hosted: per-token 5-min cache in `http-server.ts`; stdio: once at boot). The platform re-checks the principal on every call, so the probe is listing UX, never the security boundary. Deliberately absent from BOTH public docs surfaces — do not add them to `src/content/` or `docs/sections.json`.
 
+**App-gated — `src/tools/contracts.ts`** registers thirteen `talonic_contracts_*` tools over the platform's `/v1/contracts/*` (fill and clean the Contracts app: register, one contract, cleaning worklist, upcoming dates, import candidates / bulk import / queue status, fix a document, merge, re-read, decide, key date handled, set a term with its quote). Registered only when `probeContractsAccess()` (`GET /v1/contracts/import/status` → 200) passes for the credential (hosted: per-token 5-min cache; stdio: once at boot), so deployments without the app never list them. Like the growth tools they are not in the public tool count, the submission manifest or `src/content/`; the platform enforces scopes (`read` / `write`) on every call.
+
 | Tool | File | Read-only? | Notes |
 | --- | --- | --- | --- |
 | `talonic_extract` | `extract.ts` | no | Primary tool. Schema **required** (rejected at MCP layer otherwise). Inputs: `file_data`+`filename`, `file_path`, `file_url`, or `document_id`. |

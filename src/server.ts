@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
+import { probeContractsAccess } from "./tools/contracts.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -83,16 +84,21 @@ export async function main(
   // Talonic-internal growth tools appear only when this key's creator is an
   // active superadmin (probe never throws; customers just skip registration).
   // Cross-tenant Agent-task tools use the same visibility model; payload calls
-  // remain OAuth + step-up only on the platform.
-  const [includeGrowthTools, includeAdminAgentTaskTools] = await Promise.all([
-    probeGrowthAccess(apiKey, baseUrl),
-    probeAgentTaskAdminAccess(apiKey, baseUrl),
-  ])
+  // remain OAuth + step-up only on the platform. Contracts tools appear only
+  // where the platform serves the Contracts app.
+  const [includeGrowthTools, includeAdminAgentTaskTools, includeContractsTools] = await Promise.all(
+    [
+      probeGrowthAccess(apiKey, baseUrl),
+      probeAgentTaskAdminAccess(apiKey, baseUrl),
+      probeContractsAccess(apiKey, baseUrl),
+    ],
+  )
   const server = createServer({
     apiKey,
     ...(baseUrl ? { baseUrl } : {}),
     includeGrowthTools,
     includeAdminAgentTaskTools,
+    includeContractsTools,
   })
 
   const transport = new StdioServerTransport()

@@ -15,6 +15,7 @@ import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerGrowthTools } from "./tools/growth.js"
+import { registerContractsTools } from "./tools/contracts.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -107,6 +108,13 @@ export interface CreateServerOptions {
    * re-authorizes every call; this flag controls listing visibility only.
    */
   includeAdminAgentTaskTools?: boolean
+
+  /**
+   * Register the `talonic_contracts_*` tools. Callers set this only after
+   * `probeContractsAccess` passed, so a deployment without the Contracts app
+   * never lists tools that would 404. Listing visibility only.
+   */
+  includeContractsTools?: boolean
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -295,6 +303,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeAdminAgentTaskTools) {
     registerAdminAgentTaskTools(server, rawToken, baseUrl)
+  }
+  if (options.includeContractsTools) {
+    registerContractsTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.

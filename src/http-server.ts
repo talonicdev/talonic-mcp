@@ -42,6 +42,7 @@ import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
+import { probeContractsAccess } from "./tools/contracts.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { isOriginAllowed } from "./origin.js"
@@ -50,6 +51,28 @@ import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
+
+/**
+ * Per-token cache of the Contracts probe, same TTL and bounding as the growth
+ * cache: it answers "does this deployment serve the app", which changes only
+ * on deploy.
+ */
+const contractsProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. */
+export async function contractsAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = (t) =>
+    probeContractsAccess(t, process.env["TALONIC_BASE_URL"]),
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = contractsProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (contractsProbeCache.size >= 1000) contractsProbeCache.clear()
+  contractsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
+  return ok
+}
 
 /**
  * Per-token cache of the growth-access probe, so the superadmin check does
@@ -246,6 +269,8 @@ function asWidgetTemplateRead(parsed: unknown): { uri: string; id: unknown } | n
 export interface CreateRequestHandlerOptions {
   /** Override the conditional growth-tool visibility check (primarily for tests). */
   growthAccess?: (token: string) => Promise<boolean>
+  /** Override the Contracts tool visibility check (primarily for tests). */
+  contractsAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
 }
@@ -509,26 +534,31 @@ export function createRequestHandler(
     // Fresh, stateless transport + server for this single request. The token
     // is fixed for the request, so a plain provider returning it suffices.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
-    const [includeGrowthTools, includeAdminAgentTaskTools] = await Promise.all([
-      (
-        options.growthAccess ??
-        ((currentToken: string) =>
-          growthAccessCached(currentToken, (candidate) =>
-            probeGrowthAccess(candidate, process.env["TALONIC_BASE_URL"]),
-          ))
-      )(token),
-      (
-        options.adminAgentTaskAccess ??
-        ((currentToken: string) =>
-          adminAgentTaskAccessCached(currentToken, (candidate) =>
-            probeAgentTaskAdminAccess(candidate, process.env["TALONIC_BASE_URL"]),
-          ))
-      )(token),
-    ])
+    const [includeGrowthTools, includeAdminAgentTaskTools, includeContractsTools] =
+      await Promise.all([
+        (
+          options.growthAccess ??
+          ((currentToken: string) =>
+            growthAccessCached(currentToken, (candidate) =>
+              probeGrowthAccess(candidate, process.env["TALONIC_BASE_URL"]),
+            ))
+        )(token),
+        (
+          options.adminAgentTaskAccess ??
+          ((currentToken: string) =>
+            adminAgentTaskAccessCached(currentToken, (candidate) =>
+              probeAgentTaskAdminAccess(candidate, process.env["TALONIC_BASE_URL"]),
+            ))
+        )(token),
+        (
+          options.contractsAccess ?? ((currentToken: string) => contractsAccessCached(currentToken))
+        )(token),
+      ])
     const mcpServer = createServer({
       tokenProvider: () => token,
       includeGrowthTools,
       includeAdminAgentTaskTools,
+      includeContractsTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

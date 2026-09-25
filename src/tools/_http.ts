@@ -28,7 +28,7 @@ export function resolveFetch(getToken: () => string): typeof fetch {
 export type QueryParams = Record<string, string | number | boolean | undefined>
 
 /** HTTP methods raw-fetch tools may use. */
-export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE"
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 /** Multipart fields; arrays repeat the key (`file_urls`), `undefined` is skipped. */
 export type FormFields = Record<string, string | string[] | undefined>
