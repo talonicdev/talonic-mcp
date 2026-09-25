@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+_No unpublished changes yet._
+
+## [0.1.82] - 2026-09-25
+
 ### Added
 
 - **`talonic_contracts_*` tools (13), registered where the platform serves the Contracts app.** Fill and clean the Contracts register over `/v1/contracts/*`: `register`, `contract`, `issues` (cleaning worklist with the documents concerned), `upcoming`, `import_candidates`, `import` (by ids, or every unread candidate with filters, `limit` and `dry_run`), `import_status`, `update_document` (role, exclude, re-key, remove), `merge`, `reread`, `decide`, `key_date`, `set_term` (value plus verbatim quote, verified by the platform). Probe-gated like the growth tools (`GET /v1/contracts/import/status` → 200), so they never appear where they would 404. `apiJson` gains `PUT`.
