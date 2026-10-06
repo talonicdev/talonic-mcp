@@ -32,6 +32,8 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 
 **App-gated — `src/tools/contracts.ts`** registers thirteen `talonic_contracts_*` tools over the platform's `/v1/contracts/*` (fill and clean the Contracts app: register, one contract, cleaning worklist, upcoming dates, import candidates / bulk import / queue status, fix a document, merge, re-read, decide, key date handled, set a term with its quote). Registered only when `probeContractsAccess()` (`GET /v1/contracts/import/status` → 200) passes for the credential (hosted: per-token 5-min cache; stdio: once at boot), so deployments without the app never list them. Like the growth tools they are not in the public tool count, the submission manifest or `src/content/`; the platform enforces scopes (`read` / `write`) on every call.
 
+**App-gated — `src/tools/ap.ts`** registers eight `talonic_ap_*` tools over the platform's `/v1/ap/*` (Accounts Payable: totals, invoices, held worklist, configuration read / replace, NetSuite vendor bill preview, post to the SIMULATED NetSuite sandbox, posting runs). Registered only when `probeApAccess()` (`GET /v1/ap/config` → 200) passes (hosted: per-token 5-min cache `apAccessCached`; stdio: once at boot). Not in the public tool count, the submission manifest or `src/content/`.
+
 | Tool | File | Read-only? | Notes |
 | --- | --- | --- | --- |
 | `talonic_extract` | `extract.ts` | no | Primary tool. Schema **required** (rejected at MCP layer otherwise). Inputs: `file_data`+`filename`, `file_path`, `file_url`, or `document_id`. |

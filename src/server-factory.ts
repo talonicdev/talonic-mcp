@@ -16,6 +16,7 @@ import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerContractsTools } from "./tools/contracts.js"
+import { registerApTools } from "./tools/ap.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -115,6 +116,13 @@ export interface CreateServerOptions {
    * never lists tools that would 404. Listing visibility only.
    */
   includeContractsTools?: boolean
+
+  /**
+   * Register the `talonic_ap_*` tools. Callers set this only after
+   * `probeApAccess` passed, so a deployment without the AP app never lists
+   * tools that would 404. Listing visibility only.
+   */
+  includeApTools?: boolean
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -306,6 +314,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeContractsTools) {
     registerContractsTools(server, rawToken, baseUrl)
+  }
+  if (options.includeApTools) {
+    registerApTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.
