@@ -3428,7 +3428,7 @@ Payment terms: Net 30`,
   "tool": "find_data",
   "result": {
     "fields": [{ "canonical_name": "contract_end_date", "field_key": "contract_end_date", "tier": 2, "occurrence_count": 88, "samples": [{ "value": "2027-12-31", "document_id": "f0e1…" }] }],
-    "documents": [{ "document_id": "f0e1…", "filename": "Vertrag-GETEC-2024.pdf", "score": 0.81 }],
+    "documents": [{ "document_id": "f0e1…", "filename": "Supply-Agreement-2024.pdf", "score": 0.81 }],
     "passages": []
   },
   "citations": [{ "document_id": "f0e1…" }]
