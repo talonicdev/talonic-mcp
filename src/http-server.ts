@@ -43,6 +43,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
+import { probeApAccess } from "./tools/ap.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { isOriginAllowed } from "./origin.js"
@@ -71,6 +72,24 @@ export async function contractsAccessCached(
   const ok = await probe(token)
   if (contractsProbeCache.size >= 1000) contractsProbeCache.clear()
   contractsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
+  return ok
+}
+
+/** Per-token cache of the AP probe, same TTL and bounding as the Contracts cache. */
+const apProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. */
+export async function apAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = (t) =>
+    probeApAccess(t, process.env["TALONIC_BASE_URL"]),
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = apProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (apProbeCache.size >= 1000) apProbeCache.clear()
+  apProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
   return ok
 }
 
@@ -271,6 +290,8 @@ export interface CreateRequestHandlerOptions {
   growthAccess?: (token: string) => Promise<boolean>
   /** Override the Contracts tool visibility check (primarily for tests). */
   contractsAccess?: (token: string) => Promise<boolean>
+  /** Override the AP tool visibility check (primarily for tests). */
+  apAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
 }
@@ -534,7 +555,7 @@ export function createRequestHandler(
     // Fresh, stateless transport + server for this single request. The token
     // is fixed for the request, so a plain provider returning it suffices.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
-    const [includeGrowthTools, includeAdminAgentTaskTools, includeContractsTools] =
+    const [includeGrowthTools, includeAdminAgentTaskTools, includeContractsTools, includeApTools] =
       await Promise.all([
         (
           options.growthAccess ??
@@ -553,12 +574,14 @@ export function createRequestHandler(
         (
           options.contractsAccess ?? ((currentToken: string) => contractsAccessCached(currentToken))
         )(token),
+        (options.apAccess ?? ((currentToken: string) => apAccessCached(currentToken)))(token),
       ])
     const mcpServer = createServer({
       tokenProvider: () => token,
       includeGrowthTools,
       includeAdminAgentTaskTools,
       includeContractsTools,
+      includeApTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
