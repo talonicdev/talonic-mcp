@@ -2926,7 +2926,7 @@ Payment terms: Net 30`,
     title: "talonic_list_fields",
     seoTitle: "talonic_list_fields — List Field Registry Concepts",
     description:
-      "MCP tool that lists the workspace's Field Registry: every canonical concept Talonic discovered across documents, with stable ids, maturity level, synonyms and occurrence counts.",
+      "MCP tool that lists the workspace's Field Registry: canonical concepts Talonic discovered across documents, with stable ids, maturity, synonyms and counts.",
     content: [
       {
         type: "paragraph",
@@ -3067,9 +3067,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-field",
     parentSlug: "tools",
     title: "talonic_get_field",
-    seoTitle: "talonic_get_field — Field Concept Card",
+    seoTitle: "talonic_get_field — Get a Field Registry Concept Card",
     description:
-      "MCP tool that returns a Field Registry concept card: definition, synonyms and aliases, maturity, occurrence statistics, value distribution with examples, schema usage and identity links.",
+      "MCP tool that returns a Field Registry concept card by id or name: definition, synonyms, maturity, occurrence stats, top values with examples and schema usage.",
     content: [
       {
         type: "paragraph",
@@ -3204,7 +3204,7 @@ Payment terms: Net 30`,
     title: "talonic_field_values",
     seoTitle: "talonic_field_values — Read a Field Across Documents",
     description:
-      "MCP tool that reads a Field Registry concept's current values across all documents with provenance: document, value, confidence, raw name, source text and resolution band.",
+      "MCP tool that reads a Field Registry concept's current values across documents with provenance: document, value, confidence, source text and resolution band.",
     content: [
       {
         type: "paragraph",
@@ -3348,9 +3348,9 @@ Payment terms: Net 30`,
     slug: "talonic-find-data",
     parentSlug: "tools",
     title: "talonic_find_data",
-    seoTitle: "talonic_find_data — Locate Data Behind a Concept",
+    seoTitle: "talonic_find_data — Locate the Data Behind Any Concept",
     description:
-      "MCP tool that resolves a natural-language concept to the registry fields, values, documents and passages that carry it, by meaning — the same retrieval the in-product Talonic agent uses.",
+      "MCP tool that resolves a natural-language concept to the registry fields, values, documents and passages that carry it, by meaning. Read-only, no LLM cost.",
     content: [
       {
         type: "paragraph",
@@ -3461,7 +3461,7 @@ Payment terms: Net 30`,
     title: "talonic_list_agent_tools",
     seoTitle: "talonic_list_agent_tools — Platform Agent Tool Registry",
     description:
-      "MCP tool that lists the platform's agent tool registry — every retrieval, provenance and analysis primitive the in-product Talonic agent runs on — with input schemas and per-credential invocability.",
+      "MCP tool that lists the platform's agent tool registry: retrieval, provenance and analysis primitives of the Talonic agent, with input schemas and access flags.",
     content: [
       {
         type: "paragraph",
@@ -3576,7 +3576,7 @@ Payment terms: Net 30`,
     title: "talonic_invoke_agent_tool",
     seoTitle: "talonic_invoke_agent_tool — Run a Platform Agent Tool",
     description:
-      "MCP tool that invokes one named platform agent tool directly with caller-chosen arguments — read-only SQL over extracted data, document text, workspace overviews — with no model in the loop.",
+      "MCP tool that invokes one platform agent tool directly with your own arguments, no model in the loop: read-only SQL over extracted data, document text and more.",
     content: [
       {
         type: "paragraph",
