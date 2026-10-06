@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Changed
+
+- **SEO copy for every public docs section.** `seoTitle` and `description` on all 52 public sections now sit within 50–60 / 150–160 characters, including the 14 Specs/Run/Ask and decision-task tools; wording checked against each tool's implementation. Locked by `tests/content/seo-lengths.test.ts`.
+- **Neutral example data.** The `talonic_find_data` example no longer uses a customer filename.
+
+## [0.1.83] - 2026-10-06
+
 ### Added
 
 - **`talonic_ap_*` tools (8), registered where the platform serves the AP app.** Accounts Payable over `/v1/ap/*`: `overview` (ready / held / at stake per entity), `bills` (filters: status, entity, reason, query, limit), `issues` (held worklist with reasons and dollars), `config` / `save_config` (whole-object replace, `dry_run`), `netsuite_preview` (REST `vendorBill` records and the invoices left out), `netsuite_post` (simulated NetSuite sandbox: simulated internal ids and a posting log; nothing is sent to NetSuite), `netsuite_runs`. Probe-gated like the Contracts tools (`GET /v1/ap/config` → 200).
