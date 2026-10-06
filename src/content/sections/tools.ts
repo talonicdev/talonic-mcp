@@ -2289,9 +2289,9 @@ Payment terms: Net 30`,
     slug: "talonic-list-decision-tasks",
     parentSlug: "tools",
     title: "talonic_list_decision_tasks",
-    seoTitle: "talonic_list_decision_tasks — External-Mode App Inbox",
+    seoTitle: "talonic_list_decision_tasks — App Decision Inbox for Agents",
     description:
-      "MCP tool that lists one External-mode app's decision tasks — runs parked for an outside agent to decide — with status filters and cursor pagination, metadata only.",
+      "MCP tool that lists an External-mode app's decision tasks, the runs parked for an outside agent to decide, with status filters and cursor-based pagination.",
     content: [
       {
         type: "paragraph",
@@ -2418,9 +2418,9 @@ Payment terms: Net 30`,
     slug: "talonic-claim-decision-task",
     parentSlug: "tools",
     title: "talonic_claim_decision_task",
-    seoTitle: "talonic_claim_decision_task — Lease a Run's Decision",
+    seoTitle: "talonic_claim_decision_task — Lease an App Decision Task",
     description:
-      "MCP tool that claims an External-mode decision task and returns the decision bundle: task metadata with a fresh execution epoch, the output contract, precedents and the package descriptor.",
+      "MCP tool that claims an External-mode decision task and returns the bundle: a fresh execution epoch, the output contract, precedents and a package descriptor.",
     content: [
       {
         type: "paragraph",
@@ -2518,7 +2518,7 @@ Payment terms: Net 30`,
     title: "talonic_read_decision_package",
     seoTitle: "talonic_read_decision_package — Read a Frozen Input Package",
     description:
-      "MCP tool that reads one page of a claimed decision task's frozen input package — the records and provenance locators the decision must be made from — with opaque cursor pagination.",
+      "MCP tool that pages through a claimed decision task's frozen input package: the records and provenance locators the decision must rest on, with opaque cursors.",
     content: [
       {
         type: "paragraph",
@@ -2626,7 +2626,7 @@ Payment terms: Net 30`,
     title: "talonic_heartbeat_decision_task",
     seoTitle: "talonic_heartbeat_decision_task — Keep a Decision Lease",
     description:
-      "MCP tool that extends the lease on a claimed decision task using the execution epoch from the claim — never past the task's SLA deadline.",
+      "MCP tool that extends the lease on a claimed decision task using the execution epoch from the claim, never past the SLA deadline, so long reviews keep it.",
     content: [
       {
         type: "paragraph",
@@ -2689,7 +2689,7 @@ Payment terms: Net 30`,
     title: "talonic_submit_decision_task",
     seoTitle: "talonic_submit_decision_task — Submit an Evidenced Decision",
     description:
-      "MCP tool that submits the decision for a claimed External-mode task — outcome validated against the output contract, evidence checked against the frozen input package, a mandatory rationale — and resumes the run.",
+      "MCP tool that submits the decision for a claimed task: outcome checked against the output contract, evidence against the frozen package, rationale required.",
     content: [
       {
         type: "paragraph",
@@ -2805,7 +2805,7 @@ Payment terms: Net 30`,
     title: "talonic_release_decision_task",
     seoTitle: "talonic_release_decision_task — Give a Decision Task Back",
     description:
-      "MCP tool that releases a claimed decision task back to available without deciding it, so another claimant can pick it up; the next claim bumps the execution epoch.",
+      "MCP tool that releases a claimed decision task back to available without deciding it, so another agent can claim it; the next claim bumps the execution epoch.",
     content: [
       {
         type: "paragraph",
@@ -2861,7 +2861,7 @@ Payment terms: Net 30`,
     title: "talonic_fail_decision_task",
     seoTitle: "talonic_fail_decision_task — Declare a Task Undecidable",
     description:
-      "MCP tool that reports a claimed decision task cannot be decided: raises a Human Review with the agent's reason and applies the app's declared fallback policy.",
+      "MCP tool that marks a claimed decision task as undecidable: it raises a Human Review carrying the agent's reason and applies the app's declared fallback policy.",
     content: [
       {
         type: "paragraph",
@@ -3670,9 +3670,9 @@ Payment terms: Net 30`,
     slug: "talonic-list-specs",
     parentSlug: "tools",
     title: "talonic_list_specs",
-    seoTitle: "talonic_list_specs — List Workspace Specs",
+    seoTitle: "talonic_list_specs — List Runnable Spec Pipelines via MCP",
     description:
-      "MCP tool that lists the workspace's Specs — the configured pipelines an agent can run with talonic_run_spec — with schema ids, publish state, and field/node counts.",
+      "MCP tool that lists your Talonic workspace's Specs, the configured pipelines an agent can run, with schema ids, publish state, and the field and node counts.",
     content: [
       {
         type: "paragraph",
@@ -3775,9 +3775,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-spec",
     parentSlug: "tools",
     title: "talonic_get_spec",
-    seoTitle: "talonic_get_spec — Get a Spec's Structure",
+    seoTitle: "talonic_get_spec — Inspect a Spec's Rail, Schema & Fields",
     description:
-      "MCP tool that returns one Spec's full structure: identity, version state, the schema it materializes onto, the authored rail (nodes[]) and compiled execution plan (phases[]), and its fields.",
+      "MCP tool that returns one Spec's full structure: version state, the schema it fills, the authored rail of nodes, the compiled execution phases, and its fields.",
     content: [
       {
         type: "paragraph",
@@ -3893,9 +3893,9 @@ Payment terms: Net 30`,
     slug: "talonic-run-spec",
     parentSlug: "tools",
     title: "talonic_run_spec",
-    seoTitle: "talonic_run_spec — Run a Spec Pipeline",
+    seoTitle: "talonic_run_spec — Run a Spec Pipeline over Your Documents",
     description:
-      "MCP tool that runs a Spec — the customer's configured pipeline — over workspace documents or public file URLs in one call, returning a normalized RunEnvelope to poll.",
+      "MCP tool that runs a Spec pipeline over workspace documents or public file URLs in one call and returns a normalized run envelope that an agent can poll.",
     content: [
       {
         type: "paragraph",
@@ -4056,9 +4056,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-run",
     parentSlug: "tools",
     title: "talonic_get_run",
-    seoTitle: "talonic_get_run — Poll a Spec Run",
+    seoTitle: "talonic_get_run — Poll a Spec Run's Status and Progress",
     description:
-      "MCP tool that polls a Spec run started by talonic_run_spec, returning normalized status plus document- and phase-level progress.",
+      "MCP tool that polls a Spec run started by talonic_run_spec and returns normalized status, document-level progress counters and, for pipelines, phase progress.",
     content: [
       {
         type: "paragraph",
@@ -4161,9 +4161,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-run-results",
     parentSlug: "tools",
     title: "talonic_get_run_results",
-    seoTitle: "talonic_get_run_results — Read a Spec Run's Rows",
+    seoTitle: "talonic_get_run_results — Read Structured Rows of a Run",
     description:
-      "MCP tool that reads a Spec run's structured rows — one per document, with column definitions and pending-review counts.",
+      "MCP tool that reads a Spec run's structured rows, one per document, with column definitions, clean per-field values and the count of values still in review.",
     content: [
       {
         type: "paragraph",
@@ -4281,9 +4281,9 @@ Payment terms: Net 30`,
     slug: "talonic-ask",
     parentSlug: "tools",
     title: "talonic_ask",
-    seoTitle: "talonic_ask — Ask a Cited, Verified Question",
+    seoTitle: "talonic_ask — Ask Cited, Verified Questions of Documents",
     description:
-      "MCP tool that answers a natural-language question over the workspace's documents with a cited, verified markdown answer.",
+      "MCP tool that answers a natural-language question over your workspace documents as cited markdown with per-claim source links and a verification verdict.",
     content: [
       {
         type: "paragraph",
@@ -4416,9 +4416,9 @@ Payment terms: Net 30`,
     slug: "talonic-get-answer",
     parentSlug: "tools",
     title: "talonic_get_answer",
-    seoTitle: "talonic_get_answer — Poll an Ask for Its Answer",
+    seoTitle: "talonic_get_answer — Poll a Talonic Ask for Its Answer",
     description:
-      "MCP tool that polls an ask started by talonic_ask for its completed, cited answer.",
+      "MCP tool that polls a question started with talonic_ask until the cited, verified answer is ready, so agents never block on long questions over big workspaces.",
     content: [
       {
         type: "paragraph",
