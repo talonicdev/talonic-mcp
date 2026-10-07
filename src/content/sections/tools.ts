@@ -2915,7 +2915,7 @@ Payment terms: Net 30`,
       {
         question: "Is failing a decision task destructive?",
         answer:
-          "No data is deleted. The task moves to failed, a review is raised with your reason, and the fallback policy the app declared runs — which under the rules policy still produces a decision. It cannot be undone, though: a failed task is not reclaimable.",
+          "Yes, and it is annotated `destructiveHint: true`. No data is deleted, but the task moves to failed for good, a review is raised with your reason, and the fallback policy the app declared runs, which can fail the whole run (under the rules policy it still produces a decision). A failed task is not reclaimable.",
       },
     ],
     mentions: ["fail", "fallback policy", "Human Review", "undecidable"],
@@ -3472,6 +3472,11 @@ Payment terms: Net 30`,
         variant: "info",
         text: "Target API: [Talonic API reference](https://talonic.com/docs/api) — `GET /v1/agent/tools`.",
       },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Not listed on ChatGPT connections: OpenAI's plugin review requires every model-callable operation to be its own tool, so the hosted server omits `talonic_list_agent_tools` and `talonic_invoke_agent_tool` for ChatGPT. Every other client lists both.",
+      },
       { type: "heading", level: 3, id: "list-agent-tools-use-when", text: "When to use" },
       {
         type: "list",
@@ -3586,6 +3591,11 @@ Payment terms: Net 30`,
         type: "callout",
         variant: "info",
         text: "Target API: [Talonic API reference](https://talonic.com/docs/api) — `POST /v1/agent/tools/{name}/invoke`.",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        text: "Not listed on ChatGPT connections: OpenAI's plugin review requires every model-callable operation to be its own tool, so the hosted server omits `talonic_list_agent_tools` and `talonic_invoke_agent_tool` for ChatGPT. Every other client lists both.",
       },
       { type: "heading", level: 3, id: "invoke-agent-tool-use-when", text: "When to use" },
       {

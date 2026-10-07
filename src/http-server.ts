@@ -586,6 +586,9 @@ export function createRequestHandler(
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
       decisionTasksInvocable: tokenHasDecideScope(token),
+      // OpenAI's plugin review rejects generic executors; omit the
+      // list/invoke registry pair for ChatGPT / OpenAI callers only.
+      includeGenericExecutor: !isOpenAiClient(req.headers["user-agent"]),
     })
     res.on("close", () => {
       void transport.close()
@@ -594,6 +597,18 @@ export function createRequestHandler(
     await mcpServer.connect(transport)
     await transport.handleRequest(req, res, parsed)
   }
+}
+
+/**
+ * True when the request comes from ChatGPT or another OpenAI MCP client
+ * (ChatGPT connectors, the plugin dashboard's scanner). Matches the
+ * platform's `resolveSurface` rule: the User-Agent mentions openai or chatgpt.
+ *
+ * @internal
+ */
+export function isOpenAiClient(userAgent: string | string[] | undefined): boolean {
+  const ua = (Array.isArray(userAgent) ? userAgent.join(" ") : (userAgent ?? "")).toLowerCase()
+  return ua.includes("openai") || ua.includes("chatgpt")
 }
 
 /**

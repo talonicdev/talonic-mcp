@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **OpenAI plugin review compliance.** The 2026-10-07 plugin-dashboard scan held five items; all addressed:
+  - Server instructions rewritten as neutral routing guidance (`buildServerInstructions`): no "you are mistaken, invoke it anyway" override, no pricing, no "for ANY document" steering.
+  - `talonic_list_agent_tools` + `talonic_invoke_agent_tool` (a generic executor) are no longer listed for ChatGPT / OpenAI callers, detected by User-Agent (`isOpenAiClient`); other clients keep them. New `includeGenericExecutor` option on `createServer`.
+  - `talonic_fail_decision_task` and `talonic_contracts_set_term` are now `destructiveHint: true` (ends the task for good / overwrites a term).
+  - `talonic_extract` description no longer advertises cost or claims to be the default for any document.
 - **SEO copy for every public docs section.** `seoTitle` and `description` on all 52 public sections now sit within 50–60 / 150–160 characters, including the 14 Specs/Run/Ask and decision-task tools; wording checked against each tool's implementation. Locked by `tests/content/seo-lengths.test.ts`.
 - **Neutral example data.** The `talonic_find_data` example no longer uses a customer filename.
 

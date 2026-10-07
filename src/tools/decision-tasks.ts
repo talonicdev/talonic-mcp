@@ -288,6 +288,13 @@ const MUTATING = {
   openWorldHint: false,
 } as const
 
+/** Ends the task for good and can apply a fail-the-run fallback: irreversible. */
+const DESTRUCTIVE = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  openWorldHint: false,
+} as const
+
 const AUTH_NOTE =
   "AUTH: a tlnc_ key needs a per-app 'decide' grant; an OAuth connector session needs the apps:decide scope (consented at connect) and a live workspace role of senior_member or above. A 403 (decide_grant_required, insufficient_scope, insufficient_tier) names what is missing — tell the user, do not retry."
 
@@ -450,7 +457,7 @@ export function registerDecisionTaskTools(
       title: "Fail Decision Task",
       description: DESCRIPTIONS.fail,
       inputSchema: failInput,
-      annotations: { title: "Fail Decision Task", ...MUTATING },
+      annotations: { title: "Fail Decision Task", ...DESTRUCTIVE },
       ...metaFor("failDecisionTask"),
     },
     async (args: FailDecisionTaskArgs) => handleFailDecisionTask(getToken, baseUrl, args),

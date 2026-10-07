@@ -55,10 +55,15 @@ const WRITE_TOOLS = [
   "talonic_heartbeat_decision_task",
   "talonic_submit_decision_task",
   "talonic_release_decision_task",
-  "talonic_fail_decision_task",
 ]
 
-const ALL_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS]
+// Irreversible writes: destructiveHint=true per OpenAI's annotation rules.
+//   - talonic_fail_decision_task ends the task for good and can apply the
+//     app's fail-the-run fallback.
+const DESTRUCTIVE_TOOLS = ["talonic_fail_decision_task"]
+
+const ALL_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS, ...DESTRUCTIVE_TOOLS]
+const NON_DESTRUCTIVE_TOOLS = [...READ_ONLY_TOOLS, ...WRITE_TOOLS]
 // talonic_extract and talonic_to_markdown fetch public file URLs (file_url
 // input); talonic_run_spec fetches public file URLs (file_urls input, the
 // remote-ingest path of the two run backends).
@@ -73,7 +78,7 @@ describe("tool annotations conform to Apps SDK guidelines", () => {
     expect(tool.annotations?.readOnlyHint).toBe(true)
   })
 
-  it.each(ALL_TOOLS)("%s is explicitly non-destructive", (name) => {
+  it.each(NON_DESTRUCTIVE_TOOLS)("%s is explicitly non-destructive", (name) => {
     const server = createServer({ apiKey: "tlnc_test" })
     const tool = (server as any)._registeredTools[name]
     expect(tool, `${name} not registered`).toBeDefined()
@@ -100,6 +105,14 @@ describe("tool annotations conform to Apps SDK guidelines", () => {
     expect(tool, `${name} not registered`).toBeDefined()
     expect(tool.annotations?.readOnlyHint).toBe(false)
     expect(tool.annotations?.destructiveHint).toBe(false)
+  })
+
+  it.each(DESTRUCTIVE_TOOLS)("%s is annotated readOnlyHint=false, destructiveHint=true", (name) => {
+    const server = createServer({ apiKey: "tlnc_test" })
+    const tool = (server as any)._registeredTools[name]
+    expect(tool, `${name} not registered`).toBeDefined()
+    expect(tool.annotations?.readOnlyHint).toBe(false)
+    expect(tool.annotations?.destructiveHint).toBe(true)
   })
 })
 

@@ -232,6 +232,7 @@ export function registerAgentRegistryTools(
   server: McpServer,
   getToken: () => string,
   baseUrl?: string,
+  opts: { includeGenericExecutor?: boolean } = {},
 ): void {
   server.registerTool(
     "talonic_find_data",
@@ -250,6 +251,11 @@ export function registerAgentRegistryTools(
     },
     async (args) => handleFindData(getToken, baseUrl, args as FindDataArgs),
   )
+  // The list + invoke pair is a generic executor over the platform registry.
+  // OpenAI's plugin review rejects that shape (every model-callable operation
+  // must be its own reviewed tool), so the hosted entrypoint omits the pair
+  // for ChatGPT / OpenAI callers. Other clients keep it.
+  if (opts.includeGenericExecutor === false) return
   server.registerTool(
     "talonic_list_agent_tools",
     {

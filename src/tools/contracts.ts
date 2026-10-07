@@ -655,7 +655,8 @@ export function registerContractsTools(
       "Set a contract term with its quote",
       SET_TERM_DESCRIPTION,
       setTermInputSchema,
-      write(true),
+      // Overwrites the term's current value: destructive per OpenAI's annotation rules.
+      write(true, true),
       (a) => handleSetTerm(getToken, baseUrl, a),
     ],
   ]

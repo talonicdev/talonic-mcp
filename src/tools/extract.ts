@@ -5,13 +5,13 @@ import { jsonOk, toolError, validationError, type ToolResult } from "./_shared.j
 import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "Turn ANY document into structured, schema-validated JSON. The default tool whenever you need to get data OUT of an unstructured file: PDF, scan, image, DOCX, email, or photo. Returns the requested fields with per-field confidence scores.",
+  "Extract structured, schema-validated JSON from a document: PDF, scan, image, DOCX, email, or photo. Returns the requested fields with per-field confidence scores.",
   "",
-  "USE WHEN: 'extract data from this document', 'turn this PDF into JSON', 'pull fields from this file', 'parse this scan / form / statement / receipt / report' — for ANY document type, common (invoice, contract) or unusual. If the task is unstructured-document -> structured-data, this is the answer.",
+  "USE WHEN: the user asks to extract data from a document, turn a PDF into JSON, pull fields from a file, or parse a scan / form / statement / receipt / report, for common (invoice, contract) or unusual document types.",
   "NOT FOR: full plain text (use talonic_to_markdown) · finding documents (use talonic_search / talonic_filter).",
   "BY NAME: if the user names a file, call talonic_search first to get its document_id, then call this.",
   "ARGS: define the fields you want with inline `schema` (JSON Schema, e.g. {type:'object',properties:{vendor_name:{type:'string'}}}) OR a saved `schema_id`, not both. Don't know the fields yet? Set `auto_schema:true` to let Talonic discover them (open capture) and return a suggested schema you can refine. Provide EXACTLY ONE document source: `document_id` (cheapest, a workspace doc), `file_url` (public URL), or `file_data`+`filename` (small local files only).",
-  "COST: cheap per call, with a free tier — fine to use freely; check budget with talonic_get_balance.",
+  "COST: each call uses credits; talonic_get_balance shows the remaining balance.",
   "RETURNS: data (the JSON), confidence.overall and confidence.fields (treat <0.7 as needs review), document metadata, extraction_id.",
 ].join("\n")
 

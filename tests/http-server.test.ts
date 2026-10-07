@@ -144,6 +144,25 @@ describe("HTTP server routing", () => {
     expect(text).not.toContain("talonic_admin_list_agent_tasks")
   })
 
+  it("omits the generic agent-tool executor for ChatGPT / OpenAI callers only", async () => {
+    const list = async (userAgent: string) => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: { ...MCP_HEADERS, "User-Agent": userAgent },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 4, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    const openai = await list("openai-mcp/1.0.0")
+    expect(openai).toContain("talonic_find_data")
+    expect(openai).not.toContain("talonic_list_agent_tools")
+    expect(openai).not.toContain("talonic_invoke_agent_tool")
+    const other = await list("claude-ai/1.0")
+    expect(other).toContain("talonic_list_agent_tools")
+    expect(other).toContain("talonic_invoke_agent_tool")
+  })
+
   it("advertises apps:decide in the protected-resource metadata so the connector requests it", async () => {
     const res = await fetch(`${h.baseUrl}/.well-known/oauth-protected-resource`)
     expect(res.status).toBe(200)
