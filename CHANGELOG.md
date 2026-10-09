@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Added
+
+- **Glama ownership claim.** `GET /.well-known/glama.json` serves the Glama connector claim token (overridable via `GLAMA_CLAIM_TOKEN`) so the mcp.talonic.com domain verifies on Glama.
+
+## [0.1.85] - 2026-10-08
+
 ### Changed
 
 - **OpenAI plugin review compliance.** The 2026-10-07 plugin-dashboard scan held five items; all addressed:

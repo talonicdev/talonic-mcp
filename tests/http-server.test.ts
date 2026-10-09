@@ -102,6 +102,16 @@ describe("HTTP server routing", () => {
     expect(body).toBe("gnHvfQsKH6NVBNIeOWVK1vSt5QR2gsgBAIcXdSlpR_U")
   })
 
+  it("GET /.well-known/glama.json returns the Glama ownership claim", async () => {
+    const res = await fetch(`${h.baseUrl}/.well-known/glama.json`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get("content-type")).toContain("application/json")
+    expect(await res.json()).toEqual({
+      $schema: "https://glama.ai/mcp/schemas/connector.json",
+      claim: "glama_claim_Md9ULtrJRI_KRroi6rbpNwAmP5X0nqI1",
+    })
+  })
+
   it("POST /mcp initialize succeeds with no session id (stateless)", async () => {
     const res = await fetch(`${h.baseUrl}/mcp`, {
       method: "POST",

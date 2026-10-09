@@ -169,6 +169,15 @@ const APPS_CHALLENGE_TOKEN =
   process.env["OPENAI_APPS_CHALLENGE_TOKEN"] ?? "gnHvfQsKH6NVBNIeOWVK1vSt5QR2gsgBAIcXdSlpR_U"
 
 /**
+ * Ownership claim for the Glama connector directory. Glama fetches
+ * `<mcp-host>/.well-known/glama.json` and expects this exact JSON; the token
+ * is bound to the Talonic Glama account and must stay published to keep the
+ * domain verified. Overridable from the environment for rotation.
+ */
+const GLAMA_CLAIM_TOKEN =
+  process.env["GLAMA_CLAIM_TOKEN"] ?? "glama_claim_Md9ULtrJRI_KRroi6rbpNwAmP5X0nqI1"
+
+/**
  * RFC 9728 OAuth Protected Resource Metadata.
  *
  * Returned at `/.well-known/oauth-protected-resource`. Clients use this
@@ -274,6 +283,7 @@ function asWidgetTemplateRead(parsed: unknown): { uri: string; id: unknown } | n
  *  - GET `/favicon.{ico,png}`             favicon for directory listings
  *  - GET `/.well-known/oauth-protected-resource`  RFC 9728 metadata
  *  - GET `/.well-known/openai-apps-challenge`      Apps SDK domain verification
+ *  - GET `/.well-known/glama.json`                 Glama ownership claim
  *  - POST `/` or `/mcp`                   MCP Streamable HTTP (stateless)
  *  - DELETE `/` or `/mcp`                 no-op 200 (no session to terminate)
  *  - GET `/mcp` (SSE)                     405 (stateless: use POST)
@@ -385,6 +395,21 @@ export function createRequestHandler(
         "Cache-Control": "public, max-age=300",
       })
       res.end(APPS_CHALLENGE_TOKEN)
+      return
+    }
+
+    // ── Glama: connector ownership claim ──────────────────────────────
+    if (path === "/.well-known/glama.json") {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=300",
+      })
+      res.end(
+        JSON.stringify({
+          $schema: "https://glama.ai/mcp/schemas/connector.json",
+          claim: GLAMA_CLAIM_TOKEN,
+        }),
+      )
       return
     }
 
