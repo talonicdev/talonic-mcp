@@ -8,13 +8,13 @@
     "url": "https://github.com/talonicdev/talonic-mcp",
     "source": "github"
   },
-  "version": "0.1.85",
+  "version": "0.1.86",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@talonic/mcp",
-      "version": "0.1.85",
+      "version": "0.1.86",
       "transport": {
         "type": "stdio"
       },
