@@ -2233,7 +2233,7 @@ Payment terms: Net 30`,
             type: "object",
             required: true,
             description:
-              "Declared field key to `{ value, confidence?, reasoning? }`. Confidence is 0–1; reasoning is at most 4,000 characters.",
+              "Declared field key to `{ value, confidence?, reasoning?, escalate?, quote?, document_id? }`. Confidence is 0–1; reasoning is at most 4,000 characters. On Agentic Review (product) tasks, `escalate: true` hands the field to a human instead of writing it (`value` is the proposal, `reasoning` the reason); `quote` + `document_id` give verbatim evidence for a changed value, required when the task's autonomy sets `requireQuote` (an unverified change is escalated, not written).",
           },
           {
             name: "summary",
