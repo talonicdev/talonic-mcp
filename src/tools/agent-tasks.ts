@@ -36,11 +36,22 @@ const outputValue = z.object({
     .max(4000)
     .optional()
     .describe("Optional concise reasoning for this field, up to 4,000 characters."),
+  escalate: z
+    .boolean()
+    .optional()
+    .describe("Agentic Review (product) tasks only: hand this field to a human instead of writing it. value is shown as the proposal, reasoning as the reason."),
+  quote: z
+    .string()
+    .max(4000)
+    .optional()
+    .describe("Verbatim evidence for a changed value, copied from document_id. Required when the task's autonomy sets requireQuote; an unverified change is escalated, not written."),
+  document_id: z.string().uuid().optional().describe("The contract document (anchor or candidate supplier) the quote comes from."),
 })
 
-const outputs = z
+/** Exported so tests pin which per-field keys survive MCP input parsing. */
+export const outputs = z
   .record(z.string().min(1), outputValue)
-  .describe("Output field key to { value, confidence?, reasoning? }. Use only declared fields.")
+  .describe("Output field key to { value, confidence?, reasoning?, escalate?, quote?, document_id? }. Use only declared fields.")
 
 const listInput = { status, limit, cursor }
 const idInput = { task_id: taskId }
@@ -93,6 +104,9 @@ export interface AgentTaskOutput {
   value: unknown
   confidence?: number
   reasoning?: string
+  escalate?: boolean
+  quote?: string
+  document_id?: string
 }
 
 export interface SubmitAgentTaskArgs extends HeartbeatAgentTaskArgs {

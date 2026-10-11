@@ -10,6 +10,7 @@ import {
   handleHeartbeatAgentTask,
   handleListAgentTasks,
   handleSubmitAgentTask,
+  outputs as outputsSchema,
   probeAgentTaskAdminAccess,
 } from "../../src/tools/agent-tasks"
 import { createServer } from "../../src/server-factory"
@@ -114,6 +115,15 @@ describe("tenant Agent-task handlers", () => {
       },
       summary: "Verified",
     })
+  })
+
+  it("keeps escalate, quote and document_id through MCP input parsing", () => {
+    const parsed = outputsSchema.parse({
+      partner: { value: "IntReal KVG", escalate: true, reasoning: "two parties named" },
+      notice: { value: 9, quote: "9 Monate zum Ende", document_id: TASK_ID },
+    })
+    expect(parsed.partner).toEqual({ value: "IntReal KVG", escalate: true, reasoning: "two parties named" })
+    expect(parsed.notice).toEqual({ value: 9, quote: "9 Monate zum Ende", document_id: TASK_ID })
   })
 
   it("surfaces API and network errors as MCP tool errors", async () => {
