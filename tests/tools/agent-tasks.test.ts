@@ -122,7 +122,11 @@ describe("tenant Agent-task handlers", () => {
       partner: { value: "IntReal KVG", escalate: true, reasoning: "two parties named" },
       notice: { value: 9, quote: "9 Monate zum Ende", document_id: TASK_ID },
     })
-    expect(parsed.partner).toEqual({ value: "IntReal KVG", escalate: true, reasoning: "two parties named" })
+    expect(parsed.partner).toEqual({
+      value: "IntReal KVG",
+      escalate: true,
+      reasoning: "two parties named",
+    })
     expect(parsed.notice).toEqual({ value: 9, quote: "9 Monate zum Ende", document_id: TASK_ID })
   })
 
