@@ -63,7 +63,12 @@ export const outputs = z
     "Output field key to { value, confidence?, reasoning?, escalate?, quote?, document_id? }. Use only declared fields.",
   )
 
-const listInput = { status, limit, cursor }
+const pipelineId = z
+  .string()
+  .uuid()
+  .optional()
+  .describe("Optional pipeline (run) UUID: only that pipeline's tasks.")
+const listInput = { status, limit, cursor, pipeline_id: pipelineId }
 const idInput = { task_id: taskId }
 const heartbeatInput = { task_id: taskId, execution_epoch: executionEpoch }
 const submitInput = {
@@ -100,6 +105,7 @@ export interface ListAgentTasksArgs {
   status?: (typeof TASK_STATUSES)[number]
   limit?: number
   cursor?: string
+  pipeline_id?: string
 }
 
 export interface AgentTaskIdArgs {
@@ -190,7 +196,12 @@ async function agentTaskRequest(
 }
 
 function listQuery(args: ListAgentTasksArgs): Record<string, string | number | undefined> {
-  return { status: args.status, limit: args.limit, cursor: args.cursor }
+  return {
+    status: args.status,
+    limit: args.limit,
+    cursor: args.cursor,
+    pipeline_id: args.pipeline_id,
+  }
 }
 
 function adminHeaders(args: AdminPayloadAccessArgs): Record<string, string> {
@@ -370,9 +381,9 @@ const DESCRIPTIONS = {
   list: [
     "List Agent-stage tasks visible to this Talonic workspace credential.",
     "",
-    "USE WHEN: looking for external-agent work to process; begin with status 'available'.",
+    "USE WHEN: looking for external-agent work to process; begin with status 'available'. To take a batch of one pipeline (e.g. 'take 10 tasks of pipeline X'), list with pipeline_id and status 'available', then claim each with talonic_claim_agent_task; a task another agent took returns HTTP 409, so skip it and take the next.",
     "NOT FOR: reading the immutable task payload (use talonic_get_agent_task) or taking a lease (use talonic_claim_agent_task).",
-    "ARGS: optional status, limit, and cursor. RETURNS: metadata only plus pagination.next_cursor.",
+    "ARGS: optional status, pipeline_id, limit, and cursor. RETURNS: metadata only plus pagination.next_cursor.",
   ].join("\n"),
   get: [
     "Fetch one Agent-stage task's immutable input snapshot, instructions, and declared output contract. This disclosure is audited.",
@@ -386,7 +397,7 @@ const DESCRIPTIONS = {
     "",
     "USE WHEN: ready to process a task. Save the returned execution_epoch and lease_expires_at.",
     "NOT FOR: merely inspecting work (use talonic_get_agent_task) or extending an active lease (use talonic_heartbeat_agent_task).",
-    "A conflicting live claim returns HTTP 409. A successful claim returns the task payload.",
+    "A conflicting live claim returns HTTP 409. A successful claim returns the task payload: input_snapshot, instructions, and output_contract, whose entries carry each field's Spec rules (description) and allowed codes (enumValues). Review the documents against those rules.",
   ].join("\n"),
   heartbeat: [
     "Extend the lease on a claimed Agent-stage task.",

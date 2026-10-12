@@ -1903,6 +1903,12 @@ Payment terms: Net 30`,
             type: "string",
             description: "Opaque `pagination.next_cursor` from the previous page.",
           },
+          {
+            name: "pipeline_id",
+            type: "uuid",
+            description:
+              "Optional: only this pipeline's tasks. To take a batch, list with `pipeline_id` and `status: available`, then claim each; skip a task that returns HTTP 409 (another agent took it).",
+          },
         ],
       },
       {

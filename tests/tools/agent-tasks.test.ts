@@ -48,6 +48,7 @@ describe("tenant Agent-task handlers", () => {
       status: "available",
       limit: 25,
       cursor: "next-page",
+      pipeline_id: TASK_ID,
     })
 
     const [rawUrl, init] = call(fetchMock)
@@ -57,6 +58,7 @@ describe("tenant Agent-task handlers", () => {
       status: "available",
       limit: "25",
       cursor: "next-page",
+      pipeline_id: TASK_ID,
     })
     expect(new Headers(init.headers).get("authorization")).toBe("Bearer oauth-token")
     expect(result.isError).toBeUndefined()
