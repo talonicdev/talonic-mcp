@@ -19,6 +19,7 @@ import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
+import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -141,6 +142,13 @@ export interface CreateServerOptions {
   includePartiesTools?: boolean
 
   /**
+   * Register the `talonic_master_records_*` tools. Callers set this only after
+   * `probeMasterRecordsAccess` passed, so a deployment without the Master
+   * Records app never lists tools that would 404. Listing visibility only.
+   */
+  includeMasterRecordsTools?: boolean
+
+  /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
    * entrypoint sets this from `tokenHasDecideScope`: an OAuth token that
    * visibly lacks the `apps:decide` scope gets them listed but marked
@@ -204,7 +212,7 @@ export function buildServerInstructions(opts: { includeGenericExecutor: boolean 
     "apps:decide consent and a senior_member role or above; if a decision tool is marked",
     "not invocable in this session, or a call returns 403, tell the user which consent or",
     "role is missing instead of retrying.",
-    "Tools that change workspace data (saving schemas, contract and AP updates, decisions)",
+    "Tools that change workspace data (saving schemas, contract, AP and master record updates, decisions)",
     "should only be called when the user asked for that change.",
   ].join(" ")
 }
@@ -358,6 +366,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePartiesTools) {
     registerPartiesTools(server, rawToken, baseUrl)
+  }
+  if (options.includeMasterRecordsTools) {
+    registerMasterRecordsTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.

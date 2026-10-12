@@ -16,6 +16,7 @@ import { createServer } from "./server-factory.js"
 import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
+import { probeMasterRecordsAccess } from "./tools/master-records.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
@@ -90,7 +91,8 @@ export async function main(
   // remain OAuth + step-up only on the platform. Contracts tools appear only
   // where the platform serves the Contracts app, AP tools where it serves the AP app,
   // Doc Gen tools where it serves Document Generation, Parties tools where it
-  // serves Contract Party Management.
+  // serves Contract Party Management, Master Records tools where it serves the
+  // Master Records app.
   const [
     includeGrowthTools,
     includeAdminAgentTaskTools,
@@ -98,6 +100,7 @@ export async function main(
     includeApTools,
     includeDocGenTools,
     includePartiesTools,
+    includeMasterRecordsTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -105,6 +108,7 @@ export async function main(
     probeApAccess(apiKey, baseUrl),
     probeDocGenAccess(apiKey, baseUrl),
     probePartiesAccess(apiKey, baseUrl),
+    probeMasterRecordsAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -115,6 +119,7 @@ export async function main(
     includeApTools,
     includeDocGenTools,
     includePartiesTools,
+    includeMasterRecordsTools,
   })
 
   const transport = new StdioServerTransport()

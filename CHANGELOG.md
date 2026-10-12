@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Take a batch of one pipeline's Agent tasks.** `talonic_list_agent_tasks` accepts `pipeline_id`; the list and claim descriptions tell an agent how to take N tasks (list available for the pipeline, claim each, skip a 409) and that `output_contract` carries each field's Spec rules (`description`) and allowed codes (`enumValues`).
+- **`talonic_master_records_*` tools (8), registered where the platform serves the Master Records app.** Golden vendor / customer / material records across systems of record over `/v1/master-records/*`: `config` / `save_config` (whole-object replace, `dry_run`), `run` (resolve a domain now; deterministic, decisions kept), `overview` (latest run stats and multi-source records; filters: status, query, limit, offset), `get_record` (members per source, golden value per field with its sources, conflicts, link reasons), `decide` (accept / split / reopen), `changes` (change-log entries checked against evidence documents; `flagged` for the ones that need attention, with open-payables exposure), `crosswalk` (every source row to its golden record). Probe-gated like the AP tools (`GET /v1/master-records/config` → 200).
 
 ## [0.1.87] - 2026-10-11
 

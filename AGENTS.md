@@ -13,9 +13,9 @@ This repo is the **Talonic MCP server** — a Node package (`@talonic/mcp`) that
 
 Before changing **any** documentation content, internalise this — it has caused weeks of silent drift:
 
-| Edit this… | …to change this page |
-| --- | --- |
-| `src/content/sections/*.ts` → `@talonic/mcp/content` | **`talonic.com/docs/mcp/*`** (the MCP docs) |
+| Edit this…                                                            | …to change this page                                                                                                                                 |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/content/sections/*.ts` → `@talonic/mcp/content`                  | **`talonic.com/docs/mcp/*`** (the MCP docs)                                                                                                          |
 | `docs/sections.json` → `@talonic/docs` (synced via the platform repo) | the `mcp` content domain of `@talonic/docs`, which **no page currently renders** — **NOT** `/docs/mcp/`, and not `/docs/{sdk,api,platform}/*` either |
 
 If you edit `docs/sections.json` expecting the MCP docs page to change, **nothing on `/docs/mcp` will move.** Full architecture, the four-file checklist for adding a tool, the failure-mode table, and the CI-token map live in **[`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md)** — read it before any non-trivial doc change.
@@ -37,45 +37,46 @@ Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, 
 **App-gated — `src/tools/doc-gen.ts`** registers sixteen `talonic_doc_gen_*` tools over the platform's `/v1/doc-gen/*` (Document Generation: status, worklist, templates with their field sheets, change a template / fields by key, confirm fields, propose a sheet from a data product with an optional wait, upload (base64; `file_path` only in a local install) and delete templates, products and their rows, workspace rules, the writer profile (save merges), draft, generate with an optional wait, batches, PDF retry, and one generated file returned as an embedded resource blob, up to 8 MB). Registered only when `probeDocGenAccess()` (`GET /v1/doc-gen/status` → 200) passes (hosted: per-token 5-min cache `docGenAccessCached`; stdio: once at boot). Not in the public tool count, the submission manifest or `src/content/`.
 
 **App-gated — `src/tools/parties.ts`** registers twelve `talonic_parties_*` tools over the platform's `/v1/parties/*` (Contract Party Management: status, worklist per contract with duplicate candidates, contracts with partner / addressee / state, one contract's parties on a day (computed effective partner and addressee with address lines, every role with evidence, issues, cost unit, read state), search the register, read / change / create a party, add or change a role (confirm, reject, period, Verwalter link, tenant entering the contract), bulk confirm (`min_confidence` default high, `dry_run`), merge duplicates (`dry_run`), queue a parties read or report the queue with an optional `wait_seconds` (0-600) that polls `read/status`, company contacts add / remove, and group companies read / replace). Registered only when `probePartiesAccess()` (`GET /v1/parties/status` → 200) passes (hosted: per-token 5-min cache `partiesAccessCached`; stdio: once at boot). Not in the public tool count, the submission manifest or `src/content/`.
+**App-gated — `src/tools/master-records.ts`** registers eight `talonic_master_records_*` tools over the platform's `/v1/master-records/*` (Master Records: golden vendor / customer / material records across systems of record — configuration read / replace, resolve a domain, overview of multi-source records, one record with members, golden values, conflicts and link reasons, accept / split / reopen, change-log entries checked against evidence documents, source-id crosswalk). Registered only when `probeMasterRecordsAccess()` (`GET /v1/master-records/config` → 200) passes (hosted: per-token 5-min cache `masterRecordsAccessCached`; stdio: once at boot). Not in the public tool count, the submission manifest or `src/content/`.
 
-| Tool | File | Read-only? | Notes |
-| --- | --- | --- | --- |
-| `talonic_extract` | `extract.ts` | no | Primary tool. Schema **required** (rejected at MCP layer otherwise). Inputs: `file_data`+`filename`, `file_path`, `file_url`, or `document_id`. |
-| `talonic_request_upload` | `request-upload.ts` | no | Browser-handoff upload for hosted connectors. See below. |
-| `talonic_to_markdown` | `to-markdown.ts` | no* | OCR → markdown. *Not read-only: the file-input path ingests via extract and consumes credits. |
-| `talonic_search` | `search.ts` | yes | Omnisearch. `fieldMatches[]`/`fields[]` carry `dataType` + `filterable`. |
-| `talonic_filter` | `filter.ts` | yes | Field-value filtering. Numeric ops need `number`-typed fields; surfaces a `warnings[]` array. |
-| `talonic_get_document` | `get-document.ts` | yes | Metadata + status. Used to poll the browser-handoff flow. |
-| `talonic_list_schemas` | `list-schemas.ts` | yes | Saved schemas with definitions. |
-| `talonic_save_schema` | `save-schema.ts` | no | Persist a reusable schema. |
-| `talonic_get_balance` | `get-balance.ts` | yes | Credit balance, EUR, burn rate, runway. |
-| `talonic_get_pricing` | `get-pricing.ts` | yes | Public per-unit credit pricing catalog + multipliers. Predict spend before running. |
-| `talonic_get_usage` | `get-usage.ts` | yes | Per-function credit consumption over a trailing window (default 30 days). |
-| `talonic_list_fields` | `fields.ts` | yes | Field Registry list with maturity + superseded_by; raw fetch over `/v1/fields`. |
-| `talonic_get_field` | `fields.ts` | yes | Concept card (`/v1/fields/:id/card`), name resolution via `/v1/fields/resolve`, optional history. |
-| `talonic_field_values` | `fields.ts` | yes | Cross-document values with provenance (`/v1/fields/:id/values`). |
-| `talonic_find_data` | `agent-tools.ts` | yes | Wraps `POST /v1/agent/tools/find_data/invoke`. |
-| `talonic_list_agent_tools` | `agent-tools.ts` | yes | Wraps `GET /v1/agent/tools`; hides non-invocable tools by default. |
-| `talonic_invoke_agent_tool` | `agent-tools.ts` | read tools only | Wraps `POST /v1/agent/tools/:name/invoke`; the platform enforces the capability matrix. |
-| `talonic_list_agent_tasks` | `agent-tasks.ts` | yes | Metadata worklist for documents parked at Agent stages. |
-| `talonic_get_agent_task` | `agent-tasks.ts` | yes | Audited fetch of one immutable input snapshot and output contract. |
-| `talonic_claim_agent_task` | `agent-tasks.ts` | no | Acquire or reclaim a leased task and execution epoch. |
-| `talonic_heartbeat_agent_task` | `agent-tasks.ts` | no | Extend the current claim lease using its epoch. |
-| `talonic_submit_agent_task` | `agent-tasks.ts` | no | Submit declared typed outputs transactionally and resume the document. |
-| `talonic_list_specs` | `specs.ts` | yes | The workspace's configured Specs (pipelines): name, schema_id, version/materialized_version, field/node counts. |
-| `talonic_get_spec` | `specs.ts` | yes | One Spec's full structure — `nodes[]` (authored rail), `phases[]` (compiled run order), `fields[]`; optional version history. |
-| `talonic_run_spec` | `run.ts` | no | Runs a Spec over `document_ids` (`POST /v1/pipelines`) or `file_urls` (`POST /v1/run`) behind one normalised RunEnvelope. Consumes credits. |
-| `talonic_get_run` | `run.ts` | yes | Poll a run's status plus document- and phase-level progress, by `pipeline_id` or `run_id`. |
-| `talonic_get_run_results` | `run.ts` | yes | Read a run's structured rows and column definitions; readable while still processing. |
-| `talonic_ask` | `ask.ts` | no | Natural-language Q&A over the corpus with citations and verification; bounded wait, then poll. Consumes credits. |
-| `talonic_get_answer` | `ask.ts` | yes | Poll an ask that outlived `talonic_ask`'s bounded wait. |
-| `talonic_list_decision_tasks` | `decision-tasks.ts` | yes | One External-mode App's decision inbox (`GET /v1/apps/:id/decision-tasks`). Metadata only. |
-| `talonic_claim_decision_task` | `decision-tasks.ts` | no | Lease a decision task; the claim IS the payload fetch (output contract, precedents, package descriptor). No separate `get` exists on the platform. |
-| `talonic_read_decision_package` | `decision-tasks.ts` | yes | One page of the claimed run's frozen input package; claimant-only, each page journals `package_read`. |
-| `talonic_heartbeat_decision_task` | `decision-tasks.ts` | no | Extend the lease, never past `sla_deadline_at`. |
-| `talonic_submit_decision_task` | `decision-tasks.ts` | no | `outcome` (contract-shaped) + required `evidence[]` locators + required `rationale`; platform verifies transactionally, 422 on refusal. |
-| `talonic_release_decision_task` | `decision-tasks.ts` | no | Give the task back to `available`. |
-| `talonic_fail_decision_task` | `decision-tasks.ts` | no | Declare undecidable: raises a Human Review and applies the app's fallback policy. |
+| Tool                              | File                | Read-only?      | Notes                                                                                                                                              |
+| --------------------------------- | ------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `talonic_extract`                 | `extract.ts`        | no              | Primary tool. Schema **required** (rejected at MCP layer otherwise). Inputs: `file_data`+`filename`, `file_path`, `file_url`, or `document_id`.    |
+| `talonic_request_upload`          | `request-upload.ts` | no              | Browser-handoff upload for hosted connectors. See below.                                                                                           |
+| `talonic_to_markdown`             | `to-markdown.ts`    | no\*            | OCR → markdown. \*Not read-only: the file-input path ingests via extract and consumes credits.                                                     |
+| `talonic_search`                  | `search.ts`         | yes             | Omnisearch. `fieldMatches[]`/`fields[]` carry `dataType` + `filterable`.                                                                           |
+| `talonic_filter`                  | `filter.ts`         | yes             | Field-value filtering. Numeric ops need `number`-typed fields; surfaces a `warnings[]` array.                                                      |
+| `talonic_get_document`            | `get-document.ts`   | yes             | Metadata + status. Used to poll the browser-handoff flow.                                                                                          |
+| `talonic_list_schemas`            | `list-schemas.ts`   | yes             | Saved schemas with definitions.                                                                                                                    |
+| `talonic_save_schema`             | `save-schema.ts`    | no              | Persist a reusable schema.                                                                                                                         |
+| `talonic_get_balance`             | `get-balance.ts`    | yes             | Credit balance, EUR, burn rate, runway.                                                                                                            |
+| `talonic_get_pricing`             | `get-pricing.ts`    | yes             | Public per-unit credit pricing catalog + multipliers. Predict spend before running.                                                                |
+| `talonic_get_usage`               | `get-usage.ts`      | yes             | Per-function credit consumption over a trailing window (default 30 days).                                                                          |
+| `talonic_list_fields`             | `fields.ts`         | yes             | Field Registry list with maturity + superseded_by; raw fetch over `/v1/fields`.                                                                    |
+| `talonic_get_field`               | `fields.ts`         | yes             | Concept card (`/v1/fields/:id/card`), name resolution via `/v1/fields/resolve`, optional history.                                                  |
+| `talonic_field_values`            | `fields.ts`         | yes             | Cross-document values with provenance (`/v1/fields/:id/values`).                                                                                   |
+| `talonic_find_data`               | `agent-tools.ts`    | yes             | Wraps `POST /v1/agent/tools/find_data/invoke`.                                                                                                     |
+| `talonic_list_agent_tools`        | `agent-tools.ts`    | yes             | Wraps `GET /v1/agent/tools`; hides non-invocable tools by default.                                                                                 |
+| `talonic_invoke_agent_tool`       | `agent-tools.ts`    | read tools only | Wraps `POST /v1/agent/tools/:name/invoke`; the platform enforces the capability matrix.                                                            |
+| `talonic_list_agent_tasks`        | `agent-tasks.ts`    | yes             | Metadata worklist for documents parked at Agent stages.                                                                                            |
+| `talonic_get_agent_task`          | `agent-tasks.ts`    | yes             | Audited fetch of one immutable input snapshot and output contract.                                                                                 |
+| `talonic_claim_agent_task`        | `agent-tasks.ts`    | no              | Acquire or reclaim a leased task and execution epoch.                                                                                              |
+| `talonic_heartbeat_agent_task`    | `agent-tasks.ts`    | no              | Extend the current claim lease using its epoch.                                                                                                    |
+| `talonic_submit_agent_task`       | `agent-tasks.ts`    | no              | Submit declared typed outputs transactionally and resume the document.                                                                             |
+| `talonic_list_specs`              | `specs.ts`          | yes             | The workspace's configured Specs (pipelines): name, schema_id, version/materialized_version, field/node counts.                                    |
+| `talonic_get_spec`                | `specs.ts`          | yes             | One Spec's full structure — `nodes[]` (authored rail), `phases[]` (compiled run order), `fields[]`; optional version history.                      |
+| `talonic_run_spec`                | `run.ts`            | no              | Runs a Spec over `document_ids` (`POST /v1/pipelines`) or `file_urls` (`POST /v1/run`) behind one normalised RunEnvelope. Consumes credits.        |
+| `talonic_get_run`                 | `run.ts`            | yes             | Poll a run's status plus document- and phase-level progress, by `pipeline_id` or `run_id`.                                                         |
+| `talonic_get_run_results`         | `run.ts`            | yes             | Read a run's structured rows and column definitions; readable while still processing.                                                              |
+| `talonic_ask`                     | `ask.ts`            | no              | Natural-language Q&A over the corpus with citations and verification; bounded wait, then poll. Consumes credits.                                   |
+| `talonic_get_answer`              | `ask.ts`            | yes             | Poll an ask that outlived `talonic_ask`'s bounded wait.                                                                                            |
+| `talonic_list_decision_tasks`     | `decision-tasks.ts` | yes             | One External-mode App's decision inbox (`GET /v1/apps/:id/decision-tasks`). Metadata only.                                                         |
+| `talonic_claim_decision_task`     | `decision-tasks.ts` | no              | Lease a decision task; the claim IS the payload fetch (output contract, precedents, package descriptor). No separate `get` exists on the platform. |
+| `talonic_read_decision_package`   | `decision-tasks.ts` | yes             | One page of the claimed run's frozen input package; claimant-only, each page journals `package_read`.                                              |
+| `talonic_heartbeat_decision_task` | `decision-tasks.ts` | no              | Extend the lease, never past `sla_deadline_at`.                                                                                                    |
+| `talonic_submit_decision_task`    | `decision-tasks.ts` | no              | `outcome` (contract-shaped) + required `evidence[]` locators + required `rationale`; platform verifies transactionally, 422 on refusal.            |
+| `talonic_release_decision_task`   | `decision-tasks.ts` | no              | Give the task back to `available`.                                                                                                                 |
+| `talonic_fail_decision_task`      | `decision-tasks.ts` | no              | Declare undecidable: raises a Human Review and applies the app's fallback policy.                                                                  |
 
 **Decision-task auth:** the platform's `decide` tier (`AppsAccessGuard` in the platform repo) admits a `tlnc_` API key on a per-app `decide` grant, or an OAuth session on the `apps:decide` scope plus a live workspace role of `senior_member` or above (platform spec `2026-09-22-decide-for-oauth-sessions-design.md`). Web sessions are refused. Two cross-repo couplings live here: (1) `src/http-server.ts` advertises `apps:decide` in `scopes_supported` — Claude.ai requests exactly that list, and the platform's `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s; (2) `tokenHasDecideScope()` in `decision-tasks.ts` decodes an OAuth token's `scopes` claim (unverified, visibility only) and the hosted entrypoint lists the seven tools with `_meta["talonic/can_invoke"]: false` (+ `talonic/required_scope`) when the scope is absent — descriptions stay identical across sessions so directory scanners and clients that cache `tools/list` see the same text — a connector added before the scope existed keeps working and the agent tells the user to reconnect. Handlers always forward; the platform decides. `tlnc_` keys and undecodable tokens are always listed as invocable. The rule-mining external-driver routes (`/v1/apps/:id/mining/rounds/:runId/tools*`) are NOT wrapped yet — platform spec `docs/superpowers/specs/2026-09-22-mining-external-driver-design.md` §6.3 lists them as a follow-up here.
 
@@ -160,7 +161,8 @@ Always run typecheck + test + format:check before any push.
 
 ## Common workflows
 
-**Add a new MCP tool** — touches *both* this repo and `talonicdev/website`. Follow the four-file checklist in [`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md#add-a-new-mcp-tool--four-file-checklist):
+**Add a new MCP tool** — touches _both_ this repo and `talonicdev/website`. Follow the four-file checklist in [`docs/architecture/docs-pipeline.md`](docs/architecture/docs-pipeline.md#add-a-new-mcp-tool--four-file-checklist):
+
 - here: `src/tools/<name>.ts`, register in `src/server-factory.ts`, add a section to `src/content/sections/tools.ts`, add a nav entry to `src/content/seo.ts`, add unit tests.
 - website: a per-tool `page.tsx` plus three sibling registries (`docs-sync.ts`, `layout.tsx`, `next.config.ts`).
 
