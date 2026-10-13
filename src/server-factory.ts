@@ -20,6 +20,7 @@ import { registerApTools } from "./tools/ap.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
+import { registerKnowledgeTools } from "./tools/knowledge.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -147,6 +148,14 @@ export interface CreateServerOptions {
    * Records app never lists tools that would 404. Listing visibility only.
    */
   includeMasterRecordsTools?: boolean
+
+  /**
+   * Register the `talonic_knowledge_*` tools (the Talonic-internal knowledge
+   * registry). Callers set this only after `probeKnowledgeAccess` passed, i.e.
+   * the credential's human principal is a superadmin; a customer never lists
+   * them. Listing visibility only: the platform re-authorizes every call.
+   */
+  includeKnowledgeTools?: boolean
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -369,6 +378,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
+  }
+  if (options.includeKnowledgeTools) {
+    registerKnowledgeTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.

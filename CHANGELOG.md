@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Added
+
+- **`talonic_knowledge_*` tools (6), Talonic-internal, registered only for a superadmin principal.** Over the platform's `/v1/knowledge/*` (the knowledge registry: what Talonic knows ABOUT a customer, as entries with a stable id, a kind, tags and an append-only revision history): `customers`, `recall` (one markdown digest per customer, wrapped as data, NOT instructions), `search` (full-text plus the due / unverified / since worklists), `get` (one entry with its history), `add`, `update` (reason + the revision read; a stale revision returns the current entry). Writes stamp `via: "mcp"`; the `body` input has no size cap (the platform's 5 MB request limit is the one cut). Gated by `probeKnowledgeAccess()` (`GET /v1/knowledge/access`), hosted per-token cache `knowledgeAccessCached`. Not in the public tool count, the submission manifest or `src/content/`.
+
 ## [0.1.89] - 2026-10-12
 
 ### Added

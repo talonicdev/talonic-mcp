@@ -316,6 +316,31 @@ describe("HTTP server routing", () => {
     expect(names).toContain("talonic_parties_read")
   })
 
+  it("tools/list includes the knowledge tools only when the knowledge probe passes", async () => {
+    const list = async () => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    await stopHarness(h)
+    h = await startHarness({ knowledgeAccess: async () => false })
+    expect(await list()).not.toContain("talonic_knowledge_")
+    await stopHarness(h)
+    h = await startHarness({ knowledgeAccess: async () => true })
+    const text = await list()
+    const json = text.trim().startsWith("{")
+      ? text
+      : (text.split("\n").find((l) => l.startsWith("data: ")) ?? "").slice(6)
+    const tools = (JSON.parse(json) as any).result.tools as Array<{ name: string }>
+    const names = tools.map((t) => t.name).filter((n) => n.startsWith("talonic_knowledge_"))
+    expect(names).toHaveLength(6)
+    expect(names).toContain("talonic_knowledge_recall")
+  })
+
   it.each(Object.values(WIDGET_URIS))(
     "widget template %s is served WITHOUT auth and with JSON-only Accept (review fix)",
     async (uri) => {

@@ -17,6 +17,7 @@ import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
+import { probeKnowledgeAccess } from "./tools/knowledge.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
@@ -92,7 +93,8 @@ export async function main(
   // where the platform serves the Contracts app, AP tools where it serves the AP app,
   // Doc Gen tools where it serves Document Generation, Parties tools where it
   // serves Contract Party Management, Master Records tools where it serves the
-  // Master Records app.
+  // Master Records app. Knowledge-registry tools appear only for a superadmin
+  // principal (same visibility model as the growth tools).
   const [
     includeGrowthTools,
     includeAdminAgentTaskTools,
@@ -101,6 +103,7 @@ export async function main(
     includeDocGenTools,
     includePartiesTools,
     includeMasterRecordsTools,
+    includeKnowledgeTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -109,6 +112,7 @@ export async function main(
     probeDocGenAccess(apiKey, baseUrl),
     probePartiesAccess(apiKey, baseUrl),
     probeMasterRecordsAccess(apiKey, baseUrl),
+    probeKnowledgeAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -120,6 +124,7 @@ export async function main(
     includeDocGenTools,
     includePartiesTools,
     includeMasterRecordsTools,
+    includeKnowledgeTools,
   })
 
   const transport = new StdioServerTransport()

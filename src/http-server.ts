@@ -45,6 +45,7 @@ import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
+import { probeKnowledgeAccess } from "./tools/knowledge.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
@@ -111,6 +112,23 @@ export async function masterRecordsAccessCached(
   const ok = await probe(token)
   if (masterRecordsProbeCache.size >= 1000) masterRecordsProbeCache.clear()
   masterRecordsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
+  return ok
+}
+
+/** Per-token cache of the knowledge-registry probe, same TTL and bounding as the Contracts cache. */
+const knowledgeProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+/** @internal */
+export async function knowledgeAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = (t) =>
+    probeKnowledgeAccess(t, process.env["TALONIC_BASE_URL"]),
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = knowledgeProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (knowledgeProbeCache.size >= 1000) knowledgeProbeCache.clear()
+  knowledgeProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
   return ok
 }
 
@@ -365,6 +383,8 @@ export interface CreateRequestHandlerOptions {
   partiesAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
+  /** Override the knowledge-registry probe (primarily for tests). */
+  knowledgeAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
 }
@@ -651,6 +671,7 @@ export function createRequestHandler(
       includeDocGenTools,
       includePartiesTools,
       includeMasterRecordsTools,
+      includeKnowledgeTools,
     ] = await Promise.all([
       (
         options.growthAccess ??
@@ -678,6 +699,9 @@ export function createRequestHandler(
         options.masterRecordsAccess ??
         ((currentToken: string) => masterRecordsAccessCached(currentToken))
       )(token),
+      (options.knowledgeAccess ?? ((currentToken: string) => knowledgeAccessCached(currentToken)))(
+        token,
+      ),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -688,6 +712,7 @@ export function createRequestHandler(
       includeDocGenTools,
       includePartiesTools,
       includeMasterRecordsTools,
+      includeKnowledgeTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
