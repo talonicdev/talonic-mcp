@@ -7,8 +7,9 @@ import { validationError, type ToolResult } from "./_shared.js"
  * Contracts tools — fill and clean the Contracts app: one record per contract,
  * folded from its documents (base contract, amendments, renewals,
  * terminations), with the terms in force, the status on the day and the key
- * dates. Every term carries its verbatim quote; the platform refuses a value
- * whose quote does not occur in the document.
+ * dates, and the processes the contract data starts for sales, billing, legal
+ * and operations. Every term carries its verbatim quote; the platform refuses
+ * a value whose quote does not occur in the document.
  *
  * All tools hit `/v1/contracts/*` with the caller's bearer. The platform owns
  * every rule; these tools only name what to do.
@@ -188,6 +189,73 @@ export function handleUpcoming(
 ): Promise<ToolResult> {
   return runTool(() =>
     apiJson(getToken, baseUrl, "GET", "/v1/contracts/upcoming", { params: { days: args.days } }),
+  )
+}
+
+const PROCESSES_DESCRIPTION = [
+  "Open processes the contract data starts for people across contracts, from the captured Spec fields, the ERP contract register (Dynamics ku_* columns), document types and Money Found: sales (price fixing 3 months before commissioning, the notice window as the ERP keeps it, missing sales opportunity, tacit renewals to reprice, lost to competition), billing (billing held until commissioning, ERP record after signing, run-out phase, CPI adjustment, rent due), legal (land-register entry, termination received, breach, change of control, consumer law), operations (overdue supply start, missing commissioning protocol, SLAs, fuels, warranties), property (the easement DBK chain, security rights target vs actual), contract_management (signing workflow backlog: drafts, originals, documents, owner missing), procurement (subcontracts, purchase-side notice, upstream supplier), controlling (severance, asset transfer, tax and levy clauses, intercompany). Each item names its department, phase, kind (deadline / event / ingest / backlog), due date (null when the data names none yet), days_left (negative = overdue) and the fields it rests on. Items marked handled are left out.",
+  "USE WHEN: what a department has to start now; preparing a sales, billing, legal or operations worklist from contract data; a digest or ticket export.",
+  "NOT FOR: dates only (talonic_contracts_upcoming); one contract's processes (talonic_contracts_contract, `processes[]`).",
+  "",
+  "ARGS: `department` (sales | billing | legal | operations | property | contract_management | procurement | controlling), `days` (horizon for dated items, default the workspace's process horizon, 180), `contract_id`.",
+  "RETURNS: data[] { id, contract_id, contract_key, title, counterparty, rule_id, department, phase, kind, due_date, days_left, evidence[] { field, value, document_id } }.",
+].join("\n")
+
+const DEPARTMENTS = [
+  "sales",
+  "billing",
+  "legal",
+  "operations",
+  "property",
+  "contract_management",
+  "procurement",
+  "controlling",
+] as const
+
+export const processesInputSchema = {
+  department: z.enum(DEPARTMENTS).optional().describe("Only this department's items."),
+  days: z.number().int().min(1).max(3650).optional().describe("Days ahead for dated items."),
+  contract_id: z.string().uuid().optional().describe("Only this contract's items."),
+}
+
+/** @internal */
+export function handleProcesses(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { department?: string; days?: number; contract_id?: string },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "GET", "/v1/contracts/processes", {
+      params: { department: args.department, days: args.days, contract_id: args.contract_id },
+    }),
+  )
+}
+
+const PROCESS_DESCRIPTION = [
+  "Mark a process item handled (it ran: the price was agreed, the invoice went out, the entry was filed) or open again. A decision, recorded with who made it; it survives every rebuild. A moved deadline opens the process again.",
+  "USE WHEN: a process from talonic_contracts_processes was done, or was marked by mistake.",
+  "NOT FOR: key dates (talonic_contracts_key_date).",
+  "",
+  "ARGS: `process_id`, `handled` (true / false), `note` (what was done).",
+  "RETURNS: { id, handled }.",
+].join("\n")
+
+export const processInputSchema = {
+  process_id: z.string().uuid(),
+  handled: z.boolean(),
+  note: z.string().max(2000).optional(),
+}
+
+/** @internal */
+export function handleProcess(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { process_id: string; handled: boolean; note?: string },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "POST", `/v1/contracts/processes/${args.process_id}`, {
+      body: { handled: args.handled, note: args.note },
+    }),
   )
 }
 
@@ -535,7 +603,7 @@ export async function probeContractsAccess(token: string, baseUrl?: string): Pro
 }
 
 /**
- * Register the thirteen `talonic_contracts_*` tools.
+ * Register the fifteen `talonic_contracts_*` tools.
  *
  * @public
  */
@@ -649,6 +717,22 @@ export function registerContractsTools(
       keyDateInputSchema,
       write(true),
       (a) => handleKeyDate(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_contracts_processes",
+      "Processes the contract data starts",
+      PROCESSES_DESCRIPTION,
+      processesInputSchema,
+      readOnly,
+      (a) => handleProcesses(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_contracts_process",
+      "Mark a process handled",
+      PROCESS_DESCRIPTION,
+      processInputSchema,
+      write(true),
+      (a) => handleProcess(getToken, baseUrl, a),
     ],
     [
       "talonic_contracts_set_term",
