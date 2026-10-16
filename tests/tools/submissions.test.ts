@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
+  handleChecks,
   handleCompleteness,
   handleExport,
+  handleFacts,
   handleIssues,
   handleList,
+  handleMatrix,
   handleProcess,
   handleSpecs,
   probeSubmissionsAccess,
@@ -94,6 +97,39 @@ describe("submissions tool handlers", () => {
     )
   })
 
+  it("matrix reads one submission's metric × year grid", async () => {
+    const call = stub({ data: { years: [], rows: [] } })
+    await handleMatrix(token, undefined, { document_id: DOC, spec_id: SPEC })
+    expect(call().url).toBe(`https://api.talonic.com/v1/submissions/${DOC}/matrix?spec_id=${SPEC}`)
+  })
+
+  it("facts sends metric, year and a field filter as JSON", async () => {
+    const call = stub({ data: { total: 0, facts: [] } })
+    await handleFacts(token, undefined, {
+      document_id: DOC,
+      spec_id: SPEC,
+      metric: "Total Incurred",
+      year: "2019",
+      fields: { Category: "Cat" },
+      limit: 50,
+    })
+    const url = new URL(call().url)
+    expect(url.pathname).toBe(`/v1/submissions/${DOC}/facts`)
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      spec_id: SPEC,
+      metric: "Total Incurred",
+      year: "2019",
+      limit: "50",
+      fields: '{"Category":"Cat"}',
+    })
+  })
+
+  it("checks reads findings with or without a target structure", async () => {
+    const call = stub({ data: [] })
+    await handleChecks(token, undefined, { document_id: DOC })
+    expect(call().url).toBe(`https://api.talonic.com/v1/submissions/${DOC}/checks`)
+  })
+
   it("surfaces an API error as a tool error", async () => {
     stub({ message: "Target structure not found" }, 404)
     const res = await handleExport(token, undefined, { spec_id: SPEC })
@@ -102,19 +138,28 @@ describe("submissions tool handlers", () => {
 })
 
 describe("submissions tool registration", () => {
-  it("lists the six tools only when the probe passed", () => {
+  it("lists the nine tools only when the probe passed", () => {
     const names = (s: unknown) =>
       Object.keys((s as any)._registeredTools).filter((n) => n.startsWith("talonic_submissions_"))
     expect(names(createServer({ apiKey: "tlnc_test" }))).toEqual([])
     expect(
       names(createServer({ apiKey: "tlnc_test", includeSubmissionsTools: true })),
-    ).toHaveLength(6)
+    ).toHaveLength(9)
   })
 
   it("marks reads read-only and processing as a write", () => {
     const tools = (createServer({ apiKey: "tlnc_test", includeSubmissionsTools: true }) as any)
       ._registeredTools
-    for (const n of ["specs", "list", "issues", "completeness", "export"])
+    for (const n of [
+      "specs",
+      "list",
+      "issues",
+      "completeness",
+      "matrix",
+      "facts",
+      "checks",
+      "export",
+    ])
       expect(tools[`talonic_submissions_${n}`].annotations.readOnlyHint).toBe(true)
     expect(tools.talonic_submissions_process.annotations.readOnlyHint).toBe(false)
     expect(tools.talonic_submissions_process.annotations.destructiveHint).toBe(false)

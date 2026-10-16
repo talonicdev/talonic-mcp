@@ -16,7 +16,9 @@ import type { ToolResult } from "./_shared.js"
  * All tools hit `/v1/submissions/*` with the caller's bearer; the platform owns
  * every rule. The loop an agent runs: talonic_submissions_issues →
  * talonic_submissions_process (dry_run first) → talonic_submissions_list →
- * talonic_submissions_completeness / talonic_submissions_export.
+ * talonic_submissions_completeness / talonic_submissions_export. To answer a
+ * question about figures: talonic_submissions_matrix → talonic_submissions_facts,
+ * talonic_submissions_checks for what does not add up.
  */
 
 const readOnly = {
@@ -199,6 +201,124 @@ export function handleExport(
   )
 }
 
+const MATRIX_DESCRIPTION = [
+  "Where one submission's figures are: facts per metric and year (accident, underwriting or reference period), every metric of the target structure included, grouped into families (premium, losses, exposure, cat, rates, other). Key '' counts facts with no period.",
+  "USE WHEN: seeing what a submission covers before answering a question about it; finding which metric and year to read with talonic_submissions_facts.",
+  "NOT FOR: the figures themselves (talonic_submissions_facts).",
+  "",
+  "ARGS: `document_id`, `spec_id`.",
+  "RETURNS: { years[], rows[] { metric, family, in_format, facts, years { year: count } } }.",
+].join("\n")
+
+export const matrixInputSchema = {
+  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  spec_id: specId,
+}
+
+/** @internal */
+export function handleMatrix(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { document_id: string; spec_id: string },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(
+      getToken,
+      baseUrl,
+      "GET",
+      `/v1/submissions/${encodeURIComponent(args.document_id)}/matrix`,
+      {
+        params: { spec_id: args.spec_id },
+      },
+    ),
+  )
+}
+
+const FACTS_DESCRIPTION = [
+  'One submission\'s figures, filtered: by metric, by year (\'\' = no period) and by field values (e.g. { "LoB Client": "Homeowners", "Category": "Cat" }). Each fact carries its fields and the source cell (sheet, A1, and the embedded file when it came from one), so every number can be cited.',
+  'USE WHEN: answering a question about figures ("total incurred for accident year 2019", "paid loss by line of business"). Read talonic_submissions_matrix first to pick metric and year. Do not add up facts across lines of business or categories without checking for a Total row: a total and its parts are both facts.',
+  "NOT FOR: every fact of a submission (talonic_submissions_export).",
+  "",
+  "ARGS: `document_id`, `spec_id`, `metric`, `year`, `fields`, `limit` (1–1000, default 200), `offset`.",
+  "RETURNS: { total, facts[] { metric, figure, year, fields, source { sheet, a1, embedded }, derived, total } }.",
+].join("\n")
+
+export const factsInputSchema = {
+  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  spec_id: specId,
+  metric: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("Metric name exactly as talonic_submissions_matrix lists it."),
+  year: z
+    .string()
+    .regex(/^((19|20)\d{2})?$/)
+    .optional()
+    .describe("Four-digit year, or '' for facts with no period."),
+  fields: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Field values every fact must carry."),
+  limit: z.number().int().min(1).max(1000).optional(),
+  offset: z.number().int().min(0).optional(),
+}
+
+/** @internal */
+export function handleFacts(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: {
+    document_id: string
+    spec_id: string
+    metric?: string
+    year?: string
+    fields?: Record<string, string>
+    limit?: number
+    offset?: number
+  },
+): Promise<ToolResult> {
+  const { document_id, fields, ...rest } = args
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "GET", `/v1/submissions/${encodeURIComponent(document_id)}/facts`, {
+      params: { ...rest, ...(fields ? { fields: JSON.stringify(fields) } : {}) },
+    }),
+  )
+}
+
+const CHECKS_DESCRIPTION = [
+  "What does not add up in one submission: totals that are not the sum of their rows, cumulative paid amounts that fall, and the target structure's identities (e.g. Total Incurred = Paid Loss + Paid LAE + Outstanding Loss). Each with the cell, the actual and the expected figure.",
+  "USE WHEN: reviewing a submission's quality, or before quoting a figure that a finding concerns.",
+  "NOT FOR: counts across submissions (talonic_submissions_list).",
+  "",
+  "ARGS: `document_id`, `spec_id` (optional; identities need it).",
+  "RETURNS: [{ kind, severity, sheet, a1, embedded, expected, actual, parts[], check }].",
+].join("\n")
+
+export const checksInputSchema = {
+  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  spec_id: specId.optional(),
+}
+
+/** @internal */
+export function handleChecks(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { document_id: string; spec_id?: string },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(
+      getToken,
+      baseUrl,
+      "GET",
+      `/v1/submissions/${encodeURIComponent(args.document_id)}/checks`,
+      {
+        params: args.spec_id ? { spec_id: args.spec_id } : {},
+      },
+    ),
+  )
+}
+
 /**
  * True when the deployment has the Submissions app and the token can read it.
  * One cheap read; a network error or any non-2xx counts as no access.
@@ -215,7 +335,7 @@ export async function probeSubmissionsAccess(token: string, baseUrl?: string): P
   }
 }
 
-/** Register the six `talonic_submissions_*` tools. */
+/** Register the nine `talonic_submissions_*` tools. */
 export function registerSubmissionsTools(
   server: McpServer,
   getToken: () => string,
@@ -270,6 +390,30 @@ export function registerSubmissionsTools(
       completenessInputSchema,
       readOnly,
       (a) => handleCompleteness(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_submissions_matrix",
+      "Submission facts by metric and year",
+      MATRIX_DESCRIPTION,
+      matrixInputSchema,
+      readOnly,
+      (a) => handleMatrix(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_submissions_facts",
+      "Submission figures",
+      FACTS_DESCRIPTION,
+      factsInputSchema,
+      readOnly,
+      (a) => handleFacts(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_submissions_checks",
+      "Submission checks",
+      CHECKS_DESCRIPTION,
+      checksInputSchema,
+      readOnly,
+      (a) => handleChecks(getToken, baseUrl, a),
     ],
     [
       "talonic_submissions_export",

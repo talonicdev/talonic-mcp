@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `talonic_submissions_matrix`, `talonic_submissions_facts`, `talonic_submissions_checks` (app-gated): a submission's facts per metric and year, its figures filtered by metric, year and field values with their source cells, and its check findings. An agent can now answer questions about a submission's figures and cite the cell each came from.
+
 - **`talonic_submissions_*` tools (6), registered where the platform serves the Submissions app.** Reinsurance submission workbooks over `/v1/submissions/*`: `specs` (the workspace's target structures, labels awaiting review), `list` (inbox: cedent, status, values, facts, metrics, failed / warned checks; `spec_id`, `q`, `limit`, `offset`), `issues` (worklist: not captured, capture failed, not mapped, checks failed, labels to review, format metrics with no facts), `process` (capture and map in bulk: `only`, `document_ids`, `recapture`, `limit`, `dry_run`), `completeness` (one submission per format metric), `export` (facts in the client's long format with the source cell). Probe-gated like the Master Records tools (`GET /v1/submissions/specs` → 200).
 
 ## [0.1.89] - 2026-10-12
