@@ -193,15 +193,15 @@ export function handleUpcoming(
 }
 
 const PROCESSES_DESCRIPTION = [
-  "Open processes the contract data starts for people across contracts: sales (price fixing 3 months before commissioning, renewal talk before the notice deadline, retention before an early exit), billing (billing held until commissioning, construction subsidy and connection fee invoices, price escalation, tax clause), legal (land-register entry, termination received, legal successor, AVB compliance, missing signature), operations (dismantling provision, backup supply, change requests, penalty milestones). Each item names its department, phase, kind (deadline / event / set up once), due date (null when the data names none yet), days_left (negative = overdue) and the fields it rests on. Items marked handled are left out.",
+  "Open processes the contract data starts for people across contracts, from the captured Spec fields, the ERP contract register (Dynamics ku_* columns), document types and Money Found: sales (price fixing 3 months before commissioning, the notice window as the ERP keeps it, missing sales opportunity, tacit renewals to reprice, lost to competition), billing (billing held until commissioning, ERP record after signing, run-out phase, CPI adjustment, rent due), legal (land-register entry, termination received, breach, change of control, consumer law), operations (overdue supply start, missing commissioning protocol, SLAs, fuels, warranties), property (the easement DBK chain, security rights target vs actual), contract_management (signing workflow backlog: drafts, originals, documents, owner missing), procurement (subcontracts, purchase-side notice, upstream supplier), controlling (severance, asset transfer, tax and levy clauses, intercompany). Each item names its department, phase, kind (deadline / event / ingest / backlog), due date (null when the data names none yet), days_left (negative = overdue) and the fields it rests on. Items marked handled are left out.",
   "USE WHEN: what a department has to start now; preparing a sales, billing, legal or operations worklist from contract data; a digest or ticket export.",
   "NOT FOR: dates only (talonic_contracts_upcoming); one contract's processes (talonic_contracts_contract, `processes[]`).",
   "",
-  "ARGS: `department` (sales | billing | legal | operations), `days` (horizon for dated items, default the workspace's process horizon, 180), `contract_id`.",
+  "ARGS: `department` (sales | billing | legal | operations | property | contract_management | procurement | controlling), `days` (horizon for dated items, default the workspace's process horizon, 180), `contract_id`.",
   "RETURNS: data[] { id, contract_id, contract_key, title, counterparty, rule_id, department, phase, kind, due_date, days_left, evidence[] { field, value, document_id } }.",
 ].join("\n")
 
-const DEPARTMENTS = ["sales", "billing", "legal", "operations"] as const
+const DEPARTMENTS = ["sales", "billing", "legal", "operations", "property", "contract_management", "procurement", "controlling"] as const
 
 export const processesInputSchema = {
   department: z.enum(DEPARTMENTS).optional().describe("Only this department's items."),
