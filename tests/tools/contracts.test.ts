@@ -5,6 +5,8 @@ import {
   handleImport,
   handleIssues,
   handleMerge,
+  handleProcess,
+  handleProcesses,
   handleRegister,
   handleReread,
   handleSetTerm,
@@ -183,6 +185,22 @@ describe("contracts tool handlers", () => {
     })
   })
 
+  it("processes forwards department, days and contract id; process posts handled", async () => {
+    const list = stub({ data: [] })
+    await handleProcesses(token, undefined, { department: "sales", days: 90, contract_id: C })
+    expect(list()).toMatchObject({
+      url: `https://api.talonic.com/v1/contracts/processes?department=sales&days=90&contract_id=${C}`,
+      method: "GET",
+    })
+    const mark = stub({ id: R, handled: true })
+    await handleProcess(token, undefined, { process_id: R, handled: true, note: "price agreed" })
+    expect(mark()).toMatchObject({
+      url: `https://api.talonic.com/v1/contracts/processes/${R}`,
+      method: "POST",
+      body: { handled: true, note: "price agreed" },
+    })
+  })
+
   it("surfaces the platform's error", async () => {
     vi.stubGlobal(
       "fetch",
@@ -205,7 +223,7 @@ describe("contracts tool handlers", () => {
 })
 
 describe("contracts tool registration", () => {
-  it("lists the thirteen tools only when the probe passed", () => {
+  it("lists the fifteen tools only when the probe passed", () => {
     const off = Object.keys((createServer({ apiKey: "tlnc_test" }) as any)._registeredTools).filter(
       (n) => n.startsWith("talonic_contracts_"),
     )
@@ -213,7 +231,7 @@ describe("contracts tool registration", () => {
       (createServer({ apiKey: "tlnc_test", includeContractsTools: true }) as any)._registeredTools,
     ).filter((n) => n.startsWith("talonic_contracts_"))
     expect(off).toEqual([])
-    expect(on).toHaveLength(13)
+    expect(on).toHaveLength(15)
   })
 
   it("marks reads read-only and cleaning destructive", () => {
