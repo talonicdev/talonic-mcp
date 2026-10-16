@@ -201,7 +201,16 @@ const PROCESSES_DESCRIPTION = [
   "RETURNS: data[] { id, contract_id, contract_key, title, counterparty, rule_id, department, phase, kind, due_date, days_left, evidence[] { field, value, document_id } }.",
 ].join("\n")
 
-const DEPARTMENTS = ["sales", "billing", "legal", "operations", "property", "contract_management", "procurement", "controlling"] as const
+const DEPARTMENTS = [
+  "sales",
+  "billing",
+  "legal",
+  "operations",
+  "property",
+  "contract_management",
+  "procurement",
+  "controlling",
+] as const
 
 export const processesInputSchema = {
   department: z.enum(DEPARTMENTS).optional().describe("Only this department's items."),
