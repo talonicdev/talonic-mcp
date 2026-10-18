@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool } from "./_http.js"
-import type { ToolResult } from "./_shared.js"
+import { validationError, type ToolResult } from "./_shared.js"
 
 /**
  * Submissions tools: the Submissions app. Reinsurance submission workbooks
@@ -319,6 +319,76 @@ export function handleChecks(
   )
 }
 
+const REVIEW_DESCRIPTION = [
+  "Agentic review of a target structure's label mappings (how each spreadsheet label maps onto the client's metrics and fields). Without `start`: the review's progress and the decisions stored (confirmed, corrected, best guesses, answered by experts, still proposed, open questions). With `start: true`: rule-made mappings are confirmed, the review agent decides the rest, the few only the client can answer become questions, and every mapped submission is re-mapped; runs in the background, poll without `start`.",
+  "USE WHEN: labels are waiting for review (talonic_submissions_specs shows labels_to_review) and nobody will check them one by one.",
+  "NOT FOR: the questions themselves (talonic_submissions_questions).",
+  "",
+  "ARGS: `spec_id`, `start` (true to start a review).",
+  "RETURNS: { run: { phase, done, total, stats } | null, decisions: { total, proposed, questions, confirmed, fixed, best_guess, answered } }.",
+].join("\n")
+
+export const reviewInputSchema = {
+  spec_id: z.string().uuid().describe("Target structure id (talonic_submissions_specs)."),
+  start: z.boolean().optional().describe("Start a review instead of reading its status."),
+}
+
+/** @internal */
+export function handleReview(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { spec_id: string; start?: boolean },
+): Promise<ToolResult> {
+  return runTool(() =>
+    args.start
+      ? apiJson(getToken, baseUrl, "POST", "/v1/submissions/review", {
+          body: { spec_id: args.spec_id },
+        })
+      : apiJson(getToken, baseUrl, "GET", "/v1/submissions/review", {
+          params: { spec_id: args.spec_id },
+        }),
+  )
+}
+
+const QUESTIONS_DESCRIPTION = [
+  "The open questions the label review left for the client's experts, one per group, heaviest first. Without `group`: the questions with their options and the labels each settles. With `group` and `option`: record the expert's answer; every label of the group takes the mapping that answer means, and the submissions are re-mapped.",
+  "USE WHEN: walking the client's experts through the few questions only they can answer, or recording their answers.",
+  "NOT FOR: starting a review (talonic_submissions_review).",
+  "",
+  "ARGS: `spec_id`; to answer: `group` (from the list) and `option` (0-based index into its options).",
+  "RETURNS: list: data[] { group, question, options[], labels[] { label_key, text, where, samples[] } }; answer: { settled }.",
+].join("\n")
+
+export const questionsInputSchema = {
+  spec_id: z.string().uuid().describe("Target structure id (talonic_submissions_specs)."),
+  group: z.string().max(400).optional().describe("The question group to answer (from the list)."),
+  option: z.number().int().min(0).max(5).optional().describe("0-based index of the chosen option."),
+}
+
+/** @internal */
+export function handleQuestions(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { spec_id: string; group?: string; option?: number },
+): Promise<ToolResult> {
+  if ((args.group === undefined) !== (args.option === undefined)) {
+    return Promise.resolve(
+      validationError(
+        "Give both `group` and `option` to answer, or neither to list the questions.",
+      ),
+    )
+  }
+  return runTool(() =>
+    args.group !== undefined
+      ? apiJson(getToken, baseUrl, "POST", "/v1/submissions/questions/answer", {
+          body: { spec_id: args.spec_id, group: args.group, option: args.option },
+        })
+      : apiJson(getToken, baseUrl, "GET", "/v1/submissions/questions", {
+          params: { spec_id: args.spec_id },
+        }),
+  )
+}
+
 /**
  * True when the deployment has the Submissions app and the token can read it.
  * One cheap read; a network error or any non-2xx counts as no access.
@@ -414,6 +484,22 @@ export function registerSubmissionsTools(
       checksInputSchema,
       readOnly,
       (a) => handleChecks(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_submissions_review",
+      "Review label mappings",
+      REVIEW_DESCRIPTION,
+      reviewInputSchema,
+      write(true),
+      (a) => handleReview(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_submissions_questions",
+      "Questions for the client's experts",
+      QUESTIONS_DESCRIPTION,
+      questionsInputSchema,
+      write(true),
+      (a) => handleQuestions(getToken, baseUrl, a),
     ],
     [
       "talonic_submissions_export",
