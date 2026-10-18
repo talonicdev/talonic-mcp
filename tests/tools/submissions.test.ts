@@ -8,6 +8,8 @@ import {
   handleList,
   handleMatrix,
   handleProcess,
+  handleQuestions,
+  handleReview,
   handleSpecs,
   probeSubmissionsAccess,
 } from "../../src/tools/submissions"
@@ -137,14 +139,73 @@ describe("submissions tool handlers", () => {
   })
 })
 
+describe("submissions label review tools", () => {
+  afterEach(() => vi.unstubAllGlobals())
+  const stub = () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: {} }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    )
+    vi.stubGlobal("fetch", fetchMock)
+    return () => {
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+      return {
+        url,
+        method: init.method,
+        body: init.body ? JSON.parse(String(init.body)) : undefined,
+      }
+    }
+  }
+  it("review reads the status, or starts a review", async () => {
+    let call = stub()
+    await handleReview(token, undefined, { spec_id: SPEC })
+    expect(call()).toMatchObject({
+      url: `https://api.talonic.com/v1/submissions/review?spec_id=${SPEC}`,
+      method: "GET",
+    })
+    vi.unstubAllGlobals()
+    call = stub()
+    await handleReview(token, undefined, { spec_id: SPEC, start: true })
+    expect(call()).toMatchObject({
+      url: "https://api.talonic.com/v1/submissions/review",
+      method: "POST",
+      body: { spec_id: SPEC },
+    })
+  })
+  it("questions lists, answers with group and option, and refuses half an answer", async () => {
+    let call = stub()
+    await handleQuestions(token, undefined, { spec_id: SPEC })
+    expect(call()).toMatchObject({
+      url: `https://api.talonic.com/v1/submissions/questions?spec_id=${SPEC}`,
+      method: "GET",
+    })
+    vi.unstubAllGlobals()
+    call = stub()
+    await handleQuestions(token, undefined, {
+      spec_id: SPEC,
+      group: "does your paid loss include alae",
+      option: 1,
+    })
+    expect(call()).toMatchObject({
+      method: "POST",
+      body: { spec_id: SPEC, group: "does your paid loss include alae", option: 1 },
+    })
+    expect((await handleQuestions(token, undefined, { spec_id: SPEC, group: "g" })).isError).toBe(
+      true,
+    )
+  })
+})
+
 describe("submissions tool registration", () => {
-  it("lists the nine tools only when the probe passed", () => {
+  it("lists the eleven tools only when the probe passed", () => {
     const names = (s: unknown) =>
       Object.keys((s as any)._registeredTools).filter((n) => n.startsWith("talonic_submissions_"))
     expect(names(createServer({ apiKey: "tlnc_test" }))).toEqual([])
     expect(
       names(createServer({ apiKey: "tlnc_test", includeSubmissionsTools: true })),
-    ).toHaveLength(9)
+    ).toHaveLength(11)
   })
 
   it("marks reads read-only and processing as a write", () => {
