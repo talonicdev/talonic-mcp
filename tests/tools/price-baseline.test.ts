@@ -16,6 +16,7 @@ import {
   handleManual,
   handleModels,
   handlePrices,
+  handleProofInvoice,
   handleRefresh,
   handleUpdate,
   handleWorkbook,
@@ -32,6 +33,7 @@ const TOOLS = [
   "talonic_price_baseline_prices",
   "talonic_price_baseline_workbook",
   "talonic_price_baseline_compare",
+  "talonic_price_baseline_proof_invoice",
   "talonic_price_baseline_indices",
   "talonic_price_baseline_refresh_indices",
   "talonic_price_baseline_add_index_values",
@@ -187,6 +189,41 @@ describe("price baseline tools", () => {
     )
     expect(bad.isError).toBe(true)
     expect(calls).toHaveLength(2)
+  })
+
+  it("proof_invoice returns the restated invoice with a PDF link, or the HTML", async () => {
+    const invoice = {
+      comparison_id: INVOICE,
+      lines: [{ label: "Arbeitspreis", amount: 120.5, billed_amount: 100, delta: 20.5 }],
+      totals: { net: 120.5, billed_net: 100, delta: 20.5, tax_rate: 0.19, tax: 22.9, gross: 143.4 },
+      checks: [{ key: "lines_priced", label: "Every line priced", passed: true, detail: null }],
+      audit_proof: false,
+      hash: "abc",
+      sources: [],
+    }
+    const calls = stubFetch(() => Response.json({ invoice, html: "<html>proof</html>" }))
+    const json = parsed(
+      (await handleProofInvoice(getToken, undefined, { comparison_id: INVOICE })) as any,
+    )
+    const pdf = `${API}/comparisons/${INVOICE}/proof-invoice.pdf`
+    expect(calls[0]?.url).toBe(`${API}/comparisons/${INVOICE}/proof-invoice`)
+    expect(calls[0]?.init.method).toBe("GET")
+    expect(json).toEqual({ ...invoice, pdf_url: pdf })
+    const html = parsed(
+      (await handleProofInvoice(getToken, undefined, {
+        comparison_id: INVOICE,
+        format: "html",
+      })) as any,
+    )
+    expect(html).toEqual({ html: "<html>proof</html>", pdf_url: pdf })
+    expect(calls).toHaveLength(2)
+  })
+
+  it("proof_invoice surfaces a missing comparison as an error", async () => {
+    stubFetch(() => new Response('{"message":"Comparison x not found"}', { status: 404 }))
+    const res = (await handleProofInvoice(getToken, undefined, { comparison_id: INVOICE })) as any
+    expect(res.isError).toBe(true)
+    expect(res.content[0].text).toContain("404")
   })
 
   it("indices reads the catalog, or values joined by comma", async () => {

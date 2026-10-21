@@ -345,6 +345,44 @@ export function handleCompare(
   )
 }
 
+// ── Audit-proof invoice ────────────────────────────────────────────────────
+
+const PROOF_INVOICE_DESCRIPTION = [
+  "Restate a checked invoice as the audit-proof invoice the contract supports: every line restated at the contract price, every input (base value, weight, index value, quantity) listed with its source (contract quote, publisher URL and line, the biller's invoice, or a marked assumption), and eight checks that say whether the restatement holds up without anyone's word for it.",
+  "USE WHEN: an invoice was already checked (a comparison exists) and the user needs the corrected invoice to send, file or audit, or wants to know what still keeps it from being audit-proof.",
+  "NOT FOR: running a new check or listing past checks (talonic_price_baseline_compare); prices without an invoice (talonic_price_baseline_prices).",
+  "",
+  "ARGS: `comparison_id` (from talonic_price_baseline_compare), `format` (json, default | html).",
+  "RETURNS (json): { lines[] { label, quantity, unit_price, amount, billed_amount, delta, inputs[] { symbol, value, period, source }, verdict, independent }, totals { net, billed_net, delta, tax_rate, tax, gross }, checks[8] { key, label, passed, detail }, audit_proof, hash, sources[], restates, currency, pdf_url }. delta > 0 = billed too little. html: { html (self-contained page), pdf_url }. pdf_url needs the same bearer; this tool does not download it.",
+].join("\n")
+
+export const proofInvoiceInputSchema = {
+  comparison_id: z.string().uuid().describe("Comparison UUID (talonic_price_baseline_compare)."),
+  format: z
+    .enum(["json", "html"])
+    .optional()
+    .describe("json (default): the restated invoice; html: the self-contained page."),
+}
+
+/** @internal */
+export function handleProofInvoice(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { comparison_id: string; format?: "json" | "html" },
+): Promise<ToolResult> {
+  const path = `/v1/price-baseline/comparisons/${encodeURIComponent(args.comparison_id)}/proof-invoice`
+  return runTool(async () => {
+    const { invoice, html } = await apiJson<{ invoice: Record<string, unknown>; html: string }>(
+      getToken,
+      baseUrl,
+      "GET",
+      path,
+    )
+    const pdf_url = buildUrl(baseUrl, `${path}.pdf`)
+    return args.format === "html" ? { html, pdf_url } : { ...invoice, pdf_url }
+  })
+}
+
 // ── Indices ────────────────────────────────────────────────────────────────
 
 const INDICES_DESCRIPTION = [
@@ -925,7 +963,7 @@ export async function probePriceBaselineAccess(token: string, baseUrl?: string):
 }
 
 /**
- * Register the eighteen `talonic_price_baseline_*` tools.
+ * Register the nineteen `talonic_price_baseline_*` tools.
  *
  * @public
  */
@@ -1011,6 +1049,16 @@ export function registerPriceBaselineTools(
       annotations: write(false),
     },
     async (args) => handleCompare(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_price_baseline_proof_invoice",
+    {
+      title: "Audit-proof invoice",
+      description: PROOF_INVOICE_DESCRIPTION,
+      inputSchema: proofInvoiceInputSchema,
+      annotations: readOnly,
+    },
+    async (args) => handleProofInvoice(getToken, baseUrl, args),
   )
   server.registerTool(
     "talonic_price_baseline_indices",
