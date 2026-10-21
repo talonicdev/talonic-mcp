@@ -21,6 +21,7 @@ import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
+import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -155,6 +156,13 @@ export interface CreateServerOptions {
    * app never lists tools that would 404. Listing visibility only.
    */
   includeSubmissionsTools?: boolean
+
+  /**
+   * Register the `talonic_price_baseline_*` tools. Callers set this only after
+   * `probePriceBaselineAccess` passed, so a deployment without the Price
+   * Baseline app never lists tools that would 404. Listing visibility only.
+   */
+  includePriceBaselineTools?: boolean
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -380,6 +388,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeSubmissionsTools) {
     registerSubmissionsTools(server, rawToken, baseUrl)
+  }
+  if (options.includePriceBaselineTools) {
+    registerPriceBaselineTools(server, rawToken, baseUrl)
   }
 
   // Resource registrations.

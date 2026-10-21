@@ -46,6 +46,7 @@ import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
+import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
@@ -129,6 +130,24 @@ export async function submissionsAccessCached(
   const ok = await probe(token)
   if (submissionsProbeCache.size >= 1000) submissionsProbeCache.clear()
   submissionsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
+  return ok
+}
+
+/** Per-token cache of the Price Baseline probe, same TTL and bounding as the Contracts cache. */
+const priceBaselineProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. */
+export async function priceBaselineAccessCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = (t) =>
+    probePriceBaselineAccess(t, process.env["TALONIC_BASE_URL"]),
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const hit = priceBaselineProbeCache.get(token)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (priceBaselineProbeCache.size >= 1000) priceBaselineProbeCache.clear()
+  priceBaselineProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
   return ok
 }
 
@@ -384,6 +403,8 @@ export interface CreateRequestHandlerOptions {
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
+  /** Override the Price Baseline tool visibility check (primarily for tests). */
+  priceBaselineAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
 }
@@ -671,6 +692,7 @@ export function createRequestHandler(
       includePartiesTools,
       includeMasterRecordsTools,
       includeSubmissionsTools,
+      includePriceBaselineTools,
     ] = await Promise.all([
       (
         options.growthAccess ??
@@ -702,6 +724,10 @@ export function createRequestHandler(
         options.submissionsAccess ??
         ((currentToken: string) => submissionsAccessCached(currentToken))
       )(token),
+      (
+        options.priceBaselineAccess ??
+        ((currentToken: string) => priceBaselineAccessCached(currentToken))
+      )(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -713,6 +739,7 @@ export function createRequestHandler(
       includePartiesTools,
       includeMasterRecordsTools,
       includeSubmissionsTools,
+      includePriceBaselineTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

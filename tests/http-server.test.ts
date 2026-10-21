@@ -23,6 +23,7 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
     createRequestHandler({
       growthAccess: async () => false,
       adminAgentTaskAccess: async () => false,
+      priceBaselineAccess: async () => false,
       ...options,
     }),
   )
@@ -314,6 +315,24 @@ describe("HTTP server routing", () => {
     const names = tools.map((t) => t.name).filter((n) => n.startsWith("talonic_parties_"))
     expect(names).toHaveLength(12)
     expect(names).toContain("talonic_parties_read")
+  })
+
+  it("tools/list includes the price baseline tools only when the Price Baseline probe passes", async () => {
+    const list = async () => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    expect(await list()).not.toContain("talonic_price_baseline_")
+    await stopHarness(h)
+    h = await startHarness({ priceBaselineAccess: async () => true })
+    const text = await list()
+    expect(text).toContain("talonic_price_baseline_prices")
+    expect(text).not.toContain("talonic_admin_list_agent_tasks")
   })
 
   it.each(Object.values(WIDGET_URIS))(
