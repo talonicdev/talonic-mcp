@@ -14,8 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`talonic_price_baseline_*` tools (19, app-gated), registered where the platform serves Price Baseline.** Over `/v1/price-baseline/*`: contract register with expected invoices, contract workbook with open inputs, answers with a verified quote, assumptions, price model extract / enrich / edit, recomputed prices, the standard Excel workbook (embedded xlsx resource), invoice comparison, index catalog / sync / refresh / manual entry, import from data capture, and `talonic_price_baseline_proof_invoice`: the audit-proof restatement of a checked invoice (lines at the contract price, every input with its source, eight checks, `audit_proof`, `hash`; JSON or self-contained HTML, plus the PDF link). Probe `GET /v1/price-baseline/indices`; hosted per-token 5-min cache.
 - **`talonic_submissions_review` and `talonic_submissions_questions` (app-gated).** Agentic review of a target structure's label mappings over `/v1/submissions/review`: rule mappings are confirmed, the review agent decides the rest, and only the few questions the client's experts must answer are left. `talonic_submissions_questions` lists them with the labels each settles and records an answer (`group`, `option`). Eleven `talonic_submissions_*` tools now.
 
-- `talonic_submissions_matrix`, `talonic_submissions_facts`, `talonic_submissions_checks` (app-gated): a submission's facts per metric and year, its figures filtered by metric, year and field values with their source cells, and its check findings. An agent can now answer questions about a submission's figures and cite the cell each came from.
 - **`talonic_contracts_processes` and `talonic_contracts_process`.** The processes a contract's data starts for sales, billing, legal, operations, property, contract management, procurement and controlling (134 rules over the captured Spec fields, the ERP contract register, document types and Money Found: price fixing 3 months before commissioning, the notice window as the ERP keeps it, billing held until the commissioning protocol, the easement chain, the signing-workflow backlog, …), over `/v1/contracts/processes`: filter by `department`, `days`, `contract_id`; each item carries its phase, kind (deadline / event / ingest / backlog), due date (or none yet), days left and the fields it rests on. `talonic_contracts_process` marks one handled or open. Fifteen `talonic_contracts_*` tools now.
+
+## [0.1.91] - 2026-10-16
+
+### Added
+
+- `talonic_submissions_matrix`, `talonic_submissions_facts`, `talonic_submissions_checks` (app-gated): a submission's facts per metric and year, its figures filtered by metric, year and field values with their source cells, and its check findings. An agent can now answer questions about a submission's figures and cite the cell each came from.
 
 ## [0.1.90] - 2026-10-14
 
