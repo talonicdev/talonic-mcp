@@ -3,7 +3,7 @@
 **Official Talonic MCP server.** Give any AI agent the ability to extract structured, schema-validated data from any document — PDFs, scans, invoices, contracts, forms — via the [Model Context Protocol](https://modelcontextprotocol.io).
 
 [![talonic-mcp MCP server](https://glama.ai/mcp/servers/talonicdev/talonic-mcp/badges/score.svg)](https://glama.ai/mcp/servers/talonicdev/talonic-mcp)
-[![smithery badge](https://smithery.ai/badge/talonic/talonic)](https://smithery.ai/servers/talonic/talonic)
+[![LightNow capabilities](https://lightnow.ai/badge/io.github.talonicdev/talonic-mcp)](https://lightnow.ai/servers/io.github.talonicdev/talonic-mcp)
 
 > **Status:** stable, listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Thirty-six public tools and two resources, including seven decision-task tools for External-mode Talonic Apps (not yet production-verified, running at the platform's `decide` tier — a `tlnc_` key with a per-app `decide` grant, or an OAuth session with the `apps:decide` scope and a `senior_member` role or above); the rest are verified end-to-end against production (including the Claude.ai hosted connector), each tool rendering its own ChatGPT Apps SDK widget card. Runs as a local stdio process for desktop/IDE clients or as the hosted Streamable HTTP server at `mcp.talonic.com` for Claude.ai connectors.
 
