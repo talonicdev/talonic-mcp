@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Claude Connectors Directory review (Anthropic, 2026-10-25).** `talonic_request_upload` names no chat client any more; `talonic_invoke_agent_tool` states that the platform runs every caller, API key or OAuth session, as the read-only viewer role (`data.read` only), matching its read-only annotation; `talonic_extract` describes what it returns (schema-validated JSON, per-field confidence, provenance on request); the server instructions spell out the call order search, then document_id, then extract. The steering sentences the review quoted ("callable on EVERY turn", "you are mistaken", "never tell the user") were already removed in 0.1.85. Locked by `tests/claude-directory-compliance.test.ts`.
 
-## [0.1.92] - 
+## [0.1.92] - 2026-10-21
 
 ### Added
 
