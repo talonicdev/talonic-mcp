@@ -7,7 +7,7 @@ import { widgetToolMeta } from "../widgets/types.js"
 const DESCRIPTION = [
   "Get a browser upload link the user opens to add a file to their workspace. Returns the link plus a pre-allocated document_id.",
   "",
-  "USE WHEN: the user wants to upload a document and you cannot pass it directly — hosted/sandboxed clients (ChatGPT, Claude.ai) or files too large for tool-call arguments.",
+  "USE WHEN: the user wants to upload a document and you cannot pass it directly: the client cannot attach file bytes to a tool call, or the file is too large for tool-call arguments.",
   "NOT FOR: a document already in the workspace (use its document_id) · a file already on a public URL (use file_url on talonic_extract).",
   "ARGS: filename (with extension).",
   "RETURNS: upload_url, document_id, expires_at. After the user uploads, poll talonic_get_document on that document_id until status is 'completed', then call talonic_extract. If status becomes ocr_failed, extraction_failed, or error, stop polling and report the failure to the user.",
