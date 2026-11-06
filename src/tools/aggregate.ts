@@ -17,7 +17,7 @@ const DESCRIPTION = [
   "NOT FOR: reading documents or values (talonic_search, talonic_field_values); credit spend (talonic_get_usage).",
   "",
   "ARGS: `from`, `to` ISO-8601 WITH an offset (e.g. 2026-11-05T12:00:00Z); the window is half-open [from, to), at most 31 days. `scope` (optional, every query): document_ids, tags/system_tags {any|all}, source_connection_ids, document_types, client_batch_ids, roots_only, attachments_only. `queries[]` (1-20): `id` (a-z0-9_), `dataset`, `measure`, `of` (numeric field), `where[]` {field, op, value}, `group_by` (up to 3 fields, or hour/day in UTC).",
-  "Datasets: documents, document_cost (documents created in the window with all their model-call cost so far, cost_usd and pages), pipeline_documents, app_verdicts (decision_state, auto_billable, load_number, load_number_hold), app_runs, deliveries, llm_calls. Entity datasets count what was created in the window with its status now; llm_calls counts rows written in it.",
+  "Datasets (the platform's catalog is the authority and can hold more; an unknown name returns 400 invalid_aggregate with the current list): documents, document_cost (documents created in the window with all their model-call cost so far, cost_usd and pages), pipeline_documents, app_verdicts (decision_state, auto_billable, load_number, load_number_hold), app_runs, deliveries, llm_calls. Entity datasets count what was created in the window with its status now; llm_calls counts rows written in it.",
   "Measures: count, rows, count_distinct, sum, avg, min, max, median, p1-p99; a list returns `values` plus `n`. Ops: eq, neq, in, not_in, is_null, not_null, gt, gte, lt, lte, contains_any, contains_all.",
   "RETURNS: { window, as_of, results { <id>: { dataset, kind, value | values | groups[] { key, value|values }, groups_total } } }.",
   "ERRORS: 400 invalid_aggregate names the allowed datasets / fields / measures; 403 cost_not_visible for cost fields or the model dimension when cost visibility is off; 422 aggregate_timeout names the dataset (narrow the window or scope).",
@@ -56,7 +56,7 @@ export const aggregateInputSchema = {
         dataset: z
           .string()
           .describe(
-            "documents, document_cost, pipeline_documents, app_verdicts, app_runs, deliveries or llm_calls.",
+            "A catalog dataset, e.g. documents, document_cost, pipeline_documents, app_verdicts, app_runs, deliveries, llm_calls; an unknown name returns 400 with the current list.",
           ),
         measure: z
           .union([z.string(), z.array(z.string())])
