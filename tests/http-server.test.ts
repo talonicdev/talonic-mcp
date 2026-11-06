@@ -24,6 +24,7 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       growthAccess: async () => false,
       adminAgentTaskAccess: async () => false,
       priceBaselineAccess: async () => false,
+      aggregateAccess: async () => false,
       ...options,
     }),
   )
@@ -333,6 +334,22 @@ describe("HTTP server routing", () => {
     const text = await list()
     expect(text).toContain("talonic_price_baseline_prices")
     expect(text).not.toContain("talonic_admin_list_agent_tasks")
+  })
+
+  it("tools/list includes talonic_aggregate only when the aggregate probe passes", async () => {
+    const list = async () => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 8, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    expect(await list()).not.toContain("talonic_aggregate")
+    await stopHarness(h)
+    h = await startHarness({ aggregateAccess: async () => true })
+    expect(await list()).toContain("talonic_aggregate")
   })
 
   it.each(Object.values(WIDGET_URIS))(
