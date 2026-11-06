@@ -21,6 +21,7 @@ import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
+import { probeAggregateAccess } from "./tools/aggregate.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -94,7 +95,8 @@ export async function main(
   // where the platform serves the Contracts app, AP tools where it serves the AP app,
   // Doc Gen tools where it serves Document Generation, Parties tools where it
   // serves Contract Party Management, Master Records tools where it serves the
-  // Master Records app, Price Baseline tools where it serves Price Baseline.
+  // Master Records app, Price Baseline tools where it serves Price Baseline,
+  // talonic_aggregate where it serves POST /v1/aggregate.
   const [
     includeGrowthTools,
     includeAdminAgentTaskTools,
@@ -105,6 +107,7 @@ export async function main(
     includeMasterRecordsTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
+    includeAggregateTool,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -115,6 +118,7 @@ export async function main(
     probeMasterRecordsAccess(apiKey, baseUrl),
     probeSubmissionsAccess(apiKey, baseUrl),
     probePriceBaselineAccess(apiKey, baseUrl),
+    probeAggregateAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -128,6 +132,7 @@ export async function main(
     includeMasterRecordsTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
+    includeAggregateTool,
   })
 
   const transport = new StdioServerTransport()

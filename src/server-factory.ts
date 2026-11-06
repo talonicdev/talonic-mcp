@@ -22,6 +22,7 @@ import { registerPartiesTools } from "./tools/parties.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
+import { registerAggregateTool } from "./tools/aggregate.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
@@ -163,6 +164,13 @@ export interface CreateServerOptions {
    * Baseline app never lists tools that would 404. Listing visibility only.
    */
   includePriceBaselineTools?: boolean
+
+  /**
+   * Register `talonic_aggregate`. Callers set this only after
+   * `probeAggregateAccess` passed, so a deployment without `POST /v1/aggregate`
+   * never lists a tool that would 404. Listing visibility only.
+   */
+  includeAggregateTool?: boolean
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -392,6 +400,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
+  }
+  if (options.includeAggregateTool) {
+    registerAggregateTool(server, rawToken, baseUrl)
   }
 
   // Resource registrations.
