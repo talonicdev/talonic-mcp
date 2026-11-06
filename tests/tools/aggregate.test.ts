@@ -107,7 +107,7 @@ describe("talonic_aggregate registration and probe", () => {
       expect(tool.description).toContain(code)
   })
 
-  it("probe posts a one-hour document count and is true only on 200", async () => {
+  it("probe posts a one-hour document count and is true on 200 or 429", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ results: { q: { value: 0 } } }))
     vi.stubGlobal("fetch", fetchMock)
     expect(await probeAggregateAccess("t", "https://api-nikolas.up.railway.app")).toBe(true)
@@ -120,6 +120,10 @@ describe("talonic_aggregate registration and probe", () => {
     expect(body.from).toMatch(/Z$/)
 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({}, 404)))
+    expect(await probeAggregateAccess("t")).toBe(false)
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ code: "rate_limited" }, 429)))
+    expect(await probeAggregateAccess("t")).toBe(true)
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({}, 401)))
     expect(await probeAggregateAccess("t")).toBe(false)
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({}, 403)))
     expect(await probeAggregateAccess("t")).toBe(false)

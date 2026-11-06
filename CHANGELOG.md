@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`talonic_aggregate` (route-gated).** Several workspace metrics in one request over the platform's `POST /v1/aggregate`: counts, sums, averages, medians and percentiles over an allowlisted catalog (`documents`, `document_cost`, `pipeline_documents`, `app_verdicts`, `app_runs`, `deliveries`, `llm_calls`), filtered, scoped to documents and grouped (up to three dimensions, or `hour` / `day`), in a half-open `[from, to)` window of at most 31 days with offset-bearing timestamps. Numbers only; read-only. Errors as the platform names them: 400 `invalid_aggregate` (lists the allowed names), 403 `cost_not_visible`, 422 `aggregate_timeout`. Listed only where a one-hour `documents` count answers 200 (hosted: per-token 5-min cache).
+- **`talonic_aggregate` (route-gated).** Several workspace metrics in one request over the platform's `POST /v1/aggregate`: counts, sums, averages, medians and percentiles over an allowlisted catalog (`documents`, `document_cost`, `pipeline_documents`, `app_verdicts`, `app_runs`, `deliveries`, `llm_calls`), filtered, scoped to documents and grouped (up to three dimensions, or `hour` / `day`), in a half-open `[from, to)` window of at most 31 days with offset-bearing timestamps. Numbers only; read-only. Errors as the platform names them: 400 `invalid_aggregate` (lists the allowed names), 403 `cost_not_visible`, 422 `aggregate_timeout`. Listed only where a one-hour `documents` count answers 200 (or 429, one request in flight per workspace) (hosted: per-token 5-min cache).
 
 ### Changed
 

@@ -102,7 +102,9 @@ export function handleAggregate(
 
 /**
  * True when the platform behind `baseUrl` serves `POST /v1/aggregate` to this
- * credential: a one-hour document count answers 200. Both entrypoints call it
+ * credential: a one-hour document count answers 200, or 429 (the
+ * route allows one request in flight per workspace, so a probe racing a
+ * dashboard request is busy, not absent). Both entrypoints call it
  * before registering the tool, so a deployment without the route never lists
  * it. Any failure resolves `false`; never throws.
  *
@@ -126,7 +128,7 @@ export async function probeAggregateAccess(token: string, baseUrl?: string): Pro
       }),
       signal: AbortSignal.timeout(5_000),
     })
-    return res.ok
+    return res.ok || res.status === 429
   } catch {
     return false
   }
