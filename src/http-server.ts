@@ -37,6 +37,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http"
+import { createHash } from "node:crypto"
 import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
@@ -236,6 +237,68 @@ export async function adminAgentTaskAccessCached(
   return ok
 }
 
+/** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
+const MAX_BODY_BYTES = 64 * 1024 * 1024
+/** Without a credential only the small public widget-template read is legitimate. */
+const MAX_ANON_BODY_BYTES = 64 * 1024
+
+/**
+ * Does the Talonic API reject this credential outright? Only a 401 counts, so
+ * a narrow-scoped token (403) or a platform outage still passes: the API
+ * re-authorizes every tool call, this exists to answer 401 per the MCP auth spec
+ * and to stop an invalid token before the per-app probes fan out.
+ */
+async function probeTokenAccepted(token: string): Promise<boolean> {
+  try {
+    const base = process.env["TALONIC_BASE_URL"] ?? "https://api.talonic.com"
+    const res = await fetch(`${base}/v1/account`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+    })
+    return res.status !== 401
+  } catch {
+    return true
+  }
+}
+
+const TOKEN_CHECK_TTL_MS = 60 * 1000
+const tokenCheckCache = new Map<string, { ok: boolean; expiresAt: number }>()
+
+/** @internal Exported for tests. Keyed by hash: this cache needs no raw credential. */
+export async function tokenAcceptedCached(
+  token: string,
+  probe: (token: string) => Promise<boolean> = probeTokenAccepted,
+  now: () => number = Date.now,
+): Promise<boolean> {
+  const key = createHash("sha256").update(token).digest("hex")
+  const hit = tokenCheckCache.get(key)
+  if (hit && hit.expiresAt > now()) return hit.ok
+  const ok = await probe(token)
+  if (tokenCheckCache.size >= 1000) tokenCheckCache.clear()
+  tokenCheckCache.set(key, { ok, expiresAt: now() + TOKEN_CHECK_TTL_MS })
+  return ok
+}
+
+/** Read a request body, or null once it passes `limit` bytes. */
+function readBody(req: IncomingMessage, limit: number): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    let size = 0
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length
+      if (size > limit) {
+        req.removeAllListeners("data")
+        req.resume()
+        resolve(null)
+        return
+      }
+      chunks.push(chunk)
+    })
+    req.on("end", () => resolve(Buffer.concat(chunks).toString()))
+    req.on("error", reject)
+  })
+}
+
 /**
  * Canonical public URL of this MCP resource. Advertised in the protected
  * resource metadata so OAuth clients know the audience their tokens are
@@ -327,7 +390,8 @@ function extractBearerToken(req: {
   if (req.url) {
     const url = new URL(req.url, "http://localhost")
     const param = url.searchParams.get("apiKey")
-    if (param) return param
+    // API keys only: an OAuth token in a URL would land in proxy logs.
+    if (param?.startsWith("tlnc_")) return param
   }
 
   return undefined
@@ -407,12 +471,21 @@ export interface CreateRequestHandlerOptions {
   priceBaselineAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
+  /** Override the credential check that answers 401 (primarily for tests). */
+  tokenAccepted?: (token: string) => Promise<boolean>
 }
 
 export function createRequestHandler(
   options: CreateRequestHandlerOptions = {},
 ): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
-  return async (req, res) => {
+  const handle = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+    // URL.canParse first: `new URL("//", base)` throws, and an unhandled
+    // rejection here would kill the process for every tenant.
+    if (!URL.canParse(req.url ?? "/", "http://localhost")) {
+      res.writeHead(400, { "Content-Type": "application/json" })
+      res.end(JSON.stringify({ error: "bad_request", message: "Malformed request URL." }))
+      return
+    }
     const url = new URL(req.url ?? "/", "http://localhost")
     const path = url.pathname
 
@@ -605,13 +678,12 @@ export function createRequestHandler(
       return
     }
 
-    const body = await new Promise<string>((resolve) => {
-      let data = ""
-      req.on("data", (chunk: Buffer) => {
-        data += chunk.toString()
-      })
-      req.on("end", () => resolve(data))
-    })
+    const body = await readBody(req, extractBearerToken(req) ? MAX_BODY_BYTES : MAX_ANON_BODY_BYTES)
+    if (body === null) {
+      res.writeHead(413, { "Content-Type": "application/json", Connection: "close" })
+      res.end(JSON.stringify({ error: "payload_too_large", message: "Request body too large." }))
+      return
+    }
 
     let parsed: unknown
     try {
@@ -665,7 +737,7 @@ export function createRequestHandler(
 
     // ── Auth ───────────────────────────────────────────────────────────
     const token = extractBearerToken(req)
-    if (!token) {
+    if (!token || !(await (options.tokenAccepted ?? tokenAcceptedCached)(token))) {
       res.writeHead(401, {
         "Content-Type": "application/json",
         "WWW-Authenticate": wwwAuthenticate(path),
@@ -755,6 +827,18 @@ export function createRequestHandler(
     await mcpServer.connect(transport)
     await transport.handleRequest(req, res, parsed)
   }
+
+  return (req, res) =>
+    handle(req, res).catch((err: unknown) => {
+      // Message only: never log a request (headers and URL carry credentials).
+      console.error("Unhandled request error:", err instanceof Error ? err.message : "unknown")
+      if (res.headersSent) {
+        res.destroy()
+        return
+      }
+      res.writeHead(500, { "Content-Type": "application/json" })
+      res.end(JSON.stringify({ error: "internal_error", message: "Internal server error." }))
+    })
 }
 
 /**

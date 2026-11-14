@@ -469,12 +469,16 @@ describe("talonic_extract handler", () => {
   })
 
   it("rejects when both file_data and file_path are provided", async () => {
-    const result = await handleExtract(client.talonic, {
-      file_data: Buffer.from("x").toString("base64"),
-      filename: "x.pdf",
-      file_path: "/tmp/x.pdf",
-      schema: { type: "object", properties: {} },
-    })
+    const result = await handleExtract(
+      client.talonic,
+      {
+        file_data: Buffer.from("x").toString("base64"),
+        filename: "x.pdf",
+        file_path: "/tmp/x.pdf",
+        schema: { type: "object", properties: {} },
+      },
+      { localFiles: true },
+    )
     expect((result as { isError?: boolean }).isError).toBe(true)
     expect(result.content[0]?.text).toMatch(/multiple_file_sources|exactly one/)
   })

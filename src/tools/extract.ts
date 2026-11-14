@@ -32,7 +32,7 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      "Local path to a document file. Only works if the MCP server has read access to that path. In sandboxed chat clients (Claude Desktop, Cowork) where uploads land in a host-owned directory, use `file_data` instead.",
+      "Local path to a document file. Local (stdio) installs only; the hosted server refuses it. Only works if the MCP server has read access to that path. In sandboxed chat clients (Claude Desktop, Cowork) where uploads land in a host-owned directory, use `file_data` instead.",
     ),
   file_url: z
     .string()
@@ -214,7 +214,16 @@ export function suggestMinimalSchema(hint?: string): Record<string, unknown> {
   return { type: "object", properties }
 }
 
-export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promise<ToolResult> {
+export async function handleExtract(
+  talonic: Talonic,
+  args: ExtractArgs,
+  opts: { localFiles?: boolean } = {},
+): Promise<ToolResult> {
+  // The SDK reads file_path on THIS machine. On the hosted server that is our
+  // container, not the caller's disk, so a remote caller must never reach it.
+  if (args.file_path !== undefined && !opts.localFiles) {
+    return validationError("file_path works only in a local install; send file_data or file_url.")
+  }
   const hasSchema = args.schema !== undefined
   const hasSchemaId = args.schema_id !== undefined
   const wantsAuto = args.auto_schema === true
@@ -271,13 +280,18 @@ export async function handleExtract(talonic: Talonic, args: ExtractArgs): Promis
   }
 }
 
-export function registerExtract(server: McpServer, getTalonic: () => Talonic): void {
+export function registerExtract(
+  server: McpServer,
+  getTalonic: () => Talonic,
+  opts: { localFiles?: boolean } = {},
+): void {
+  const { file_path: _localOnly, ...hostedInputSchema } = inputSchema
   server.registerTool(
     "talonic_extract",
     {
       title: "Extract Data from Document",
       description: DESCRIPTION,
-      inputSchema,
+      inputSchema: opts.localFiles ? inputSchema : hostedInputSchema,
       outputSchema,
       annotations: {
         title: "Extract Data from Document",
@@ -287,6 +301,6 @@ export function registerExtract(server: McpServer, getTalonic: () => Talonic): v
       },
       _meta: widgetToolMeta("extract"),
     },
-    async (args) => handleExtract(getTalonic(), args as ExtractArgs),
+    async (args) => handleExtract(getTalonic(), args as ExtractArgs, opts),
   )
 }

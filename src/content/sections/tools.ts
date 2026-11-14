@@ -35,7 +35,12 @@ export const sections: RawSection[] = [
             type: "string",
             description: "Original filename (used for MIME type inference when using `file_data`).",
           },
-          { name: "file_path", type: "string", description: "Local file path." },
+          {
+            name: "file_path",
+            type: "string",
+            description:
+              "Local file path. Local (stdio) installs only; the hosted server refuses it.",
+          },
           { name: "file_url", type: "string", description: "Remote file URL." },
           {
             name: "document_id",
@@ -776,7 +781,12 @@ export const sections: RawSection[] = [
             description: "Base64-encoded file bytes. Pair with `filename`.",
           },
           { name: "filename", type: "string", description: "Original filename with extension." },
-          { name: "file_path", type: "string", description: "Local file path." },
+          {
+            name: "file_path",
+            type: "string",
+            description:
+              "Local file path. Local (stdio) installs only; the hosted server refuses it.",
+          },
           {
             name: "file_url",
             type: "string",
