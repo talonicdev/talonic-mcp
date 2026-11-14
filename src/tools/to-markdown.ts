@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { TalonicError, type Talonic } from "@talonic/node"
 import { z } from "zod"
-import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { jsonOk, toolError, type ToolResult, validationError } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
@@ -96,7 +96,12 @@ const INGEST_ONLY_SCHEMA: Record<string, unknown> = {
 export async function handleToMarkdown(
   talonic: Talonic,
   args: ToMarkdownArgs,
+  opts: { localFiles?: boolean } = {},
 ): Promise<ToolResult> {
+  // See handleExtract: file_path would read the hosted server's own disk.
+  if (args.file_path !== undefined && !opts.localFiles) {
+    return validationError("file_path works only in a local install; send file_data or file_url.")
+  }
   try {
     const sources = ["document_id", "file_data", "file_path", "file_url"] as const
     const provided = sources.filter((k) => args[k] !== undefined)
@@ -141,13 +146,18 @@ export async function handleToMarkdown(
   }
 }
 
-export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic): void {
+export function registerToMarkdown(
+  server: McpServer,
+  getTalonic: () => Talonic,
+  opts: { localFiles?: boolean } = {},
+): void {
+  const { file_path: _localOnly, ...hostedInputSchema } = inputSchema
   server.registerTool(
     "talonic_to_markdown",
     {
       title: "Document to Markdown",
       description: DESCRIPTION,
-      inputSchema,
+      inputSchema: opts.localFiles ? inputSchema : hostedInputSchema,
       outputSchema,
       annotations: {
         title: "Document to Markdown",
@@ -157,6 +167,6 @@ export function registerToMarkdown(server: McpServer, getTalonic: () => Talonic)
       },
       _meta: widgetToolMeta("toMarkdown"),
     },
-    async (args) => handleToMarkdown(getTalonic(), args as ToMarkdownArgs),
+    async (args) => handleToMarkdown(getTalonic(), args as ToMarkdownArgs, opts),
   )
 }

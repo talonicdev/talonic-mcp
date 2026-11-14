@@ -597,7 +597,7 @@
           {
             "name": "file_path",
             "type": "string",
-            "description": "Local filesystem path. Only works if the MCP server process can read it — sandboxed clients should use `file_data` instead."
+            "description": "Local filesystem path. Local (stdio) installs only; the hosted server refuses it. Only works if the MCP server process can read it — sandboxed clients should use `file_data` instead."
           },
           {
             "name": "file_url",
@@ -1374,7 +1374,7 @@
           {
             "name": "file_path",
             "type": "string",
-            "description": "Local path. Only works if the MCP server has read access."
+            "description": "Local path. Local (stdio) installs only; the hosted server refuses it."
           },
           {
             "name": "file_url",
