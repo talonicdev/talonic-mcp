@@ -41,6 +41,8 @@ const FIXTURE_BY_WIDGET_KEY: Readonly<Record<WidgetKey, string>> = {
   getPricing: "pricing",
   getUsage: "usage",
   requestUpload: "upload-link",
+  listAccounts: "account-list",
+  createAccount: "account-created",
   listFields: "list-fields",
   getField: "get-field",
   fieldValues: "field-values",

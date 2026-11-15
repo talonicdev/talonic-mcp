@@ -31,6 +31,8 @@ export const WIDGET_URIS = {
   getPricing: "ui://widget/pricing.html",
   getUsage: "ui://widget/usage.html",
   requestUpload: "ui://widget/upload-link.html",
+  listAccounts: "ui://widget/account-list.html",
+  createAccount: "ui://widget/account-created.html",
   listFields: "ui://widget/field-list.html",
   getField: "ui://widget/field-card.html",
   fieldValues: "ui://widget/field-values.html",
@@ -89,6 +91,8 @@ export const TOOL_WIDGET_KEYS: Readonly<Record<string, WidgetKey>> = {
   talonic_get_pricing: "getPricing",
   talonic_get_usage: "getUsage",
   talonic_request_upload: "requestUpload",
+  talonic_list_accounts: "listAccounts",
+  talonic_create_account: "createAccount",
   talonic_list_fields: "listFields",
   talonic_get_field: "getField",
   talonic_field_values: "fieldValues",
@@ -142,6 +146,8 @@ export const TOOL_INVOCATION_STATUS: Readonly<Record<WidgetKey, ToolInvocationSt
   getPricing: { invoking: "Loading pricing catalog…", invoked: "Pricing ready" },
   getUsage: { invoking: "Loading usage breakdown…", invoked: "Usage ready" },
   requestUpload: { invoking: "Preparing upload link…", invoked: "Upload link ready" },
+  listAccounts: { invoking: "Listing accounts…", invoked: "Accounts ready" },
+  createAccount: { invoking: "Creating account…", invoked: "Account created" },
   listFields: { invoking: "Loading the Field Registry…", invoked: "Fields listed" },
   getField: { invoking: "Loading field concept card…", invoked: "Field card ready" },
   fieldValues: {
@@ -201,6 +207,8 @@ export const WIDGET_DESCRIPTIONS: Readonly<Record<WidgetKey, string>> = {
     "Breakdown of credits consumed per function over the trailing window, with proportion bars.",
   requestUpload:
     "Card with the browser upload link the user must open to add their file, plus the document id and expiry.",
+  listAccounts: "List of the workspace's accounts (companies) with their other names.",
+  createAccount: "Card confirming the account just created, with its other names.",
   listFields:
     "Table of Field Registry concepts with data type, maturity (core, proven, candidate) and occurrence counts.",
   getField:

@@ -885,3 +885,27 @@ describe("talonic_request_upload handler", () => {
     expect(result.content[0]?.text).toContain("ECONNREFUSED")
   })
 })
+
+describe("talonic_request_upload account + add_to_workspace", () => {
+  afterEach(() => vi.unstubAllGlobals())
+  it("passes account as account_id and add_to_workspace as ingestion_target=ingest", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ document_id: "d", upload_url: "u", expires_at: "e" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    )
+    vi.stubGlobal("fetch", fetchMock)
+    await handleRequestUpload(() => "tok", undefined, {
+      filename: "a.pdf",
+      account: "Filu",
+      add_to_workspace: true,
+    })
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(JSON.parse(init.body as string)).toEqual({
+      filename: "a.pdf",
+      account_id: "Filu",
+      ingestion_target: "ingest",
+    })
+  })
+})

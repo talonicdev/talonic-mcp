@@ -9,8 +9,8 @@ const DESCRIPTION = [
   "",
   "USE WHEN: the user wants to upload a document and you cannot pass it directly: the client cannot attach file bytes to a tool call, or the file is too large for tool-call arguments.",
   "NOT FOR: a document already in the workspace (use its document_id) · a file already on a public URL (use file_url on talonic_extract).",
-  "ARGS: filename (with extension).",
-  "RETURNS: upload_url, document_id, expires_at. After the user uploads, poll talonic_get_document on that document_id until status is 'completed', then call talonic_extract. If status becomes ocr_failed, extraction_failed, or error, stop polling and report the failure to the user.",
+  "ARGS: filename (with extension); optional account (company name or id from talonic_list_accounts) so the file stays with that company; optional add_to_workspace (true = process it fully into workspace data for later questions and SQL; default false = text only, for a following talonic_extract).",
+  "RETURNS: upload_url, document_id, expires_at. After the user uploads, poll talonic_get_document on that document_id until status is 'completed' (or 'extracted' when add_to_workspace is false), then call talonic_extract if you need fields. If status becomes ocr_failed, extraction_failed, or error, stop polling and report the failure to the user.",
 ].join("\n")
 
 const inputSchema = {
@@ -19,6 +19,19 @@ const inputSchema = {
     .min(1)
     .describe(
       "The name of the file being uploaded, including extension (e.g. 'invoice.pdf'). Used to pre-allocate the document and infer MIME type.",
+    ),
+  account: z
+    .string()
+    .max(255)
+    .optional()
+    .describe(
+      "Company (account) the file belongs to: its name, alias or id. See talonic_list_accounts / talonic_create_account.",
+    ),
+  add_to_workspace: z
+    .boolean()
+    .optional()
+    .describe(
+      "true: process fully so the file becomes workspace data (questions, SQL, registry). false (default): text only, for a one-off talonic_extract.",
     ),
 }
 
@@ -34,6 +47,8 @@ const outputSchema = {
 
 export interface RequestUploadArgs {
   filename: string
+  account?: string
+  add_to_workspace?: boolean
 }
 
 export async function handleRequestUpload(
@@ -52,7 +67,11 @@ export async function handleRequestUpload(
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ filename: args.filename }),
+      body: JSON.stringify({
+        filename: args.filename,
+        ...(args.account ? { account_id: args.account } : {}),
+        ...(args.add_to_workspace ? { ingestion_target: "ingest" } : {}),
+      }),
     })
 
     if (!res.ok) {

@@ -4,7 +4,7 @@
     "parentSlug": "mcp-overview",
     "title": "Introduction",
     "seoTitle": "MCP Server Introduction — Talonic Docs",
-    "description": "Official Talonic MCP server for AI agents. Thirty-six public tools and two resources for structured document extraction via the Model Context Protocol.",
+    "description": "Official Talonic MCP server for AI agents. Thirty-eight public tools and two resources for structured document extraction via the Model Context Protocol.",
     "content": [
       {
         "type": "paragraph",
@@ -1949,6 +1949,76 @@
       "file size limit",
       "sandbox",
       "upload link"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-accounts",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_accounts",
+    "seoTitle": "talonic_list_accounts MCP Tool — Talonic Docs",
+    "description": "List the workspace's accounts: the companies whose documents it keeps apart.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List the workspace's accounts. An account is a company (portfolio company, client, entity) inside one workspace; each document belongs to at most one, so questions and SQL can be answered per company and never mix two companies' files."
+      },
+      {
+        "type": "paragraph",
+        "text": "Use it before uploading a company's files: pass the account name as `account` on `talonic_request_upload`. No parameters. Returns `data[]` of `{ id, name, aliases[], description, created_at }`."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_request_upload",
+        "slug": "mcp-talonic-request-upload"
+      }
+    ],
+    "faq": [
+      {
+        "question": "What if the company is missing?",
+        "answer": "Create it with talonic_create_account, then upload with `account` set to its name."
+      }
+    ],
+    "mentions": [
+      "account",
+      "company",
+      "portfolio company",
+      "upload"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-create-account",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_create_account",
+    "seoTitle": "talonic_create_account MCP Tool — Talonic Docs",
+    "description": "Create an account: a company whose documents the workspace keeps apart.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Create an account for a company the workspace does not have yet. Parameters: `name` (required), `aliases` (other names it appears under in documents, e.g. its legal name), `description`."
+      },
+      {
+        "type": "paragraph",
+        "text": "Returns `{ id, name, aliases[], description, created_at }`. A name already in use returns 409."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_request_upload",
+        "slug": "mcp-talonic-request-upload"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why give aliases?",
+        "answer": "Documents name the same company differently (\"Filu\", \"Filu Group GmbH\"). Aliases let uploads and questions refer to the account by any of those names."
+      }
+    ],
+    "mentions": [
+      "account",
+      "company",
+      "portfolio company",
+      "upload"
     ]
   },
   {

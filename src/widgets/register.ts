@@ -4,6 +4,7 @@ import { WIDGET_DESCRIPTIONS, WIDGET_URIS, widgetKeyForUri, type WidgetKey } fro
 import { getExtractionResultWidgetHtml } from "./extraction-result.js"
 import { getBalanceWidgetHtml } from "./balance.js"
 import { getUploadLinkWidgetHtml } from "./upload-link.js"
+import { getAccountListWidgetHtml, getAccountCreatedWidgetHtml } from "./accounts.js"
 import { getSchemaSavedWidgetHtml } from "./schema-saved.js"
 import { getDocumentMetaWidgetHtml } from "./document-meta.js"
 import { getMarkdownViewWidgetHtml } from "./markdown-view.js"
@@ -98,6 +99,16 @@ const WIDGET_REGISTRY: Readonly<Record<WidgetKey, WidgetEntry>> = {
     name: "upload-link-widget",
     title: "Talonic Upload Link",
     html: getUploadLinkWidgetHtml,
+  },
+  listAccounts: {
+    name: "account-list-widget",
+    title: "Talonic Accounts",
+    html: getAccountListWidgetHtml,
+  },
+  createAccount: {
+    name: "account-created-widget",
+    title: "Talonic Account Created",
+    html: getAccountCreatedWidgetHtml,
   },
   listFields: {
     name: "field-list-widget",

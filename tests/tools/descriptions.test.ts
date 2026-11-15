@@ -18,6 +18,8 @@ const ALL_TOOLS = [
   "talonic_get_pricing",
   "talonic_get_usage",
   "talonic_request_upload",
+  "talonic_list_accounts",
+  "talonic_create_account",
   "talonic_list_fields",
   "talonic_get_field",
   "talonic_field_values",

@@ -1844,6 +1844,11 @@ Payment terms: Net 30`,
           "It usually cannot — Claude.ai's sandbox and similar hosted environments restrict outbound egress to arbitrary endpoints. Even where it would technically work, you should still hand the link to the user: it preserves the user-agent boundary (the user controls what file gets uploaded) and matches what every other browser-handoff flow looks like.",
       },
       {
+        question: "How do I keep a company's files together, and make them workspace data?",
+        answer:
+          "Pass `account` (a company name, alias or id from talonic_list_accounts; create one with talonic_create_account) so the document belongs to that company, and `add_to_workspace: true` so it is processed fully (values, Field Registry, questions, SQL) instead of text only. Without add_to_workspace the document is prepared for a single talonic_extract call.",
+      },
+      {
         question: "Why a separate tool instead of changing `talonic_extract`?",
         answer:
           "Keeping the upload-link step explicit makes the agent's reasoning visible to the user (the user sees an upload link in chat and knows what's happening). Folding it into talonic_extract would either silently change the contract for small files or introduce a hidden mode switch — both bad for predictability.",
@@ -1857,6 +1862,88 @@ Payment terms: Net 30`,
       "Claude.ai",
       "32 KB cap",
     ],
+  },
+  {
+    slug: "talonic-list-accounts",
+    parentSlug: "tools",
+    title: "talonic_list_accounts",
+    seoTitle: "talonic_list_accounts — List Per-Company Workspace Accounts",
+    description:
+      "MCP tool that lists the companies a Talonic workspace keeps apart (portfolio companies, clients), so uploads, questions and SQL stay separate per company.",
+    content: [
+      { type: "heading", level: 3, id: "list-accounts-when-to-use", text: "When to use" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "Before uploading a company's files, to get the account name to pass as `account`.",
+          "To see which companies the workspace holds.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "List the workspace's accounts. An account is a company (portfolio company, client, entity) inside one workspace; each document belongs to at most one, so questions and SQL can be answered per company and never mix two companies' files.",
+      },
+      {
+        type: "paragraph",
+        text: "Use it before uploading a company's files: pass the account name as `account` on `talonic_request_upload`. No parameters. Returns `data[]` of `{ id, name, aliases[], description, created_at }`.",
+      },
+    ],
+    related: [
+      {
+        label: "talonic_request_upload",
+        slug: "talonic-request-upload",
+      },
+    ],
+    faq: [
+      {
+        question: "What if the company is missing?",
+        answer:
+          "Create it with talonic_create_account, then upload with `account` set to its name.",
+      },
+    ],
+    mentions: ["account", "company", "portfolio company", "upload"],
+  },
+  {
+    slug: "talonic-create-account",
+    parentSlug: "tools",
+    title: "talonic_create_account",
+    seoTitle: "talonic_create_account — Add a Company Account to Talonic",
+    description:
+      "MCP tool that creates a company account in a Talonic workspace, with aliases, so its documents, answers and SQL are kept apart from every other company.",
+    content: [
+      { type: "heading", level: 3, id: "create-account-when-to-use", text: "When to use" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "The user is adding files for a company talonic_list_accounts does not show.",
+          "Setting up a new workspace with one account per portfolio company.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Create an account for a company the workspace does not have yet. Parameters: `name` (required), `aliases` (other names it appears under in documents, e.g. its legal name), `description`.",
+      },
+      {
+        type: "paragraph",
+        text: "Returns `{ id, name, aliases[], description, created_at }`. A name already in use returns 409.",
+      },
+    ],
+    related: [
+      {
+        label: "talonic_request_upload",
+        slug: "talonic-request-upload",
+      },
+    ],
+    faq: [
+      {
+        question: "Why give aliases?",
+        answer:
+          'Documents name the same company differently ("Filu", "Filu Group GmbH"). Aliases let uploads and questions refer to the account by any of those names.',
+      },
+    ],
+    mentions: ["account", "company", "portfolio company", "upload"],
   },
   {
     slug: "talonic-list-agent-tasks",
