@@ -14,6 +14,7 @@ import { registerListSchemas } from "./tools/list-schemas.js"
 import { registerSaveSchema } from "./tools/save-schema.js"
 import { registerSearch } from "./tools/search.js"
 import { registerRequestUpload } from "./tools/request-upload.js"
+import { registerAccounts } from "./tools/accounts.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
@@ -358,6 +359,7 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerGetPricing(server, getTalonic)
   registerGetUsage(server, getTalonic)
   registerRequestUpload(server, rawToken, baseUrl)
+  registerAccounts(server, rawToken, baseUrl)
   registerFieldTools(server, rawToken, baseUrl)
   registerAgentRegistryTools(server, rawToken, baseUrl, {
     includeGenericExecutor: options.includeGenericExecutor !== false,

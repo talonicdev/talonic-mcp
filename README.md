@@ -112,7 +112,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all thirty-six public tools.
+Fully restart Claude Desktop (Cmd+Q on macOS — not just close the window). Talonic appears in the connected-servers list with all thirty-eight public tools.
 </details>
 
 <details>
@@ -170,7 +170,7 @@ Claude.ai's "Add custom connector" flow uses a remote MCP URL instead of a local
 2. URL: `https://mcp.talonic.com/mcp` (no query string, no headers).
 3. Click **Connect** → you're redirected to Talonic → sign in (Google, Microsoft, or SSO).
 4. Approve the consent screen (scopes: `extract:write`, `documents:read`, `schemas:read`, and `apps:decide` for the decision-task tools). Connectors added before `apps:decide` existed keep working; the seven decision tools show as not invocable until you remove and re-add the connector. Pick a workspace if you have multiple.
-5. You're returned to Claude.ai. All thirty-six public tools appear.
+5. You're returned to Claude.ai. All thirty-eight public tools appear.
 
 The flow uses PKCE (RFC 7636) and dynamic client registration (RFC 7591). Claude.ai stores a 1-hour access token + 30-day refresh token and refreshes automatically. No API key ever touches the connector config or any URL. Revoke by removing the connector or revoking the OAuth client in your Talonic dashboard.
 

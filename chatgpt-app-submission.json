@@ -32,6 +32,30 @@
         "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
       }
     },
+    "talonic_list_accounts": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only lists the companies (accounts) defined in the user's own Talonic workspace; changes nothing.",
+        "open_world_justification": "Reads only the user's own Talonic workspace; no external sites or third-party systems are contacted.",
+        "destructive_justification": "Read-only listing; nothing is deleted, overwritten or revoked."
+      }
+    },
+    "talonic_create_account": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a new account (a named company grouping) in the user's Talonic workspace.",
+        "open_world_justification": "Writes only inside the user's own Talonic workspace; no external sites or third-party systems are contacted.",
+        "destructive_justification": "Only adds a new account; it never deletes, overwrites or revokes existing data, and a taken name is refused."
+      }
+    },
     "talonic_to_markdown": {
       "annotations": {
         "readOnlyHint": false,
@@ -260,6 +284,14 @@
     "talonic_fail_decision_task": { "annotations": { "readOnlyHint": false, "openWorldHint": false, "destructiveHint": true }, "justifications": { "read_only_justification": "Reports a claimed decision task as undecidable: raises a Human Review with the given reason and applies the app's declared fallback policy, ending the task.", "open_world_justification": "Acts on the connected workspace's own claimed task; no public internet access.", "destructive_justification": "Ends the task for good and applies the app's declared fallback, which can fail the whole run; the effect cannot be undone." } }
   },
   "test_cases": [
+    {
+      "description": "Set up a company and add a file for it.",
+      "user_prompt": "Add a company called Filu to my workspace, then give me a link to upload its July investor update so it becomes part of my workspace data.",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_accounts, talonic_create_account, talonic_request_upload",
+      "expected_output": "Lists the existing accounts, creates the Filu account, and returns an upload link whose document is stored under Filu and fully processed into workspace data.",
+      "expected_output_url": null
+    },
     {
       "description": "Extract structured fields from a workspace invoice by name.",
       "user_prompt": "Extract the vendor name, total amount, and invoice date from sample-invoice.pdf.",

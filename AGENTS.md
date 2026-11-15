@@ -24,7 +24,7 @@ If you edit `docs/sections.json` expecting the MCP docs page to change, **nothin
 
 ---
 
-## The thirty-six public tools (and what an agent should reach for)
+## The thirty-eight public tools (and what an agent should reach for)
 
 Source: one file per tool in `src/tools/`. Each exports `handle<Name>()` (pure, unit-tested) and `register<Name>()` (wires it into the MCP server).
 
@@ -140,7 +140,7 @@ npm run format:check    # prettier check
 npm run format          # prettier --write
 npm run build           # tsup → dist/{index,server,http-server,content}.js
 npm run start:http      # local hosted-MCP server on :3000
-npm run preflight:chatgpt   # boot dist/http-server.js, check 36 tools + every template like ChatGPT does
+npm run preflight:chatgpt   # boot dist/http-server.js, check 38 tools + every template like ChatGPT does
 ```
 
 Always run typecheck + test + format:check before any push.
