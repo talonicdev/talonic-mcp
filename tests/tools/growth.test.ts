@@ -169,3 +169,32 @@ describe("conditional registration", () => {
     expect(names(withGrowth)).toContain("talonic_extract")
   })
 })
+
+describe("row-level growth tool handlers", () => {
+  it("map args to query params and page as strings", async () => {
+    const {
+      handleGrowthAttribution,
+      handleGrowthEvents,
+      handleGrowthSignups,
+      handleGrowthAccounts,
+    } = await import("../../src/tools/growth")
+    const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({}))
+    vi.stubGlobal("fetch", fetchMock)
+
+    await handleGrowthAttribution(() => "t", undefined, { range: "7d", by: "source" })
+    await handleGrowthEvents(() => "t", undefined, {
+      event: "lead_submitted",
+      limit: 50,
+      offset: 100,
+    })
+    await handleGrowthSignups(() => "t", undefined, { range: "30d" })
+    await handleGrowthAccounts(() => "t", undefined, {})
+
+    expect(fetchMock.mock.calls.map((c) => (c as [string])[0])).toEqual([
+      "https://api.talonic.com/v1/growth/attribution?range=7d&by=source",
+      "https://api.talonic.com/v1/growth/events?event=lead_submitted&limit=50&offset=100",
+      "https://api.talonic.com/v1/growth/signups?range=30d",
+      "https://api.talonic.com/v1/growth/accounts",
+    ])
+  })
+})

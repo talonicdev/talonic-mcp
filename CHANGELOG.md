@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Row-level growth tools** (`talonic_growth_attribution`, `talonic_growth_events`, `talonic_growth_signups`, `talonic_growth_accounts`) over `/v1/growth/*`: conversions per landing page and source, website conversions, signups with their source, and usage per organisation. Probe-gated with the existing growth tools; the platform now also admits listed growth readers. Absent from the public docs by design.
 - **Accounts.** `talonic_list_accounts` and `talonic_create_account` (`GET/POST /v1/accounts`): the companies a workspace keeps apart. `talonic_request_upload` takes `account` (name, alias or id) so a file stays with its company, and `add_to_workspace: true` to process it fully into workspace data (values, registry, questions, SQL) instead of text only.
 
 ## [0.1.94] - 2026-11-14
