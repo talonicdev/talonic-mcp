@@ -822,7 +822,9 @@ export function createRequestHandler(
         options.priceBaselineAccess ??
         ((currentToken: string) => priceBaselineAccessCached(currentToken))
       )(token),
-      (options.portfolioAccess ?? ((currentToken: string) => portfolioAccessCached(currentToken)))(token),
+      (options.portfolioAccess ?? ((currentToken: string) => portfolioAccessCached(currentToken)))(
+        token,
+      ),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,

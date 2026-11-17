@@ -19,8 +19,18 @@ import type { ToolResult } from "./_shared.js"
  * documents.
  */
 
-const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
-const write = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+const readOnly = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+}
+const write = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+}
 
 /** True when the caller's workspace has the Portfolio app (tools are listed only then). */
 export async function probePortfolioAccess(token: string, baseUrl?: string): Promise<boolean> {
@@ -49,17 +59,66 @@ const REFRESH_DESCRIPTION =
  *
  * @public
  */
-export function registerPortfolioTools(server: McpServer, getToken: () => string, baseUrl?: string): void {
-  const tools: Array<[string, string, string, Record<string, z.ZodTypeAny>, typeof readOnly | typeof write, (a: any) => Promise<ToolResult>]> = [
-    ["talonic_portfolio_companies", "Portfolio companies", COMPANIES_DESCRIPTION, {}, readOnly,
-      () => runTool(() => apiJson(getToken, baseUrl, "GET", "/v1/portfolio"))],
-    ["talonic_portfolio_company", "Portfolio company KPI table", COMPANY_DESCRIPTION,
-      { account_id: z.string().uuid().describe("The company's account_id from talonic_portfolio_companies") }, readOnly,
-      (a) => runTool(() => apiJson(getToken, baseUrl, "GET", `/v1/portfolio/companies/${encodeURIComponent(a.account_id)}`))],
-    ["talonic_portfolio_conflicts", "Portfolio conflicts", CONFLICTS_DESCRIPTION, {}, readOnly,
-      () => runTool(() => apiJson(getToken, baseUrl, "GET", "/v1/portfolio/conflicts"))],
-    ["talonic_portfolio_refresh", "Read new portfolio documents", REFRESH_DESCRIPTION, {}, write,
-      () => runTool(() => apiJson(getToken, baseUrl, "POST", "/v1/portfolio/refresh"))],
+export function registerPortfolioTools(
+  server: McpServer,
+  getToken: () => string,
+  baseUrl?: string,
+): void {
+  const tools: Array<
+    [
+      string,
+      string,
+      string,
+      Record<string, z.ZodTypeAny>,
+      typeof readOnly | typeof write,
+      (a: any) => Promise<ToolResult>,
+    ]
+  > = [
+    [
+      "talonic_portfolio_companies",
+      "Portfolio companies",
+      COMPANIES_DESCRIPTION,
+      {},
+      readOnly,
+      () => runTool(() => apiJson(getToken, baseUrl, "GET", "/v1/portfolio")),
+    ],
+    [
+      "talonic_portfolio_company",
+      "Portfolio company KPI table",
+      COMPANY_DESCRIPTION,
+      {
+        account_id: z
+          .string()
+          .uuid()
+          .describe("The company's account_id from talonic_portfolio_companies"),
+      },
+      readOnly,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "GET",
+            `/v1/portfolio/companies/${encodeURIComponent(a.account_id)}`,
+          ),
+        ),
+    ],
+    [
+      "talonic_portfolio_conflicts",
+      "Portfolio conflicts",
+      CONFLICTS_DESCRIPTION,
+      {},
+      readOnly,
+      () => runTool(() => apiJson(getToken, baseUrl, "GET", "/v1/portfolio/conflicts")),
+    ],
+    [
+      "talonic_portfolio_refresh",
+      "Read new portfolio documents",
+      REFRESH_DESCRIPTION,
+      {},
+      write,
+      () => runTool(() => apiJson(getToken, baseUrl, "POST", "/v1/portfolio/refresh")),
+    ],
   ]
   for (const [name, title, description, inputSchema, annotations, handler] of tools) {
     server.registerTool(
