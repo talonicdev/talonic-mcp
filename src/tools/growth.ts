@@ -4,12 +4,12 @@ import { jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { resolveFetch } from "./_http.js"
 
 /**
- * Growth analytics tools — Talonic-internal, superadmin-only.
+ * Growth analytics tools — Talonic-internal.
  *
  * These wrap the platform's `/v1/growth/*` read surface, which is gated by
- * `SuperadminPrincipalGuard` server-side: the OAuth user (hosted connector)
- * or the API key's creator (stdio) must be an active Talonic superadmin, or
- * every call 403s. Registration is therefore conditional — both entrypoints
+ * `GrowthReaderGuard` server-side: the OAuth user (hosted connector) or the
+ * API key's creator (stdio) must be an active Talonic superadmin or a listed
+ * growth reader, or every call 403s. Registration is therefore conditional — both entrypoints
  * call {@link probeGrowthAccess} first and only register these tools when the
  * probe passes, so customers never see them in a tools listing. The probe is
  * a UX nicety, never the security boundary: the platform re-checks the
@@ -41,8 +41,8 @@ async function growthGet(
     if (res.status === 403) {
       return toolError(
         new Error(
-          "Talonic growth analytics require an active superadmin account. " +
-            "Sign in to the connector with your Talonic staff account (or use a superadmin-created API key).",
+          "Talonic growth analytics require a superadmin or growth-reader account. " +
+            "Sign in to the connector with your Talonic staff account (or use an API key created by one).",
         ),
       )
     }
@@ -151,6 +151,136 @@ interface ToolsUsageArgs {
   funnel_stage?: string
 }
 
+const pageArgs = {
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .optional()
+    .describe("Rows per page (default 100, max 500)."),
+  offset: z.number().int().min(0).optional().describe("Rows to skip, for paging."),
+}
+
+const ATTRIBUTION_DESCRIPTION = [
+  "Read where conversions come from: per landing page or per source, the page views, website conversions",
+  "(total and per event, e.g. lead_submitted, demo_booked), signups and activated signups.",
+  "",
+  "USE WHEN: asked which landing pages or sources produce leads, demo bookings or signups.",
+  "INTERNAL: Talonic growth data; other accounts are rejected by the platform.",
+  "ARGS: range (optional: 7d | 30d | 90d, default 30d), by (optional: landing_page | source, default landing_page).",
+  "RETURNS: { rangeDays, by, rows[] } with each row { key, page_views, conversions, by_event, signups, activated }. Page views are anonymous event counts, conversions and signups are people: three independent totals, not a per-visitor funnel. Signups without stored attribution fall under '(unknown)'.",
+].join("\n")
+
+const EVENTS_DESCRIPTION = [
+  "List identified website conversions (any event the website sent with an email: lead forms, demo bookings, ...),",
+  "newest first, with landing page, UTM tags, referrer and the event's own properties.",
+  "",
+  "USE WHEN: asked who converted, to check that a new website event arrives, or to inspect one person's conversions.",
+  "INTERNAL: Talonic growth data, contains personal data (emails); other accounts are rejected by the platform.",
+  "ARGS: all optional: range (7d | 30d | 90d, default all time), event (exact name), email, source (UTM source or referrer host), limit, offset.",
+  "RETURNS: { events[], total, limit, offset }; hubspot_synced_at is null until the row reached HubSpot.",
+].join("\n")
+
+const SIGNUPS_DESCRIPTION = [
+  "List platform signups, newest first: email, signup method, organisation, where they came from",
+  "(acquisition + acquisition_origin: 'signup' = stored at signup, 'lead' = inherited from an earlier website conversion) and usage so far.",
+  "",
+  "USE WHEN: asked who signed up, from which source or landing page, or what a signup did afterwards.",
+  "INTERNAL: Talonic growth data, contains personal data (emails); other accounts are rejected by the platform.",
+  "ARGS: all optional: range (7d | 30d | 90d, default all time), limit, offset.",
+  "RETURNS: { signups[], total, limit, offset }. private:true marks a personal (non-company) signup; documents and credits_used are per user for those only, company usage lives in talonic_growth_accounts.",
+].join("\n")
+
+const ACCOUNTS_DESCRIPTION = [
+  "List usage per organisation, newest first: users, last login, documents (total and last 30 days),",
+  "API calls and credits (last 30 days), plan, status, and where its first user came from.",
+  "",
+  "USE WHEN: asked how much an organisation uses Talonic, which accounts are active, or usage by acquisition source.",
+  "INTERNAL: Talonic growth data; other accounts are rejected by the platform.",
+  "ARGS: limit, offset (both optional).",
+  "RETURNS: { accounts[], total, limit, offset }. Personal signups are not organisations; they are in talonic_growth_signups.",
+].join("\n")
+
+interface PageArgs {
+  limit?: number
+  offset?: number
+}
+
+const page = (a: PageArgs) => ({ limit: a.limit?.toString(), offset: a.offset?.toString() })
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthAttribution(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: RangeArgs & { by?: string },
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "attribution", { range: args.range, by: args.by })
+}
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthEvents(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: RangeArgs & PageArgs & { event?: string; email?: string; source?: string },
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "events", {
+    range: args.range,
+    event: args.event,
+    email: args.email,
+    source: args.source,
+    ...page(args),
+  })
+}
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthSignups(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: RangeArgs & PageArgs,
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "signups", { range: args.range, ...page(args) })
+}
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthAccounts(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: PageArgs,
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "accounts", page(args))
+}
+
+const SITE_EVENTS_DESCRIPTION = [
+  "Count anonymous website events (page views, CTA clicks, and any custom event the website sends, e.g. a calculator",
+  "interaction), grouped by one dimension.",
+  "",
+  "USE WHEN: asked which website events exist, how often a custom event fired, or how one splits by page, source or one of its own properties.",
+  "INTERNAL: Talonic growth data; other accounts are rejected by the platform.",
+  "ARGS: all optional: range (7d | 30d | 90d, default 30d), event (exact name), page (exact path), by (event | page | landing_page | source | country | device | prop:<key>, default event). prop:<key> groups by a property the website attached to the event.",
+  "RETURNS: { rangeDays, by, rows[] } with each row { key, count, first_seen, last_seen }. Event counts, never visitors: anonymous events carry no visitor identity.",
+].join("\n")
+
+interface SiteEventsArgs extends RangeArgs {
+  event?: string
+  page?: string
+  by?: string
+}
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthSiteEvents(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: SiteEventsArgs,
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "site-events", {
+    range: args.range,
+    event: args.event,
+    page: args.page,
+    by: args.by,
+  })
+}
+
 /** @internal Exported for unit testing. */
 export async function handleGrowthFunnel(
   getToken: () => string,
@@ -202,7 +332,7 @@ const READ_ONLY = {
 } as const
 
 /**
- * Register the four growth tools. Call ONLY after {@link probeGrowthAccess}
+ * Register the growth tools. Call ONLY after {@link probeGrowthAccess}
  * passed for the session's credential — see the module doc for why.
  *
  * @public
@@ -251,5 +381,81 @@ export function registerGrowthTools(
       annotations: { title: "Growth: Free-Tools Usage", ...READ_ONLY },
     },
     async (args: ToolsUsageArgs) => handleGrowthToolsUsage(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_attribution",
+    {
+      title: "Growth: Attribution",
+      description: ATTRIBUTION_DESCRIPTION,
+      inputSchema: {
+        range: rangeArg,
+        by: z
+          .enum(["landing_page", "source"])
+          .optional()
+          .describe("Group by (default landing_page)."),
+      },
+      annotations: { title: "Growth: Attribution", ...READ_ONLY },
+    },
+    async (args: RangeArgs & { by?: string }) => handleGrowthAttribution(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_events",
+    {
+      title: "Growth: Website Conversions",
+      description: EVENTS_DESCRIPTION,
+      inputSchema: {
+        range: z.enum(RANGES).optional().describe("Trailing window (default all time)."),
+        event: z.string().optional().describe("Exact event name, e.g. 'lead_submitted'."),
+        email: z.string().optional().describe("One person's conversions."),
+        source: z.string().optional().describe("UTM source or referrer host."),
+        ...pageArgs,
+      },
+      annotations: { title: "Growth: Website Conversions", ...READ_ONLY },
+    },
+    async (args: RangeArgs & PageArgs & { event?: string; email?: string; source?: string }) =>
+      handleGrowthEvents(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_signups",
+    {
+      title: "Growth: Signups",
+      description: SIGNUPS_DESCRIPTION,
+      inputSchema: {
+        range: z.enum(RANGES).optional().describe("Trailing window (default all time)."),
+        ...pageArgs,
+      },
+      annotations: { title: "Growth: Signups", ...READ_ONLY },
+    },
+    async (args: RangeArgs & PageArgs) => handleGrowthSignups(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_accounts",
+    {
+      title: "Growth: Account Usage",
+      description: ACCOUNTS_DESCRIPTION,
+      inputSchema: pageArgs,
+      annotations: { title: "Growth: Account Usage", ...READ_ONLY },
+    },
+    async (args: PageArgs) => handleGrowthAccounts(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_site_events",
+    {
+      title: "Growth: Anonymous Website Events",
+      description: SITE_EVENTS_DESCRIPTION,
+      inputSchema: {
+        range: rangeArg,
+        event: z.string().optional().describe("Exact event name, e.g. 'page_cta_clicked'."),
+        page: z.string().optional().describe("Exact page path, e.g. '/pricing'."),
+        by: z
+          .string()
+          .optional()
+          .describe(
+            "Group by: event | page | landing_page | source | country | device | prop:<key> (default event).",
+          ),
+      },
+      annotations: { title: "Growth: Anonymous Website Events", ...READ_ONLY },
+    },
+    async (args: SiteEventsArgs) => handleGrowthSiteEvents(getToken, baseUrl, args),
   )
 }
