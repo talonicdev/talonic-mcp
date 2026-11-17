@@ -40,6 +40,7 @@ const allProbesOff = {
   masterRecordsAccess: off,
   submissionsAccess: off,
   priceBaselineAccess: off,
+  portfolioAccess: off,
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {
@@ -136,6 +137,7 @@ describe("a rejected credential does not fan out", () => {
         masterRecordsAccess: probe,
         submissionsAccess: probe,
         priceBaselineAccess: probe,
+        portfolioAccess: probe,
         tokenAccepted: off,
       }),
     )
