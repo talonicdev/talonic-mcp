@@ -251,6 +251,36 @@ export async function handleGrowthAccounts(
   return growthGet(getToken, baseUrl, "accounts", page(args))
 }
 
+const SITE_EVENTS_DESCRIPTION = [
+  "Count anonymous website events (page views, CTA clicks, and any custom event the website sends, e.g. a calculator",
+  "interaction), grouped by one dimension.",
+  "",
+  "USE WHEN: asked which website events exist, how often a custom event fired, or how one splits by page, source or one of its own properties.",
+  "INTERNAL: Talonic growth data; other accounts are rejected by the platform.",
+  "ARGS: all optional: range (7d | 30d | 90d, default 30d), event (exact name), page (exact path), by (event | page | landing_page | source | country | device | prop:<key>, default event). prop:<key> groups by a property the website attached to the event.",
+  "RETURNS: { rangeDays, by, rows[] } with each row { key, count, first_seen, last_seen }. Event counts, never visitors: anonymous events carry no visitor identity.",
+].join("\n")
+
+interface SiteEventsArgs extends RangeArgs {
+  event?: string
+  page?: string
+  by?: string
+}
+
+/** @internal Exported for unit testing. */
+export async function handleGrowthSiteEvents(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: SiteEventsArgs,
+): Promise<ToolResult> {
+  return growthGet(getToken, baseUrl, "site-events", {
+    range: args.range,
+    event: args.event,
+    page: args.page,
+    by: args.by,
+  })
+}
+
 /** @internal Exported for unit testing. */
 export async function handleGrowthFunnel(
   getToken: () => string,
@@ -407,5 +437,25 @@ export function registerGrowthTools(
       annotations: { title: "Growth: Account Usage", ...READ_ONLY },
     },
     async (args: PageArgs) => handleGrowthAccounts(getToken, baseUrl, args),
+  )
+  server.registerTool(
+    "talonic_growth_site_events",
+    {
+      title: "Growth: Anonymous Website Events",
+      description: SITE_EVENTS_DESCRIPTION,
+      inputSchema: {
+        range: rangeArg,
+        event: z.string().optional().describe("Exact event name, e.g. 'page_cta_clicked'."),
+        page: z.string().optional().describe("Exact page path, e.g. '/pricing'."),
+        by: z
+          .string()
+          .optional()
+          .describe(
+            "Group by: event | page | landing_page | source | country | device | prop:<key> (default event).",
+          ),
+      },
+      annotations: { title: "Growth: Anonymous Website Events", ...READ_ONLY },
+    },
+    async (args: SiteEventsArgs) => handleGrowthSiteEvents(getToken, baseUrl, args),
   )
 }
