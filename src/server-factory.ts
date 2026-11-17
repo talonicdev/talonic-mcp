@@ -20,6 +20,7 @@ import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
+import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
@@ -143,6 +144,12 @@ export interface CreateServerOptions {
    * Management never lists tools that would 404. Listing visibility only.
    */
   includePartiesTools?: boolean
+
+  /**
+   * Register the `talonic_portfolio_*` tools. Callers set this only after
+   * `probePortfolioAccess` passed (the workspace has the Portfolio app).
+   */
+  includePortfolioTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -388,6 +395,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePartiesTools) {
     registerPartiesTools(server, rawToken, baseUrl)
+  }
+  if (options.includePortfolioTools) {
+    registerPortfolioTools(server, rawToken, baseUrl)
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)

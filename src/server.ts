@@ -20,6 +20,7 @@ import { probeMasterRecordsAccess } from "./tools/master-records.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
+import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -105,6 +106,7 @@ export async function main(
     includeMasterRecordsTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
+    includePortfolioTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -115,6 +117,7 @@ export async function main(
     probeMasterRecordsAccess(apiKey, baseUrl),
     probeSubmissionsAccess(apiKey, baseUrl),
     probePriceBaselineAccess(apiKey, baseUrl),
+    probePortfolioAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -128,6 +131,7 @@ export async function main(
     includeMasterRecordsTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
+    includePortfolioTools,
   })
 
   const transport = new StdioServerTransport()
