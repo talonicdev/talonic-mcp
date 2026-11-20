@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `talonic_list_apps`: the workspace's apps with id, description, mode and enabled state; supplies the `app_id` the decision-task tools need (no tool returned it before).
 - `talonic_get_schema`: one saved schema's field definition. It was only in the `talonic://schemas` resource, which claude.ai never shows the model.
-- `talonic_portfolio_companies`, `talonic_portfolio_company`, `talonic_portfolio_conflicts`, `talonic_portfolio_refresh`: the Portfolio app (KPI table per portfolio company and the conflicts between its documents), listed when the workspace has the app.
-
-- **Row-level growth tools** (`talonic_growth_attribution`, `talonic_growth_events`, `talonic_growth_signups`, `talonic_growth_accounts`, `talonic_growth_site_events`) over `/v1/growth/*`: conversions per landing page and source, website conversions, signups with their source, usage per organisation, and counts of any anonymous website event. Probe-gated with the existing growth tools; the platform now also admits listed growth readers. Absent from the public docs by design.
-- **Accounts.** `talonic_list_accounts` and `talonic_create_account` (`GET/POST /v1/accounts`): the companies a workspace keeps apart. `talonic_request_upload` takes `account` (name, alias or id) so a file stays with its company, and `add_to_workspace: true` to process it fully into workspace data (values, registry, questions, SQL) instead of text only.
 
 ### Fixed
 
@@ -32,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tool results are compact JSON, capped at 100,000 characters with a note to page or filter.
 - UUID arguments emit `format: "uuid"` instead of zod's inlined regex.
 - Every argument of every tool has a description (39 were missing). Internal vocabulary (rail, materialize, planes, resolution band, Sources-IAM) and one customer's ERP vocabulary in `talonic_contracts_processes` replaced by plain descriptions.
+
+## [0.1.95] - 2026-11-17
+
+### Added
+
+- `talonic_portfolio_companies`, `talonic_portfolio_company`, `talonic_portfolio_conflicts`, `talonic_portfolio_refresh`: the Portfolio app (KPI table per portfolio company and the conflicts between its documents), listed when the workspace has the app.
+- **Row-level growth tools** (`talonic_growth_attribution`, `talonic_growth_events`, `talonic_growth_signups`, `talonic_growth_accounts`, `talonic_growth_site_events`) over `/v1/growth/*`: conversions per landing page and source, website conversions, signups with their source, usage per organisation, and counts of any anonymous website event. Probe-gated with the existing growth tools; the platform now also admits listed growth readers. Absent from the public docs by design.
+- **Accounts.** `talonic_list_accounts` and `talonic_create_account` (`GET/POST /v1/accounts`): the companies a workspace keeps apart. `talonic_request_upload` takes `account` (name, alias or id) so a file stays with its company, and `add_to_workspace: true` to process it fully into workspace data (values, registry, questions, SQL) instead of text only.
 
 ## [0.1.94] - 2026-11-14
 
