@@ -36,6 +36,8 @@ const FIXTURE_BY_WIDGET_KEY: Readonly<Record<WidgetKey, string>> = {
   getDocument: "document-meta",
   toMarkdown: "markdown-view",
   listSchemas: "schema-list",
+  getSchema: "schema-card",
+  listApps: "app-list",
   saveSchema: "schema-saved",
   getBalance: "balance",
   getPricing: "pricing",

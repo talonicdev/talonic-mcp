@@ -9,6 +9,8 @@ import { getSchemaSavedWidgetHtml } from "./schema-saved.js"
 import { getDocumentMetaWidgetHtml } from "./document-meta.js"
 import { getMarkdownViewWidgetHtml } from "./markdown-view.js"
 import { getSchemaListWidgetHtml } from "./schema-list.js"
+import { getSchemaCardWidgetHtml } from "./schema-card.js"
+import { getAppListWidgetHtml } from "./app-list.js"
 import { getSearchResultsWidgetHtml } from "./search-results.js"
 import { getFilterResultsWidgetHtml } from "./filter-results.js"
 import { getPricingWidgetHtml } from "./pricing.js"
@@ -87,6 +89,12 @@ const WIDGET_REGISTRY: Readonly<Record<WidgetKey, WidgetEntry>> = {
     title: "Talonic Schemas",
     html: getSchemaListWidgetHtml,
   },
+  getSchema: {
+    name: "schema-card-widget",
+    title: "Talonic Schema",
+    html: getSchemaCardWidgetHtml,
+  },
+  listApps: { name: "app-list-widget", title: "Talonic Apps", html: getAppListWidgetHtml },
   saveSchema: {
     name: "schema-saved-widget",
     title: "Talonic Schema Saved",

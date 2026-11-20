@@ -42,17 +42,9 @@ import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { createServer } from "./server-factory.js"
-import { probeGrowthAccess } from "./tools/growth.js"
-import { probeContractsAccess } from "./tools/contracts.js"
-import { probeApAccess } from "./tools/ap.js"
-import { probeMasterRecordsAccess } from "./tools/master-records.js"
-import { probeSubmissionsAccess } from "./tools/submissions.js"
-import { probePriceBaselineAccess } from "./tools/price-baseline.js"
-import { probeDocGenAccess } from "./tools/doc-gen.js"
-import { probePartiesAccess } from "./tools/parties.js"
-import { probePortfolioAccess } from "./tools/portfolio.js"
-import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
+import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
+import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -60,201 +52,73 @@ import { SERVER_NAME, VERSION } from "./version.js"
 
 const PORT = Number(process.env["PORT"] ?? 3000)
 
-/**
- * Per-token cache of the Contracts probe, same TTL and bounding as the growth
- * cache: it answers "does this deployment serve the app", which changes only
- * on deploy.
- */
-const contractsProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function contractsAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probeContractsAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = contractsProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (contractsProbeCache.size >= 1000) contractsProbeCache.clear()
-  contractsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the AP probe, same TTL and bounding as the Contracts cache. */
-const apProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function apAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probeApAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = apProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (apProbeCache.size >= 1000) apProbeCache.clear()
-  apProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the Master Records probe, same TTL and bounding as the Contracts cache. */
-const masterRecordsProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function masterRecordsAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probeMasterRecordsAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = masterRecordsProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (masterRecordsProbeCache.size >= 1000) masterRecordsProbeCache.clear()
-  masterRecordsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-const submissionsProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function submissionsAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probeSubmissionsAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = submissionsProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (submissionsProbeCache.size >= 1000) submissionsProbeCache.clear()
-  submissionsProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the Price Baseline probe, same TTL and bounding as the Contracts cache. */
-const priceBaselineProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function priceBaselineAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probePriceBaselineAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = priceBaselineProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (priceBaselineProbeCache.size >= 1000) priceBaselineProbeCache.clear()
-  priceBaselineProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the Doc Gen probe, same TTL and bounding as the Contracts cache. */
-const docGenProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function docGenAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probeDocGenAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = docGenProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (docGenProbeCache.size >= 1000) docGenProbeCache.clear()
-  docGenProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the Portfolio probe, same TTL and bounding as the Contracts cache. */
-const portfolioProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function portfolioAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probePortfolioAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = portfolioProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (portfolioProbeCache.size >= 1000) portfolioProbeCache.clear()
-  portfolioProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
-
-/** Per-token cache of the Parties probe, same TTL and bounding as the Contracts cache. */
-const partiesProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function partiesAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = (t) =>
-    probePartiesAccess(t, process.env["TALONIC_BASE_URL"]),
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = partiesProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (partiesProbeCache.size >= 1000) partiesProbeCache.clear()
-  partiesProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
-}
+/** How long a probe answer is trusted; access changes only on deploy or app install. */
+const PROBE_TTL_MS = 5 * 60 * 1000
 
 /**
- * Per-token cache of the growth-access probe, so the superadmin check does
- * not add a platform round-trip to every stateless MCP request. Entries live
- * GROWTH_PROBE_TTL_MS; the map is pruned wholesale past 1000 tokens (bounded
- * memory beats LRU precision for a 5-minute cache). Negative results are
- * cached too — a customer session stays one lookup per TTL, not per call.
+ * One per-token access cache. A probe answers true / false, or "unknown"
+ * when the platform could not be asked (timeout, network, 5xx, 429). An
+ * unknown answer never removes tools a session already had: it reuses the
+ * last known answer (even an expired one) and is not cached, so the next
+ * request asks again. Before this, one slow probe silently dropped a whole
+ * app's tools for five minutes, mid-conversation, and calls to them then
+ * failed as "unknown tool".
  */
-const GROWTH_PROBE_TTL_MS = 5 * 60 * 1000
-const growthProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function growthAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = probeGrowthAccess,
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = growthProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (growthProbeCache.size >= 1000) growthProbeCache.clear()
-  growthProbeCache.set(token, { ok, expiresAt: now() + GROWTH_PROBE_TTL_MS })
-  return ok
+function makeAccessCache(defaultProbe: (token: string) => Promise<ProbeAnswer>) {
+  const cache = new Map<string, { ok: boolean; expiresAt: number }>()
+  return async function accessCached(
+    token: string,
+    probe: (token: string) => Promise<ProbeAnswer> = defaultProbe,
+    now: () => number = Date.now,
+  ): Promise<boolean> {
+    const hit = cache.get(token)
+    if (hit && hit.expiresAt > now()) return hit.ok
+    let answer: ProbeAnswer
+    try {
+      answer = await probe(token)
+    } catch {
+      answer = "unknown"
+    }
+    if (answer === "unknown") return hit?.ok ?? false
+    if (cache.size >= 1000) cache.clear()
+    cache.set(token, { ok: answer, expiresAt: now() + PROBE_TTL_MS })
+    return answer
+  }
 }
 
+const base = () => process.env["TALONIC_BASE_URL"]
+const pathProbe = (path: string) => (t: string) => probeAccessState(t, base(), path)
+
+/** @internal Exported for tests. */
+export const contractsAccessCached = makeAccessCache(pathProbe("/v1/contracts/import/status"))
+/** @internal Exported for tests. */
+export const apAccessCached = makeAccessCache(pathProbe("/v1/ap/config"))
+/** @internal Exported for tests. */
+export const masterRecordsAccessCached = makeAccessCache(pathProbe("/v1/master-records/config"))
+/** @internal Exported for tests. */
+export const submissionsAccessCached = makeAccessCache(pathProbe("/v1/submissions/specs"))
+/** @internal Exported for tests. */
+export const priceBaselineAccessCached = makeAccessCache(pathProbe("/v1/price-baseline/indices"))
+/** @internal Exported for tests. */
+export const docGenAccessCached = makeAccessCache(pathProbe("/v1/doc-gen/status"))
+/** @internal Exported for tests. */
+export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
+/** @internal Exported for tests. */
+export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
+/** Superadmin / growth-reader only. @internal Exported for tests. */
+export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
+/** Superadmin only. @internal Exported for tests. */
+export const adminAgentTaskAccessCached = makeAccessCache(pathProbe("/v1/agent-tasks/admin/access"))
 /**
- * Per-token cache for conditional admin-tool visibility. Both positive and
- * negative probes are cached for five minutes. The map is bounded by a coarse
- * clear at 1,000 entries; the platform re-authorizes every actual tool call.
+ * Agent-stage worker tools: only for workspaces whose pipelines have
+ * produced at least one Agent task. @internal Exported for tests.
  */
-const ADMIN_AGENT_TASK_PROBE_TTL_MS = 5 * 60 * 1000
-const adminAgentTaskProbeCache = new Map<string, { ok: boolean; expiresAt: number }>()
-
-/** @internal Exported for tests. */
-export async function adminAgentTaskAccessCached(
-  token: string,
-  probe: (token: string) => Promise<boolean> = probeAgentTaskAdminAccess,
-  now: () => number = Date.now,
-): Promise<boolean> {
-  const hit = adminAgentTaskProbeCache.get(token)
-  if (hit && hit.expiresAt > now()) return hit.ok
-  const ok = await probe(token)
-  if (adminAgentTaskProbeCache.size >= 1000) adminAgentTaskProbeCache.clear()
-  adminAgentTaskProbeCache.set(token, {
-    ok,
-    expiresAt: now() + ADMIN_AGENT_TASK_PROBE_TTL_MS,
-  })
-  return ok
-}
+export const agentTasksAccessCached = makeAccessCache((t) => probeAgentTasksInUse(t, base()))
+/**
+ * Decision-task tools: only for workspaces with an External-mode app.
+ * @internal Exported for tests.
+ */
+export const decisionTasksAccessCached = makeAccessCache((t) => probeExternalAppsInUse(t, base()))
 
 /** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
 const MAX_BODY_BYTES = 64 * 1024 * 1024
@@ -485,6 +349,10 @@ export interface CreateRequestHandlerOptions {
   partiesAccess?: (token: string) => Promise<boolean>
   /** Override the Portfolio tool visibility check (primarily for tests). */
   portfolioAccess?: (token: string) => Promise<boolean>
+  /** Override the Agent-stage task tool visibility check (primarily for tests). */
+  agentTasksAccess?: (token: string) => Promise<boolean>
+  /** Override the decision-task tool visibility check (primarily for tests). */
+  decisionTasksAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
@@ -787,44 +655,21 @@ export function createRequestHandler(
       includeSubmissionsTools,
       includePriceBaselineTools,
       includePortfolioTools,
+      includeAgentTaskTools,
+      includeDecisionTaskTools,
     ] = await Promise.all([
-      (
-        options.growthAccess ??
-        ((currentToken: string) =>
-          growthAccessCached(currentToken, (candidate) =>
-            probeGrowthAccess(candidate, process.env["TALONIC_BASE_URL"]),
-          ))
-      )(token),
-      (
-        options.adminAgentTaskAccess ??
-        ((currentToken: string) =>
-          adminAgentTaskAccessCached(currentToken, (candidate) =>
-            probeAgentTaskAdminAccess(candidate, process.env["TALONIC_BASE_URL"]),
-          ))
-      )(token),
-      (options.contractsAccess ?? ((currentToken: string) => contractsAccessCached(currentToken)))(
-        token,
-      ),
-      (options.apAccess ?? ((currentToken: string) => apAccessCached(currentToken)))(token),
-      (options.docGenAccess ?? ((currentToken: string) => docGenAccessCached(currentToken)))(token),
-      (options.partiesAccess ?? ((currentToken: string) => partiesAccessCached(currentToken)))(
-        token,
-      ),
-      (
-        options.masterRecordsAccess ??
-        ((currentToken: string) => masterRecordsAccessCached(currentToken))
-      )(token),
-      (
-        options.submissionsAccess ??
-        ((currentToken: string) => submissionsAccessCached(currentToken))
-      )(token),
-      (
-        options.priceBaselineAccess ??
-        ((currentToken: string) => priceBaselineAccessCached(currentToken))
-      )(token),
-      (options.portfolioAccess ?? ((currentToken: string) => portfolioAccessCached(currentToken)))(
-        token,
-      ),
+      (options.growthAccess ?? growthAccessCached)(token),
+      (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
+      (options.contractsAccess ?? contractsAccessCached)(token),
+      (options.apAccess ?? apAccessCached)(token),
+      (options.docGenAccess ?? docGenAccessCached)(token),
+      (options.partiesAccess ?? partiesAccessCached)(token),
+      (options.masterRecordsAccess ?? masterRecordsAccessCached)(token),
+      (options.submissionsAccess ?? submissionsAccessCached)(token),
+      (options.priceBaselineAccess ?? priceBaselineAccessCached)(token),
+      (options.portfolioAccess ?? portfolioAccessCached)(token),
+      (options.agentTasksAccess ?? agentTasksAccessCached)(token),
+      (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -838,6 +683,8 @@ export function createRequestHandler(
       includeSubmissionsTools,
       includePriceBaselineTools,
       includePortfolioTools,
+      includeAgentTaskTools,
+      includeDecisionTaskTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

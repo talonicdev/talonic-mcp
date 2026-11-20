@@ -90,6 +90,42 @@ export async function apiJson<T = unknown>(
  *
  * @internal
  */
+/**
+ * Probe answer: the feature is available (true), refused (false), or the
+ * platform could not be asked ("unknown": timeout, network, 5xx, 429).
+ *
+ * @internal
+ */
+export type ProbeAnswer = boolean | "unknown"
+
+/**
+ * GET `path` with the caller's token and classify the answer. A refusal
+ * (401/403/404 and other 4xx) is a definite false; only a reachable 2xx is
+ * true. `accept` lets a caller require more than a 2xx (e.g. a non-empty list).
+ *
+ * @internal
+ */
+export async function probeAccessState(
+  token: string,
+  baseUrl: string | undefined,
+  path: string,
+  accept: (body: unknown) => boolean = () => true,
+  params: QueryParams = {},
+): Promise<ProbeAnswer> {
+  try {
+    const res = await fetch(buildUrl(baseUrl, path, params), {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      signal: AbortSignal.timeout(5_000),
+    })
+    if (res.status >= 500 || res.status === 429) return "unknown"
+    if (!res.ok) return false
+    const body = await res.json().catch(() => null)
+    return accept(body)
+  } catch {
+    return "unknown"
+  }
+}
+
 export async function apiForm<T = unknown>(
   getToken: () => string,
   baseUrl: string | undefined,

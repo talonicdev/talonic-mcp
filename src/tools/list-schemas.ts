@@ -18,7 +18,7 @@ const DESCRIPTION = [
   "USE WHEN: 'what schemas do I have', or to find a reusable schema before extracting.",
   "NOT FOR: a one-off extraction with an inline schema (call talonic_extract directly).",
   "ARGS: none.",
-  "RETURNS: data[] of schema summaries. Full field definitions are omitted here — read the talonic://schemas resource for those. Pass a schema's id/short_id to talonic_extract as `schema_id`.",
+  "RETURNS: data[] of schema summaries. Field definitions are omitted here; call talonic_get_schema with an id to see a schema's fields. Pass a schema's id/short_id to talonic_extract as `schema_id`.",
 ].join("\n")
 
 export const schemaItem = z.object({
@@ -116,5 +116,59 @@ export function registerListSchemas(server: McpServer, getTalonic: () => Talonic
       _meta: widgetToolMeta("listSchemas"),
     },
     async () => handleListSchemas(getTalonic()),
+  )
+}
+
+const GET_DESCRIPTION = [
+  "Get one saved schema with its full field definition (field names, types, descriptions).",
+  "",
+  "USE WHEN: the user asks what a saved schema extracts, or before extracting with a schema_id to know which fields will come back.",
+  "NOT FOR: listing schemas (talonic_list_schemas) or creating one (talonic_save_schema).",
+  "ARGS: schema_id (the id or short_id from talonic_list_schemas).",
+  "RETURNS: the schema with `definition` (JSON Schema of the fields), version and timestamps.",
+].join("\n")
+
+/** @internal Exported for tests. */
+export async function handleGetSchema(
+  talonic: Talonic,
+  args: { schema_id: string },
+): Promise<ToolResult> {
+  try {
+    const schema = await talonic.schemas.get(args.schema_id)
+    return jsonOk(schema)
+  } catch (err) {
+    return toolError(err)
+  }
+}
+
+/**
+ * Register `talonic_get_schema`. Saved schemas' field definitions were only
+ * reachable through the `talonic://schemas` resource, which hosted chat
+ * clients (claude.ai) never expose to the model.
+ *
+ * @public
+ */
+export function registerGetSchema(server: McpServer, getTalonic: () => Talonic): void {
+  server.registerTool(
+    "talonic_get_schema",
+    {
+      title: "Get Talonic Schema",
+      description: GET_DESCRIPTION,
+      inputSchema: {
+        schema_id: z
+          .string()
+          .min(1)
+          .describe("Schema id (UUID) or short_id (SCH-XXXXXXXX) from talonic_list_schemas."),
+      },
+      annotations: {
+        title: "Get Talonic Schema",
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: widgetToolMeta("getSchema"),
+    },
+    async (args: { schema_id: string }) => handleGetSchema(getTalonic(), args),
   )
 }

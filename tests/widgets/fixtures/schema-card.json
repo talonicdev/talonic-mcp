@@ -1,0 +1,16 @@
+{
+  "id": "6f1c2c1e-6a43-4d0e-9b8a-1c2d3e4f5a6b",
+  "short_id": "SCH-INV00001",
+  "name": "Invoice",
+  "description": "Supplier invoices",
+  "version": 3,
+  "definition": {
+    "type": "object",
+    "properties": {
+      "vendor_name": { "type": "string", "description": "Legal name of the supplier" },
+      "total_amount": { "type": "number", "description": "Gross total" },
+      "invoice_date": { "type": "string" }
+    },
+    "required": ["vendor_name"]
+  }
+}

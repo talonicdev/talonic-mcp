@@ -33,6 +33,7 @@ const ALLOWLISTED_PROBES: Record<string, string> = {
   "submissions.ts": "probeSubmissionsAccess",
   "price-baseline.ts": "probePriceBaselineAccess",
   "portfolio.ts": "probePortfolioAccess",
+  "_http.ts": "probeAccessState",
 }
 
 /** Matches a top-level (column-0) function declaration and captures its name. */

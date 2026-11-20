@@ -1,0 +1,7 @@
+{
+  "apps": [
+    { "id": "0b7e8f0a-1111-4c2d-9e3f-222233334444", "slug": "contracts", "display_name": "Contracts", "description": "Key dates and obligations across contracts", "mode": "rules", "enabled": true, "standard": true },
+    { "id": "0b7e8f0a-5555-4c2d-9e3f-666677778888", "slug": "billing-review", "display_name": "Billing review", "description": "Decides auto-billing per load", "mode": "external", "enabled": true, "standard": false }
+  ],
+  "count": 2
+}

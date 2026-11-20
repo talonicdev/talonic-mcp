@@ -907,6 +907,75 @@ Payment terms: Net 30`,
     mentions: ["markdown", "OCR", "document_id", "tables"],
   },
   {
+    slug: "talonic-get-schema",
+    parentSlug: "tools",
+    title: "talonic_get_schema",
+    seoTitle: "talonic_get_schema — Read a Saved Schema's Field List",
+    description:
+      "MCP tool that returns one saved Talonic schema with its full field definition (names, types, descriptions), so an agent knows which fields extraction returns.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Get one saved schema with its full field definition: the JSON Schema `definition` with every field's name, type and description, plus the schema's version and timestamps.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_get_schema`** is read-only and free. Call it when the user asks what a saved schema extracts, or before `talonic_extract` with a `schema_id` so the agent knows which fields will come back. Find the id with `talonic_list_schemas`; both the UUID and the `SCH-XXXXXXXX` short id work.",
+      },
+      { type: "heading", level: 3, id: "get-schema-input", text: "Input" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "`schema_id` (required): the schema's UUID or short id from `talonic_list_schemas`.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Hosted chat clients such as Claude.ai do not let the model read MCP resources, so this tool is the way an agent there sees a schema's fields.",
+      },
+    ],
+    related: [
+      { label: "talonic_list_schemas", slug: "talonic-list-schemas" },
+      { label: "talonic_extract", slug: "talonic-extract" },
+    ],
+    faq: [],
+    mentions: ["schema", "schema_id", "fields"],
+  },
+  {
+    slug: "talonic-list-apps",
+    parentSlug: "tools",
+    title: "talonic_list_apps",
+    seoTitle: "talonic_list_apps — List the Apps in Your Workspace",
+    description:
+      "MCP tool that lists the Talonic Apps in a workspace with their id, name, one-line description, mode and enabled state, and supplies the app ids tools need.",
+    content: [
+      {
+        type: "paragraph",
+        text: "List the Talonic Apps in the user's workspace. Each entry has the app's `id`, `slug`, `display_name`, a one-line `description`, its `mode`, and whether it is `enabled`.",
+      },
+      {
+        type: "paragraph",
+        text: "**`talonic_list_apps`** is read-only and free. Call it when the user asks which apps or automations the workspace runs, or when another tool needs an app id: `talonic_list_decision_tasks` takes the id of an app whose `mode` is `external`.",
+      },
+      { type: "heading", level: 3, id: "list-apps-input", text: "Input" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "`enabled_only` (optional, default `true`): pass `false` to include disabled apps.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Mode `external` means the app hands its decisions to an outside agent through the decision-task tools. Other modes decide inside Talonic.",
+      },
+    ],
+    related: [{ label: "talonic_list_decision_tasks", slug: "talonic-list-decision-tasks" }],
+    faq: [],
+    mentions: ["apps", "app_id", "External mode"],
+  },
+  {
     slug: "talonic-list-schemas",
     parentSlug: "tools",
     title: "talonic_list_schemas",
@@ -920,11 +989,11 @@ Payment terms: Net 30`,
       },
       {
         type: "paragraph",
-        text: "The full per-field JSON Schema definition is intentionally omitted from the list — across many schemas that payload is large and can get truncated by some clients. To inspect a schema's full field definitions, read the `talonic://schemas` resource, which clients that browse resources separately (Claude Desktop and Cowork) also render in the UI.",
+        text: "The full per-field JSON Schema definition is intentionally omitted from the list — across many schemas that payload is large and can get truncated by some clients. To inspect one schema's full field definitions, call `talonic_get_schema` with its id. Clients that browse MCP resources (Claude Desktop, Cowork) can also read every definition at once from the `talonic://schemas` resource.",
       },
       {
         type: "paragraph",
-        text: "**`talonic_list_schemas`** is a read-only tool that returns every saved schema in your workspace as a summary. Agents should call this before creating a new schema to avoid duplicates, and when the user asks about their available extraction templates. To read the full field structure of a specific schema, use the `talonic://schemas` resource.",
+        text: "**`talonic_list_schemas`** is a read-only tool that returns every saved schema in your workspace as a summary. Agents should call this before creating a new schema to avoid duplicates, and when the user asks about their available extraction templates. To read the full field structure of a specific schema, call `talonic_get_schema`.",
       },
       {
         type: "paragraph",

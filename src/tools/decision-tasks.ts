@@ -63,7 +63,10 @@ const TASK_STATUSES = [
 /** Platform default for `apps.package_page_size_max`; a larger `limit` is a 400 there. */
 const PACKAGE_PAGE_LIMIT_MAX = 2000
 
-const appId = z.string().uuid().describe("App UUID whose decision-task inbox to read.")
+const appId = z
+  .string()
+  .uuid()
+  .describe("Id of an External-mode app (from talonic_list_apps, where mode is 'external').")
 const taskId = z.string().uuid().describe("Decision task UUID.")
 const executionEpoch = z
   .number()

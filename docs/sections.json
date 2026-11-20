@@ -1537,6 +1537,136 @@
     ]
   },
   {
+    "slug": "mcp-talonic-get-schema",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_schema",
+    "seoTitle": "talonic_get_schema MCP Tool — Talonic Docs",
+    "description": "Get one saved schema with its full field definition.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Get one saved schema with its full JSON Schema field definition, version and timestamps."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "The user asks what a saved schema extracts.",
+          "Before extracting with a `schema_id`, to know which fields come back."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Listing schemas → `talonic_list_schemas`.",
+          "Creating a schema → `talonic_save_schema`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "`schema_id` (required): UUID or `SCH-XXXXXXXX` short id from `talonic_list_schemas`."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — does not consume credits."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_schemas",
+        "slug": "mcp-talonic-list-schemas"
+      }
+    ],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-talonic-list-apps",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_apps",
+    "seoTitle": "talonic_list_apps MCP Tool — Talonic Docs",
+    "description": "List the workspace's Talonic Apps with id, name, description, mode and enabled state.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List the Talonic Apps in the workspace: id, slug, display_name, description, mode, enabled."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "The user asks which apps the workspace has.",
+          "Another tool needs an app id (`talonic_list_decision_tasks` needs an External-mode app's id)."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "When NOT to use"
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Documents → `talonic_search`.",
+          "Pipelines → `talonic_list_specs`."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Input schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "`enabled_only` (optional, default true)."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Cost"
+      },
+      {
+        "type": "paragraph",
+        "text": "Free — does not consume credits."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_decision_tasks",
+        "slug": "mcp-talonic-list-decision-tasks"
+      }
+    ],
+    "faq": [],
+    "mentions": []
+  },
+  {
     "slug": "mcp-talonic-save-schema",
     "parentSlug": "mcp-tools",
     "title": "talonic_save_schema",

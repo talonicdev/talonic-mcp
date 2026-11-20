@@ -24,6 +24,8 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       growthAccess: async () => false,
       adminAgentTaskAccess: async () => false,
       priceBaselineAccess: async () => false,
+      agentTasksAccess: async () => true,
+      decisionTasksAccess: async () => true,
       tokenAccepted: async () => true,
       ...options,
     }),

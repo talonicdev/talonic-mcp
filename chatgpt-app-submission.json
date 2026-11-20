@@ -128,6 +128,32 @@
         "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
       }
     },
+  
+    "talonic_get_schema": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads one saved schema's field definition from the user's Talonic workspace.",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+  
+    "talonic_list_apps": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only lists the apps configured in the user's Talonic workspace (id, name, mode, enabled).",
+        "open_world_justification": "Only reads private Talonic workspace data and does not publish or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
     "talonic_get_balance": {
       "annotations": {
         "readOnlyHint": true,
@@ -338,6 +364,22 @@
       "file_attachment_urls": null,
       "tools_triggered": "talonic_list_schemas",
       "expected_output": "Returns the saved schemas with names, short IDs, and field counts.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Show the fields of a saved schema.",
+      "user_prompt": "Which fields does my saved Invoice schema extract?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_schemas, talonic_get_schema",
+      "expected_output": "Finds the Invoice schema in the saved list, then returns its field definition with each field's name and type.",
+      "expected_output_url": null
+    },
+    {
+      "description": "List the workspace's apps.",
+      "user_prompt": "Which Talonic apps are set up in my workspace?",
+      "file_attachment_urls": null,
+      "tools_triggered": "talonic_list_apps",
+      "expected_output": "Returns each enabled app with its name, one-line description and mode.",
       "expected_output_url": null
     },
     {

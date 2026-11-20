@@ -8,7 +8,7 @@ import { spawn } from "node:child_process"
 import { createServer } from "node:net"
 import { setTimeout as sleep } from "node:timers/promises"
 
-const EXPECTED_TOOLS = 38
+const EXPECTED_TOOLS = 40
 
 const port = await new Promise((resolve, reject) => {
   const s = createServer()

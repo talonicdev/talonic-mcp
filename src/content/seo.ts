@@ -33,6 +33,8 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
       { id: "talonic-get-document", label: "talonic_get_document" },
       { id: "talonic-to-markdown", label: "talonic_to_markdown" },
       { id: "talonic-list-schemas", label: "talonic_list_schemas" },
+      { id: "talonic-get-schema", label: "talonic_get_schema" },
+      { id: "talonic-list-apps", label: "talonic_list_apps" },
       { id: "talonic-save-schema", label: "talonic_save_schema" },
       { id: "talonic-get-balance", label: "talonic_get_balance" },
       { id: "talonic-get-pricing", label: "talonic_get_pricing" },
