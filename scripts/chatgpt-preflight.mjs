@@ -116,4 +116,4 @@ if (failures.length) {
   console.error("PREFLIGHT FAILED:\n - " + failures.join("\n - "))
   process.exit(1)
 }
-console.log(`PREFLIGHT OK — ChatGPT will see ${EXPECTED_TOOLS} tools; ${uris.length} with a card, every card template fetchable.`)
+console.log(`PREFLIGHT OK — ChatGPT will see ${EXPECTED_TOOLS} tools, every card template fetchable.`)
