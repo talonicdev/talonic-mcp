@@ -1,4 +1,4 @@
-import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { apiHttpError, jsonOk, toolError, type ToolResult } from "./_shared.js"
 
 /** Default Talonic API origin for raw-fetch tools (mirrors the SDK default). */
 export const DEFAULT_BASE = "https://api.talonic.com"
@@ -78,8 +78,7 @@ export async function apiJson<T = unknown>(
     ...(opts.signal ? { signal: opts.signal } : {}),
   })
   if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
+    throw await apiHttpError(res)
   }
   return (await res.json()) as T
 }
@@ -109,8 +108,7 @@ export async function apiForm<T = unknown>(
     body: form,
   })
   if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
+    throw await apiHttpError(res)
   }
   return (await res.json()) as T
 }
@@ -140,8 +138,7 @@ export async function apiBinary(
     headers: { Authorization: `Bearer ${getToken()}`, Accept: "*/*" },
   })
   if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
+    throw await apiHttpError(res)
   }
   const tooLarge = (n: number) =>
     new Error(`File is ${n} bytes, over the ${opts.maxBytes}-byte limit for a tool result.`)

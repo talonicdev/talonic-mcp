@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, resolveFetch, runTool } from "./_http.js"
-import { toolError, validationError, type ToolResult } from "./_shared.js"
+import { apiHttpError, toolError, validationError, type ToolResult } from "./_shared.js"
 
 /**
  * Price Baseline tools — turn a supply contract's price clause (Wärme, Kälte,
@@ -278,8 +278,7 @@ export async function handleWorkbook(
       headers: { Authorization: `Bearer ${getToken()}`, Accept: XLSX_MIME },
     })
     if (!res.ok) {
-      const text = await res.text().catch(() => "")
-      throw new Error(`Talonic API error: HTTP ${res.status}${text ? ` — ${text}` : ""}`)
+      throw await apiHttpError(res)
     }
     const buf = Buffer.from(await res.arrayBuffer())
     const filename =

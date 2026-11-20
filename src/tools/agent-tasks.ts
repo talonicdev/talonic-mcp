@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
-import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { apiHttpError, jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { resolveFetch } from "./_http.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
@@ -183,10 +183,7 @@ async function agentTaskRequest(
     })
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "")
-      return toolError(
-        new Error(`Talonic API error: HTTP ${response.status}${body ? ` — ${body}` : ""}`),
-      )
+      return toolError(await apiHttpError(response))
     }
 
     return jsonOk(await response.json())

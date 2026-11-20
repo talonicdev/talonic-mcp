@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
-import { jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { apiHttpError, jsonOk, toolError, type ToolResult } from "./_shared.js"
 import { resolveFetch } from "./_http.js"
 
 /**
@@ -47,10 +47,7 @@ async function growthGet(
       )
     }
     if (!res.ok) {
-      const body = await res.text().catch(() => "")
-      return toolError(
-        new Error(`Talonic API error: HTTP ${res.status}${body ? ` — ${body}` : ""}`),
-      )
+      return toolError(await apiHttpError(res))
     }
     return jsonOk(await res.json())
   } catch (err) {
