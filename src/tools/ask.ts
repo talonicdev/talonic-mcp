@@ -22,7 +22,7 @@ const POLL_HINT = "still processing — call talonic_get_answer with this ask_id
 const ASK_DESCRIPTION = [
   "Ask a natural-language question over the workspace's documents and get a cited, verified answer (markdown). The Talonic agent plans over the workspace's extracted fields, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. Consumes credits.",
   "",
-  "USE WHEN: the user asks an open question about their documents ('which vendors invoiced us twice in May?'), wants a summary across documents, or the answer needs reasoning over several fields.",
+  "USE WHEN (the default for questions): the user asks anything about what their documents contain — counts, totals, duplicates, comparisons, anomalies ('which vendors invoiced us twice in May?'), or a summary across documents. One call replaces exploring fields, schemas, specs and SQL yourself; skip that exploration.",
   "NOT FOR: reading a known field's values (talonic_field_values, free) or filtering documents by a known value (talonic_filter, free); locating which field holds a concept (talonic_find_data).",
   "ARGS: `question`; optional `scope` { document_ids[], schema_id, pipeline_id, data_product_id, document_type, source_id, tags[], ingested_after, ingested_before } (ANDed), `conversation_id` (continue a thread), `output_format` { instruction, template }, `wait_seconds` (0–55, default 45).",
   "RETURNS: { ask_id, status ('completed'|'processing'|'error'), conversation_id, answer (markdown), citations[] { quote, document_id, kind, filename, app_url }, verification { verdict, checks_total, checks_unsupported, correction }, usage { tokens, credits_charged }, tool_calls, artifacts[], waited_ms }. If status is still 'processing' after the wait, call talonic_get_answer with the ask_id.",
@@ -190,11 +190,11 @@ export function registerAskTools(
   server.registerTool(
     "talonic_ask",
     {
-      title: "Ask a question over the workspace",
+      title: "Ask your documents",
       description: ASK_DESCRIPTION,
       inputSchema: askInputSchema,
       annotations: {
-        title: "Ask a question over the workspace",
+        title: "Ask your documents",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: false,
@@ -206,11 +206,11 @@ export function registerAskTools(
   server.registerTool(
     "talonic_get_answer",
     {
-      title: "Poll an ask for its answer",
+      title: "Get the answer",
       description: GET_ANSWER_DESCRIPTION,
       inputSchema: { ask_id: uuid.describe("From talonic_ask.") },
       annotations: {
-        title: "Poll an ask for its answer",
+        title: "Get the answer",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

@@ -77,12 +77,12 @@ export function registerSaveSchema(server: McpServer, getTalonic: () => Talonic)
   server.registerTool(
     "talonic_save_schema",
     {
-      title: "Save Talonic Schema",
+      title: "Save a schema",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Save Talonic Schema",
+        title: "Save a schema",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: false,

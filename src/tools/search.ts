@@ -137,12 +137,12 @@ export function registerSearch(server: McpServer, getTalonic: () => Talonic): vo
   server.registerTool(
     "talonic_search",
     {
-      title: "Search Talonic Workspace",
+      title: "Search documents",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Search Talonic Workspace",
+        title: "Search documents",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

@@ -16,7 +16,7 @@ const DESCRIPTION = [
   "List the saved schemas in the workspace as compact summaries (id, short_id, name, description, version, field_count).",
   "",
   "USE WHEN: 'what schemas do I have', or to find a reusable schema before extracting.",
-  "NOT FOR: a one-off extraction with an inline schema (call talonic_extract directly).",
+  "NOT FOR: a one-off extraction with an inline schema (call talonic_extract directly). Not a warm-up before answering a question about the documents: call talonic_ask for that.",
   "ARGS: none.",
   "RETURNS: data[] of schema summaries. Field definitions are omitted here; call talonic_get_schema with an id to see a schema's fields. Pass a schema's id/short_id to talonic_extract as `schema_id`.",
 ].join("\n")
@@ -103,12 +103,12 @@ export function registerListSchemas(server: McpServer, getTalonic: () => Talonic
   server.registerTool(
     "talonic_list_schemas",
     {
-      title: "List Talonic Schemas",
+      title: "List saved schemas",
       description: DESCRIPTION,
       inputSchema: {},
       outputSchema,
       annotations: {
-        title: "List Talonic Schemas",
+        title: "List saved schemas",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
@@ -152,7 +152,7 @@ export function registerGetSchema(server: McpServer, getTalonic: () => Talonic):
   server.registerTool(
     "talonic_get_schema",
     {
-      title: "Get Talonic Schema",
+      title: "Read a schema's fields",
       description: GET_DESCRIPTION,
       inputSchema: {
         schema_id: z
@@ -161,7 +161,7 @@ export function registerGetSchema(server: McpServer, getTalonic: () => Talonic):
           .describe("Schema id (UUID) or short_id (SCH-XXXXXXXX) from talonic_list_schemas."),
       },
       annotations: {
-        title: "Get Talonic Schema",
+        title: "Read a schema's fields",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

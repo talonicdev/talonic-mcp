@@ -289,12 +289,12 @@ export function registerExtract(
   server.registerTool(
     "talonic_extract",
     {
-      title: "Extract Data from Document",
+      title: "Extract data",
       description: DESCRIPTION,
       inputSchema: opts.localFiles ? inputSchema : hostedInputSchema,
       outputSchema,
       annotations: {
-        title: "Extract Data from Document",
+        title: "Extract data",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,

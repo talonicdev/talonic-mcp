@@ -86,12 +86,39 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
   details.tree > summary { cursor: pointer; font-size: 13px; list-style: none; }
   details.tree > summary::before { content: "▸ "; color: var(--muted); }
   details.tree[open] > summary::before { content: "▾ "; }
+  .loading { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px; color: var(--muted); }
+  .tl-mark { color: var(--accent); }
+  .tl-mark g, .tl-mark circle { transform-box: view-box; transform-origin: 0 0; }
+  .tl-layer { fill: none; stroke: currentColor; stroke-width: 20; stroke-linecap: round; }
+  .tl-spin { animation: tl-spin 4s infinite; }
+  .tl-core { animation: tl-core 4s infinite; }
+  .tl-arm { animation: tl-arm 4s infinite; animation-delay: calc(4s * var(--i) * -0.0075); }
+  @keyframes tl-spin {
+    0% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.55, 0, .9, .45); }
+    42% { transform: rotate(560deg); animation-timing-function: linear; }
+    58% { transform: rotate(860deg); animation-timing-function: cubic-bezier(.1, .6, .25, 1); }
+    100% { transform: rotate(1080deg); }
+  }
+  @keyframes tl-arm {
+    0%, 24% { transform: scale(1); animation-timing-function: cubic-bezier(.6, 0, .85, .3); }
+    48% { transform: scale(.06); animation-timing-function: linear; }
+    60% { transform: scale(.06); animation-timing-function: cubic-bezier(.2, 1.5, .35, 1); }
+    84%, 100% { transform: scale(1); }
+  }
+  @keyframes tl-core {
+    0%, 28% { transform: scale(1); animation-timing-function: cubic-bezier(.6, 0, .85, .3); }
+    48% { transform: scale(.5); animation-timing-function: ease-in-out; }
+    58% { transform: scale(.44); animation-timing-function: cubic-bezier(.2, 1.6, .4, 1); }
+    74% { transform: scale(1.1); animation-timing-function: ease-in-out; }
+    88%, 100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) { .tl-spin, .tl-core, .tl-arm { animation: none; } }
 
 
 </style>
 </head>
 <body>
-<div id="root" class="root"><div class="empty">Loading…</div></div>
+<div id="root" class="root"><div class="loading" role="status"><svg class="tl-mark" viewBox="-200 -200 400 400" width="36" height="36" aria-hidden="true" focusable="false"><g class="tl-layer"><g class="tl-spin"><circle class="tl-core" r="65.5" stroke-width="21"/><g transform="rotate(0)"><g class="tl-arm" style="--i:0"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(45)"><g class="tl-arm" style="--i:1"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(90)"><g class="tl-arm" style="--i:2"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(135)"><g class="tl-arm" style="--i:3"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(180)"><g class="tl-arm" style="--i:4"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(225)"><g class="tl-arm" style="--i:5"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(270)"><g class="tl-arm" style="--i:6"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g><g transform="rotate(315)"><g class="tl-arm" style="--i:7"><path d="M-15 -66C-36 -90 -30 -118 4 -133"/><circle cy="-155" r="22"/></g></g></g></g></svg><span>Loading…</span></div></div>
 <script>
 (function () {
 

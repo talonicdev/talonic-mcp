@@ -155,12 +155,12 @@ export function registerToMarkdown(
   server.registerTool(
     "talonic_to_markdown",
     {
-      title: "Document to Markdown",
+      title: "Read document text",
       description: DESCRIPTION,
       inputSchema: opts.localFiles ? inputSchema : hostedInputSchema,
       outputSchema,
       annotations: {
-        title: "Document to Markdown",
+        title: "Read document text",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,

@@ -8,7 +8,7 @@ const LIST_DESCRIPTION = [
   "List the workspace's accounts: the companies (portfolio companies, clients, entities) whose documents it keeps apart.",
   "",
   "USE WHEN: before uploading a company's files (pass its name as `account` on talonic_request_upload), or to see which companies exist.",
-  "NOT FOR: listing documents (talonic_search / talonic_filter) · creating an account (talonic_create_account).",
+  "NOT FOR: listing documents (talonic_search / talonic_filter) · creating an account (talonic_create_account). Not a warm-up before answering a question about the documents: call talonic_ask for that.",
   "ARGS: none.",
   "RETURNS: data[] of { id, name, aliases[], description, created_at }.",
 ].join("\n")
@@ -81,13 +81,13 @@ export function registerAccounts(
   server.registerTool(
     "talonic_list_accounts",
     {
-      title: "List Accounts",
+      title: "List companies",
       description: LIST_DESCRIPTION,
       inputSchema: {},
       outputSchema: { data: z.array(z.object(accountShape)).describe("The workspace's accounts.") },
       _meta: widgetToolMeta("listAccounts"),
       annotations: {
-        title: "List Accounts",
+        title: "List companies",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
@@ -98,7 +98,7 @@ export function registerAccounts(
   server.registerTool(
     "talonic_create_account",
     {
-      title: "Create Account",
+      title: "Add a company",
       description: CREATE_DESCRIPTION,
       inputSchema: {
         name: z.string().min(1).max(255).describe("Company name, e.g. 'Filu'."),
@@ -112,7 +112,7 @@ export function registerAccounts(
       outputSchema: accountShape,
       _meta: widgetToolMeta("createAccount"),
       annotations: {
-        title: "Create Account",
+        title: "Add a company",
         readOnlyHint: false,
         destructiveHint: false,
         idempotentHint: false,

@@ -59,7 +59,7 @@ const LIST_DESCRIPTION = [
   "List the workspace's Field Registry — the canonical concepts Talonic has discovered across every ingested document, each with a stable id, maturity level, data type, synonyms and occurrence count.",
   "",
   "USE WHEN: you need to know WHAT data exists before querying it, want to pick the right concept for a question, or need the exact field id for talonic_get_field / talonic_field_values.",
-  "NOT FOR: locating a specific document (talonic_search) or filtering documents by a value (talonic_filter).",
+  "NOT FOR: locating a specific document (talonic_search) or filtering documents by a value (talonic_filter). Not a warm-up before answering a question about the documents: call talonic_ask for that. The registry holds many one-off candidate fields; pass maturity core or proven unless the user asks for candidates.",
   "",
   "ARGS: `search` (case-insensitive contains on name), `maturity` (core | proven | candidate — prefer `core`/`proven` for anything you will build on), `include_superseded` (default false: rows merged into another concept are hidden so you never see two ids for one concept), `limit`, `cursor`.",
   "RETURNS: data[] of { id, canonical_name, display_name, data_type, maturity, tier, synonyms, description, occurrence_count, superseded_by, links } plus cursor pagination.",
@@ -236,11 +236,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_list_fields",
     {
-      title: "List Registry Fields",
+      title: "List fields",
       description: LIST_DESCRIPTION,
       inputSchema: listFieldsInputSchema,
       annotations: {
-        title: "List Registry Fields",
+        title: "List fields",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -253,11 +253,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_get_field",
     {
-      title: "Get Field Concept Card",
+      title: "Look up a field",
       description: GET_DESCRIPTION,
       inputSchema: getFieldInputSchema,
       annotations: {
-        title: "Get Field Concept Card",
+        title: "Look up a field",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -270,11 +270,11 @@ export function registerFieldTools(
   server.registerTool(
     "talonic_field_values",
     {
-      title: "Read Field Values",
+      title: "Read a field's values",
       description: VALUES_DESCRIPTION,
       inputSchema: fieldValuesInputSchema,
       annotations: {
-        title: "Read Field Values",
+        title: "Read a field's values",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

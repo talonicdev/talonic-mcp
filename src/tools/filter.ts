@@ -197,12 +197,12 @@ export function registerFilter(server: McpServer, getTalonic: () => Talonic): vo
   server.registerTool(
     "talonic_filter",
     {
-      title: "Filter Talonic Documents",
+      title: "Filter documents",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Filter Talonic Documents",
+        title: "Filter documents",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

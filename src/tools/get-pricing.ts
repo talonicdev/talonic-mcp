@@ -54,12 +54,12 @@ export function registerGetPricing(server: McpServer, getTalonic: () => Talonic)
   server.registerTool(
     "talonic_get_pricing",
     {
-      title: "Get Talonic Pricing",
+      title: "Check pricing",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Get Talonic Pricing",
+        title: "Check pricing",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

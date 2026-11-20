@@ -375,11 +375,11 @@ export function registerRunTools(
   server.registerTool(
     "talonic_run_spec",
     {
-      title: "Run a Spec pipeline",
+      title: "Run a pipeline",
       description: RUN_DESCRIPTION,
       inputSchema: runSpecInputSchema,
       annotations: {
-        title: "Run a Spec pipeline",
+        title: "Run a pipeline",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,
@@ -391,10 +391,10 @@ export function registerRunTools(
   server.registerTool(
     "talonic_get_run",
     {
-      title: "Poll a Spec run",
+      title: "Check run progress",
       description: GET_RUN_DESCRIPTION,
       inputSchema: runRefInputSchema,
-      annotations: { title: "Poll a Spec run", ...READ_ONLY },
+      annotations: { title: "Check run progress", ...READ_ONLY },
       _meta: widgetToolMeta("getRun"),
     },
     async (args) => handleGetRun(getToken, baseUrl, args as RunRefArgs),
@@ -402,10 +402,10 @@ export function registerRunTools(
   server.registerTool(
     "talonic_get_run_results",
     {
-      title: "Read a Spec run's rows",
+      title: "Read run results",
       description: RESULTS_DESCRIPTION,
       inputSchema: resultsInputSchema,
-      annotations: { title: "Read a Spec run's rows", ...READ_ONLY },
+      annotations: { title: "Read run results", ...READ_ONLY },
       _meta: widgetToolMeta("getRunResults"),
     },
     async (args) => handleGetRunResults(getToken, baseUrl, args as RunResultsArgs),

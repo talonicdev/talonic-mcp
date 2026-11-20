@@ -100,12 +100,12 @@ export function registerGetDocument(server: McpServer, getTalonic: () => Talonic
   server.registerTool(
     "talonic_get_document",
     {
-      title: "Get Talonic Document",
+      title: "Look up a document",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Get Talonic Document",
+        title: "Look up a document",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

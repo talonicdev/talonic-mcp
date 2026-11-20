@@ -55,12 +55,12 @@ export function registerGetUsage(server: McpServer, getTalonic: () => Talonic): 
   server.registerTool(
     "talonic_get_usage",
     {
-      title: "Get Talonic Usage",
+      title: "Check credit usage",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Get Talonic Usage",
+        title: "Check credit usage",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

@@ -104,12 +104,12 @@ export function registerRequestUpload(
   server.registerTool(
     "talonic_request_upload",
     {
-      title: "Request File Upload",
+      title: "Get an upload link",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Request File Upload",
+        title: "Get an upload link",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: false,

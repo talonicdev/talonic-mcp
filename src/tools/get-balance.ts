@@ -47,12 +47,12 @@ export function registerGetBalance(server: McpServer, getTalonic: () => Talonic)
   server.registerTool(
     "talonic_get_balance",
     {
-      title: "Get Talonic Credit Balance",
+      title: "Check credit balance",
       description: DESCRIPTION,
       inputSchema,
       outputSchema,
       annotations: {
-        title: "Get Talonic Credit Balance",
+        title: "Check credit balance",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,

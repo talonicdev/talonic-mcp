@@ -112,7 +112,7 @@ const LIST_TOOLS_DESCRIPTION = [
   "Target API: https://talonic.com/docs/api (GET /v1/agent/tools).",
   "",
   "USE WHEN: you want a capability talonic_* tools do not cover directly (e.g. SQL over the structured data, a workspace overview, cohort discovery) — list here, then call talonic_invoke_agent_tool with the tool name and its args.",
-  "NOT FOR: discovering fields (talonic_list_fields / talonic_find_data) or documents (talonic_search) — those are shaped for you.",
+  "NOT FOR: answering the user's question about their documents — call talonic_ask, which runs these same tools server-side in one call and returns a cited answer. Also not for discovering fields (talonic_find_data) or documents (talonic_search).",
   "",
   "ARGS: `only_invocable` (default true — hide tools this credential cannot run), `include_schemas` (default true — include each tool's JSON input schema).",
   "RETURNS: { tools[] of { name, description, impact, capability, can_invoke, input_schema? }, invocable_count, totalCount }. Registry tools that already have their own talonic_* tool (find_data) are left out; call the dedicated tool.",
@@ -182,12 +182,12 @@ export async function handleListAgentTools(
 // ── talonic_invoke_agent_tool ───────────────────────────────────────────────
 
 const INVOKE_DESCRIPTION = [
-  "Invoke ONE named tool from the platform's agent tool registry directly, with no model in the loop — you choose the arguments. This is how an external agent uses Talonic's retrieval and provenance while driving control flow itself (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
+  "Invoke ONE named tool from the platform's agent tool registry directly, with no model in the loop (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
   "READ-ONLY FOR EVERY CREDENTIAL: the platform runs each caller of this route, API key or OAuth session alike, as its least-privilege viewer role, which grants only the registry's read-only tools (capability `data.read`). Write-capable registry tools are never invocable here, however you connected, so this tool reads and never changes workspace data.",
   "Target API: Talonic agent tool registry — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
   "",
   "USE WHEN: talonic_list_agent_tools showed a tool with can_invoke: true that does what you need. Pass exactly the `args` its input_schema declares.",
-  "NOT FOR: anything a dedicated talonic_* tool already does (prefer those — they are shaped for you).",
+  "NOT FOR: answering a question about the documents (talonic_ask runs these tools server-side and returns one cited answer). Use this only for a query the user asked for, or when talonic_ask could not answer.",
   "",
   "ARGS: `name` (tool name), `args` (object matching the tool's input_schema), optional `document_ids` (hard scope for scope-aware tools).",
   "RETURNS: { tool, result (the tool's parsed output), citations?, artifacts?, cards? }. Denied capabilities come back as an error naming the capability required; the platform re-checks every call.",
@@ -246,11 +246,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_find_data",
     {
-      title: "Find Data by Concept",
+      title: "Find where data lives",
       description: FIND_DESCRIPTION,
       inputSchema: findDataInputSchema,
       annotations: {
-        title: "Find Data by Concept",
+        title: "Find where data lives",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -268,11 +268,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_list_agent_tools",
     {
-      title: "List Platform Agent Tools",
+      title: "List data tools",
       description: LIST_TOOLS_DESCRIPTION,
       inputSchema: listAgentToolsInputSchema,
       annotations: {
-        title: "List Platform Agent Tools",
+        title: "List data tools",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
@@ -285,11 +285,11 @@ export function registerAgentRegistryTools(
   server.registerTool(
     "talonic_invoke_agent_tool",
     {
-      title: "Invoke Platform Agent Tool",
+      title: "Query workspace data",
       description: INVOKE_DESCRIPTION,
       inputSchema: invokeAgentToolInputSchema,
       annotations: {
-        title: "Invoke Platform Agent Tool",
+        title: "Query workspace data",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,

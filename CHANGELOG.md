@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Questions go to `talonic_ask`.** In claude.ai the model answered a simple question by exploring the workspace itself: accounts, the field registry (13,000+ mostly one-off candidate fields), specs, schemas, `workspace_overview`, then a chain of `query_data` SQL attempts, about 20 calls and over a minute. `talonic_ask` runs that same toolset server-side and returns one cited answer, but the model skipped it because it costs credits and the SQL route is free. The server instructions and `talonic_ask` now name it the default for any question about document contents; `talonic_invoke_agent_tool`, `talonic_list_agent_tools`, `talonic_list_fields`, `talonic_list_specs`, `talonic_list_schemas` and `talonic_list_accounts` say they are not a warm-up for answering one. `talonic_list_fields` tells the model to pass `maturity: core|proven`.
+- **Readable tool titles.** Claude shows each call as "Talonic: <title>"; titles drop the repeated "Talonic" and internal wording ("Invoke Platform Agent Tool" → "Query workspace data", "Poll a Spec run" → "Check run progress", …).
+- **Cards show the spinning Talonic mark while loading** (Ink's mark and loop; still under `prefers-reduced-motion`).
+
+## [0.1.97] - 2026-11-20
+
+### Changed
+
 - **Inline cards only for answers.** Once cards rendered in Claude (0.1.96), every tool call drew one, so a single question filled the chat with 20+ full-height cards of field lists, specs, schemas and raw SQL rows. Only ten tools now declare a card: `talonic_extract`, `talonic_ask`, `talonic_get_answer`, `talonic_get_run_results`, `talonic_request_upload`, `talonic_get_balance`, `talonic_get_usage`, `talonic_get_pricing`, `talonic_save_schema`, `talonic_create_account`. Lookups the model makes for itself show only the collapsed tool-call row. The run-results card shows 12 rows and 6 columns at most.
 
 ## [0.1.96] - 2026-11-20

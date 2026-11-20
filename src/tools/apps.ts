@@ -62,7 +62,7 @@ export function registerAppsTools(server: McpServer, getToken: () => string, bas
   server.registerTool(
     "talonic_list_apps",
     {
-      title: "List Apps",
+      title: "List apps",
       description: LIST_APPS_DESCRIPTION,
       inputSchema: {
         enabled_only: z
@@ -71,7 +71,7 @@ export function registerAppsTools(server: McpServer, getToken: () => string, bas
           .describe("Only enabled apps (default true). Pass false to include disabled ones."),
       },
       annotations: {
-        title: "List Apps",
+        title: "List apps",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

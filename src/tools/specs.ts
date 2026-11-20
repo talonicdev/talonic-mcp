@@ -15,7 +15,7 @@ const LIST_DESCRIPTION = [
   "List the workspace's Specs. A Spec is a saved extraction pipeline: an ordered list of processing steps plus the fields it produces; talonic_run_spec runs it over documents. Each row: id, name, description, schema_id (the schema the run's output rows follow — a DIFFERENT id from the Spec's), version / materialized_version (the published version runs use; null = never published), field_count, node_count, timestamps.",
   "",
   "USE WHEN: the user wants to run 'their pipeline' / 'the invoice Spec', or you need a spec_id for talonic_run_spec / talonic_get_spec.",
-  "NOT FOR: ad-hoc extraction schemas (talonic_list_schemas) or discovering fields (talonic_list_fields).",
+  "NOT FOR: ad-hoc extraction schemas (talonic_list_schemas) or discovering fields (talonic_list_fields). Not a warm-up before answering a question about the documents: call talonic_ask for that.",
   "ARGS: optional `search` (name contains, case-insensitive), `limit` (1–100, default 20), `cursor` (from pagination.next_cursor), `order` (asc|desc by updated_at).",
   "RETURNS: { data[] of { id, name, description, schema_id, version, materialized_version, materialized_at, field_count, node_count, created_at, updated_at, links }, pagination { total, limit, has_more, next_cursor } }.",
 ].join("\n")
@@ -111,10 +111,10 @@ export function registerSpecTools(
   server.registerTool(
     "talonic_list_specs",
     {
-      title: "List Specs",
+      title: "List pipelines",
       description: LIST_DESCRIPTION,
       inputSchema: listSpecsInputSchema,
-      annotations: { title: "List Specs", ...READ_ONLY },
+      annotations: { title: "List pipelines", ...READ_ONLY },
       _meta: widgetToolMeta("listSpecs"),
     },
     async (args) => handleListSpecs(getToken, baseUrl, args as ListSpecsArgs),
@@ -122,10 +122,10 @@ export function registerSpecTools(
   server.registerTool(
     "talonic_get_spec",
     {
-      title: "Get a Spec's structure",
+      title: "Look up a pipeline",
       description: GET_DESCRIPTION,
       inputSchema: getSpecInputSchema,
-      annotations: { title: "Get a Spec's structure", ...READ_ONLY },
+      annotations: { title: "Look up a pipeline", ...READ_ONLY },
       _meta: widgetToolMeta("getSpec"),
     },
     async (args) => handleGetSpec(getToken, baseUrl, args as GetSpecArgs),
