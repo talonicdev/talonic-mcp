@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Security
+
+- Runtime dependencies patched (`npm audit --omit=dev`: 9 advisories → 0, one critical). Minimum versions raised to `@modelcontextprotocol/sdk` ^1.32.2 and `zod` ^4.6.7 so installs never resolve the vulnerable ranges; transitive fixes (`proxy-addr`, `body-parser`, `fast-uri`, `hono`, `qs`, …) come through the lockfile. Dev-only `vitest` advisories need a major upgrade and stay open.
+
+### Fixed
+
+- The repo no longer tracks a `node_modules` symlink committed by mistake in 0.1.96; `.gitignore` ignores the path whether it is a directory or a link.
+
+## [0.1.98] - 2026-11-21
+
 ### Changed
 
 - **Questions go to `talonic_ask`.** In claude.ai the model answered a simple question by exploring the workspace itself: accounts, the field registry (13,000+ mostly one-off candidate fields), specs, schemas, `workspace_overview`, then a chain of `query_data` SQL attempts, about 20 calls and over a minute. `talonic_ask` runs that same toolset server-side and returns one cited answer, but the model skipped it because it costs credits and the SQL route is free. The server instructions and `talonic_ask` now name it the default for any question about document contents; `talonic_invoke_agent_tool`, `talonic_list_agent_tools`, `talonic_list_fields`, `talonic_list_specs`, `talonic_list_schemas` and `talonic_list_accounts` say they are not a warm-up for answering one. `talonic_list_fields` tells the model to pass `maturity: core|proven`.
