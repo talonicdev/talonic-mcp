@@ -61,7 +61,9 @@ describe("every widget resource is registered correctly", () => {
     // Submission metadata: unique domain + CSP, modern keys + OpenAI aliases,
     // model-facing description, bordered card.
     const meta = item._meta
-    expect(meta.ui?.domain).toBe("https://talonic.com")
+    // No ui.domain: Claude rejects any value that is not the hash of the
+    // connector URL, and shows an error instead of the card.
+    expect(meta.ui?.domain).toBeUndefined()
     expect(meta.ui?.csp?.connectDomains).toEqual([])
     expect(meta["openai/widgetDomain"]).toBe("https://talonic.com")
     expect(meta["openai/widgetCSP"]?.connect_domains).toEqual([])

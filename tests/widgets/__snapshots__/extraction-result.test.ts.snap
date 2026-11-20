@@ -6,6 +6,7 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
 <title>Talonic — Extraction Result</title>
 <style>
 
@@ -15,11 +16,16 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
     --chip: #f3f4f6;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #0f1115; --fg: #f3f4f6; --muted: #9ca3af; --border: #1f2937;
       --chip: #1f2937;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --fg: #f3f4f6; --muted: #9ca3af; --border: #1f2937;
+    --chip: #1f2937;
+  }
+  :root[data-host="mcp-apps"] { --bg: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
     font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
   .root { padding: 20px; box-sizing: border-box; }
@@ -85,7 +91,7 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
 </style>
 </head>
 <body>
-<div id="root" class="root"><div class="empty">Waiting for result…</div></div>
+<div id="root" class="root"><div class="empty">Loading…</div></div>
 <script>
 (function () {
 
@@ -263,29 +269,111 @@ exports[`getExtractionResultWidgetHtml > matches snapshot (catches unintended la
 
   }
 
-  function payloadFromHost() {
-    return (window.openai && window.openai.toolOutput) || null;
-  }
-  function renderFromHost() {
-    var p = payloadFromHost();
+  var lastPayload = null;
+  function show(p) {
     if (!p) return;
+    lastPayload = p;
     try { render(p); } catch (e) { empty("Could not render this result."); }
+    reportSize();
   }
-  renderFromHost();
+
+  // ── ChatGPT Apps SDK channel ──
+  function renderFromOpenAI() {
+    var p = window.openai && window.openai.toolOutput;
+    if (p && p !== lastPayload) show(p);
+  }
+  renderFromOpenAI();
   window.addEventListener("openai:set_globals", function (event) {
     var globals = event && event.detail && event.detail.globals;
     var output = globals && globals.toolOutput;
     if (output) { window.openai = window.openai || {}; window.openai.toolOutput = output; }
-    renderFromHost();
+    renderFromOpenAI();
   }, { passive: true });
+
+  // ── MCP Apps channel (Claude, and any spec host) ──
+  // The host sends nothing until the view has sent ui/initialize and then
+  // ui/notifications/initialized. After that it delivers tool-input and
+  // tool-result, and expects size-changed for the iframe height.
+  var hasParent = window.parent && window.parent !== window;
+  var initId = "talonic-init-" + Math.random().toString(36).slice(2);
+  var initialized = false;
+  var lastHeight = -1;
+  function post(msg) { if (hasParent) window.parent.postMessage(msg, "*"); }
+  function applyHostContext(ctx) {
+    if (!ctx || typeof ctx !== "object") return;
+    var el = document.documentElement;
+    if (ctx.theme === "dark" || ctx.theme === "light") {
+      el.setAttribute("data-theme", ctx.theme);
+      el.style.colorScheme = ctx.theme;
+    }
+  }
+  function reportSize() {
+    if (!initialized) return;
+    var h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+    if (h === lastHeight) return;
+    lastHeight = h;
+    var w = Math.ceil(document.documentElement.getBoundingClientRect().width);
+    post({ jsonrpc: "2.0", method: "ui/notifications/size-changed", params: { width: w, height: h } });
+  }
+  function payloadFromToolResult(params) {
+    if (!params) return null;
+    if (params.structuredContent && typeof params.structuredContent === "object") return params.structuredContent;
+    var c = params.content;
+    if (Array.isArray(c)) {
+      for (var i = 0; i < c.length; i++) {
+        if (c[i] && c[i].type === "text") {
+          try { var v = JSON.parse(c[i].text); if (v && typeof v === "object") return v; } catch (e) {}
+        }
+      }
+    }
+    return null;
+  }
   window.addEventListener("message", function (event) {
     if (event.source !== window.parent) return;
     var msg = event.data;
     if (!msg || msg.jsonrpc !== "2.0") return;
-    if (!msg || msg.method !== "ui/notifications/tool-result") return;
-    var sc = msg.params && msg.params.structuredContent;
-    if (sc) { window.openai = window.openai || {}; window.openai.toolOutput = sc; renderFromHost(); }
+    if (msg.id === initId && !msg.method) {
+      if (msg.result) applyHostContext(msg.result.hostContext);
+      if (!initialized) {
+        initialized = true;
+        document.documentElement.setAttribute("data-host", "mcp-apps");
+        post({ jsonrpc: "2.0", method: "ui/notifications/initialized", params: {} });
+        reportSize();
+      }
+      return;
+    }
+    if (msg.method === "ui/notifications/tool-result") {
+      if (msg.params && msg.params.isError) {
+        var t = Array.isArray(msg.params.content) && msg.params.content[0] && msg.params.content[0].text;
+        empty(t ? String(t).slice(0, 300) : "The tool returned an error.");
+        reportSize();
+        return;
+      }
+      show(payloadFromToolResult(msg.params));
+      return;
+    }
+    if (msg.method === "ui/notifications/tool-cancelled") { empty("Cancelled."); reportSize(); return; }
+    if (msg.method === "ui/notifications/host-context-changed") { applyHostContext(msg.params); return; }
+    if (msg.method && msg.id != null) {
+      // Host request (ui/resource-teardown, ping, …): acknowledge.
+      post({ jsonrpc: "2.0", id: msg.id, result: {} });
+    }
   });
+  if (typeof ResizeObserver === "function") {
+    new ResizeObserver(function () { reportSize(); }).observe(document.documentElement);
+  }
+  if (hasParent && !(window.openai && window.openai.toolOutput)) {
+    post({
+      jsonrpc: "2.0",
+      id: initId,
+      method: "ui/initialize",
+      params: {
+        protocolVersion: "2026-01-26",
+        appInfo: { name: document.title || "talonic-widget", version: "1" },
+        appCapabilities: {},
+      },
+    });
+  }
 
 })();
 </script>

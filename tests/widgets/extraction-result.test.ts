@@ -111,7 +111,9 @@ describe("registerExtractionResultWidget", () => {
     // A unique HTTPS origin is required to submit the app. ChatGPT renders the
     // widget under <domain>.web-sandbox.oaiusercontent.com for iframe isolation.
     // Standard key + OpenAI alias, both a full https origin.
-    expect(meta.ui?.domain).toBe("https://talonic.com")
+    // ChatGPT-only key. The MCP Apps `ui.domain` must stay unset: Claude
+    // validates it against a hash of the connector URL and errors otherwise.
+    expect(meta.ui?.domain).toBeUndefined()
     expect(meta["openai/widgetDomain"]).toBe("https://talonic.com")
   })
 })
