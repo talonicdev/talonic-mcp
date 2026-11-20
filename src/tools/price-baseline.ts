@@ -610,7 +610,11 @@ const ANSWER_DESCRIPTION = [
 
 export const answerInputSchema = {
   model_id: modelIdArg,
-  action: z.enum(["enter_contract_value", "choose_source"]),
+  action: z
+    .enum(["enter_contract_value", "choose_source"])
+    .describe(
+      "enter_contract_value: type in the value with its quote; choose_source: record where it will come from.",
+    ),
   variable: z
     .string()
     .min(1)
@@ -720,31 +724,54 @@ const ASSUME_DESCRIPTION = [
 ].join("\n")
 
 export const assumeInputSchema = {
-  action: z.enum(["create", "replace", "withdraw"]),
+  action: z
+    .enum(["create", "replace", "withdraw"])
+    .describe(
+      "create a new assumption, replace one (assumption_id), or withdraw one (assumption_id).",
+    ),
   assumption_id: zUuid().optional().describe("Assumption to replace or withdraw."),
   scope: z
     .enum(["contract", "workspace"])
     .optional()
     .describe("One contract (needs `contract_key`) or every contract of the workspace."),
   contract_key: z.string().min(1).max(64).optional().describe("Contract key (scope: contract)."),
-  target_kind: z.enum(["series", "variable", "quantity", "profile"]).optional(),
+  target_kind: z
+    .enum(["series", "variable", "quantity", "profile"])
+    .optional()
+    .describe(
+      "What is assumed: an index series, a contract variable, a quantity, or a load profile. Copy from the open input's assume_target.",
+    ),
   target: z
     .string()
     .min(1)
     .max(120)
     .optional()
     .describe("Series key or variable name; `*` = every series."),
-  rule: z.enum(["value", "carry_forward", "proxy"]).optional(),
+  rule: z
+    .enum(["value", "carry_forward", "proxy"])
+    .optional()
+    .describe(
+      "value = `value`; carry_forward = the series' last real value; proxy = params.series × params.factor.",
+    ),
   value: z.number().optional().describe("The assumed number (rule: value)."),
-  unit: z.string().max(40).optional(),
+  unit: z.string().max(40).optional().describe("Unit of `value`, e.g. 'EUR/MWh'."),
   params: z
     .object({
       series: z.string().min(1).max(120).optional().describe("Source series (proxy, profile)."),
       factor: z.number().optional().describe("Multiplier on the source series (proxy)."),
     })
-    .optional(),
-  period_from: z.string().regex(INDEX_PERIOD_RE).optional(),
-  period_to: z.string().regex(INDEX_PERIOD_RE).optional(),
+    .optional()
+    .describe("Proxy/profile parameters: the source series and its factor."),
+  period_from: z
+    .string()
+    .regex(INDEX_PERIOD_RE)
+    .optional()
+    .describe("First period it applies to: YYYY, YYYY-MM, YYYY-Qn or YYYY-Hn. Omit = open start."),
+  period_to: z
+    .string()
+    .regex(INDEX_PERIOD_RE)
+    .optional()
+    .describe("Last period it applies to, same format. Omit = open-ended."),
   note: z.string().min(1).max(2000).optional().describe("Why this assumption is made (required)."),
 }
 
@@ -878,7 +905,10 @@ const IMPORTS_DESCRIPTION = [
 ].join("\n")
 
 export const importsInputSchema = {
-  view: z.enum(["candidates", "status"]).optional(),
+  view: z
+    .enum(["candidates", "status"])
+    .optional()
+    .describe("candidates (default): documents to import; status: the import queue."),
   query: z.string().optional().describe("Filename contains match (candidates)."),
 }
 

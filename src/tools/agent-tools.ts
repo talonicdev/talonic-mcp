@@ -57,12 +57,12 @@ const FIND_DESCRIPTION = [
   "NOT FOR: reading a known field's values (talonic_field_values) or filtering by a known field (talonic_filter).",
   "",
   "ARGS: `query` (the concept, in the user's words), optional `top_k` (1–25, default 10), `document_ids` (hard scope).",
-  "RETURNS: ranked planes — FIELDS (canonical_name, field ids/keys, maturity/tier, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item a ready handle for the next call. Read-only, no LLM cost.",
+  "RETURNS: four ranked groups — FIELDS (canonical_name, field ids/keys, maturity/tier, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item a ready handle for the next call. Read-only, no LLM cost.",
 ].join("\n")
 
 export const findDataInputSchema = {
   query: z.string().min(1).describe("The natural-language concept to locate."),
-  top_k: z.number().int().min(1).max(25).optional().describe("Max results per plane (default 10)."),
+  top_k: z.number().int().min(1).max(25).optional().describe("Max results per group (default 10)."),
   document_ids: documentIdsArg,
 }
 

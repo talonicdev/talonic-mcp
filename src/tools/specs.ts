@@ -12,7 +12,7 @@ import { widgetToolMeta } from "../widgets/types.js"
  */
 
 const LIST_DESCRIPTION = [
-  "List the workspace's Specs — the configured pipelines (rail + fields) that talonic_run_spec executes. Each row: id, name, description, schema_id (the schema a run materializes onto — a DIFFERENT id from the Spec's), version / materialized_version (null = never published), field_count, node_count, timestamps.",
+  "List the workspace's Specs. A Spec is a saved extraction pipeline: an ordered list of processing steps plus the fields it produces; talonic_run_spec runs it over documents. Each row: id, name, description, schema_id (the schema the run's output rows follow — a DIFFERENT id from the Spec's), version / materialized_version (the published version runs use; null = never published), field_count, node_count, timestamps.",
   "",
   "USE WHEN: the user wants to run 'their pipeline' / 'the invoice Spec', or you need a spec_id for talonic_run_spec / talonic_get_spec.",
   "NOT FOR: ad-hoc extraction schemas (talonic_list_schemas) or discovering fields (talonic_list_fields).",
@@ -21,7 +21,7 @@ const LIST_DESCRIPTION = [
 ].join("\n")
 
 const GET_DESCRIPTION = [
-  "Get one Spec's structure: identity and version state, the schema it materializes onto, `nodes[]` (the rail as authored, in editing order) and `phases[]` (the compiled execution plan, in run order — a validation checkpoint expands to one phase per gate, so the two lists differ on purpose), and `fields[]` (Spec field ↔ schema field).",
+  "Get one Spec's structure: identity and version state, the schema its output rows follow, `nodes[]` (the processing steps as the user configured them, in editing order), `phases[]` (the steps as they actually run, in run order; one configured validation step can run as several phases, so the two lists can differ), and `fields[]` (Spec field ↔ schema field).",
   "",
   "USE WHEN: you need to explain what a run will do, confirm a Spec is published (`version` non-null) before talonic_run_spec, or map field names to keys.",
   "NOT FOR: listing Specs (talonic_list_specs) or starting a run (talonic_run_spec).",

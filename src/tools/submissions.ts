@@ -68,8 +68,8 @@ const LIST_DESCRIPTION = [
 export const listInputSchema = {
   spec_id: specId.optional(),
   q: z.string().optional().describe("File name contains."),
-  limit: z.number().int().min(1).max(500).optional(),
-  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(500).optional().describe("Rows per page, 1 to 500."),
+  offset: z.number().int().min(0).optional().describe("Rows to skip (pagination)."),
 }
 
 /** @internal */
@@ -114,13 +114,26 @@ const PROCESS_DESCRIPTION = [
 
 export const processInputSchema = {
   spec_id: specId.optional(),
-  document_ids: z.array(zUuid()).max(200).optional(),
-  only: z.enum(["not_captured", "not_mapped", "all"]).optional(),
+  document_ids: z
+    .array(zUuid())
+    .max(200)
+    .optional()
+    .describe("Only these documents (ids from talonic_submissions_list)."),
+  only: z
+    .enum(["not_captured", "not_mapped", "all"])
+    .optional()
+    .describe("Which submissions: not yet captured, captured but not mapped, or all (default)."),
   recapture: z
     .boolean()
     .optional()
     .describe("Capture again even when already captured; earlier facts are replaced."),
-  limit: z.number().int().min(1).max(200).optional(),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .describe("Most documents to process (default 50)."),
   dry_run: z.boolean().optional().describe("List what would run; nothing runs."),
 }
 
@@ -259,8 +272,8 @@ export const factsInputSchema = {
     .record(z.string(), z.string())
     .optional()
     .describe("Field values every fact must carry."),
-  limit: z.number().int().min(1).max(1000).optional(),
-  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(1000).optional().describe("Rows per page, 1 to 1000."),
+  offset: z.number().int().min(0).optional().describe("Rows to skip (pagination)."),
 }
 
 /** @internal */

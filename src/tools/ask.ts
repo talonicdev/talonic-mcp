@@ -20,7 +20,7 @@ export const ASK_MAX_WAIT_S = 55
 const POLL_HINT = "still processing — call talonic_get_answer with this ask_id in a few seconds"
 
 const ASK_DESCRIPTION = [
-  "Ask a natural-language question over the workspace's documents and get a cited, verified answer (markdown). The Talonic agent plans over the structured field plane, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. Consumes credits.",
+  "Ask a natural-language question over the workspace's documents and get a cited, verified answer (markdown). The Talonic agent plans over the workspace's extracted fields, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. Consumes credits.",
   "",
   "USE WHEN: the user asks an open question about their documents ('which vendors invoiced us twice in May?'), wants a summary across documents, or the answer needs reasoning over several fields.",
   "NOT FOR: reading a known field's values (talonic_field_values, free) or filtering documents by a known value (talonic_filter, free); locating which field holds a concept (talonic_find_data).",
@@ -40,10 +40,14 @@ const GET_ANSWER_DESCRIPTION = [
 const uuid = zUuid()
 const scopeSchema = z
   .object({
-    document_ids: z.array(uuid).max(500).optional(),
-    schema_id: uuid.optional(),
-    pipeline_id: uuid.optional(),
-    data_product_id: uuid.optional(),
+    document_ids: z.array(uuid).max(500).optional().describe("Only these documents."),
+    schema_id: uuid.optional().describe("Only documents extracted with this schema."),
+    pipeline_id: uuid.optional().describe("Only documents of this pipeline run."),
+    data_product_id: uuid
+      .optional()
+      .describe(
+        "Only documents of this data product (a curated document collection; rarely needed).",
+      ),
     document_type: z.string().min(1).optional(),
     source_id: uuid.optional(),
     tags: z.array(z.string().min(1)).max(50).optional(),

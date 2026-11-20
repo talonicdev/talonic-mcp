@@ -167,13 +167,13 @@ export async function handleGetField(
 // ── talonic_field_values ────────────────────────────────────────────────────
 
 const VALUES_DESCRIPTION = [
-  "Read a field's CURRENT VALUES across documents, with provenance — one row per bound occurrence: document id + filename + type, the value, confidence, the raw name it was captured under, the verbatim source text, and the resolution band that bound it.",
+  "Read a field's CURRENT VALUES across documents, with provenance — one row per bound occurrence: document id + filename + type, the value, confidence, the raw name it was captured under, the verbatim source text, and how confidently the raw name was matched to this concept (`resolved_by`).",
   "",
   "USE WHEN: the user asks 'what are all the X across my documents', you need to tabulate or aggregate one concept across the corpus, or you want the evidence (source text + document) behind a value.",
   "NOT FOR: multi-field row-shaped queries over documents (talonic_filter) or one document's full field set (talonic_get_document).",
   "",
   "ARGS: exactly one of `field_id` or `name`; optional `document_id` (one document), `value` (case-insensitive contains filter), `limit` (max 100), `cursor`.",
-  "RETURNS: { field_id, canonical_name, concept_ids, data[] of { occurrence_id, document_id, document_filename, value, confidence, provenance{ raw_field_name, source_text, resolved_by, needs_confirmation, via_redirect }, links }, pagination }. Rows are Sources-IAM filtered for the caller.",
+  "RETURNS: { field_id, canonical_name, concept_ids, data[] of { occurrence_id, document_id, document_filename, value, confidence, provenance{ raw_field_name, source_text, resolved_by, needs_confirmation, via_redirect }, links }, pagination }. Only rows from documents the caller may see are returned.",
 ].join("\n")
 
 export const fieldValuesInputSchema = {

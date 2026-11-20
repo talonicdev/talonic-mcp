@@ -277,17 +277,21 @@ export const partyInputSchema = {
     .describe("Name as printed; required to create."),
   salutation: z.enum(SALUTATIONS).nullable().optional().describe("Salutation; null clears it."),
   title: nullableText(60).describe("Academic title, e.g. 'Dr.'."),
-  first_name: nullableText(120),
-  last_name: nullableText(120),
-  company_name: nullableText(300),
+  first_name: nullableText(120).describe("Given name (persons); null clears it."),
+  last_name: nullableText(120).describe("Family name (persons); null clears it."),
+  company_name: nullableText(300).describe("Registered company name (companies)."),
   legal_form: nullableText(60).describe("e.g. GmbH, AG, KG."),
   street: nullableText(200).describe("Street and house number."),
-  postcode: nullableText(12),
-  town: nullableText(120),
-  country: nullableText(60),
-  email: z.string().email().nullable().optional(),
-  phone: nullableText(60),
-  preferred_channel: z.enum(["post", "email"]).nullable().optional(),
+  postcode: nullableText(12).describe("Postal code."),
+  town: nullableText(120).describe("Town or city."),
+  country: nullableText(60).describe("Country, e.g. 'DE' or 'Germany'."),
+  email: z.string().email().nullable().optional().describe("Email address; null clears it."),
+  phone: nullableText(60).describe("Phone number."),
+  preferred_channel: z
+    .enum(["post", "email"])
+    .nullable()
+    .optional()
+    .describe("How letters to this party are sent."),
   external_refs: z
     .record(z.string(), z.string())
     .optional()

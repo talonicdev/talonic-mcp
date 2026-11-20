@@ -189,12 +189,12 @@ export function handleUpcoming(
 }
 
 const PROCESSES_DESCRIPTION = [
-  "Open processes the contract data starts for people across contracts, from the captured Spec fields, the ERP contract register (Dynamics ku_* columns), document types and Money Found: sales (price fixing 3 months before commissioning, the notice window as the ERP keeps it, missing sales opportunity, tacit renewals to reprice, lost to competition), billing (billing held until commissioning, ERP record after signing, run-out phase, CPI adjustment, rent due), legal (land-register entry, termination received, breach, change of control, consumer law), operations (overdue supply start, missing commissioning protocol, SLAs, fuels, warranties), property (the easement DBK chain, security rights target vs actual), contract_management (signing workflow backlog: drafts, originals, documents, owner missing), procurement (subcontracts, purchase-side notice, upstream supplier), controlling (severance, asset transfer, tax and levy clauses, intercompany). Each item names its department, phase, kind (deadline / event / ingest / backlog), due date (null when the data names none yet), days_left (negative = overdue) and the fields it rests on. Items marked handled are left out.",
+  "Open processes the contract data asks people to start, across all contracts, grouped by department: sales (price fixing before commissioning, notice windows, renewals to reprice), billing (billing start, index/CPI adjustments, rent due), legal (terminations received, breaches, change of control, register entries), operations (overdue supply start, missing commissioning protocol, SLAs, warranties), property (easements, security rights), contract_management (unsigned drafts, missing originals or owners), procurement (subcontracts, purchase-side notice) and controlling (asset transfer, tax and levy clauses, intercompany). Which processes exist is configured per workspace; each comes from the contract's extracted terms, the workspace's contract register (when one is connected) and document types. Each item names its department, phase, kind (deadline / event / ingest / backlog), due date (null when the data names none yet), days_left (negative = overdue) and the fields it rests on. Items marked handled are left out.",
   "USE WHEN: what a department has to start now; preparing a sales, billing, legal or operations worklist from contract data; a digest or ticket export.",
   "NOT FOR: dates only (talonic_contracts_upcoming); one contract's processes (talonic_contracts_contract, `processes[]`).",
   "",
   "ARGS: `department` (sales | billing | legal | operations | property | contract_management | procurement | controlling), `days` (horizon for dated items, default the workspace's process horizon, 180), `contract_id`.",
-  "RETURNS: data[] { id, contract_id, contract_key, title, counterparty, rule_id, department, phase, kind, due_date, days_left, evidence[] { field, value, document_id } }.",
+  "RETURNS: data[] { id, contract_id, contract_key, title, counterparty, rule_id, department, phase, kind, due_date, days_left, evidence[] { field, value, document_id } }. Mark one done with talonic_contracts_process.",
 ].join("\n")
 
 const DEPARTMENTS = [
@@ -237,9 +237,9 @@ const PROCESS_DESCRIPTION = [
 ].join("\n")
 
 export const processInputSchema = {
-  process_id: zUuid(),
-  handled: z.boolean(),
-  note: z.string().max(2000).optional(),
+  process_id: zUuid().describe("Process item id (data[].id from talonic_contracts_processes)."),
+  handled: z.boolean().describe("true = the process ran; false = open it again."),
+  note: z.string().max(2000).optional().describe("What was done, e.g. 'price agreed 2026-03-02'."),
 }
 
 /** @internal */
@@ -486,12 +486,14 @@ const DECIDE_DESCRIPTION = [
 
 export const decideInputSchema = {
   contract_id: contractIdArg,
-  state: z.enum(DECISIONS),
+  state: z
+    .enum(DECISIONS)
+    .describe("The decision. 'active' withdraws an earlier decision on this contract."),
   note: z
     .string()
     .max(2000)
     .optional()
-    .describe("Source of the decision, e.g. 'Kündigungsschreiben vom 12.01.2026'."),
+    .describe("Where the decision comes from, e.g. 'termination letter dated 2026-01-12'."),
 }
 
 /** @internal */
@@ -517,9 +519,13 @@ const KEY_DATE_DESCRIPTION = [
 ].join("\n")
 
 export const keyDateInputSchema = {
-  key_date_id: zUuid(),
-  handled: z.boolean(),
-  note: z.string().max(2000).optional(),
+  key_date_id: zUuid().describe(
+    "Key date id (key_dates[].id from talonic_contracts_contract, or id from talonic_contracts_upcoming).",
+  ),
+  handled: z
+    .boolean()
+    .describe("true = dealt with (leaves the upcoming list); false = open again."),
+  note: z.string().max(2000).optional().describe("What was done about the date."),
 }
 
 /** @internal */
@@ -547,8 +553,12 @@ const SET_TERM_DESCRIPTION = [
 export const setTermInputSchema = {
   contract_id: contractIdArg,
   document_row_id: rowIdArg,
-  field: z.enum(TERMS),
-  value: z.union([z.string(), z.number(), z.boolean()]),
+  field: z.enum(TERMS).describe("The contract term to set."),
+  value: z
+    .union([z.string(), z.number(), z.boolean()])
+    .describe(
+      "The term's value: ISO date (YYYY-MM-DD) for dates, a fraction for escalation_pct (0.025 = 2.5%), a number of months for *_months fields.",
+    ),
   quote: z.string().min(3).max(2000).describe("Copied character for character from the document."),
 }
 

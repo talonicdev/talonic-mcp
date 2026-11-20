@@ -589,8 +589,20 @@ const PROFILE_DESCRIPTION = [
   "RETURNS: { name, kuerzel, titel, bereich, unterschrift }.",
 ].join("\n")
 
+/** The API's field names are German (the templates' placeholders); say what each holds. */
+const PROFILE_KEY_DESCRIPTIONS: Record<ProfileKey, string> = {
+  name: "The writer's full name.",
+  kuerzel: "The writer's initials (German 'Kürzel'), e.g. 'NA'.",
+  titel: "The writer's job title (German 'Titel').",
+  bereich: "The writer's department (German 'Bereich').",
+  unterschrift: "The signature line printed under letters (German 'Unterschrift').",
+}
+
 export const profileInputSchema = Object.fromEntries(
-  PROFILE_KEYS.map((k) => [k, z.string().max(200).optional()]),
+  PROFILE_KEYS.map((k) => [
+    k,
+    z.string().max(200).optional().describe(PROFILE_KEY_DESCRIPTIONS[k]),
+  ]),
 ) as Record<ProfileKey, z.ZodOptional<z.ZodString>>
 
 /** @internal */
