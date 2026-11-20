@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool } from "./_http.js"
-import type { ToolResult } from "./_shared.js"
+import { zUuid, type ToolResult } from "./_shared.js"
 
 /**
  * AP tools: the Accounts Payable app. Supplier invoices the workspace already
@@ -222,7 +222,7 @@ const RUNS_DESCRIPTION = [
 ].join("\n")
 
 export const runsInputSchema = {
-  run_id: z.string().uuid().optional().describe("One run (from the list)."),
+  run_id: zUuid().optional().describe("One run (from the list)."),
 }
 
 /** @internal */

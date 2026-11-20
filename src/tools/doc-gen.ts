@@ -3,7 +3,7 @@ import { basename } from "node:path"
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiBinary, apiJson, buildUrl, runTool, sleep as defaultSleep } from "./_http.js"
-import { toolError, validationError, type ToolResult } from "./_shared.js"
+import { toolError, validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Document Generation tools: the Doc Gen app. Word templates (letters and
@@ -55,12 +55,11 @@ export interface DocGenDeps {
   now?: () => number
 }
 
-const templateIdArg = z
-  .string()
-  .uuid()
-  .describe("Template id (from talonic_doc_gen_templates or talonic_doc_gen_issues).")
-const productIdArg = z.string().uuid().describe("Data product id (from talonic_doc_gen_products).")
-const jobIdArg = z.string().uuid().describe("Batch id (from talonic_doc_gen_jobs or _generate).")
+const templateIdArg = zUuid().describe(
+  "Template id (from talonic_doc_gen_templates or talonic_doc_gen_issues).",
+)
+const productIdArg = zUuid().describe("Data product id (from talonic_doc_gen_products).")
+const jobIdArg = zUuid().describe("Batch id (from talonic_doc_gen_jobs or _generate).")
 const valuesArg = z
   .record(z.string(), z.string())
   .describe(
@@ -193,9 +192,7 @@ export const updateTemplateInputSchema = {
   name: z.string().min(1).max(300).optional().describe("New template name."),
   group: z.string().max(200).nullable().optional().describe("Group; null clears it."),
   kind: z.enum(["letter", "agreement"]).nullable().optional().describe("Letter or agreement."),
-  pair_template_id: z
-    .string()
-    .uuid()
+  pair_template_id: zUuid()
     .nullable()
     .optional()
     .describe("The companion template generated with this one (with_pair); null unpairs."),
@@ -323,11 +320,7 @@ export const proposeInputSchema = {
     .max(PROPOSE_MAX_WAIT_S)
     .optional()
     .describe(`One template: seconds to wait for the proposal (0-${PROPOSE_MAX_WAIT_S}).`),
-  template_ids: z
-    .array(z.string().uuid())
-    .max(200)
-    .optional()
-    .describe("Bulk: only these templates."),
+  template_ids: z.array(zUuid()).max(200).optional().describe("Bulk: only these templates."),
   only_unproposed: z
     .boolean()
     .optional()
@@ -632,7 +625,7 @@ const batchSchema = {
     .optional()
     .describe("The template to fill (with_pair adds its companion). Or template_ids."),
   template_ids: z
-    .array(z.string().uuid())
+    .array(zUuid())
     .min(1)
     .max(10)
     .optional()
@@ -649,7 +642,7 @@ const batchSchema = {
     .array(
       z.object({
         record_id: z.string().min(1).max(200),
-        template_id: z.string().uuid().optional().describe("Only this template's document."),
+        template_id: zUuid().optional().describe("Only this template's document."),
         values: valuesArg,
       }),
     )
@@ -864,7 +857,7 @@ const FILE_DESCRIPTION = [
 
 export const fileInputSchema = {
   job_id: jobIdArg,
-  document_id: z.string().uuid().describe("documents[].id of the batch (talonic_doc_gen_jobs)."),
+  document_id: zUuid().describe("documents[].id of the batch (talonic_doc_gen_jobs)."),
   kind: z.enum(["docx", "pdf"]).optional().describe("Word file or PDF (default docx)."),
 }
 

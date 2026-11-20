@@ -87,6 +87,14 @@ describe("agent registry wrappers", () => {
       tools: [
         {
           name: "find_data",
+          description: "has its own talonic_find_data tool",
+          impact: "read",
+          capability: "data.read",
+          can_invoke: true,
+          input_schema: { type: "object" },
+        },
+        {
+          name: "query_data",
           description: "d1",
           impact: "read",
           capability: "data.read",
@@ -102,8 +110,8 @@ describe("agent registry wrappers", () => {
           input_schema: { type: "object" },
         },
       ],
-      totalCount: 2,
-      invocable_count: 1,
+      totalCount: 3,
+      invocable_count: 2,
     }
 
     it("hides non-invocable tools by default and keeps schemas", async () => {
@@ -111,7 +119,8 @@ describe("agent registry wrappers", () => {
       const body = parsed(
         await handleListAgentTools(getToken, "https://staging.api.talonic.com", {}),
       )
-      expect(body.tools.map((t: any) => t.name)).toEqual(["find_data"])
+      // find_data is hidden: it has its own dedicated tool.
+      expect(body.tools.map((t: any) => t.name)).toEqual(["query_data"])
       expect(body.tools[0].input_schema).toEqual({ type: "object" })
       expect(body).toMatchObject({ invocable_count: 1, totalCount: 2 })
       expect(calls[0].url).toBe("https://staging.api.talonic.com/v1/agent/tools")

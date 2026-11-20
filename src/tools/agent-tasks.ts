@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
-import { apiHttpError, jsonOk, toolError, type ToolResult } from "./_shared.js"
+import { apiHttpError, jsonOk, toolError, type ToolResult, zUuid } from "./_shared.js"
 import { resolveFetch } from "./_http.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
@@ -17,7 +17,7 @@ import { widgetToolMeta } from "../widgets/types.js"
 const DEFAULT_BASE = "https://api.talonic.com"
 const TASK_STATUSES = ["available", "claimed", "submitted", "timed_out", "cancelled"] as const
 
-const taskId = z.string().uuid().describe("Agent task UUID.")
+const taskId = zUuid().describe("Agent task UUID.")
 const executionEpoch = z
   .number()
   .int()
@@ -49,9 +49,7 @@ const outputValue = z.object({
     .describe(
       "Verbatim evidence for a changed value, copied from document_id. Required when the task's autonomy sets requireQuote; an unverified change is escalated, not written.",
     ),
-  document_id: z
-    .string()
-    .uuid()
+  document_id: zUuid()
     .optional()
     .describe("The contract document (anchor or candidate supplier) the quote comes from."),
 })
@@ -63,9 +61,7 @@ export const outputs = z
     "Output field key to { value, confidence?, reasoning?, escalate?, quote?, document_id? }. Use only declared fields.",
   )
 
-const pipelineId = z
-  .string()
-  .uuid()
+const pipelineId = zUuid()
   .optional()
   .describe("Optional pipeline (run) UUID: only that pipeline's tasks.")
 const listInput = { status, limit, cursor, pipeline_id: pipelineId }
@@ -82,10 +78,9 @@ const submitInput = {
     .describe("Optional result summary, up to 4,000 characters."),
 }
 
-const adminCustomerId = z
-  .string()
-  .uuid()
-  .describe("Explicit customer/workspace UUID. Payload calls never accept 'all'.")
+const adminCustomerId = zUuid().describe(
+  "Explicit customer/workspace UUID. Payload calls never accept 'all'.",
+)
 const adminReason = z
   .string()
   .min(1)
@@ -503,7 +498,7 @@ export function registerAdminAgentTaskTools(
         "INTERNAL: list Agent-task metadata across all tenants or one named tenant. NOT FOR payload data; use talonic_admin_get_agent_task with an explicit tenant, reason, and TOTP code.",
       inputSchema: {
         customer_id: z
-          .union([z.string().uuid(), z.literal("all")])
+          .union([zUuid(), z.literal("all")])
           .optional()
           .describe("Tenant UUID, or 'all' (default) for cross-tenant metadata."),
         ...listInput,

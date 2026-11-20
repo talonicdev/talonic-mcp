@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Contracts tools — fill and clean the Contracts app: one record per contract,
@@ -20,16 +20,12 @@ import { validationError, type ToolResult } from "./_shared.js"
  * talonic_contracts_update_document / _merge / _reread → talonic_contracts_issues again.
  */
 
-const contractIdArg = z
-  .string()
-  .uuid()
-  .describe("Contract id (from talonic_contracts_register or talonic_contracts_issues).")
-const rowIdArg = z
-  .string()
-  .uuid()
-  .describe(
-    "Document row id on the contract: `documents[].id` from talonic_contracts_contract (not the workspace document id).",
-  )
+const contractIdArg = zUuid().describe(
+  "Contract id (from talonic_contracts_register or talonic_contracts_issues).",
+)
+const rowIdArg = zUuid().describe(
+  "Document row id on the contract: `documents[].id` from talonic_contracts_contract (not the workspace document id).",
+)
 
 const readOnly = {
   readOnlyHint: true,
@@ -215,7 +211,7 @@ const DEPARTMENTS = [
 export const processesInputSchema = {
   department: z.enum(DEPARTMENTS).optional().describe("Only this department's items."),
   days: z.number().int().min(1).max(3650).optional().describe("Days ahead for dated items."),
-  contract_id: z.string().uuid().optional().describe("Only this contract's items."),
+  contract_id: zUuid().optional().describe("Only this contract's items."),
 }
 
 /** @internal */
@@ -241,7 +237,7 @@ const PROCESS_DESCRIPTION = [
 ].join("\n")
 
 export const processInputSchema = {
-  process_id: z.string().uuid(),
+  process_id: zUuid(),
   handled: z.boolean(),
   note: z.string().max(2000).optional(),
 }
@@ -314,7 +310,7 @@ const IMPORT_DESCRIPTION = [
 export const importInputSchema = {
   all: z.boolean().optional().describe("Queue every unread candidate (with the filters below)."),
   document_ids: z
-    .array(z.string().uuid())
+    .array(zUuid())
     .min(1)
     .max(500)
     .optional()
@@ -521,7 +517,7 @@ const KEY_DATE_DESCRIPTION = [
 ].join("\n")
 
 export const keyDateInputSchema = {
-  key_date_id: z.string().uuid(),
+  key_date_id: zUuid(),
   handled: z.boolean(),
   note: z.string().max(2000).optional(),
 }

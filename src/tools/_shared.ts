@@ -1,4 +1,22 @@
 import { TalonicError } from "@talonic/node"
+import { z } from "zod"
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * A UUID string argument. Validates like `z.string().uuid()`, but emits only
+ * `{ type: "string", format: "uuid" }` in tools/list: zod's `.uuid()` inlines
+ * a ~200-character regex into every id field, which repeated 33 times in the
+ * base tool list (126 times with all apps) for no benefit to the model.
+ *
+ * @internal
+ */
+export function zUuid() {
+  return z
+    .string()
+    .refine((v) => UUID_RE.test(v), { message: "must be a UUID" })
+    .meta({ format: "uuid" })
+}
 
 /**
  * Successful tool result envelope. The `content` array follows the MCP
@@ -104,7 +122,7 @@ export function jsonOk(value: unknown): ToolSuccessResult {
     content: [
       {
         type: "text",
-        text: JSON.stringify(value, null, 2),
+        text: modelText(value),
       },
     ],
   }
@@ -112,6 +130,31 @@ export function jsonOk(value: unknown): ToolSuccessResult {
     result["structuredContent"] = value as Record<string, unknown>
   }
   return result
+}
+
+/**
+ * Largest text payload handed to the model. Claude.ai moves a tool result
+ * past ~150k characters out of the conversation into a sandbox file (and
+ * the card then never hydrates); other clients truncate silently.
+ *
+ * @internal
+ */
+export const MAX_MODEL_TEXT_CHARS = 100_000
+
+/**
+ * The model-facing text: compact JSON (pretty-printing cost ~30% more
+ * tokens for nothing), cut at {@link MAX_MODEL_TEXT_CHARS} with a note that
+ * tells the model how to get the rest instead of letting a client drop it.
+ *
+ * @internal
+ */
+export function modelText(value: unknown): string {
+  const text = JSON.stringify(value) ?? "null"
+  if (text.length <= MAX_MODEL_TEXT_CHARS) return text
+  return (
+    text.slice(0, MAX_MODEL_TEXT_CHARS) +
+    `\n[Truncated: ${text.length - MAX_MODEL_TEXT_CHARS} more characters. Ask for less: use the tool's limit/cursor/page arguments or narrower filters.]`
+  )
 }
 
 /**

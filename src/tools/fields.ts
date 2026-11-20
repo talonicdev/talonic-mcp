@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, type QueryParams } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -22,9 +22,7 @@ const maturityArg = z
     "Filter by maturity: `core` (universal, fully trusted — safe to build on), `proven` (recurring, stable id), `candidate` (newly discovered, may still be merged or renamed).",
   )
 
-const fieldIdArg = z
-  .string()
-  .uuid()
+const fieldIdArg = zUuid()
   .optional()
   .describe("Field UUID (from talonic_list_fields / talonic_search).")
 const fieldNameArg = z
@@ -181,7 +179,7 @@ const VALUES_DESCRIPTION = [
 export const fieldValuesInputSchema = {
   field_id: fieldIdArg,
   name: fieldNameArg,
-  document_id: z.string().uuid().optional().describe("Only occurrences on this document."),
+  document_id: zUuid().optional().describe("Only occurrences on this document."),
   value: z.string().optional().describe("Case-insensitive contains filter on the value text."),
   limit: z.number().int().min(1).max(100).optional().describe("Page size (default 20, max 100)."),
   cursor: z.string().optional().describe("Opaque cursor from pagination.next_cursor."),

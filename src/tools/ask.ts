@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, sleep as defaultSleep } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -37,7 +37,7 @@ const GET_ANSWER_DESCRIPTION = [
   "RETURNS: the same answer envelope as talonic_ask (answer, citations[], verification, usage) or { status: 'processing', poll_hint }.",
 ].join("\n")
 
-const uuid = z.string().uuid()
+const uuid = zUuid()
 const scopeSchema = z
   .object({
     document_ids: z.array(uuid).max(500).optional(),

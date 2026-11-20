@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiForm, apiJson, runTool, type QueryParams } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -53,7 +53,7 @@ const RESULTS_DESCRIPTION = [
   "RETURNS: { run_kind, status, columns[] of { field_key, display_name, data_type }, data[] of { document_id, filename, record_id, status ('complete'|'partial'|'error'|'processing'), completed_at, fields { field_key: value }, cells?, provenance? }, pagination, pending_review_count, links }.",
 ].join("\n")
 
-const uuid = z.string().uuid()
+const uuid = zUuid()
 const documentIdsArg = z
   .array(uuid)
   .min(1)

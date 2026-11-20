@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool } from "./_http.js"
-import type { ToolResult } from "./_shared.js"
+import { zUuid, type ToolResult } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -43,7 +43,7 @@ function unwrap(res: InvokeResponse): Record<string, unknown> {
 }
 
 const documentIdsArg = z
-  .array(z.string().uuid())
+  .array(zUuid())
   .max(1000)
   .optional()
   .describe("Restrict to these document ids (hard filter, enforced server-side).")
@@ -99,6 +99,14 @@ export async function handleFindData(
 
 // ── talonic_list_agent_tools ────────────────────────────────────────────────
 
+/**
+ * Registry tools that already have a dedicated, shaped MCP tool. They are
+ * hidden from talonic_list_agent_tools so a model is never offered two ways
+ * to make the same call (talonic_find_data is literally
+ * POST /v1/agent/tools/find_data/invoke).
+ */
+const DEDICATED: ReadonlySet<string> = new Set(["find_data"])
+
 const LIST_TOOLS_DESCRIPTION = [
   "List the platform's agent tool registry — every retrieval, provenance and analysis primitive the in-product Talonic agent runs on (find_data, describe_data, query_data for read-only SQL over the extracted data, get_document_markdown, workspace_overview, …) with its input schema and whether THIS credential may invoke it.",
   "Target API: https://talonic.com/docs/api (GET /v1/agent/tools).",
@@ -107,7 +115,7 @@ const LIST_TOOLS_DESCRIPTION = [
   "NOT FOR: discovering fields (talonic_list_fields / talonic_find_data) or documents (talonic_search) — those are shaped for you.",
   "",
   "ARGS: `only_invocable` (default true — hide tools this credential cannot run), `include_schemas` (default true — include each tool's JSON input schema).",
-  "RETURNS: { tools[] of { name, description, impact, capability, can_invoke, input_schema? }, invocable_count, totalCount }.",
+  "RETURNS: { tools[] of { name, description, impact, capability, can_invoke, input_schema? }, invocable_count, totalCount }. Registry tools that already have their own talonic_* tool (find_data) are left out; call the dedicated tool.",
 ].join("\n")
 
 export const listAgentToolsInputSchema = {
@@ -149,7 +157,8 @@ export async function handleListAgentTools(
     }>(getToken, baseUrl, "GET", "/v1/agent/tools")
     const onlyInvocable = args.only_invocable ?? true
     const includeSchemas = args.include_schemas ?? true
-    const tools = (res.tools ?? [])
+    const registry = (res.tools ?? []).filter((t) => !DEDICATED.has(t.name))
+    const tools = registry
       .filter((t) => !onlyInvocable || t.can_invoke)
       .map((t) => {
         const item: Record<string, unknown> = {
@@ -164,8 +173,8 @@ export async function handleListAgentTools(
       })
     return {
       tools,
-      invocable_count: res.invocable_count ?? tools.length,
-      totalCount: res.totalCount ?? res.tools?.length ?? 0,
+      invocable_count: registry.filter((t) => t.can_invoke).length,
+      totalCount: registry.length,
     }
   })
 }

@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Submissions tools: the Submissions app. Reinsurance submission workbooks
@@ -35,10 +35,9 @@ const write = (idempotent: boolean, destructive = false) =>
     openWorldHint: false,
   }) as const
 
-const specId = z
-  .string()
-  .uuid()
-  .describe("Target structure id (talonic_submissions_specs). Omit to use none.")
+const specId = zUuid().describe(
+  "Target structure id (talonic_submissions_specs). Omit to use none.",
+)
 
 const SPECS_DESCRIPTION = [
   "List the workspace's target structures: the client formats submissions are mapped into, with field count and how many label mappings still await review.",
@@ -115,7 +114,7 @@ const PROCESS_DESCRIPTION = [
 
 export const processInputSchema = {
   spec_id: specId.optional(),
-  document_ids: z.array(z.string().uuid()).max(200).optional(),
+  document_ids: z.array(zUuid()).max(200).optional(),
   only: z.enum(["not_captured", "not_mapped", "all"]).optional(),
   recapture: z
     .boolean()
@@ -153,7 +152,7 @@ const COMPLETENESS_DESCRIPTION = [
 ].join("\n")
 
 export const completenessInputSchema = {
-  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  document_id: zUuid().describe("Submission (workbook document) id."),
   spec_id: specId,
 }
 
@@ -187,7 +186,7 @@ const EXPORT_DESCRIPTION = [
 
 export const exportInputSchema = {
   spec_id: specId,
-  document_id: z.string().uuid().optional().describe("Only this submission."),
+  document_id: zUuid().optional().describe("Only this submission."),
 }
 
 /** @internal */
@@ -211,7 +210,7 @@ const MATRIX_DESCRIPTION = [
 ].join("\n")
 
 export const matrixInputSchema = {
-  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  document_id: zUuid().describe("Submission (workbook document) id."),
   spec_id: specId,
 }
 
@@ -244,7 +243,7 @@ const FACTS_DESCRIPTION = [
 ].join("\n")
 
 export const factsInputSchema = {
-  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  document_id: zUuid().describe("Submission (workbook document) id."),
   spec_id: specId,
   metric: z
     .string()
@@ -296,7 +295,7 @@ const CHECKS_DESCRIPTION = [
 ].join("\n")
 
 export const checksInputSchema = {
-  document_id: z.string().uuid().describe("Submission (workbook document) id."),
+  document_id: zUuid().describe("Submission (workbook document) id."),
   spec_id: specId.optional(),
 }
 
@@ -329,7 +328,7 @@ const REVIEW_DESCRIPTION = [
 ].join("\n")
 
 export const reviewInputSchema = {
-  spec_id: z.string().uuid().describe("Target structure id (talonic_submissions_specs)."),
+  spec_id: zUuid().describe("Target structure id (talonic_submissions_specs)."),
   start: z.boolean().optional().describe("Start a review instead of reading its status."),
 }
 
@@ -360,7 +359,7 @@ const QUESTIONS_DESCRIPTION = [
 ].join("\n")
 
 export const questionsInputSchema = {
-  spec_id: z.string().uuid().describe("Target structure id (talonic_submissions_specs)."),
+  spec_id: zUuid().describe("Target structure id (talonic_submissions_specs)."),
   group: z.string().max(400).optional().describe("The question group to answer (from the list)."),
   option: z.number().int().min(0).max(5).optional().describe("0-based index of the chosen option."),
 }

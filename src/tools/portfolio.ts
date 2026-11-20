@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool } from "./_http.js"
-import type { ToolResult } from "./_shared.js"
+import { zUuid, type ToolResult } from "./_shared.js"
 
 /**
  * Portfolio tools: per portfolio company (an account), the KPIs its board
@@ -87,10 +87,7 @@ export function registerPortfolioTools(
       "Portfolio company KPI table",
       COMPANY_DESCRIPTION,
       {
-        account_id: z
-          .string()
-          .uuid()
-          .describe("The company's account_id from talonic_portfolio_companies"),
+        account_id: zUuid().describe("The company's account_id from talonic_portfolio_companies"),
       },
       readOnly,
       (a) =>

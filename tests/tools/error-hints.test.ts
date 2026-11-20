@@ -25,3 +25,15 @@ describe("tool error next-step hints", () => {
     expect(toolError(err).content[0]!.text).toMatch(/did not answer in time/)
   })
 })
+
+describe("model-facing payload", () => {
+  it("is compact JSON and is cut with a how-to-get-less note past the cap", async () => {
+    const { jsonOk, MAX_MODEL_TEXT_CHARS, zUuid } = await import("../../src/tools/_shared")
+    expect(jsonOk({ a: 1 }).content[0]!.text).toBe('{"a":1}')
+    const big = jsonOk({ s: "x".repeat(MAX_MODEL_TEXT_CHARS + 10) }).content[0]!.text
+    expect(big.length).toBeLessThan(MAX_MODEL_TEXT_CHARS + 300)
+    expect(big).toMatch(/Truncated: .* limit\/cursor/)
+    expect(zUuid().safeParse("nope").success).toBe(false)
+    expect(zUuid().safeParse("6f1c2c1e-6a43-4d0e-9b8a-1c2d3e4f5a6b").success).toBe(true)
+  })
+})

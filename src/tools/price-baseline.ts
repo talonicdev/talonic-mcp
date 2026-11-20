@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, resolveFetch, runTool } from "./_http.js"
-import { apiHttpError, toolError, validationError, type ToolResult } from "./_shared.js"
+import { apiHttpError, toolError, validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Price Baseline tools — turn a supply contract's price clause (Wärme, Kälte,
@@ -20,10 +20,7 @@ const MONTH_RE = /^\d{4}-\d{2}$/
 /** Index periods: year, month, quarter or half-year, as the platform stores them. */
 const INDEX_PERIOD_RE = /^\d{4}(-\d{2}|-Q[1-4]|-H[12])?$/
 
-const modelIdArg = z
-  .string()
-  .uuid()
-  .describe("Price model id (from talonic_price_baseline_models).")
+const modelIdArg = zUuid().describe("Price model id (from talonic_price_baseline_models).")
 const fromArg = z
   .string()
   .regex(MONTH_RE)
@@ -77,7 +74,7 @@ const EXTRACT_DESCRIPTION = [
 ].join("\n")
 
 export const extractInputSchema = {
-  document_id: z.string().uuid().optional().describe("Contract document UUID (new model)."),
+  document_id: zUuid().optional().describe("Contract document UUID (new model)."),
   model_id: modelIdArg
     .optional()
     .describe(
@@ -171,9 +168,7 @@ export const updateInputSchema = {
     .describe(
       "Contract this document belongs to (its contract number); null clears a hand-set key.",
     ),
-  superseded_by: z
-    .string()
-    .uuid()
+  superseded_by: zUuid()
     .nullable()
     .optional()
     .describe("Model of the amendment or price sheet that replaces this one; null unlinks."),
@@ -249,9 +244,7 @@ export const workbookInputSchema = {
   model_id: modelIdArg,
   from: fromArg,
   to: toArg,
-  comparison_id: z
-    .string()
-    .uuid()
+  comparison_id: zUuid()
     .optional()
     .describe("Invoice comparison to include (from talonic_price_baseline_compare)."),
 }
@@ -317,7 +310,7 @@ const COMPARE_DESCRIPTION = [
 
 export const compareInputSchema = {
   model_id: modelIdArg,
-  invoice_document_id: z.string().uuid().optional().describe("Invoice document UUID to check."),
+  invoice_document_id: zUuid().optional().describe("Invoice document UUID to check."),
   list: z
     .boolean()
     .optional()
@@ -356,7 +349,7 @@ const PROOF_INVOICE_DESCRIPTION = [
 ].join("\n")
 
 export const proofInvoiceInputSchema = {
-  comparison_id: z.string().uuid().describe("Comparison UUID (talonic_price_baseline_compare)."),
+  comparison_id: zUuid().describe("Comparison UUID (talonic_price_baseline_compare)."),
   format: z
     .enum(["json", "html"])
     .optional()
@@ -468,7 +461,7 @@ export const manualInputSchema = {
         base_year: z.number().int().optional(),
         quote: z.string().min(1).describe("The publisher's line that prints this value."),
         source_url: z.string().url().optional(),
-        document_id: z.string().uuid().optional(),
+        document_id: zUuid().optional(),
       }),
     )
     .min(1)
@@ -544,11 +537,7 @@ const CONTRACT_DESCRIPTION = [
 export const contractInputSchema = {
   model_id: modelIdArg,
   year: z.number().int().min(2000).max(2100).optional().describe("Calendar year to prepare."),
-  comparison_id: z
-    .string()
-    .uuid()
-    .optional()
-    .describe("Invoice check whose period and quantities to use."),
+  comparison_id: zUuid().optional().describe("Invoice check whose period and quantities to use."),
   from: fromArg.optional(),
   to: toArg.optional(),
   include_grid: z
@@ -732,7 +721,7 @@ const ASSUME_DESCRIPTION = [
 
 export const assumeInputSchema = {
   action: z.enum(["create", "replace", "withdraw"]),
-  assumption_id: z.string().uuid().optional().describe("Assumption to replace or withdraw."),
+  assumption_id: zUuid().optional().describe("Assumption to replace or withdraw."),
   scope: z
     .enum(["contract", "workspace"])
     .optional()
@@ -920,7 +909,7 @@ const IMPORT_DESCRIPTION = [
 
 export const importInputSchema = {
   document_ids: z
-    .array(z.string().uuid())
+    .array(zUuid())
     .min(1)
     .max(500)
     .describe("Contract document UUIDs (from talonic_price_baseline_imports)."),

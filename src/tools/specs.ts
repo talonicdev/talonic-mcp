@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, runTool, type QueryParams } from "./_http.js"
-import type { ToolResult } from "./_shared.js"
+import { zUuid, type ToolResult } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
@@ -41,7 +41,7 @@ const listSpecsInputSchema = {
 }
 
 const getSpecInputSchema = {
-  spec_id: z.string().uuid().describe("Spec UUID (from talonic_list_specs)."),
+  spec_id: zUuid().describe("Spec UUID (from talonic_list_specs)."),
   include_versions: z
     .boolean()
     .optional()

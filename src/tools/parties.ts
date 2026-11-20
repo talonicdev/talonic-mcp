@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 import { apiJson, buildUrl, runTool, sleep as defaultSleep } from "./_http.js"
-import { validationError, type ToolResult } from "./_shared.js"
+import { validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Contract Party Management tools: who a contract's parties are and to whom
@@ -84,14 +84,10 @@ const dateArg = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "a date YYYY-MM-DD")
   .describe("ISO date YYYY-MM-DD.")
-const contractIdArg = z
-  .string()
-  .uuid()
-  .describe("Contract id (from talonic_parties_contracts or talonic_parties_issues).")
-const partyIdArg = z
-  .string()
-  .uuid()
-  .describe("Party id (from talonic_parties_search, _contract or _issues).")
+const contractIdArg = zUuid().describe(
+  "Contract id (from talonic_parties_contracts or talonic_parties_issues).",
+)
+const partyIdArg = zUuid().describe("Party id (from talonic_parties_search, _contract or _issues).")
 
 /** Clamp a requested wait to [0, max] whole seconds. */
 function waitSeconds(requested: number | undefined, max: number): number {
@@ -338,9 +334,7 @@ const SET_ROLE_DESCRIPTION = [
 
 export const setRoleInputSchema = {
   contract_id: contractIdArg.optional().describe("Add: the contract to add the role to."),
-  role_id: z
-    .string()
-    .uuid()
+  role_id: zUuid()
     .optional()
     .describe("Change: the role row (roles[].id from talonic_parties_contract)."),
   party_id: partyIdArg.optional().describe("Add: the party; change: move the row to this party."),
@@ -349,9 +343,7 @@ export const setRoleInputSchema = {
     .enum(ROLE_STATES)
     .optional()
     .describe("confirmed or rejected (a person's decision); suggested keeps it open."),
-  represents_id: z
-    .string()
-    .uuid()
+  represents_id: zUuid()
     .nullable()
     .optional()
     .describe("Manager / contact: the role id it acts for on the same contract; null clears."),
@@ -419,7 +411,7 @@ const CONFIRM_DESCRIPTION = [
 ].join("\n")
 
 export const confirmInputSchema = {
-  contract_ids: z.array(z.string().uuid()).max(1000).optional().describe("Only these contracts."),
+  contract_ids: z.array(zUuid()).max(1000).optional().describe("Only these contracts."),
   roles: z.array(z.enum(ROLES)).max(ROLES.length).optional().describe("Only these roles."),
   min_confidence: z
     .enum(["high", "medium", "low"])
@@ -465,7 +457,7 @@ const MERGE_DESCRIPTION = [
 
 export const mergeInputSchema = {
   party_id: partyIdArg.describe("The party merged away."),
-  into: z.string().uuid().describe("The party that survives."),
+  into: zUuid().describe("The party that survives."),
   dry_run: z.boolean().optional().describe("Count the moves; nothing changes."),
 }
 
@@ -500,7 +492,7 @@ const READ_DESCRIPTION = [
 export const readInputSchema = {
   status: z.boolean().optional().describe("Only report the read queue; nothing is queued."),
   contract_ids: z
-    .array(z.string().uuid())
+    .array(zUuid())
     .max(5000)
     .optional()
     .describe("Only these contracts (read again when already read)."),
@@ -606,11 +598,9 @@ const MEMBERS_DESCRIPTION = [
 
 export const membersInputSchema = {
   party_id: partyIdArg.optional().describe("Add: the company or owners' association."),
-  person_id: z.string().uuid().optional().describe("Add: the person (a party of kind person)."),
+  person_id: zUuid().optional().describe("Add: the person (a party of kind person)."),
   function: z.string().max(200).nullable().optional().describe("Add: their function."),
-  member_id: z
-    .string()
-    .uuid()
+  member_id: zUuid()
     .optional()
     .describe("Remove: the link (members[].id from talonic_parties_party)."),
 }
