@@ -11,10 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `talonic_list_apps`: the workspace's apps with id, description, mode and enabled state; supplies the `app_id` the decision-task tools need (no tool returned it before).
+- `talonic_get_schema`: one saved schema's field definition. It was only in the `talonic://schemas` resource, which claude.ai never shows the model.
 - `talonic_portfolio_companies`, `talonic_portfolio_company`, `talonic_portfolio_conflicts`, `talonic_portfolio_refresh`: the Portfolio app (KPI table per portfolio company and the conflicts between its documents), listed when the workspace has the app.
 
 - **Row-level growth tools** (`talonic_growth_attribution`, `talonic_growth_events`, `talonic_growth_signups`, `talonic_growth_accounts`, `talonic_growth_site_events`) over `/v1/growth/*`: conversions per landing page and source, website conversions, signups with their source, usage per organisation, and counts of any anonymous website event. Probe-gated with the existing growth tools; the platform now also admits listed growth readers. Absent from the public docs by design.
 - **Accounts.** `talonic_list_accounts` and `talonic_create_account` (`GET/POST /v1/accounts`): the companies a workspace keeps apart. `talonic_request_upload` takes `account` (name, alias or id) so a file stays with its company, and `add_to_workspace: true` to process it fully into workspace data (values, registry, questions, SQL) instead of text only.
+
+### Fixed
+
+- **Cards render in Claude.** Every widget declared `_meta.ui.domain: "https://talonic.com"`; Claude validates that value against `{sha256(connector URL)[:32]}.claudemcpcontent.com` and showed "There was a problem displaying content from Talonic" instead of the card. The field is gone (ChatGPT keeps `openai/widgetDomain`). Widgets now also speak the MCP Apps protocol: `ui/initialize` → `ui/notifications/initialized`, render on `ui/notifications/tool-result` (structuredContent, or JSON text as fallback), report height via `ui/notifications/size-changed`, follow the host theme from `hostContext`, show tool errors instead of a blank card, and answer host requests. Locked by `tests/widgets/render/mcp-apps-host.test.ts`.
+- **Actionable tool errors.** A raw-fetch API failure came back as `Unexpected error: Talonic API error: HTTP 402 {json}`. Errors now keep their status and end with a "Next step" line (reconnect, top up credits, missing permission, look the id up again, retry once); timeouts and network failures say so.
+- **App tools no longer vanish mid-session.** One generic per-token probe cache replaces ten copies: a timeout, network error, 5xx or 429 reuses the last known answer and is not cached, instead of dropping a whole app's tools for five minutes.
+
+### Changed
+
+- **Agent-task (5) and decision-task (7) tools are listed on the hosted server only where the workspace uses them** (an Agent task exists / an External-mode app exists). A normal claude.ai user now sees 28 tools (was 38) and a 71 KB `tools/list` (was 99 KB). Local installs keep them by default (`includeAgentTaskTools`, `includeDecisionTaskTools`).
+- Server instructions open with a which-tool-for-which-question table and only describe flows whose tools are registered.
+- `talonic_list_agent_tools` no longer offers `find_data` (it has its own tool).
+- Tool results are compact JSON, capped at 100,000 characters with a note to page or filter.
+- UUID arguments emit `format: "uuid"` instead of zod's inlined regex.
+- Every argument of every tool has a description (39 were missing). Internal vocabulary (rail, materialize, planes, resolution band, Sources-IAM) and one customer's ERP vocabulary in `talonic_contracts_processes` replaced by plain descriptions.
 
 ## [0.1.94] - 2026-11-14
 

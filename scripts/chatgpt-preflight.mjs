@@ -8,7 +8,10 @@ import { spawn } from "node:child_process"
 import { createServer } from "node:net"
 import { setTimeout as sleep } from "node:timers/promises"
 
-const EXPECTED_TOOLS = 40
+// Public tools a workspace sees when it uses neither Agent tasks nor
+// External-mode apps (the API here is unreachable, so both probes say no and
+// those 12 worker tools stay hidden, as they do for most hosted users).
+const EXPECTED_TOOLS = 28
 
 const port = await new Promise((resolve, reject) => {
   const s = createServer()
