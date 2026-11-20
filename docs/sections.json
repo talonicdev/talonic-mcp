@@ -5078,6 +5078,7 @@
       {
         "type": "list",
         "items": [
+          "Default for any question about what the documents contain (counts, totals, duplicates, comparisons, anomalies): one call runs the workspace's fields, SQL and document text server-side and returns a cited answer, instead of the agent exploring fields, schemas, specs and SQL itself.",
           "The user asks an open question about their documents, e.g. 'which vendors invoiced us twice in May?'",
           "The user wants a summary across documents.",
           "The answer needs reasoning over several fields, not a single known value."
