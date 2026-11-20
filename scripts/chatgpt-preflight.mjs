@@ -73,8 +73,7 @@ try {
   for (const t of publicTools) {
     const meta = t._meta ?? {}
     const uri = meta["openai/outputTemplate"]
-    if (!uri) failures.push(`${t.name}: no openai/outputTemplate`)
-    else uris.push([t.name, uri])
+    if (uri) uris.push([t.name, uri])
     for (const k of ["openai/toolInvocation/invoking", "openai/toolInvocation/invoked"]) {
       if (typeof meta[k] !== "string" || meta[k].length === 0 || meta[k].length > 64) failures.push(`${t.name}: bad ${k}`)
     }
@@ -117,4 +116,4 @@ if (failures.length) {
   console.error("PREFLIGHT FAILED:\n - " + failures.join("\n - "))
   process.exit(1)
 }
-console.log(`PREFLIGHT OK — ChatGPT will see ${EXPECTED_TOOLS} tools, each with a fetchable widget template.`)
+console.log(`PREFLIGHT OK — ChatGPT will see ${EXPECTED_TOOLS} tools; ${uris.length} with a card, every card template fetchable.`)

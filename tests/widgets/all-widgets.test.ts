@@ -7,6 +7,7 @@ import {
   WIDGET_MIME,
   WIDGET_URIS,
   type WidgetKey,
+  CARD_TOOL_KEYS,
 } from "../../src/widgets/types"
 
 // Every public tool renders a branded inline widget. The mapping lives in
@@ -20,13 +21,14 @@ function buildServer() {
   return createServer({ apiKey: "tlnc_test" }) as any
 }
 
-describe("every tool declares its widget as outputTemplate", () => {
+describe("only answer tools declare a card; lookups declare none", () => {
   it.each(TOOL_WIDGET_MAP)("%s -> %s", (toolName, key, uri) => {
     const server = buildServer()
     const tool = server._registeredTools[toolName]
     expect(tool, `${toolName} not registered`).toBeDefined()
-    expect(tool._meta?.ui?.resourceUri).toBe(uri)
-    expect(tool._meta?.["openai/outputTemplate"]).toBe(uri)
+    const card = CARD_TOOL_KEYS.has(key)
+    expect(tool._meta?.ui?.resourceUri).toBe(card ? uri : undefined)
+    expect(tool._meta?.["openai/outputTemplate"]).toBe(card ? uri : undefined)
     expect(tool._meta?.["openai/toolInvocation/invoking"]).toBe(
       TOOL_INVOCATION_STATUS[key].invoking,
     )
@@ -96,5 +98,22 @@ describe("widget coverage is complete", () => {
         expect(server._registeredTools[name]._meta?.["openai/outputTemplate"]).toBeUndefined()
       }
     }
+  })
+})
+
+describe("card budget", () => {
+  it("keeps inline cards to the ten answer tools", () => {
+    expect([...CARD_TOOL_KEYS].sort()).toEqual([
+      "ask",
+      "createAccount",
+      "extract",
+      "getAnswer",
+      "getBalance",
+      "getPricing",
+      "getRunResults",
+      "getUsage",
+      "requestUpload",
+      "saveSchema",
+    ])
   })
 })

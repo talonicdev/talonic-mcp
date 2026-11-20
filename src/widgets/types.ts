@@ -269,21 +269,47 @@ export const WIDGET_DESCRIPTIONS: Readonly<Record<WidgetKey, string>> = {
 }
 
 /**
- * Build the `_meta` block a tool declares to opt into its widget: the modern
- * `ui.resourceUri` key, the `openai/outputTemplate` alias, and the two
- * `openai/toolInvocation/*` status strings.
+ * Tools whose result is the answer the user asked for, and so earn an inline
+ * card. Every other tool is a lookup the model does for itself (list fields,
+ * list specs, run SQL, poll a run, claim a task): rendering those turned one
+ * question into 20+ full-height cards in the chat (claude.ai, 2026-11-20).
+ * Those tools keep their status strings but declare no output template, so
+ * hosts show only the collapsed tool-call row.
+ *
+ * @public
+ */
+export const CARD_TOOL_KEYS: ReadonlySet<WidgetKey> = new Set<WidgetKey>([
+  "extract",
+  "ask",
+  "getAnswer",
+  "getRunResults",
+  "requestUpload",
+  "getBalance",
+  "getUsage",
+  "getPricing",
+  "saveSchema",
+  "createAccount",
+])
+
+/**
+ * Build the `_meta` block for a tool: the two `openai/toolInvocation/*`
+ * status strings always, and for {@link CARD_TOOL_KEYS} also the modern
+ * `ui.resourceUri` key and its `openai/outputTemplate` alias.
  *
  * @public
  */
 export function widgetToolMeta(key: WidgetKey): Record<string, unknown> {
   const uri = WIDGET_URIS[key]
   const status = TOOL_INVOCATION_STATUS[key]
-  return {
-    ui: { resourceUri: uri },
-    "openai/outputTemplate": uri,
+  const meta: Record<string, unknown> = {
     "openai/toolInvocation/invoking": status.invoking,
     "openai/toolInvocation/invoked": status.invoked,
   }
+  if (CARD_TOOL_KEYS.has(key)) {
+    meta["ui"] = { resourceUri: uri }
+    meta["openai/outputTemplate"] = uri
+  }
+  return meta
 }
 
 /**

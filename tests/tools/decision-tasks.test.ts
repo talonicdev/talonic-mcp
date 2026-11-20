@@ -343,10 +343,14 @@ describe("decide-scope listing", () => {
         "talonic/can_invoke": false,
         "talonic/required_scope": "apps:decide",
       })
-      expect(typeof marked._registeredTools[name]._meta["openai/outputTemplate"]).toBe("string")
+      expect(typeof marked._registeredTools[name]._meta["openai/toolInvocation/invoking"]).toBe(
+        "string",
+      )
       expect(plain._registeredTools[name].description).not.toContain("NOT INVOCABLE")
       expect(plain._registeredTools[name]._meta).toBeDefined()
-      expect(typeof plain._registeredTools[name]._meta["openai/outputTemplate"]).toBe("string")
+      expect(typeof plain._registeredTools[name]._meta["openai/toolInvocation/invoking"]).toBe(
+        "string",
+      )
       expect(plain._registeredTools[name]._meta).not.toHaveProperty("talonic/can_invoke")
     }
     // Other tools are untouched by the marker.

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Changed
+
+- **Inline cards only for answers.** Once cards rendered in Claude (0.1.96), every tool call drew one, so a single question filled the chat with 20+ full-height cards of field lists, specs, schemas and raw SQL rows. Only ten tools now declare a card: `talonic_extract`, `talonic_ask`, `talonic_get_answer`, `talonic_get_run_results`, `talonic_request_upload`, `talonic_get_balance`, `talonic_get_usage`, `talonic_get_pricing`, `talonic_save_schema`, `talonic_create_account`. Lookups the model makes for itself show only the collapsed tool-call row. The run-results card shows 12 rows and 6 columns at most.
+
 ### Added
 
 - `talonic_list_apps`: the workspace's apps with id, description, mode and enabled state; supplies the `app_id` the decision-task tools need (no tool returned it before).
