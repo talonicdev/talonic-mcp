@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Changed
+
+- **Questions steer to `talonic_ask` at the moment the model reaches for SQL.** Results of `query_data`, `describe_data`, `workspace_overview` and `plan_fields` via `talonic_invoke_agent_tool` carry one extra content item (`structuredContent.next_step`) saying that `talonic_ask` does the same work server-side in one cited call. An unknown-field refusal (the model guessed a `field_key`, as in the 2026-11-20 claude.ai session) adds that `talonic_ask` resolves field names itself. `content[0]` stays parseable JSON.
+
+## [0.1.99] - 2026-11-21
+
 ### Security
 
 - Runtime dependencies patched (`npm audit --omit=dev`: 9 advisories → 0, one critical). Minimum versions raised to `@modelcontextprotocol/sdk` ^1.32.2 and `zod` ^4.6.7 so installs never resolve the vulnerable ranges; transitive fixes (`proxy-addr`, `body-parser`, `fast-uri`, `hono`, `qs`, …) come through the lockfile. Dev-only `vitest` advisories need a major upgrade and stay open.

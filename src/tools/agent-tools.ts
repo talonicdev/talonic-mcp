@@ -208,7 +208,51 @@ export interface InvokeAgentToolArgs {
   document_ids?: string[]
 }
 
+/**
+ * Registry tools a model reaches for when it is answering a question itself
+ * (exploring the data, then SQL attempt after SQL attempt). Their results
+ * carry {@link ASK_HINT} so the model sees, at the moment it chooses that
+ * route, that one talonic_ask call does the same work server-side.
+ */
+const ANALYSIS_TOOLS: ReadonlySet<string> = new Set([
+  "query_data",
+  "describe_data",
+  "workspace_overview",
+  "plan_fields",
+])
+
+/** @internal */
+export const ASK_HINT =
+  "If you are answering a question about the documents, call talonic_ask with the user's question instead of further queries: it runs this same SQL, field lookup and document reading server-side, knows the workspace's real field names and duplicate rules, and returns one cited answer in a single call."
+
+/** @internal */
+export const UNKNOWN_KEY_HINT =
+  "talonic_ask resolves field names itself; call it with the user's question rather than guessing field_key values."
+
 export async function handleInvokeAgentTool(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: InvokeAgentToolArgs,
+): Promise<ToolResult> {
+  const result = await invokeAgentTool(getToken, baseUrl, args)
+  if (!ANALYSIS_TOOLS.has(args.name)) return result
+  const first = result.content[0]
+  if (!first) return result
+  if (result.isError) {
+    if (/Unknown field_key|Unknown claim predicate/.test(first.text)) {
+      first.text = `${first.text}\n${UNKNOWN_KEY_HINT}`
+    }
+    return result
+  }
+  if (result["structuredContent"] && typeof result["structuredContent"] === "object") {
+    ;(result["structuredContent"] as Record<string, unknown>)["next_step"] = ASK_HINT
+  }
+  // A separate item, so content[0] stays parseable JSON for clients that read it.
+  result.content.push({ type: "text", text: `Next step: ${ASK_HINT}` })
+  return result
+}
+
+async function invokeAgentTool(
   getToken: () => string,
   baseUrl: string | undefined,
   args: InvokeAgentToolArgs,

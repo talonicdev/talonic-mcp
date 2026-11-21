@@ -3,6 +3,8 @@ import {
   handleFindData,
   handleInvokeAgentTool,
   handleListAgentTools,
+  ASK_HINT,
+  UNKNOWN_KEY_HINT,
 } from "../../src/tools/agent-tools"
 
 type Call = { url: string; init: RequestInit }
@@ -178,5 +180,46 @@ describe("agent registry wrappers", () => {
       expect(res.isError).toBe(true)
       expect(res.content[0]?.text).toContain("spec.run")
     })
+  })
+})
+
+describe("talonic_invoke_agent_tool steers questions to talonic_ask", () => {
+  afterEach(() => vi.unstubAllGlobals())
+  const respond = (status: number, body: unknown) =>
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify(body), { status })),
+    )
+
+  it("appends the ask hint to query_data results", async () => {
+    respond(200, { tool: "query_data", ok: true, content: '{"rows":[{"n":1}],"rowCount":1}' })
+    const res = await handleInvokeAgentTool(() => "t", undefined, {
+      name: "query_data",
+      args: { sql: "SELECT 1" },
+    })
+    expect(JSON.parse(res.content[0]!.text).result.rowCount).toBe(1)
+    expect(res.content[1]!.text).toBe(`Next step: ${ASK_HINT}`)
+    expect((res as any).structuredContent.next_step).toBe(ASK_HINT)
+  })
+
+  it("adds the field-name hint to an unknown-key refusal", async () => {
+    respond(422, {
+      message: "Unknown field_key 'vendor.name' — it does not exist in this workspace's data.",
+    })
+    const res = await handleInvokeAgentTool(() => "t", undefined, {
+      name: "query_data",
+      args: { sql: "x" },
+    })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]!.text).toContain(UNKNOWN_KEY_HINT)
+  })
+
+  it("leaves other registry tools alone", async () => {
+    respond(200, { tool: "get_document_markdown", ok: true, content: "# doc" })
+    const res = await handleInvokeAgentTool(() => "t", undefined, {
+      name: "get_document_markdown",
+      args: {},
+    })
+    expect(res.content).toHaveLength(1)
   })
 })
