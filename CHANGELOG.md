@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cards in the Ink design.** Ink's palette and type (`--void-*` tokens from the platform's `ink/restructure`: accent #512DA8 / #C9B6F5, neutral surfaces, quieter dividers and chips) replace the generic indigo/grey for all ten cards, in light and dark. The answer card renders its markdown as prose (bold, lists, code, https links, tables, escape-first so model text can never become markup), drops the boxed raw-markdown block, the ask/conversation ids and the token count, shows a "Verified" style verdict, numbered sources, and one quiet meta line (credits · queries · seconds).
+
+## [0.1.100] - 2026-11-21
+
+### Changed
+
 - **Questions steer to `talonic_ask` at the moment the model reaches for SQL.** Results of `query_data`, `describe_data`, `workspace_overview` and `plan_fields` via `talonic_invoke_agent_tool` carry one extra content item (`structuredContent.next_step`) saying that `talonic_ask` does the same work server-side in one cited call. An unknown-field refusal (the model guessed a `field_key`, as in the 2026-11-20 claude.ai session) adds that `talonic_ask` resolves field names itself. `content[0]` stays parseable JSON.
 
 ## [0.1.99] - 2026-11-21

@@ -57,24 +57,34 @@ export function widgetMeta(description?: string): Record<string, unknown> {
  * @internal
  */
 const BASE_CSS = `
+  /* Ink tokens (platform ink/restructure, src/app/globals.css --void-*). */
   :root {
-    --bg: #ffffff; --fg: #111827; --muted: #6b7280; --border: #e5e7eb;
-    --accent: #4f46e5; --good: #16a34a; --warn: #d97706; --bad: #dc2626;
-    --chip: #f3f4f6;
+    --bg: #FFFFFF; --fg: #1B1B1F; --muted: #5B5B64; --faint: #6A6A71;
+    --border: rgba(20, 20, 30, 0.12); --divider: rgba(20, 20, 30, 0.07);
+    --accent: #512DA8; --accent-dim: rgba(81, 45, 168, 0.07); --accent-tint: #EEE8F8;
+    --good: #1F9D5B; --warn: #B97E14; --bad: #C94343;
+    --chip: #F5F5F3; --surface-2: #F5F5F3;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0f1115; --fg: #f3f4f6; --muted: #9ca3af; --border: #1f2937;
-      --chip: #1f2937;
+      --bg: #101013; --fg: #EDEDEF; --muted: #A2A2AB; --faint: #86868E;
+      --border: rgba(255, 255, 255, 0.08); --divider: rgba(255, 255, 255, 0.06);
+      --accent: #C9B6F5; --accent-dim: rgba(201, 182, 245, 0.10); --accent-tint: #2A1F3D;
+      --good: #5BC98B; --warn: #E8B45A; --bad: #E36D6D;
+      --chip: #1A1A1F; --surface-2: #16161A;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0f1115; --fg: #f3f4f6; --muted: #9ca3af; --border: #1f2937;
-    --chip: #1f2937;
+    --bg: #101013; --fg: #EDEDEF; --muted: #A2A2AB; --faint: #86868E;
+    --border: rgba(255, 255, 255, 0.08); --divider: rgba(255, 255, 255, 0.06);
+    --accent: #C9B6F5; --accent-dim: rgba(201, 182, 245, 0.10); --accent-tint: #2A1F3D;
+    --good: #5BC98B; --warn: #E8B45A; --bad: #E36D6D;
+    --chip: #1A1A1F; --surface-2: #16161A;
   }
   :root[data-host="mcp-apps"] { --bg: transparent; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
-    font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    font: 14px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; }
   .root { padding: 20px; box-sizing: border-box; }
   * { box-sizing: border-box; }
   .empty { color: var(--muted); padding: 28px; text-align: center; }
@@ -82,10 +92,26 @@ const BASE_CSS = `
   .small { font-size: 12px; }
   .header { display: flex; align-items: flex-start; justify-content: space-between;
     gap: 12px; margin-bottom: 16px; }
-  .title { font-weight: 600; }
-  .subtitle { color: var(--muted); font-size: 12px; }
+  .title { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--faint); font-size: 12px; }
+  .eyebrow { color: var(--faint); font-size: 12px; font-weight: 500; margin-bottom: 2px; }
+  .prose { font-size: 14.5px; line-height: 1.6; color: var(--fg); }
+  .prose p { margin: 0 0 10px; }
+  .prose p:last-child, .prose ul:last-child, .prose ol:last-child { margin-bottom: 0; }
+  .prose ul, .prose ol { margin: 0 0 10px; padding-left: 20px; }
+  .prose li { margin: 3px 0; }
+  .prose h3, .prose h4 { font-size: 14.5px; font-weight: 600; margin: 14px 0 6px; }
+  .prose code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--chip);
+    border: 1px solid var(--divider); border-radius: 4px; padding: 0 4px; }
+  .prose strong { font-weight: 600; }
+  .prose a { color: var(--accent); text-decoration: none; }
+  .prose a:hover { text-decoration: underline; }
+  .prose table { margin: 6px 0 12px; }
+  .section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--divider); }
+  .section-label { color: var(--faint); font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+  .meta { color: var(--faint); font-size: 12px; margin-top: 14px; }
   table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--divider);
     vertical-align: top; font-size: 13px; }
   th { color: var(--muted); font-weight: 500; font-size: 12px; }
   th:first-child, td:first-child { padding-left: 0; }
@@ -103,15 +129,18 @@ const BASE_CSS = `
     border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer;
     text-decoration: none; display: inline-block; }
   button:hover, a.btn:hover { border-color: var(--accent); }
-  a.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .chip { display: inline-block; background: var(--chip); border-radius: 999px;
-    padding: 1px 8px; font-size: 12px; margin: 2px 4px 2px 0; }
+  a.btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  :root[data-host="mcp-apps"] a.btn.primary { color: #fff; }
+  @media (prefers-color-scheme: dark) { :root[data-host="mcp-apps"]:not([data-theme="light"]) a.btn.primary { color: #17102A; } }
+  :root[data-host="mcp-apps"][data-theme="dark"] a.btn.primary { color: #17102A; }
+  .chip { display: inline-block; background: var(--chip); border-radius: 6px; color: var(--muted);
+    padding: 1px 7px; font-size: 12px; font-weight: 500; margin: 2px 4px 2px 0; }
   .big { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px; margin-top: 14px; }
   /* Stat tile: label stacked above value, padded, never crowding an edge. */
   .kv { display: flex; flex-direction: column; gap: 3px;
-    background: var(--chip); border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface-2); border: 1px solid var(--divider); border-radius: 10px;
     padding: 10px 12px; min-width: 0; }
   .kv .k { color: var(--muted); font-size: 12px; }
   .kv .val { font-weight: 500; }
@@ -122,7 +151,7 @@ const BASE_CSS = `
   .chip.good { background: rgba(22,163,74,.12); color: var(--good); }
   .chip.warn { background: rgba(217,119,6,.14); color: var(--warn); }
   .chip.bad { background: rgba(220,38,38,.12); color: var(--bad); }
-  .chip.info { background: rgba(79,70,229,.12); color: var(--accent); }
+  .chip.info { background: var(--accent-dim); color: var(--accent); }
   .plane { margin-top: 14px; }
   .plane .subtitle { margin-bottom: 4px; }
   .num { text-align: right; }
@@ -168,6 +197,53 @@ const BASE_CSS = `
  *
  * @internal
  */
+/**
+ * Escape-first markdown renderer injected into every widget (the answer card
+ * uses it). Kept in String.raw so its regexes keep their backslashes; backticks
+ * are written as \x60 because they cannot appear in a template literal.
+ *
+ * @internal
+ */
+const MD_JS = String.raw`
+  // Minimal, escape-first markdown: paragraphs, - / 1. lists, ### headings,
+  // **bold**, *em*, code spans, https links, pipe tables. Input is escaped before
+  // any markup is added, so model text can never inject HTML.
+  function mdInline(t) {
+    return esc(t)
+      .replace(/\x60([^\x60]+)\x60/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>")
+      .replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  }
+  function md(text) {
+    var lines = String(text == null ? "" : text).replace(/\r/g, "").split("\n");
+    var out = [], para = [], list = null, i = 0;
+    function flushPara() { if (para.length) { out.push("<p>" + para.map(mdInline).join("<br>") + "</p>"); para = []; } }
+    function flushList() { if (list) { out.push("<" + list.tag + ">" + list.items.map(function (x) { return "<li>" + mdInline(x) + "</li>"; }).join("") + "</" + list.tag + ">"); list = null; } }
+    for (; i < lines.length; i++) {
+      var l = lines[i], m;
+      if (/^\s*$/.test(l)) { flushPara(); flushList(); continue; }
+      if (/^\s*\|.*\|\s*$/.test(l) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+        flushPara(); flushList();
+        var cells = function (row) { return row.trim().replace(/^\||\|$/g, "").split("|").map(function (c) { return c.trim(); }); };
+        var head = cells(l); i += 2; var rows = [];
+        while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+        i--;
+        out.push("<table><thead><tr>" + head.map(function (h) { return "<th>" + mdInline(h) + "</th>"; }).join("") + "</tr></thead><tbody>"
+          + rows.slice(0, 50).map(function (r) { return "<tr>" + r.map(function (c) { return '<td class="val">' + mdInline(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>");
+        continue;
+      }
+      if ((m = /^\s*#{1,6}\s+(.*)$/.exec(l))) { flushPara(); flushList(); out.push("<h3>" + mdInline(m[1]) + "</h3>"); continue; }
+      if ((m = /^\s*[-*•]\s+(.*)$/.exec(l))) { flushPara(); if (!list || list.tag !== "ul") { flushList(); list = { tag: "ul", items: [] }; } list.items.push(m[1]); continue; }
+      if ((m = /^\s*\d+[.)]\s+(.*)$/.exec(l))) { flushPara(); if (!list || list.tag !== "ol") { flushList(); list = { tag: "ol", items: [] }; } list.items.push(m[1]); continue; }
+      if (list) { list.items[list.items.length - 1] += " " + l.trim(); continue; }
+      para.push(l.trim());
+    }
+    flushPara(); flushList();
+    return out.join("");
+  }
+`
+
 const HELPERS_JS = `
   var root = document.getElementById("root");
   function esc(s) {
@@ -190,6 +266,7 @@ const HELPERS_JS = `
     var p = Math.round(v * 100);
     return '<span class="bar ' + confClass(v) + '"><span style="width:' + p + '%"></span></span> <span class="muted small">' + p + '%</span>';
   }
+${MD_JS}
   function empty(msg) { root.innerHTML = '<div class="empty">' + esc(msg) + '</div>'; }
   function copyButton(id, text) {
     var btn = document.getElementById(id);
