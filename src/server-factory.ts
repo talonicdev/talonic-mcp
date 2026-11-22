@@ -21,6 +21,7 @@ import { registerApTools } from "./tools/ap.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
+import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
@@ -151,6 +152,12 @@ export interface CreateServerOptions {
    * `probePortfolioAccess` passed (the workspace has the Portfolio app).
    */
   includePortfolioTools?: boolean
+  /**
+   * Register the `talonic_process_*` tools. Callers set this only after
+   * `probeProcessesAccess` passed (the caller holds the Process Plane view
+   * permission in the workspace).
+   */
+  includeProcessesTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -440,6 +447,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePortfolioTools) {
     registerPortfolioTools(server, rawToken, baseUrl)
+  }
+  if (options.includeProcessesTools) {
+    registerProcessesTools(server, rawToken, baseUrl)
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
