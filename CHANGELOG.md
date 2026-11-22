@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
 
+### Added
+
+- `talonic_process_list`, `talonic_process_run`, `talonic_process_status`, `talonic_process_runs`, `talonic_process_waiting_for_me`, `talonic_process_sign`: the Process Plane over `/v1/processes` (list processes, start one for an item by field names and get its reply, where runs stand, what waits for the caller, sign a step). Listed only when the caller holds the Process Plane view permission; the platform checks run and sign permissions and assignment on every call.
+
 ### Changed
 
 - **Cards in the Ink design.** Ink's palette and type (`--void-*` tokens from the platform's `ink/restructure`: accent #512DA8 / #C9B6F5, neutral surfaces, quieter dividers and chips) replace the generic indigo/grey for all ten cards, in light and dark. The answer card renders its markdown as prose (bold, lists, code, https links, tables, escape-first so model text can never become markup), drops the boxed raw-markdown block, the ask/conversation ids and the token count, shows a "Verified" style verdict, numbered sources, and one quiet meta line (credits · queries · seconds).
