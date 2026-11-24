@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Build, check, publish and set up a process.** Fifteen more `talonic_process_*` tools over the new `/v1/processes` routes: `talonic_process_create` (a draft from a description or an n8n workflow), `talonic_process_change` (an instruction in plain words; a change that reduces governance returns `needs_confirmation` and saves nothing until the user agreed), `talonic_process_get`, `talonic_process_check`, `talonic_process_test_run`, `talonic_process_publish`, `talonic_process_versions`, `talonic_process_rollback`, `talonic_process_delete`, `talonic_process_item`, `talonic_process_retry`, `talonic_process_send_back`, `talonic_process_setup` (people, mailboxes, secret names, look-up data), `talonic_process_mailbox_ownership`, `talonic_process_address`. Publish, rollback, delete and address carry `destructiveHint`. No tool stores or reads a secret's value, and connecting a mailbox stays in the web app.
 - `talonic_process_list`, `talonic_process_run`, `talonic_process_status`, `talonic_process_runs`, `talonic_process_waiting_for_me`, `talonic_process_sign`: the Process Plane over `/v1/processes` (list processes, start one for an item by field names and get its reply, where runs stand, what waits for the caller, sign a step). Listed only when the caller holds the Process Plane view permission; the platform checks run and sign permissions and assignment on every call.
 
 ## [0.1.101] - 2026-11-21
