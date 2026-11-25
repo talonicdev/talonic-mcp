@@ -20,6 +20,8 @@ import { probeMasterRecordsAccess } from "./tools/master-records.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
+import { probeReviewAccess } from "./tools/review.js"
+import { probeCasesAccess } from "./tools/cases.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
@@ -96,7 +98,8 @@ export async function main(
   // where the platform serves the Contracts app, AP tools where it serves the AP app,
   // Doc Gen tools where it serves Document Generation, Parties tools where it
   // serves Contract Party Management, Master Records tools where it serves the
-  // Master Records app, Price Baseline tools where it serves Price Baseline.
+  // Master Records app, Price Baseline tools where it serves Price Baseline,
+  // review and cases tools where the credential reaches the review queue / cases.
   const [
     includeGrowthTools,
     includeAdminAgentTaskTools,
@@ -109,6 +112,8 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeReviewTools,
+    includeCasesTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -121,6 +126,8 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeReviewAccess(apiKey, baseUrl),
+    probeCasesAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -136,6 +143,8 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeReviewTools,
+    includeCasesTools,
   })
 
   const transport = new StdioServerTransport()

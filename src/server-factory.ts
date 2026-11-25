@@ -20,6 +20,8 @@ import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
+import { registerReviewTools } from "./tools/review.js"
+import { registerCasesTools } from "./tools/cases.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
@@ -146,6 +148,20 @@ export interface CreateServerOptions {
    * Management never lists tools that would 404. Listing visibility only.
    */
   includePartiesTools?: boolean
+
+  /**
+   * Register the `talonic_review_*` tools. Callers set this only after
+   * `probeReviewAccess` passed (the credential reaches the review queue).
+   * Listing visibility only.
+   */
+  includeReviewTools?: boolean
+
+  /**
+   * Register the `talonic_cases_*` tools. Callers set this only after
+   * `probeCasesAccess` passed (the credential reaches cases). Listing
+   * visibility only.
+   */
+  includeCasesTools?: boolean
 
   /**
    * Register the `talonic_portfolio_*` tools. Callers set this only after
@@ -444,6 +460,12 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePartiesTools) {
     registerPartiesTools(server, rawToken, baseUrl)
+  }
+  if (options.includeReviewTools) {
+    registerReviewTools(server, rawToken, baseUrl)
+  }
+  if (options.includeCasesTools) {
+    registerCasesTools(server, rawToken, baseUrl)
   }
   if (options.includePortfolioTools) {
     registerPortfolioTools(server, rawToken, baseUrl)
