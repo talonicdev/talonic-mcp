@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
+// @ts-expect-error plain ESM script without types
+import { promote } from "../scripts/promote-changelog.mjs"
 
 const md = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8")
 const pkgVersion = (
@@ -18,34 +20,20 @@ const cmp = (a: string, b: string) => {
 }
 
 /**
- * Every 0.1.x patch from 45 up to the package version must be documented.
- *
- * A version strictly below the package version must have its own
- * `## [x.y.z] - date` heading — no exception. The package version itself may
- * instead be covered by a non-empty `## [Unreleased]` section (at least one
- * `- ` bullet line before the first versioned heading): CI's publish
- * workflow auto-bumps `package.json` on release, before anyone promotes
- * `[Unreleased]` to a dated heading, so the very next commit on `main` must
- * not go red for that gap alone. Returns the list of versions still missing
- * coverage (empty when everything is covered).
+ * Every 0.1.x patch from 45 up to and including the package version must have
+ * its own `## [x.y.z] - date` heading. There is no grace for the package
+ * version: the publish workflow promotes `[Unreleased]` to the new version's
+ * heading in the same commit that bumps package.json
+ * (`scripts/promote-changelog.mjs`). Returns the versions still missing.
  */
 function checkCoverage(md: string, pkgVersion: string): string[] {
   const versionHeading = /^## \[(\d+\.\d+\.\d+)\] - \d{4}-\d{2}-\d{2}$/gm
-  const matches = [...md.matchAll(versionHeading)]
-  const have = new Set(matches.map((m) => m[1]))
-
-  const firstHeadingIndex = matches.length > 0 ? (matches[0].index ?? md.length) : md.length
-  const unreleasedIndex = md.indexOf("## [Unreleased]")
-  const unreleasedSection = unreleasedIndex >= 0 ? md.slice(unreleasedIndex, firstHeadingIndex) : ""
-  const unreleasedHasBullets = /^- /m.test(unreleasedSection)
-
+  const have = new Set([...md.matchAll(versionHeading)].map((m) => m[1]))
   const [maj, min, patch] = pkgVersion.split(".").map(Number)
   const missing: string[] = []
   for (let p = 45; p <= patch; p++) {
     const v = `${maj}.${min}.${p}`
-    if (have.has(v)) continue
-    if (p === patch && unreleasedHasBullets) continue
-    missing.push(v)
+    if (!have.has(v)) missing.push(v)
   }
   return missing
 }
@@ -72,7 +60,7 @@ describe("CHANGELOG.md", () => {
     }
   })
 
-  it("has a heading for every patch release from 0.1.45 up to the package version (or the package version under a non-empty [Unreleased])", () => {
+  it("has a heading for every patch release from 0.1.45 up to and including the package version", () => {
     const missing = checkCoverage(md, pkgVersion)
     expect(missing, `missing heading(s): ${missing.map((v) => `## [${v}]`).join(", ")}`).toEqual([])
   })
@@ -87,8 +75,8 @@ describe("CHANGELOG.md", () => {
     }
   })
 
-  describe("checkCoverage (Important 5 — the auto-bump tolerance)", () => {
-    it("passes with the package version living under a non-empty [Unreleased] instead of its own heading", () => {
+  describe("checkCoverage", () => {
+    it("fails, naming the package version, when only [Unreleased] covers it", () => {
       const mutated = [
         "## [Unreleased]",
         "",
@@ -98,26 +86,53 @@ describe("CHANGELOG.md", () => {
         "",
         "## [0.1.45] - 2026-05-27",
         "",
-        "### Added",
-        "",
-        "- Something.",
-        "",
-      ].join("\n")
-      expect(checkCoverage(mutated, "0.1.46")).toEqual([])
-    })
-
-    it("fails, naming the version, when [Unreleased] is empty and the package version has no heading", () => {
-      const mutated = [
-        "## [Unreleased]",
-        "",
-        "## [0.1.45] - 2026-05-27",
-        "",
-        "### Added",
-        "",
         "- Something.",
         "",
       ].join("\n")
       expect(checkCoverage(mutated, "0.1.46")).toEqual(["0.1.46"])
+      expect(checkCoverage(mutated, "0.1.45")).toEqual([])
+    })
+  })
+
+  describe("promote-changelog (what the publish workflow runs on a bump)", () => {
+    const base = [
+      "# Changelog",
+      "",
+      "## [Unreleased]",
+      "",
+      "> note",
+      "",
+      "### Added",
+      "",
+      "- A thing.",
+      "",
+      "## [0.1.45] - 2026-05-27",
+      "",
+      "- Something.",
+      "",
+    ].join("\n")
+
+    it("moves the entries under the new heading and leaves [Unreleased] with its note", () => {
+      const out = promote(base, "0.1.46", "2026-05-28")
+      expect(out).toContain(
+        "## [Unreleased]\n\n> note\n\n## [0.1.46] - 2026-05-28\n\n### Added\n\n- A thing.",
+      )
+      expect(checkCoverage(out, "0.1.46")).toEqual([])
+      expect(out.indexOf("## [0.1.46]")).toBeLessThan(out.indexOf("## [0.1.45]"))
+    })
+
+    it("an empty [Unreleased] still gets a heading, and a version is never promoted twice", () => {
+      const empty = base.replace("### Added\n\n- A thing.\n\n", "")
+      expect(promote(empty, "0.1.46", "2026-05-28")).toContain(
+        "## [0.1.46] - 2026-05-28\n\n### Changed\n\n- No user-facing changes.",
+      )
+      expect(() => promote(base, "0.1.45", "2026-05-28")).toThrow(/already has a heading/)
+    })
+
+    it("the real changelog promotes cleanly to the next patch", () => {
+      const [maj, min, patch] = pkgVersion.split(".").map(Number)
+      const next = `${maj}.${min}.${patch + 1}`
+      expect(checkCoverage(promote(md, next, "2099-01-01"), next)).toEqual([])
     })
   })
 })
