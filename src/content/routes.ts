@@ -6,6 +6,8 @@
 // ---------------------------------------------------------------------------
 
 import { TOOL_REGISTRY } from "./generated/tool-registry"
+import { sections as appSections } from "./sections/apps"
+import { sections as toolGroupSections } from "./sections/tool-groups"
 
 const PAGES: Record<string, string> = {
   "mcp-introduction": "/docs/mcp",
@@ -36,6 +38,10 @@ const PAGES: Record<string, string> = {
 /** URL path of a section on talonic.com, by slug. */
 export const MCP_PATHS: Record<string, string> = {
   ...PAGES,
+  // App tools and tool-group pages keep the paths they shipped with.
+  ...Object.fromEntries(
+    [...appSections, ...toolGroupSections].map((s) => [s.slug, `/docs/mcp/${s.slug}`]),
+  ),
   ...Object.fromEntries(
     TOOL_REGISTRY.map((t) => [
       t.name.replace(/_/g, "-"),
