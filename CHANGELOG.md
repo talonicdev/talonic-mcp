@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
 
+## [0.1.106] - 2026-11-25
+
+### Changed
+
+- No user-facing changes.
+
 ## [0.1.105] - 2026-11-25
 
 ### Changed
