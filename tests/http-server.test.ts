@@ -186,6 +186,9 @@ describe("HTTP server routing", () => {
       "documents:read",
       "schemas:read",
       "apps:decide",
+      "sources:read",
+      "sources:write",
+      "documents:write",
     ])
   })
 

@@ -105,6 +105,12 @@ export const docGenAccessCached = makeAccessCache(pathProbe("/v1/doc-gen/status"
 export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
 /** @internal Exported for tests. */
 export const processesAccessCached = makeAccessCache(pathProbe("/v1/processes"))
+/**
+ * Integrations group: listed only where the platform serves
+ * `/v1/integrations/connectors` to this credential (route deployed and
+ * `sources:read` granted). @internal Exported for tests.
+ */
+export const integrationsAccessCached = makeAccessCache(pathProbe("/v1/integrations/connectors"))
 /** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
@@ -231,13 +237,30 @@ const GLAMA_CLAIM_TOKEN =
  * (filter, get_document, search), `schemas:read` (list_schemas), and
  * `apps:decide` (the seven decision-task tools; the platform's `decide`
  * tier needs it on an OAuth session, and it is never pre-consented, so the
- * consent page asks for it in person). Claude.ai requests exactly this
+ * consent page asks for it in person), and the integrations group's
+ * catalog scopes: `sources:read` (connectors, connect status, connections,
+ * browse, imports, sync settings), `sources:write` (connect, change sync
+ * settings) and `documents:write` (import, sync now). Requesting a
+ * catalog-only scope makes the grant a catalog grant on the platform: catalog
+ * names there mean exactly themselves, the other names keep their fold.
+ * Claude.ai requests exactly this
  * list, so an entry here is a consent-screen line; the platform's
  * `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s.
  * The Talonic authorization server supports more scopes than this; we
  * advertise only what the connector itself needs so the consent screen
  * stays tight.
  */
+/** @internal Exported for tests. The scopes the hosted connector requests. */
+export const SCOPES_SUPPORTED: readonly string[] = [
+  "extract:write",
+  "documents:read",
+  "schemas:read",
+  DECIDE_SCOPE,
+  "sources:read",
+  "sources:write",
+  "documents:write",
+]
+
 function renderProtectedResourceMetadata(resourcePath = ""): {
   resource: string
   authorization_servers: string[]
@@ -247,7 +270,7 @@ function renderProtectedResourceMetadata(resourcePath = ""): {
   return {
     resource: `${RESOURCE_URL}${resourcePath}`,
     authorization_servers: [AUTHORIZATION_SERVER],
-    scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
+    scopes_supported: [...SCOPES_SUPPORTED],
     bearer_methods_supported: ["header"],
   }
 }
@@ -353,6 +376,8 @@ export interface CreateRequestHandlerOptions {
   portfolioAccess?: (token: string) => Promise<boolean>
   /** Override the Process Plane tool visibility check (primarily for tests). */
   processesAccess?: (token: string) => Promise<boolean>
+  /** Override the integrations tool visibility check (primarily for tests). */
+  integrationsAccess?: (token: string) => Promise<boolean>
   /** Override the Agent-stage task tool visibility check (primarily for tests). */
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
@@ -660,6 +685,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeIntegrationsTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
     ] = await Promise.all([
@@ -674,6 +700,7 @@ export function createRequestHandler(
       (options.priceBaselineAccess ?? priceBaselineAccessCached)(token),
       (options.portfolioAccess ?? portfolioAccessCached)(token),
       (options.processesAccess ?? processesAccessCached)(token),
+      (options.integrationsAccess ?? integrationsAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
     ])
@@ -690,6 +717,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeIntegrationsTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),

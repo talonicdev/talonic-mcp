@@ -221,6 +221,16 @@ Cost to the user: one click. It's the same pattern as a Slack/Stripe "open in br
 
 ---
 
+## Connecting sources: the integrations tools
+
+Nine tools connect and work with sources: `talonic_integrations_connectors`, `talonic_integrations_connect`, `talonic_integrations_connect_status`, `talonic_sources_connections`, `talonic_sources_browse`, `talonic_sources_import`, `talonic_sources_imports`, `talonic_sources_sync_now` and `talonic_sources_sync_settings`. They are listed only when the Talonic platform serves `/v1/integrations` to your credential (an API key or OAuth grant with `sources:read`); importing and syncing also need `documents:write`, connecting and changing sync settings `sources:write`.
+
+Connecting works like the upload handoff: `talonic_integrations_connect` returns an `authorize_url`. You open it in a browser while signed in to Talonic, in the same workspace, confirm, and finish the provider's sign-in (Gmail, Google Drive, Outlook, OneDrive, SharePoint, Teams, Notion, HubSpot, Dropbox, Slack, Google Sheets). The agent polls `talonic_integrations_connect_status` until it reports `connected` and then uses the `connection_id`. Personal connections (mailboxes, notes, your own drive) show their content only as the connecting person's access allows.
+
+**No tool for credentials or keys.** Sources that connect with credentials (Amazon S3, Azure Blob Storage, SQL databases, Kendox, Granola, a Slack token, an external upload link) and source ingest keys have no MCP tool: secrets and keys never pass through an agent conversation. Enter them in the Talonic web app, or send them from your own system to `POST /v1/sources/connections/<type>` and `POST /v1/sources/:id/keys`.
+
+---
+
 ## Agent decision guide
 
 Pick the right tool before calling — the wrong one returns the wrong data, costs credits, and slows the conversation.
