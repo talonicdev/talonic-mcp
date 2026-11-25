@@ -7,7 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
+> Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
+
+## [0.1.105] - 2026-11-25
+
+### Changed
+
+- No user-facing changes.
+
+## [0.1.104] - 2026-11-25
+
+### Fixed
+
+- **Contract parties tools work again.** 0.1.103 sent seven route strings the platform no longer serves; `GET /v1/parties/issues` and `GET /v1/parties/contracts` fell into `GET /v1/parties/:id` and came back as "party not found". The tools now use the current routes, where a contract is a data-product row (`product_id` + `row_id`):
+  - `talonic_parties_issues` lists the parties needing attention (`GET /v1/parties?attention=true`). The `code` filter is gone (the API has none); each party's issues come with `talonic_parties_party`.
+  - `talonic_parties_contract` takes `product_id` + `row_id` (was `contract_id`) and reads `GET /v1/parties/rows/:productId/:rowId`.
+  - `talonic_parties_contracts` now lists one party's contracts (`party_id`, paged; `GET /v1/parties/:id/contracts`). The workspace-wide contract list has no API equivalent: use `talonic_parties_issues` / `talonic_parties_search` and open contracts from a party.
+  - `talonic_parties_set_role` adds a role with `product_id` + `row_id` (was `contract_id`; `POST /v1/parties/rows/:productId/:rowId/roles`). The change branch (`role_id`, `PATCH /v1/parties/roles/:roleId`) is unchanged. Role `our_party` is accepted.
+  - `talonic_parties_confirm` confirms the role ids it is given (`role_ids[]`, one `PATCH` each, per-id results). The bulk confirm by `min_confidence` has no API equivalent and is gone.
+  - `talonic_parties_read` reads one contract's documents (`product_id` + `row_id`; `POST …/read`) and waits on that row until the read is `done` or `failed`; `status: true` without a contract reports the workspace's read queue. The bulk queue (`contract_ids`, `only_unread`, `force`, `dry_run`) has no API equivalent; refilling every contract from the data is the new `talonic_parties_sync`.
+
+### Added
+
+- `talonic_parties_documents`, `talonic_parties_history` (a party's documents and history, paged), `talonic_parties_names` (aliases and former names: add, confirm / reject, remove), `talonic_parties_directory_link` (link to or unlink from the CRM directory), `talonic_parties_address_choice` (CRM or contract address for letters), `talonic_parties_sync` (refill from the data products, optional wait). `talonic_parties_party` takes `overview` and `product_id`; `talonic_parties_search` takes `scope`, `product_id` and `offset`. Eighteen parties tools in all, still listed only where the Parties app is on.
+- `talonic_find_data` takes `account` (one portfolio company, by name or alias) and `concepts[]`, matching the platform's `find_data`; a test holds the tool's parameters to the platform's schema.
+- Rendered docs pages for the 21 `talonic_process_*` tools (`src/content/sections/processes.ts`, nav under Tool Reference); before, they existed only in the unrendered `docs/sections.json`.
+
+### Changed
+
+- **CI refuses a tool whose route is not in the public API.** `npm run check:routes` checks every `/v1/...` route string in `src/tools/**` against the live spec (`api.talonic.com/v1/docs/openapi.json`, pinned fallback), verb included, and refuses a literal in a uuid path slot; `tests/tools/route-branches.test.ts` calls every tool and every argument-picked branch. Known gaps are listed with a reason in `scripts/route-gaps.json`.
+- `tests/content/tool-sections.test.ts` fails when a tool is documented only in `docs/sections.json`.
+- Tool counts in `AGENTS.md` and `STATUS.md` are generated from `tools/list` (`scripts/tool-inventory.mjs`) and test-locked; public, optional (app-gated) and internal groups are counted apart.
+- The changelog lock requires a `## [x.y.z]` heading for the package version; the publish workflow promotes `[Unreleased]` when it bumps.
+- Tool and docs text for `talonic_find_data`, the parties tools and `talonic_process_create` no longer describes internal mechanics.
+
+## [0.1.103] - 2026-11-24
 
 ### Added
 
@@ -17,6 +51,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace data catalog and suggestions.** Nine probe-gated tools: `talonic_catalog_list`, `talonic_catalog_get` and `talonic_catalog_rows` (rows with their source documents, filtered by `where`, with a `withheld` count), and `talonic_suggestion_*` to list and answer questions about the workspace's data and to decide suggested field mappings and matches between tables. Listed only when `GET /v1/catalog` answers for the credential.
 - **Schema review and link keys.** Probe-gated `talonic_schema_review_queue`, `talonic_schema_review_approve`, `talonic_schema_review_reject` (the decision records who and when) and `talonic_link_key_set` (needs an Admin of the workspace; turning a key on links existing documents in the background). Listed only when `GET /v1/schema-graph/review-queue` answers for the credential.
 - **OAuth scopes for these tools.** The hosted server also advertises `products:read`, `products:write`, `specs:read`, `specs:write`, `runs:write`, `records:read`, `records:write`, `reviews:read` and `reviews:write`; the platform's OAuth scope list must contain them before a release that advertises them.
+- **Apps toolset: build, run and review an app.** Twenty-five tools over `/v1/apps/*`, `/v1/runs/*` and `/v1/reviews/*`, listed when the credential can read the workspace's apps: `talonic_create_app`, `talonic_get_app`, `talonic_get_app_logic`, `talonic_get_app_fields`, `talonic_save_app_draft`, `talonic_interpret_app_rules`, `talonic_propose_app_edit`, `talonic_apply_app_edit`, `talonic_list_app_versions`, `talonic_publish_app`, `talonic_enable_app`, `talonic_disable_app`, `talonic_get_app_acceptance`, `talonic_save_app_acceptance`, `talonic_check_app_acceptance`, `talonic_run_app`, `talonic_list_app_runs`, `talonic_get_app_run`, `talonic_get_run_record`, `talonic_get_run_verdicts`, `talonic_list_app_reviews`, `talonic_raise_app_review`, `talonic_resolve_app_review`, `talonic_interview_app_review`, `talonic_list_app_precedents`. Ported from the 2026-08 `feat/apps-toolset` branch and re-checked against the current routes: app ids are UUIDs, `autonomous` is a mode, lists page by `offset`, review feedback uses `partial`, run options travel in the body.
+- **Drive a rule-finding round from outside.** Six `talonic_mining_*` tools for autonomous apps: list, read and start rounds, list a claimed round's tools, call one (busy rounds retried, long calls polled), and read a call that outlived the wait. The round is claimed, kept and closed with the existing decision-task tools, which a workspace with an autonomous app now also lists. The three driver tools need the `decide` access the decision-task tools need.
+
+- **Probe-gated tool groups** (`src/tools/_groups.ts`), each listed only when its probe passes for the connection, each with a docs page under "App and Admin Tools":
+  - Documents, extractions, jobs and schemas (14): `talonic_list_documents`, `talonic_reextract_document`, `talonic_delete_document`, `talonic_list_extractions`, `talonic_get_extraction`, `talonic_get_extraction_data`, `talonic_correct_extraction`, `talonic_list_jobs`, `talonic_get_job`, `talonic_get_job_results`, `talonic_create_job` (refuses a whole-workspace job unless `all_documents: true`), `talonic_cancel_job`, `talonic_update_schema`, `talonic_delete_schema`. Deletes and the schema replace carry `destructiveHint`.
+  - `talonic_list_events` over `GET /v1/events` (`after` / `since` / `next_cursor`).
+  - `talonic_aggregate_catalog` and `talonic_aggregate` over `/v1/aggregate` (supersedes PR #57: probes the catalog GET instead of taking the one-in-flight POST slot; refuses offset-less timestamps, inverted windows and bad or repeated query ids before calling).
+  - Workspace administration (11): API keys list / create / revoke, account snapshot, webhooks list / get / create / update / delete, webhook event types, buy-credits link.
+  - Contract Desk (16) and Transport Folders (13): work lists, evidence, decide / undo, assign / confirm and their withdrawals, the load's document set as an embedded PDF (up to 8 MB).
+  - Compliance (39), Money Found (5), Customs declaration (3).
 
 ## [0.1.102] - 2026-11-22
 

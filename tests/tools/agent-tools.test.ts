@@ -1,5 +1,9 @@
+import { readFileSync } from "node:fs"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { z } from "zod"
 import {
+  FIND_DATA_REGISTRY_ARGS,
+  findDataInputSchema,
   handleFindData,
   handleInvokeAgentTool,
   handleListAgentTools,
@@ -221,5 +225,77 @@ describe("talonic_invoke_agent_tool steers questions to talonic_ask", () => {
       args: {},
     })
     expect(res.content).toHaveLength(1)
+  })
+})
+
+describe("named registry tools keep the registry's parameters", () => {
+  const registry = JSON.parse(
+    readFileSync(new URL("../fixtures/agent-registry-schemas.json", import.meta.url), "utf8"),
+  ) as {
+    tools: Record<
+      string,
+      { properties: Record<string, { type: string; items?: { type: string } }>; required: string[] }
+    >
+  }
+  const find = registry.tools["find_data"]!
+  const named = z.toJSONSchema(z.object(findDataInputSchema)) as {
+    properties: Record<string, { type: string; items?: { type: string } }>
+    required?: string[]
+  }
+  const toRegistry = FIND_DATA_REGISTRY_ARGS as Record<string, string>
+
+  it("every registry parameter of find_data is a talonic_find_data parameter", () => {
+    const covered = new Set(Object.values(toRegistry))
+    expect([...Object.keys(find.properties)].filter((p) => !covered.has(p))).toEqual([])
+  })
+
+  it("every talonic_find_data parameter maps to a registry parameter of the same type", () => {
+    expect(Object.keys(named.properties).sort()).toEqual(Object.keys(toRegistry).sort())
+    for (const [mine, theirs] of Object.entries(toRegistry)) {
+      const r = find.properties[theirs]
+      expect(r, `${mine} → ${theirs} is not in the registry`).toBeDefined()
+      const m = named.properties[mine]!
+      const type = (t: string) => (t === "integer" ? "number" : t)
+      expect(type(m.type), mine).toBe(type(r!.type))
+      if (r!.items) expect(type(m.items!.type), `${mine}[]`).toBe(type(r!.items.type))
+    }
+  })
+
+  it("the registry's required parameters are required on the named tool", () => {
+    for (const req of find.required) {
+      const mine = Object.entries(toRegistry).find(([, t]) => t === req)?.[0]
+      expect(named.required ?? [], req).toContain(mine)
+    }
+  })
+
+  it("the handler sends every parameter under its registry name", async () => {
+    const { calls } = stubFetch({ tool: "find_data", ok: true, content: "{}" })
+    await handleFindData(getToken, undefined, {
+      query: "revenue",
+      concepts: ["revenue", "ebitda"],
+      top_k: 3,
+      document_ids: ["5f2b3c1e-1c6a-4d3a-9d3a-3f2b1c6a4d3a"],
+      account: " Filu ",
+    })
+    expect(sentBody(calls[0]!)).toEqual({
+      args: {
+        query: "revenue",
+        concepts: ["revenue", "ebitda"],
+        top_k: 3,
+        document_scope: ["5f2b3c1e-1c6a-4d3a-9d3a-3f2b1c6a4d3a"],
+        account: "Filu",
+      },
+    })
+    expect(Object.keys(sentBody(calls[0]!).args).sort()).toEqual(
+      Object.keys(find.properties).sort(),
+    )
+    vi.unstubAllGlobals()
+  })
+
+  it("account and document_ids scope together; an account alone is passed through", async () => {
+    const { calls } = stubFetch({ tool: "find_data", ok: true, content: "{}" })
+    await handleFindData(getToken, undefined, { query: "revenue", account: "Filu" })
+    expect(sentBody(calls[0]!)).toEqual({ args: { query: "revenue", account: "Filu" } })
+    vi.unstubAllGlobals()
   })
 })

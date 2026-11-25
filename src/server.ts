@@ -22,12 +22,15 @@ import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
+import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeDataProductsAccess } from "./tools/data-products.js"
 import { probeDataPoliciesAccess } from "./tools/data-policies.js"
 import { probeWorkspaceDataAccess } from "./tools/workspace-data.js"
 import { probeSchemaReviewAccess } from "./tools/schema-review.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { probeToolGroups } from "./tools/tool-groups.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -117,6 +120,9 @@ export async function main(
     includeDataPolicyTools,
     includeWorkspaceDataTools,
     includeSchemaReviewTools,
+    appsToolsetAnswer,
+    miningAnswer,
+    toolGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -133,7 +139,13 @@ export async function main(
     probeDataPoliciesAccess(apiKey, baseUrl),
     probeWorkspaceDataAccess(apiKey, baseUrl),
     probeSchemaReviewAccess(apiKey, baseUrl),
+    probeAppsToolsetAccess(apiKey, baseUrl),
+    probeMiningInUse(apiKey, baseUrl),
+    probeToolGroups(apiKey, baseUrl),
   ])
+  // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
+  const includeAppsToolset = appsToolsetAnswer === true
+  const includeMiningDriverTools = miningAnswer === true
   const server = createServer({
     apiKey,
     ...(baseUrl ? { baseUrl } : {}),
@@ -152,6 +164,9 @@ export async function main(
     includeDataPolicyTools,
     includeWorkspaceDataTools,
     includeSchemaReviewTools,
+    includeAppsToolset,
+    includeMiningDriverTools,
+    toolGroups,
   })
 
   const transport = new StdioServerTransport()

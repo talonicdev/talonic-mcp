@@ -2616,11 +2616,11 @@
     "parentSlug": "mcp-tools",
     "title": "talonic_find_data",
     "seoTitle": "talonic_find_data — Locate Data Behind a Concept",
-    "description": "MCP tool that resolves a natural-language concept to the registry fields, values, documents and passages that carry it, by meaning — the same retrieval the in-product Talonic agent uses.",
+    "description": "MCP tool that resolves a natural-language concept to the fields, values, documents and passages that carry it, optionally within one account (portfolio company).",
     "content": [
       {
         "type": "paragraph",
-        "text": "Locate the **real data behind a concept** before querying anything. Semantic plus lexical retrieval resolves a phrase in the user's words ('payment volume per transaction', 'Vertragslaufzeit') to the registry fields, values, documents and text passages that carry it — even when the field was captured under a different name. It is the same `find_data` primitive the in-product Talonic agent calls first, exposed with no model in the loop."
+        "text": "Locate the **real data behind a concept** before querying anything. It resolves a phrase in the user's words ('payment volume per transaction', 'Vertragslaufzeit'), by meaning and by its words, to the fields, values, documents and text passages that carry it — even when the field was captured under a different name. Pass `account` when the question names one portfolio company, so another company's figures cannot come back."
       },
       {
         "type": "heading",
@@ -2661,17 +2661,28 @@
           {
             "name": "query",
             "type": "string",
+            "required": true,
             "description": "The concept, in the user's words."
+          },
+          {
+            "name": "concepts",
+            "type": "string[]",
+            "description": "Several concepts resolved to fields in one call (fields only, no text search)."
           },
           {
             "name": "top_k",
             "type": "number",
-            "description": "Max results per plane (1–25, default 10)."
+            "description": "Max results per group (1–25, default 10)."
           },
           {
             "name": "document_ids",
             "type": "string[]",
-            "description": "Hard scope: restrict every plane to these documents."
+            "description": "Hard scope: restrict every group to these documents."
+          },
+          {
+            "name": "account",
+            "type": "string",
+            "description": "Only the documents of this account (portfolio company), by name or alias, e.g. `Filu` (see `talonic_list_accounts`). Narrows like `document_ids`; an unknown name returns an error listing the accounts."
           }
         ]
       },
@@ -2687,12 +2698,12 @@
           {
             "name": "result.fields",
             "type": "array",
-            "description": "Matching concepts: canonical_name, field ids/keys, tier, occurrence_count, sample values with their documents."
+            "description": "Matching concepts: canonical_name, field ids/keys, maturity, occurrence_count, sample values with their documents."
           },
           {
             "name": "result.values / result.documents / result.passages",
             "type": "array",
-            "description": "Value, document and passage planes — each item a ready handle for the next call."
+            "description": "Value, document and passage groups — each item a ready handle for the next call."
           },
           {
             "name": "citations",
@@ -2705,13 +2716,13 @@
         "type": "code",
         "language": "json",
         "title": "Tool input",
-        "code": "{ \"query\": \"contract end date\", \"top_k\": 5 }"
+        "code": "{ \"query\": \"revenue\", \"account\": \"Filu\", \"top_k\": 5 }"
       },
       {
         "type": "code",
         "language": "json",
         "title": "Tool response",
-        "code": "{\n  \"tool\": \"find_data\",\n  \"result\": {\n    \"fields\": [{ \"canonical_name\": \"contract_end_date\", \"field_key\": \"contract_end_date\", \"tier\": 2, \"occurrence_count\": 88, \"samples\": [{ \"value\": \"2027-12-31\", \"document_id\": \"f0e1…\" }] }],\n    \"documents\": [{ \"document_id\": \"f0e1…\", \"filename\": \"Supply-Agreement-2024.pdf\", \"score\": 0.81 }],\n    \"passages\": []\n  },\n  \"citations\": [{ \"document_id\": \"f0e1…\" }]\n}"
+        "code": "{\n  \"tool\": \"find_data\",\n  \"result\": {\n    \"fields\": [{ \"canonical_name\": \"contract_end_date\", \"field_key\": \"contract_end_date\", \"occurrence_count\": 88, \"samples\": [{ \"value\": \"2027-12-31\", \"document_id\": \"f0e1…\" }] }],\n    \"documents\": [{ \"document_id\": \"f0e1…\", \"filename\": \"Supply-Agreement-2024.pdf\", \"score\": 0.81 }],\n    \"passages\": []\n  },\n  \"citations\": [{ \"document_id\": \"f0e1…\" }]\n}"
       }
     ],
     "related": [
@@ -5919,8 +5930,8 @@
     "slug": "mcp-talonic-process-list",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_list",
-    "seoTitle": "talonic_process_list — List Processes",
-    "description": "MCP tool that lists a Talonic workspace's processes with their live version, folder and tags.",
+    "seoTitle": "talonic_process_list — List a Workspace's Processes",
+    "description": "MCP tool that lists a Talonic workspace's processes with their live version, folder, tags and number of steps. Start here: the other process tools take its id.",
     "content": [
       {
         "type": "paragraph",
@@ -5960,7 +5971,7 @@
     "parentSlug": "mcp-tools",
     "title": "talonic_process_run",
     "seoTitle": "talonic_process_run — Start a Process for One Item",
-    "description": "MCP tool that starts a published Talonic process for one item, with values by field name, and returns the process's reply.",
+    "description": "MCP tool that starts a published Talonic process for one item, with values given by field name, and returns the process's reply or where the run stands now.",
     "content": [
       {
         "type": "paragraph",
@@ -6017,8 +6028,8 @@
     "slug": "mcp-talonic-process-status",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_status",
-    "seoTitle": "talonic_process_status — Process Run Status",
-    "description": "MCP tool that shows where a Talonic process run stands, per step and per item.",
+    "seoTitle": "talonic_process_status — Where a Process Run Stands",
+    "description": "MCP tool that shows where a Talonic process run stands: per step how many items are waiting, done or failed, and each item's state. Default: the latest run.",
     "content": [
       {
         "type": "paragraph",
@@ -6069,8 +6080,8 @@
     "slug": "mcp-talonic-process-runs",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_runs",
-    "seoTitle": "talonic_process_runs — Runs Across Processes",
-    "description": "MCP tool that lists Talonic process runs across all processes, newest first, with filters.",
+    "seoTitle": "talonic_process_runs — Process Runs Across Processes",
+    "description": "MCP tool that lists Talonic process runs across all processes, newest first, with items done, waiting and failed; filter by process or runs waiting for you.",
     "content": [
       {
         "type": "paragraph",
@@ -6129,8 +6140,8 @@
     "slug": "mcp-talonic-process-waiting-for-me",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_waiting_for_me",
-    "seoTitle": "talonic_process_waiting_for_me — Waiting for Me",
-    "description": "MCP tool that lists the Talonic sign-offs and forms waiting for the caller.",
+    "seoTitle": "talonic_process_waiting_for_me — Sign-offs for You",
+    "description": "MCP tool that lists the Talonic sign-offs and forms waiting for the caller, per process and step, with how many items wait on each before the run moves on.",
     "content": [
       {
         "type": "paragraph",
@@ -6164,8 +6175,8 @@
     "slug": "mcp-talonic-process-sign",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_sign",
-    "seoTitle": "talonic_process_sign — Sign a Process Step",
-    "description": "MCP tool that signs a sign-off step of a Talonic process run for the caller.",
+    "seoTitle": "talonic_process_sign — Sign a Step of a Process Run",
+    "description": "MCP tool that signs a sign-off step of a Talonic process run for the caller: approve every waiting item or only some, with a decision where the step offers one.",
     "content": [
       {
         "type": "paragraph",
@@ -6235,8 +6246,8 @@
     "slug": "mcp-talonic-process-get",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_get",
-    "seoTitle": "talonic_process_get — One Process",
-    "description": "MCP tool that reads one Talonic process with its draft: fields, steps and the arrows between them.",
+    "seoTitle": "talonic_process_get — Read One Process and Its Draft",
+    "description": "MCP tool that reads one Talonic process with its draft: its fields, its steps with their ids and settings, and the arrows between them, before changing it.",
     "content": [
       {
         "type": "paragraph",
@@ -6286,12 +6297,12 @@
     "slug": "mcp-talonic-process-create",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_create",
-    "seoTitle": "talonic_process_create — New Process Draft",
-    "description": "MCP tool that sets up a new Talonic process as a draft, from a description in plain words or an exported n8n workflow.",
+    "seoTitle": "talonic_process_create — Set Up a New Process Draft",
+    "description": "MCP tool that sets up a new Talonic process as a draft, from a description in plain words or an exported n8n workflow. Nothing runs until it is published.",
     "content": [
       {
         "type": "paragraph",
-        "text": "Set up a new process as a draft. Pass `description` in the user's own words (what comes in, what is read or checked, who decides, what goes out), or `workflow_json` with an exported n8n workflow to take it over. Nothing runs and nothing is sent until the process is published. The answer names what a person still has to choose (`stillOpen`, `questions`). A description uses a model call. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+        "text": "Set up a new process as a draft. Pass `description` in the user's own words (what comes in, what is read or checked, who decides, what goes out), or `workflow_json` with an exported n8n workflow to take it over. Nothing runs and nothing is sent until the process is published. The answer names what a person still has to choose (`stillOpen`, `questions`). Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
       },
       {
         "type": "param-table",
@@ -6347,8 +6358,8 @@
     "slug": "mcp-talonic-process-change",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_change",
-    "seoTitle": "talonic_process_change — Change a Process Draft",
-    "description": "MCP tool that changes a Talonic process draft from an instruction in plain words, and asks first when the change reduces governance.",
+    "seoTitle": "talonic_process_change — Change a Talonic Process Draft",
+    "description": "MCP tool that changes a Talonic process draft from an instruction in plain words, and saves nothing until the user agreed when the change reduces governance.",
     "content": [
       {
         "type": "paragraph",
@@ -6420,8 +6431,8 @@
     "slug": "mcp-talonic-process-check",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_check",
-    "seoTitle": "talonic_process_check — Check a Process Draft",
-    "description": "MCP tool that says what a Talonic process draft still needs before it can go live and what publishing would change.",
+    "seoTitle": "talonic_process_check — Check a Draft Before Going Live",
+    "description": "MCP tool that says what a Talonic process draft still needs per step before it can go live, every problem it finds, and what publishing it would change.",
     "content": [
       {
         "type": "paragraph",
@@ -6475,8 +6486,8 @@
     "slug": "mcp-talonic-process-test-run",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_test_run",
-    "seoTitle": "talonic_process_test_run — Test a Process Draft",
-    "description": "MCP tool that runs a Talonic process draft on real documents in a test copy that sends nothing.",
+    "seoTitle": "talonic_process_test_run — Test a Process Draft Safely",
+    "description": "MCP tool that runs a Talonic process draft on real documents in a test copy that sends nothing out, so you can see each step's result before going live.",
     "content": [
       {
         "type": "paragraph",
@@ -6536,8 +6547,8 @@
     "slug": "mcp-talonic-process-publish",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_publish",
-    "seoTitle": "talonic_process_publish — Publish a Process",
-    "description": "MCP tool that makes a Talonic process draft the live version.",
+    "seoTitle": "talonic_process_publish — Make a Process Draft Live",
+    "description": "MCP tool that makes a Talonic process draft the live version, so it starts, sends mail and calls systems for real. Refused while the check still finds an error.",
     "content": [
       {
         "type": "paragraph",
@@ -6597,8 +6608,8 @@
     "slug": "mcp-talonic-process-versions",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_versions",
-    "seoTitle": "talonic_process_versions — Process Versions",
-    "description": "MCP tool that lists the published versions of a Talonic process.",
+    "seoTitle": "talonic_process_versions — Published Process Versions",
+    "description": "MCP tool that lists the published versions of a Talonic process, newest first, with who published each one and why, to choose a version to roll back to.",
     "content": [
       {
         "type": "paragraph",
@@ -6648,8 +6659,8 @@
     "slug": "mcp-talonic-process-rollback",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_rollback",
-    "seoTitle": "talonic_process_rollback — Roll a Process Back",
-    "description": "MCP tool that makes an earlier published version of a Talonic process live again.",
+    "seoTitle": "talonic_process_rollback — Roll a Process Back Live",
+    "description": "MCP tool that makes an earlier published version of a Talonic process live again. It changes what runs for real, so call it only when the user asks for it.",
     "content": [
       {
         "type": "paragraph",
@@ -6705,8 +6716,8 @@
     "slug": "mcp-talonic-process-delete",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_delete",
-    "seoTitle": "talonic_process_delete — Delete a Process",
-    "description": "MCP tool that deletes a Talonic process.",
+    "seoTitle": "talonic_process_delete — Delete a Process for Good",
+    "description": "MCP tool that deletes a Talonic process. Not possible while a run is open, and it cannot be undone: call it only when the user named the process to delete.",
     "content": [
       {
         "type": "paragraph",
@@ -6756,8 +6767,8 @@
     "slug": "mcp-talonic-process-item",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_item",
-    "seoTitle": "talonic_process_item — One Item of a Process Run",
-    "description": "MCP tool that shows one item's way through a Talonic process run, step by step, and its values.",
+    "seoTitle": "talonic_process_item — One Item's Way Through a Run",
+    "description": "MCP tool that shows one item's way through a Talonic process run, step by step, with status, time and notes such as why it stopped, and its values now.",
     "content": [
       {
         "type": "paragraph",
@@ -6819,8 +6830,8 @@
     "slug": "mcp-talonic-process-retry",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_retry",
-    "seoTitle": "talonic_process_retry — Retry a Run's Failed Steps",
-    "description": "MCP tool that tries every failed step of a Talonic process run again.",
+    "seoTitle": "talonic_process_retry — Retry the Failed Steps of a Run",
+    "description": "MCP tool that tries every failed step of a Talonic process run again. Steps that send or call will send or call again: use it once the cause is fixed.",
     "content": [
       {
         "type": "paragraph",
@@ -6870,8 +6881,8 @@
     "slug": "mcp-talonic-process-send-back",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_send_back",
-    "seoTitle": "talonic_process_send_back — Send Items Back from a Sign-off",
-    "description": "MCP tool that sends items back from a sign-off step of a Talonic process run, with a reason, for the caller.",
+    "seoTitle": "talonic_process_send_back — Send Items Back in a Run",
+    "description": "MCP tool that sends items back from a sign-off step of a Talonic process run with a reason, for the caller: the opposite of signing, where they are assigned.",
     "content": [
       {
         "type": "paragraph",
@@ -6945,8 +6956,8 @@
     "slug": "mcp-talonic-process-setup",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_setup",
-    "seoTitle": "talonic_process_setup — What Processes Can Use",
-    "description": "MCP tool that lists who a Talonic process step can wait for, the connected mailboxes, secret names and look-up data.",
+    "seoTitle": "talonic_process_setup — People, Mailboxes and Look-ups",
+    "description": "MCP tool that lists what Talonic processes can use: who a step can wait for, the connected mailboxes, the names of stored secrets and data look-ups can read.",
     "content": [
       {
         "type": "paragraph",
@@ -6985,8 +6996,8 @@
     "slug": "mcp-talonic-process-mailbox-ownership",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_mailbox_ownership",
-    "seoTitle": "talonic_process_mailbox_ownership — Say Whose a Mailbox Is",
-    "description": "MCP tool that marks a connected mailbox as one person's own or the company's, which decides who may put it on a Talonic process.",
+    "seoTitle": "talonic_process_mailbox_ownership — Mailbox Owners",
+    "description": "MCP tool that marks a connected mailbox as one person's own or the company's, which decides who may put it on a Talonic process. A governance decision.",
     "content": [
       {
         "type": "paragraph",
@@ -7038,8 +7049,8 @@
     "slug": "mcp-talonic-process-address",
     "parentSlug": "mcp-tools",
     "title": "talonic_process_address",
-    "seoTitle": "talonic_process_address — A Process's Address for Other Systems",
-    "description": "MCP tool that shows whether a Talonic process has an address other systems send items to, and makes one.",
+    "seoTitle": "talonic_process_address — A Process's Inbound Address",
+    "description": "MCP tool that shows whether a Talonic process has an address other systems send items to, and makes one when asked; the address is shown once, when made.",
     "content": [
       {
         "type": "paragraph",
@@ -7101,6 +7112,4514 @@
       "process",
       "workflow",
       "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-data-management-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Documents, extractions, jobs and schemas",
+    "seoTitle": "Manage Documents, Extractions, Jobs and Schemas via MCP",
+    "description": "MCP tools to list, re-extract and delete Talonic documents, read and correct extracted values, run and cancel jobs over many documents, and edit saved schemas.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "These tools cover the day-to-day housekeeping of a workspace: listing documents, reading a document again, correcting values, running one saved schema over many documents as a job, and changing or removing saved schemas. Every call runs as the person behind the connection: a document that person cannot see answers 404, exactly like a missing one."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "text": "The tools are listed when the connection can read the workspace's documents; changes need the `write` scope. `talonic_delete_document` and `talonic_delete_schema` cannot be undone, and `talonic_update_schema` with a new field list removes every field you do not send again. Agents confirm with the user before calling them. Re-extracting a document and creating a job consume credits and are not deduplicated: after a timeout, check the first call's result before calling again."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-documents",
+        "text": "talonic_list_documents"
+      },
+      {
+        "type": "paragraph",
+        "text": "List documents, newest first, one page at a time. Returns `data[]` (id, filename, pages, status, source, field count, created_at) and `pagination { total, limit, has_more, next_cursor }`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "string",
+            "description": "Only documents with this status, e.g. `error`."
+          },
+          {
+            "name": "source_id",
+            "type": "UUID",
+            "description": "Only documents from this source."
+          },
+          {
+            "name": "source_type",
+            "type": "string",
+            "description": "Only documents from this kind of source."
+          },
+          {
+            "name": "search",
+            "type": "string",
+            "description": "Filename contains (case-insensitive)."
+          },
+          {
+            "name": "parent_id",
+            "type": "UUID",
+            "description": "Only documents unpacked from this one (email attachments, archive members)."
+          },
+          {
+            "name": "relation",
+            "type": "string",
+            "description": "Only nested documents of this kind."
+          },
+          {
+            "name": "top_level",
+            "type": "boolean",
+            "description": "`true` hides nested documents."
+          },
+          {
+            "name": "text_degraded",
+            "type": "boolean",
+            "description": "`true`: only documents whose text could not be read verbatim."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Items per page, 1-100. Default 20."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "`pagination.next_cursor` of the previous page."
+          },
+          {
+            "name": "order",
+            "type": "asc | desc",
+            "description": "By creation time. Default desc (newest first)."
+          },
+          {
+            "name": "after",
+            "type": "ISO-8601",
+            "description": "Only items created after this time."
+          },
+          {
+            "name": "before",
+            "type": "ISO-8601",
+            "description": "Only items created before this time."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-reextract-document",
+        "text": "talonic_reextract_document"
+      },
+      {
+        "type": "paragraph",
+        "text": "Read an existing document again and capture its values afresh, without uploading it again. Consumes credits like a new extraction. Answers at once with `status: processing`; poll `talonic_get_document` until it is `completed`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The document."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-delete-document",
+        "text": "talonic_delete_document"
+      },
+      {
+        "type": "paragraph",
+        "text": "Delete one document with its captured values. Cannot be undone. Documents only shared with the user are read-only and answer 404. Returns `{ deleted: true, id }`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The document."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-extractions",
+        "text": "talonic_list_extractions"
+      },
+      {
+        "type": "paragraph",
+        "text": "List extractions, one per document with captured values, newest first. An extraction's id is its document's id."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "description": "Only this document's extraction."
+          },
+          {
+            "name": "status",
+            "type": "complete | failed",
+            "description": "Only finished or failed ones."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Items per page, 1-100. Default 20."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "`pagination.next_cursor` of the previous page."
+          },
+          {
+            "name": "order",
+            "type": "asc | desc",
+            "description": "By creation time. Default desc (newest first)."
+          },
+          {
+            "name": "after",
+            "type": "ISO-8601",
+            "description": "Only items created after this time."
+          },
+          {
+            "name": "before",
+            "type": "ISO-8601",
+            "description": "Only items created before this time."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-extraction",
+        "text": "talonic_get_extraction"
+      },
+      {
+        "type": "paragraph",
+        "text": "One extraction in full: every field with its value, type and confidence."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "extraction_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The extraction (document) id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-extraction-data",
+        "text": "talonic_get_extraction_data"
+      },
+      {
+        "type": "paragraph",
+        "text": "One extraction's values as a flat field → value map, or as a one-row CSV (`{ format: 'csv', csv }`)."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "extraction_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The extraction (document) id."
+          },
+          {
+            "name": "format",
+            "type": "json | csv",
+            "description": "Default json."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-correct-extraction",
+        "text": "talonic_correct_extraction"
+      },
+      {
+        "type": "paragraph",
+        "text": "Correct captured values. Each correction is kept as a new version of the value, attributed to the connection. A value a reviewer confirmed, or one waiting for approval, is not overwritten: it is reported in `cells_skipped`. Returns the extraction with `cells_written` and `cells_skipped`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "extraction_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The extraction (document) id."
+          },
+          {
+            "name": "values",
+            "type": "object",
+            "required": true,
+            "description": "`{ <field_name>: corrected value }` for the fields to change."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-jobs",
+        "text": "talonic_list_jobs"
+      },
+      {
+        "type": "paragraph",
+        "text": "List jobs (one saved schema run over a set of documents), newest first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "string",
+            "description": "Only jobs with this status."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Items per page, 1-100. Default 20."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "`pagination.next_cursor` of the previous page."
+          },
+          {
+            "name": "order",
+            "type": "asc | desc",
+            "description": "By creation time. Default desc (newest first)."
+          },
+          {
+            "name": "after",
+            "type": "ISO-8601",
+            "description": "Only items created after this time."
+          },
+          {
+            "name": "before",
+            "type": "ISO-8601",
+            "description": "Only items created before this time."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-job",
+        "text": "talonic_get_job"
+      },
+      {
+        "type": "paragraph",
+        "text": "One job's status, schema, document count, timestamps and error. Poll it after `talonic_create_job`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "job_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The job."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-job-results",
+        "text": "talonic_get_job_results"
+      },
+      {
+        "type": "paragraph",
+        "text": "A job's result rows: one per document with its values, confidence and validation flags. Readable while the job still runs."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "job_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The job."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-create-job",
+        "text": "talonic_create_job"
+      },
+      {
+        "type": "paragraph",
+        "text": "Run a saved schema over many documents and collect one row of values per document. Consumes credits per document. Name the documents, or pass `all_documents: true` for every completed document of the workspace. Returns the job id; poll `talonic_get_job`."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "schema_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The saved schema to run."
+          },
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "description": "The documents to process."
+          },
+          {
+            "name": "all_documents",
+            "type": "boolean",
+            "description": "`true`: every completed document, instead of `document_ids`."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "A name for the job, up to 200 characters."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-cancel-job",
+        "text": "talonic_cancel_job"
+      },
+      {
+        "type": "paragraph",
+        "text": "Cancel a pending or running job; rows already produced stay. Safe to retry: a job that already ended answers 409 and is left as it is."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "job_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The job."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-update-schema",
+        "text": "talonic_update_schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "Rename a saved schema, change its description, or replace its field list. A new `definition` or `fields` list replaces every field, so read the schema first with `talonic_get_schema` and send the whole list. A schema managed by a Spec answers 409; change the Spec in the app instead."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "schema_id",
+            "type": "string",
+            "required": true,
+            "description": "UUID or SCH-XXXXXXXX short id."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "New name, up to 100 characters."
+          },
+          {
+            "name": "description",
+            "type": "string | null",
+            "description": "New description; null clears it."
+          },
+          {
+            "name": "definition",
+            "type": "object",
+            "description": "The full field list as JSON Schema: `{ properties, required }`."
+          },
+          {
+            "name": "fields",
+            "type": "object[]",
+            "description": "The full field list as rows: `field_name`, `display_name`, `data_type`, `description`, `is_required`."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-delete-schema",
+        "text": "talonic_delete_schema"
+      },
+      {
+        "type": "paragraph",
+        "text": "Delete a saved schema. Cannot be undone; documents already extracted with it keep their values. A schema managed by a Spec answers 409."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "schema_id",
+            "type": "string",
+            "required": true,
+            "description": "UUID or SCH-XXXXXXXX short id."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-events-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Events",
+    "seoTitle": "talonic_list_events — Read the Talonic Workspace Event Feed",
+    "description": "MCP tool that reads your Talonic workspace's event feed (extractions, run results, review verdicts, deliveries) and resumes from a saved cursor later.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "**`talonic_list_events`** reads what happened in the workspace: documents extracted, runs completed or failed, review verdicts, delivery outcomes. These are the same events your webhooks receive, so an agent or a scheduled job can catch up on anything a webhook missed, or answer “what failed since this morning?”."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Listed when the connection can read the workspace. Only events about documents the connected person may see are returned."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-events",
+        "text": "talonic_list_events"
+      },
+      {
+        "type": "paragraph",
+        "text": "Two ways to page. Without `after` you get the newest events first, paged with `limit` and `offset`. With `after` set to an event id or a saved `next_cursor`, you get strictly newer events, oldest first: process them in order, save the returned `next_cursor`, and pass it as `after` next time. `next_cursor` is `null` only at the end of the feed."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "after",
+            "type": "string",
+            "description": "Resume point: a saved `next_cursor` or an event id. Returns newer events, oldest first."
+          },
+          {
+            "name": "since",
+            "type": "string",
+            "description": "Only events created at or after this ISO-8601 time."
+          },
+          {
+            "name": "event_type",
+            "type": "string | string[]",
+            "description": "One event type or several."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Events per page, 1-200.",
+            "default": "50"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "description": "Events to skip on the newest-first listing."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Resume from a saved cursor",
+        "code": "{ \"after\": \"1042\", \"limit\": 100 }\n\n→ { \"data\": [{ \"id\": \"1043\", \"event_type\": \"extraction.completed\", \"payload\": { … }, \"created_at\": \"2026-11-25T07:01:12Z\" }], \"next_cursor\": \"1043\" }"
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-aggregate-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Workspace metrics",
+    "seoTitle": "talonic_aggregate — Workspace Metrics in One MCP Call",
+    "description": "MCP tools that answer monitoring questions about a Talonic workspace in one call: documents received or failed, app verdicts, deliveries and cost per document.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Ask for several numbers about the workspace in one request: how many documents arrived or failed in the last 12 hours, how many lack a value, verdicts by state, median cost per document. Only numbers come back, never document content, and only documents the connected person may see are counted."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Listed when the workspace offers metrics to the connection. One metrics request per workspace runs at a time; a second one answers 429 and should be retried after a few seconds."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-aggregate-catalog",
+        "text": "talonic_aggregate_catalog"
+      },
+      {
+        "type": "paragraph",
+        "text": "What can be counted: every dataset with its fields, which fields can be grouped and filtered with which operators, the measures, the limits (window length, queries per request) and whether this workspace may see cost fields. Free; call it before the first metrics request."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-aggregate",
+        "text": "talonic_aggregate"
+      },
+      {
+        "type": "paragraph",
+        "text": "Computes several named numbers (20 by default) over a half-open window `[from, to)` of at most 31 days by default; the catalog states the limits that apply. Each query picks a dataset and a measure (`count`, `count_distinct`, `sum`, `avg`, `min`, `max`, `median`, `p1`-`p99`), optional filters and up to three group-by fields or `hour` / `day`. A count over nothing is `0`; an average or percentile over nothing is `null`. Cost fields are in US dollars."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "from",
+            "type": "string",
+            "required": true,
+            "description": "Window start, inclusive, ISO-8601 with an offset (`2026-11-05T12:00:00Z`)."
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "required": true,
+            "description": "Window end, exclusive, with an offset."
+          },
+          {
+            "name": "scope",
+            "type": "object",
+            "description": "Document selectors for every query: `document_ids`, `tags`, `system_tags`, `source_connection_ids`, `document_types`, `client_batch_ids`, `roots_only`, `attachments_only`."
+          },
+          {
+            "name": "queries",
+            "type": "object[]",
+            "required": true,
+            "description": "Each `{ id, dataset, measure, of?, where?, group_by? }`; `id` is lowercase letters, digits and underscores and keys the result."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Documents received and failed today",
+        "code": "{\n  \"from\": \"2026-11-25T00:00:00Z\",\n  \"to\": \"2026-11-26T00:00:00Z\",\n  \"queries\": [\n    { \"id\": \"received\", \"dataset\": \"documents\", \"measure\": \"count\" },\n    { \"id\": \"failed\", \"dataset\": \"documents\", \"measure\": \"count\", \"where\": [{ \"field\": \"failed\", \"op\": \"eq\", \"value\": true }] }\n  ]\n}"
+      },
+      {
+        "type": "paragraph",
+        "text": "Errors: `400 invalid_aggregate` names the allowed datasets, fields or measures; `403 cost_not_visible` when the workspace may not see costs; `422 aggregate_timeout` names the dataset to narrow."
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-admin-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Workspace administration",
+    "seoTitle": "Workspace Admin Tools — API Keys, Webhooks, Credits",
+    "description": "MCP tools for Talonic workspace admins: list, create and revoke API keys, manage webhooks and their event types, read the account and get a buy-credits link.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Manage the workspace from an agent: API keys, webhooks, the account snapshot and the link where a person buys credits. Each tool calls the same Talonic API your dashboard uses, with your credential."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are meant for workspace admins. Talonic checks every call against the person behind the credential, exactly as in the app: an owner manages every key, anyone else only their own, and a new key can never carry more access than the credential that creates it. A new key's secret is shown once, in the create response; store it straight away."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-api-keys",
+        "text": "talonic_list_api_keys"
+      },
+      {
+        "type": "paragraph",
+        "text": "The workspace's API keys with name, scopes, masked prefix, active state, last use and expiry. Never returns a secret."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-create-api-key",
+        "text": "talonic_create_api_key"
+      },
+      {
+        "type": "paragraph",
+        "text": "Creates a key and returns its secret once in `key`. Scopes can only be a subset of the calling credential's own; `billing`, `usage` and `records_write` are granted only by an owner in the app."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Label shown in listings (1-255 characters)."
+          },
+          {
+            "name": "scopes",
+            "type": "string[]",
+            "description": "Subset of extract, read, write, operations, billing, delivery, usage, records_write. Default: the calling credential's scopes."
+          },
+          {
+            "name": "expires_at",
+            "type": "string",
+            "description": "ISO-8601 time in the future when the key stops working."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-revoke-api-key",
+        "text": "talonic_revoke_api_key"
+      },
+      {
+        "type": "paragraph",
+        "text": "Revokes a key at once; it cannot be turned back on. Marked destructive, so clients ask before running it."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The key, from talonic_list_api_keys."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-account",
+        "text": "talonic_get_account"
+      },
+      {
+        "type": "paragraph",
+        "text": "Plan (`tier`), status, credit balance in EUR, daily request limits and today's usage against them."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-webhooks",
+        "text": "talonic_list_webhooks"
+      },
+      {
+        "type": "paragraph",
+        "text": "Every webhook with its URL, event types, active state and optional source. Signing secrets are never returned."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-webhook",
+        "text": "talonic_get_webhook"
+      },
+      {
+        "type": "paragraph",
+        "text": "One webhook by id."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The webhook id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-create-webhook",
+        "text": "talonic_create_webhook"
+      },
+      {
+        "type": "paragraph",
+        "text": "Sends the chosen events to your URL as signed POST requests (`X-Talonic-Signature: sha256=<hex>` over the raw body when a secret is set)."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "url",
+            "type": "string",
+            "required": true,
+            "description": "Receiver URL that accepts POST."
+          },
+          {
+            "name": "events",
+            "type": "string[]",
+            "description": "Event types. Default: extraction.complete, extraction.failed."
+          },
+          {
+            "name": "secret",
+            "type": "string",
+            "description": "Signing secret your receiver verifies."
+          },
+          {
+            "name": "source_connection_id",
+            "type": "UUID",
+            "description": "Only events of this source."
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "description": "Default true."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-update-webhook",
+        "text": "talonic_update_webhook"
+      },
+      {
+        "type": "paragraph",
+        "text": "Changes only the fields you send. `is_active: false` pauses deliveries without deleting the webhook."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The webhook id."
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "description": "New receiver URL."
+          },
+          {
+            "name": "events",
+            "type": "string[]",
+            "description": "New event types."
+          },
+          {
+            "name": "secret",
+            "type": "string",
+            "description": "New signing secret."
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "description": "Pause or resume."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-delete-webhook",
+        "text": "talonic_delete_webhook"
+      },
+      {
+        "type": "paragraph",
+        "text": "Deletes a webhook for good. Marked destructive. To stop deliveries for a while, pause it instead."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The webhook id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-list-webhook-event-types",
+        "text": "talonic_list_webhook_event_types"
+      },
+      {
+        "type": "paragraph",
+        "text": "The event types a webhook can subscribe to, each with a description. A past webhook call is not re-sent; a receiver that missed events reads them with `talonic_list_events` from its saved cursor."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-get-billing-upgrade-link",
+        "text": "talonic_get_billing_upgrade_link"
+      },
+      {
+        "type": "paragraph",
+        "text": "A link where a person buys credits. The tool never buys anything: a human opens the link and completes the payment, and credits arrive seconds later. Workspaces billed through a marketplace get the marketplace page."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "pack",
+            "type": "string",
+            "description": "10, 50, 250 or 1000 (EUR). Default 50."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-contract-desk-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Contract Desk",
+    "seoTitle": "Contract Desk MCP Tools — Work, Evidence and Decisions",
+    "description": "Use the Contract Desk from an AI agent: list open contract work by team, open an item's evidence, record a decision at its source app and undo it if needed.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The Contract Desk gathers the open work of your contract apps in one list: values where the documents and the CRM disagree or are missing, missing documents, site checks, key dates and process steps. With these tools an agent works that list the way a person does: pick a batch from the To do list, open an item's evidence, record a decision, and undo it if it was wrong. A decision is recorded at the item's source app and in the desk's log, under your connection."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are listed only when the Contract Desk is available to your connection. Every call is checked against your role in the workspace, exactly as in the app: reading needs an active membership, deciding needs the edit permission and the app switched on, changing the team setup needs an Admin."
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "`talonic_contract_desk_todo` — sections and batches of open work.",
+          "`talonic_contract_desk_todo_items` — the items of one batch.",
+          "`talonic_contract_desk_get_decision` — one item's evidence and the actions it offers.",
+          "`talonic_contract_desk_decide` — record the decision (preview with `dry_run` first).",
+          "`talonic_contract_desk_undo` — take a decision back while it is the item's latest."
+        ]
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "Accepting a colleague's suggestion is done by a person in the app; there is no tool for it."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-status",
+        "text": "talonic_contract_desk_status"
+      },
+      {
+        "type": "paragraph",
+        "text": "Whether the desk is ready: when it was last refreshed, whether a refresh is running, and how many sites, contracts and open items it holds."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-refresh",
+        "text": "talonic_contract_desk_refresh"
+      },
+      {
+        "type": "paragraph",
+        "text": "Start a refresh of the desk from its source apps. Answers at once; the status tool shows it running. Needs the run permission."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-sites",
+        "text": "talonic_contract_desk_sites"
+      },
+      {
+        "type": "paragraph",
+        "text": "One page of sites with their open work."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "q",
+            "type": "string",
+            "description": "Words that must each occur in the site's number, name, contracts or partners."
+          },
+          {
+            "name": "filter",
+            "type": "string",
+            "description": "`all`, `now` (work due now) or `nodoc` (no documents)."
+          },
+          {
+            "name": "page",
+            "type": "integer",
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Rows per page; the desk caps it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-get-site",
+        "text": "talonic_contract_desk_get_site"
+      },
+      {
+        "type": "paragraph",
+        "text": "One site with its contracts and site-level items."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "The site key."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-contracts",
+        "text": "talonic_contract_desk_contracts"
+      },
+      {
+        "type": "paragraph",
+        "text": "One page of contracts, searchable, for one partner or one site."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "q",
+            "type": "string",
+            "description": "Search words."
+          },
+          {
+            "name": "partner",
+            "type": "string",
+            "description": "A `partner_key`, matched exactly."
+          },
+          {
+            "name": "site",
+            "type": "string",
+            "description": "A site key, matched exactly."
+          },
+          {
+            "name": "page",
+            "type": "integer",
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Rows per page; the desk caps it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-get-contract",
+        "text": "talonic_contract_desk_get_contract"
+      },
+      {
+        "type": "paragraph",
+        "text": "One contract with its items and values: where the documents and the CRM agree or differ, and what is open."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "The contract's `crm_key`."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-dashboard",
+        "text": "talonic_contract_desk_dashboard"
+      },
+      {
+        "type": "paragraph",
+        "text": "Work due now and this month, open work by team, due dates by week, the busiest sites and the history."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "team",
+            "type": "string",
+            "description": "One team's work only; all teams when left out."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-quality",
+        "text": "talonic_contract_desk_quality"
+      },
+      {
+        "type": "paragraph",
+        "text": "Required values and how many are still open, the attributes with most open values, and how well documents link to contracts."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-todo",
+        "text": "talonic_contract_desk_todo"
+      },
+      {
+        "type": "paragraph",
+        "text": "The To do list: per section (now, this month, later, no date) its count and first batches of similar items, plus today's decisions."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "team",
+            "type": "string",
+            "description": "One team's work only; all teams when left out."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-todo-items",
+        "text": "talonic_contract_desk_todo_items"
+      },
+      {
+        "type": "paragraph",
+        "text": "One page of the open items of a batch."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "batch",
+            "type": "string",
+            "required": true,
+            "description": "The batch key from `talonic_contract_desk_todo`, unchanged."
+          },
+          {
+            "name": "page",
+            "type": "integer",
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Rows per page; the desk caps it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-get-decision",
+        "text": "talonic_contract_desk_get_decision"
+      },
+      {
+        "type": "paragraph",
+        "text": "Everything the decision screen shows for one item: for a value, what each document and the CRM say and the values to pick; for a key date, its day and the outcomes offered; for a process step, mark it handled. `can_decide` says whether your connection may decide it; `mode: suggest` means your decision becomes a suggestion a colleague accepts."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The item id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-decide",
+        "text": "talonic_contract_desk_decide"
+      },
+      {
+        "type": "paragraph",
+        "text": "Decide one item at its source app. Run with `dry_run` first. Returns the `decision_id` to undo it with."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The item id."
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "required": true,
+            "description": "`set`, `crm_add`, `handled`, `notice_sent`, `renewal_declined` or `terminated`; only those the item offers."
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "description": "The value to record; with `set` only."
+          },
+          {
+            "name": "note",
+            "type": "string",
+            "description": "Why, in a few words; recorded at the source."
+          },
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "description": "Preview only; nothing is recorded."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-decisions",
+        "text": "talonic_contract_desk_decisions"
+      },
+      {
+        "type": "paragraph",
+        "text": "The decisions newest first, with who decided what and whether each can still be undone."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "mine",
+            "type": "boolean",
+            "description": "Only your own decisions."
+          },
+          {
+            "name": "crm_key",
+            "type": "string",
+            "description": "One contract's decisions."
+          },
+          {
+            "name": "page",
+            "type": "integer",
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "description": "Rows per page; the desk caps it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-undo",
+        "text": "talonic_contract_desk_undo"
+      },
+      {
+        "type": "paragraph",
+        "text": "Undo a decision at its source and put the item back on the list. Only an item's latest decision can be undone."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "required": true,
+            "description": "The decision id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-settings",
+        "text": "talonic_contract_desk_settings"
+      },
+      {
+        "type": "paragraph",
+        "text": "Which team gets which items: the team per item kind and per attribute, and the choices."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-contract-desk-save-settings",
+        "text": "talonic_contract_desk_save_settings"
+      },
+      {
+        "type": "paragraph",
+        "text": "Replace the whole team setup and refresh the desk. Read the current setup first and send it back complete. Needs an Admin."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "teams",
+            "type": "object",
+            "required": true,
+            "description": "`{ kinds: { <kind>: <team> }, fields: { <field_key>: <team> } }`."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-transport-folders-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Transport Folders",
+    "seoTitle": "Transport Folders MCP Tools — Loads, Documents, Handover",
+    "description": "Use Transport Folders from an AI agent: list loads and documents that need a person, open the evidence, assign documents, confirm loads, get the customer set.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Transport Folders turns each scanned packet of a transport into one folder, matches its documents to the transport's loads and judges each load: required documents on file, delivery confirmed, quantities agree. Documents that fit no single load wait for a person. With these tools an agent works the worklist, opens a folder's evidence, assigns a document to a load or confirms a load, and can take either back."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are listed only when Transport Folders is available to your connection. Every call is checked against your role in the workspace, exactly as in the app: documents are shown as you may see them, changing the settings needs an Admin, and locating values and confirming loads need the app switched on."
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "`talonic_transport_folders_worklist` — loads not complete and documents not assigned.",
+          "`talonic_transport_folders_get` — one folder's loads, documents and comparisons.",
+          "`talonic_transport_folders_assign` or `talonic_transport_folders_confirm_load` — record the decision.",
+          "`talonic_transport_folders_unassign` or `talonic_transport_folders_unconfirm_load` — take it back."
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-list",
+        "text": "talonic_transport_folders_list"
+      },
+      {
+        "type": "paragraph",
+        "text": "Every folder with its transport number, status and load counts, and whether the app is set up."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-worklist",
+        "text": "talonic_transport_folders_worklist"
+      },
+      {
+        "type": "paragraph",
+        "text": "Everything that needs a person across all folders: loads not complete and documents not assigned to a load."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-get",
+        "text": "talonic_transport_folders_get"
+      },
+      {
+        "type": "paragraph",
+        "text": "One folder: per load its verdict, what is missing, the record compared with the documents and whether it is confirmed; per document the load it belongs to and why, or the candidate loads and a suggestion."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-boxes",
+        "text": "talonic_transport_folders_boxes"
+      },
+      {
+        "type": "paragraph",
+        "text": "Where each captured value of a document sits on its pages, as far as already located."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "A document of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-locate-document",
+        "text": "talonic_transport_folders_locate_document"
+      },
+      {
+        "type": "paragraph",
+        "text": "Find where a document's values sit on its page images and keep the result. Does nothing when already done."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "A document of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-locate-folder",
+        "text": "talonic_transport_folders_locate_folder"
+      },
+      {
+        "type": "paragraph",
+        "text": "Find where the values of every document of a folder sit on the page images."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-assign",
+        "text": "talonic_transport_folders_assign"
+      },
+      {
+        "type": "paragraph",
+        "text": "Record which load a document belongs to, or that it belongs to no load. Your assignment wins over the matching."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "A document of the folder."
+          },
+          {
+            "name": "load_key",
+            "type": "string | null",
+            "required": true,
+            "description": "A load of the folder, or null for no load."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-unassign",
+        "text": "talonic_transport_folders_unassign"
+      },
+      {
+        "type": "paragraph",
+        "text": "Withdraw an assignment, so the matching decides again."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "A document of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-confirm-load",
+        "text": "talonic_transport_folders_confirm_load"
+      },
+      {
+        "type": "paragraph",
+        "text": "Confirm a load as ready to invoice and hand its customer document set over. Records who confirmed and which documents."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "load_key",
+            "type": "string",
+            "required": true,
+            "description": "A load of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-unconfirm-load",
+        "text": "talonic_transport_folders_unconfirm_load"
+      },
+      {
+        "type": "paragraph",
+        "text": "Withdraw a load's confirmation."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "load_key",
+            "type": "string",
+            "required": true,
+            "description": "A load of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-handover",
+        "text": "talonic_transport_folders_handover"
+      },
+      {
+        "type": "paragraph",
+        "text": "The customer document set of a load as one PDF (returned as an embedded file), with the archive filing values per document (`index`)."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "folder_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The transport folder."
+          },
+          {
+            "name": "load_key",
+            "type": "string",
+            "required": true,
+            "description": "A load of the folder."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-settings",
+        "text": "talonic_transport_folders_settings"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app's settings and what they can be set to: your Specs and ready reference tables."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-transport-folders-save-settings",
+        "text": "talonic_transport_folders_save_settings"
+      },
+      {
+        "type": "paragraph",
+        "text": "Change the settings; only the keys sent change and null clears one. Needs an Admin."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "pipeline_id",
+            "type": "UUID | null",
+            "description": "The Spec run whose results describe the documents."
+          },
+          {
+            "name": "reference_data_id",
+            "type": "UUID | null",
+            "description": "The reference table holding the loads."
+          },
+          {
+            "name": "folder_key_pattern",
+            "type": "string | null",
+            "description": "Regular expression whose first group is the transport number in a filename."
+          },
+          {
+            "name": "matcher",
+            "type": "object | null",
+            "description": "Overrides of column names, field names and document type lists."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-compliance-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Compliance",
+    "seoTitle": "Compliance MCP Tools — Check Documents Against Rules",
+    "description": "MCP tools for the Talonic Compliance app: list failed checks, open a verdict with its reason and quote, re-evaluate documents and manage frameworks and sets.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Check workspace documents against the regulations, policies and standards the workspace holds as frameworks. Each rule of a framework that is ON gets a verdict per document (or per document set): pass, fail, unclear or not applicable, with the reason and the quote it rests on."
+      },
+      {
+        "type": "paragraph",
+        "text": "The usual loop: **`talonic_compliance_issues`** lists what fails, **`talonic_compliance_get_document_evaluation`** shows the evidence for one document, and the allowed correction follows: re-evaluate after the document changed, take a document off the list, switch a framework OFF, or narrow the rules a document set is judged against. A workspace that makes its compliance decisions with its own agent works them through the task tools (claim, heartbeat, release, submit)."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are listed only when the Compliance app is available to the connection. Every call is checked against the role and permissions of the person behind the connection, exactly as in the web app."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-issues",
+        "text": "talonic_compliance_issues"
+      },
+      {
+        "type": "paragraph",
+        "text": "The worklist of failed checks: per document the rules it fails (and, with `unclear`, the rules whose verdict is unclear), with the framework each rule comes from."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "unclear",
+            "type": "boolean",
+            "required": false,
+            "description": "Also list rules whose verdict is unclear."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-get-document-evaluation",
+        "text": "talonic_compliance_get_document_evaluation"
+      },
+      {
+        "type": "paragraph",
+        "text": "A document's latest evaluation with every result: per rule the verdict (pass, fail, unclear, not_applicable), the reason, the quote from the document it rests on, whether it needs a person's check, and whether the evaluation is outdated."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The evaluated document."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-evaluations",
+        "text": "talonic_compliance_list_evaluations"
+      },
+      {
+        "type": "paragraph",
+        "text": "The latest evaluation of every document on the Evaluations list. Without paging arguments the whole list; with any of status / limit / offset one page with total and has_more."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "\"processing\" | \"waiting\" | \"completed\" | \"error\"",
+            "required": false,
+            "description": "Only evaluations with this status (an interrupted one shows error)."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Page size; any of status / limit / offset asks for one page."
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "Rows to skip, for paging."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-evaluation-status",
+        "text": "talonic_compliance_evaluation_status"
+      },
+      {
+        "type": "paragraph",
+        "text": "Counts over the latest evaluations: processing, completed, error, outdated and failing."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-export",
+        "text": "talonic_compliance_export"
+      },
+      {
+        "type": "paragraph",
+        "text": "Download every verdict of the evaluated documents and document sets as a file (one row per rule and document or set: framework, rule, obligation, verdict, reason, quote, evaluated at, outdated), up to 8 MB."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "format",
+            "type": "\"xlsx\" | \"csv\"",
+            "required": false,
+            "description": "File format (default xlsx)."
+          },
+          {
+            "name": "issues_only",
+            "type": "boolean",
+            "required": false,
+            "description": "Only failed and unclear verdicts of the sets."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-evaluate",
+        "text": "talonic_compliance_evaluate"
+      },
+      {
+        "type": "paragraph",
+        "text": "Evaluate documents against every framework that is ON. Runs in the background; poll talonic_compliance_evaluation_status or talonic_compliance_get_document_evaluation."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "Documents to evaluate."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-evaluate-all",
+        "text": "talonic_compliance_evaluate_all"
+      },
+      {
+        "type": "paragraph",
+        "text": "Evaluate every listed document whose evaluation is missing or outdated, oldest first. Run with dry_run first to see how many."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "required": false,
+            "description": "Only report how many would be evaluated."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Evaluate at most this many."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-add-documents",
+        "text": "talonic_compliance_add_documents"
+      },
+      {
+        "type": "paragraph",
+        "text": "Put workspace documents on the Evaluations list and evaluate them against the frameworks that are ON."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "Documents to add and evaluate."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-remove-document",
+        "text": "talonic_compliance_remove_document"
+      },
+      {
+        "type": "paragraph",
+        "text": "Take a document off the Evaluations list together with its evaluations. The document itself stays in the workspace; adding it again re-evaluates it. Cannot be undone: ask the user first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The document to take off the list."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-frameworks",
+        "text": "talonic_compliance_list_frameworks"
+      },
+      {
+        "type": "paragraph",
+        "text": "The frameworks (regulations, policies, contract standards held as workspace documents) with their status, whether each is ON, and their rule counts."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-framework-rules",
+        "text": "talonic_compliance_framework_rules"
+      },
+      {
+        "type": "paragraph",
+        "text": "The rules of one framework: code, text, obligation, section, what it applies to and its condition."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The framework's document id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-add-frameworks",
+        "text": "talonic_compliance_add_frameworks"
+      },
+      {
+        "type": "paragraph",
+        "text": "Make existing workspace documents frameworks (a regulation, policy or standard to check other documents against). Their rules are then written from their text; switch a framework ON to check documents against it."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "Workspace documents to make frameworks."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-set-framework-active",
+        "text": "talonic_compliance_set_framework_active"
+      },
+      {
+        "type": "paragraph",
+        "text": "Turn a framework ON (its rules are in force for every evaluation) or OFF (they are not). Reversible; evaluations made before become outdated."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The framework's document id."
+          },
+          {
+            "name": "active",
+            "type": "boolean",
+            "required": true,
+            "description": "true = ON, false = OFF."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-generate-rules",
+        "text": "talonic_compliance_generate_rules"
+      },
+      {
+        "type": "paragraph",
+        "text": "Write the rules of a framework again from its text, replacing the current ones. Cannot be undone: ask the user first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The framework's document id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-remove-framework",
+        "text": "talonic_compliance_remove_framework"
+      },
+      {
+        "type": "paragraph",
+        "text": "Take a framework out of the app with its rules. The document stays in the workspace and can be made a framework again. Cannot be undone: ask the user first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The framework's document id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-comparisons",
+        "text": "talonic_compliance_list_comparisons"
+      },
+      {
+        "type": "paragraph",
+        "text": "Comparisons of document batches for discrepancies (values that should agree across the documents but do not), newest first."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-get-comparison",
+        "text": "talonic_compliance_get_comparison"
+      },
+      {
+        "type": "paragraph",
+        "text": "One comparison with every discrepancy found: the value, which documents disagree and where."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The comparison id."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-compare-documents",
+        "text": "talonic_compliance_compare_documents"
+      },
+      {
+        "type": "paragraph",
+        "text": "Compare a batch of documents that belong together (an order, its invoice, its delivery note) for values that disagree. Runs in the background; read it with talonic_compliance_get_comparison."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "The documents to compare."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-sets",
+        "text": "talonic_compliance_list_sets"
+      },
+      {
+        "type": "paragraph",
+        "text": "Document sets (documents judged as one whole, e.g. a contract with its annexes) with their documents and rule set."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-create-set",
+        "text": "talonic_compliance_create_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Create a document set picked by hand, judged against one rule set or, without one, every rule of the frameworks that are ON."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Set name."
+          },
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "The set's documents."
+          },
+          {
+            "name": "rule_set_id",
+            "type": "UUID",
+            "required": false,
+            "description": "Rule set to judge it against; omitted or null = every ON rule."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-assembly-groups",
+        "text": "talonic_compliance_assembly_groups"
+      },
+      {
+        "type": "paragraph",
+        "text": "The assembly groups of the workspace's pipelines (documents grouped by a shared value, such as one order number) that sets can be made from."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-create-sets-from-groups",
+        "text": "talonic_compliance_create_sets_from_groups"
+      },
+      {
+        "type": "paragraph",
+        "text": "Create one document set per assembly group; the set follows the group as documents join it."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "groups",
+            "type": "object[]",
+            "required": true,
+            "description": "Groups from talonic_compliance_assembly_groups."
+          },
+          {
+            "name": "rule_set_id",
+            "type": "UUID",
+            "required": false,
+            "description": "Rule set to judge them against; omitted or null = every ON rule."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-update-set",
+        "text": "talonic_compliance_update_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Rename a set, replace its documents (a group-following set becomes hand-picked) or change its rule set. Fields left out stay."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The set."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "New set name."
+          },
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": false,
+            "description": "The set's documents (replaces them)."
+          },
+          {
+            "name": "rule_set_id",
+            "type": "UUID",
+            "required": false,
+            "description": "null = every ON rule; omitted = unchanged."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-remove-set",
+        "text": "talonic_compliance_remove_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Remove a document set with its evaluations. The documents stay in the workspace. Cannot be undone: ask the user first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The set."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-set-evaluations",
+        "text": "talonic_compliance_list_set_evaluations"
+      },
+      {
+        "type": "paragraph",
+        "text": "The latest evaluation of every document set. Without paging arguments the whole list; with any of status / limit / offset one page with total and has_more."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "\"processing\" | \"waiting\" | \"completed\" | \"error\"",
+            "required": false,
+            "description": "Only evaluations with this status (an interrupted one shows error)."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Page size; any of status / limit / offset asks for one page."
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "Rows to skip, for paging."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-get-set-evaluation",
+        "text": "talonic_compliance_get_set_evaluation"
+      },
+      {
+        "type": "paragraph",
+        "text": "A set's latest evaluation with every result: verdict, reason, and the quote with the member document it comes from."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The set."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-evaluate-sets",
+        "text": "talonic_compliance_evaluate_sets"
+      },
+      {
+        "type": "paragraph",
+        "text": "Evaluate document sets, each as one whole, against their rule set. Runs in the background."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "set_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "Sets to evaluate."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-rule-sets",
+        "text": "talonic_compliance_list_rule_sets"
+      },
+      {
+        "type": "paragraph",
+        "text": "The workspace's rule sets: named selections of rules of the ON frameworks that a document set is judged against."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-create-rule-set",
+        "text": "talonic_compliance_create_rule_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Create a named selection of rules (from talonic_compliance_framework_rules) to judge document sets against."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Rule set name."
+          },
+          {
+            "name": "rule_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "Rules of ON frameworks."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-update-rule-set",
+        "text": "talonic_compliance_update_rule_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Rename a rule set or replace its rules."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "rule_set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "New rule set name."
+          },
+          {
+            "name": "rule_ids",
+            "type": "UUID[]",
+            "required": false,
+            "description": "The rules (replaces them)."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-remove-rule-set",
+        "text": "talonic_compliance_remove_rule_set"
+      },
+      {
+        "type": "paragraph",
+        "text": "Remove a rule set. Sets that used it go back to every rule of the ON frameworks. Cannot be undone: ask the user first."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "rule_set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-settings",
+        "text": "talonic_compliance_settings"
+      },
+      {
+        "type": "paragraph",
+        "text": "Who makes the workspace's compliance decisions: `platform` (Talonic decides every verdict) or `external` (the workspace's own agent decides, through the compliance tasks)."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-set-decider",
+        "text": "talonic_compliance_set_decider"
+      },
+      {
+        "type": "paragraph",
+        "text": "Switch who makes the compliance decisions: `platform` or `external` (the workspace's own agent works the tasks). Reversible. The person behind the connection needs the Workspace settings permission."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "decider",
+            "type": "\"platform\" | \"external\"",
+            "required": true,
+            "description": "platform = Talonic decides; external = the workspace's own agent."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-list-tasks",
+        "text": "talonic_compliance_list_tasks"
+      },
+      {
+        "type": "paragraph",
+        "text": "Decisions waiting for the workspace's own agent (only when the decider is external)."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "status",
+            "type": "\"open\" | \"all\"",
+            "required": false,
+            "description": "open (default) or all."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Most tasks returned (default 100)."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-get-task",
+        "text": "talonic_compliance_get_task"
+      },
+      {
+        "type": "paragraph",
+        "text": "One task's state (open, claimed, done) without its work package."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-claim-task",
+        "text": "talonic_compliance_claim_task"
+      },
+      {
+        "type": "paragraph",
+        "text": "Claim a task for this agent and read its work package: instructions, the input, and the JSON Schema the answer must match. The claim is a lease: renew it with talonic_compliance_heartbeat_task while working, hand it back with talonic_compliance_release_task, or answer with talonic_compliance_submit_task. A lapsed lease returns the task to open."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-heartbeat-task",
+        "text": "talonic_compliance_heartbeat_task"
+      },
+      {
+        "type": "paragraph",
+        "text": "Renew the lease on a claimed task."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "The execution_epoch talonic_compliance_claim_task returned."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-release-task",
+        "text": "talonic_compliance_release_task"
+      },
+      {
+        "type": "paragraph",
+        "text": "Hand a claimed task back unanswered; it is open again for any agent."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "The execution_epoch talonic_compliance_claim_task returned."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-compliance-submit-task",
+        "text": "talonic_compliance_submit_task"
+      },
+      {
+        "type": "paragraph",
+        "text": "Submit the answer to a claimed task. It is checked against the package's output_schema and stored exactly like a verdict Talonic makes itself."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "task_id",
+            "type": "UUID",
+            "required": true,
+            "description": "Id from the matching list tool."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "The execution_epoch talonic_compliance_claim_task returned."
+          },
+          {
+            "name": "answer",
+            "type": "object",
+            "required": true,
+            "description": "The answer, matching the package's output_schema."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-money-found-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Money Found",
+    "seoTitle": "Money Found MCP Tools — Recoverable Amounts Ledger",
+    "description": "MCP tools for the Talonic Money Found app: read the ledger of recoverable amounts with their evidence, prepare evidence requests and queue row re-reviews.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read the Money Found ledger: every amount the workspace's contracts, invoices and payments show could be recovered, grouped by lever, each row with the clause and the documents it rests on."
+      },
+      {
+        "type": "paragraph",
+        "text": "The usual loop: **`talonic_money_found_ledger`** finds a row and its evidence, **`talonic_money_found_evidence_requests`** lists what to ask the customer's receivables team to confirm, and **`talonic_money_found_review_row`** queues a re-review when a row's price is in doubt; **`talonic_money_found_reviews`** shows the outcome."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are listed only when the Money Found app is available to the connection. Every call is checked against the role and permissions of the person behind the connection, exactly as in the web app."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-money-found-ledger",
+        "text": "talonic_money_found_ledger"
+      },
+      {
+        "type": "paragraph",
+        "text": "The whole lever ledger: per lever (a kind of recoverable amount, such as a charge the contract allows but the invoices leave off) its rows, each with its key, party and agreement, the amount, its `tier` (e.g. potential) and `state`, the explanation, and the quotes and documents it rests on, plus the ledger totals in the ledger currency."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-money-found-evidence-requests",
+        "text": "talonic_money_found_evidence_requests"
+      },
+      {
+        "type": "paragraph",
+        "text": "What to ask the customer's receivables team for: the open potential rows that need a confirmation, grouped by cost unit and framework number, largest first, each item with its lever id and row key, invoice type, period, amount and the question to ask."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-money-found-reviews",
+        "text": "talonic_money_found_reviews"
+      },
+      {
+        "type": "paragraph",
+        "text": "Re-reviews of contract price rows: per row its status (queued, running, done), the outcome, and the suggested price where a contract price was read again."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-money-found-review-row",
+        "text": "talonic_money_found_review_row"
+      },
+      {
+        "type": "paragraph",
+        "text": "Queue a re-review of one contract price row: its contract price is checked again against the documents; the ledger changes only when the review finds a different price."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "lever_id",
+            "type": "string",
+            "required": true,
+            "description": "The lever id of the row."
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "The row key."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-money-found-review-all",
+        "text": "talonic_money_found_review_all"
+      },
+      {
+        "type": "paragraph",
+        "text": "Queue a re-review of every contract price row not reviewed since its check changed."
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-customs-declaration-tools",
+    "parentSlug": "mcp-tools",
+    "title": "Customs declaration",
+    "seoTitle": "Customs Declaration MCP Tools — Compare and Check Orders",
+    "description": "MCP tools for the Talonic customs declaration app: list orders whose documents and filed declaration disagree, and read the field-by-field comparison per order.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Compare the transport documents of each order with the customs declaration filed for it, field by field, and see which orders fail a check before filing."
+      },
+      {
+        "type": "paragraph",
+        "text": "The usual loop: **`talonic_customs_declaration_issues`** lists the orders that fail a check, and **`talonic_customs_declaration_orders`** with `q` set to the order's LRN shows the comparison and the documents behind it. Corrections happen on the documents themselves; the order is compared again afterwards."
+      },
+      {
+        "type": "callout",
+        "variant": "info",
+        "text": "These tools are listed only when the Customs declaration app is available to the connection. Every call is checked against the role and permissions of the person behind the connection, exactly as in the web app."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-customs-declaration-pipelines",
+        "text": "talonic_customs_declaration_pipelines"
+      },
+      {
+        "type": "paragraph",
+        "text": "The pipelines whose Spec compares transport documents with a filed customs declaration."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-customs-declaration-issues",
+        "text": "talonic_customs_declaration_issues"
+      },
+      {
+        "type": "paragraph",
+        "text": "The worklist: orders with a failing check, with the checks that fail (message and fields concerned) and the fields where documents and declaration differ or a value is missing."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "pipeline_id",
+            "type": "UUID",
+            "required": false,
+            "description": "The pipeline (talonic_customs_declaration_pipelines); default: the workspace's first."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "id": "talonic-customs-declaration-orders",
+        "text": "talonic_customs_declaration_orders"
+      },
+      {
+        "type": "paragraph",
+        "text": "Orders of a pipeline with their field-by-field comparison (document value, declared value, state match / mismatch / missing) and checks; the evidence for one order's issues."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "pipeline_id",
+            "type": "UUID",
+            "required": false,
+            "description": "The pipeline (talonic_customs_declaration_pipelines); default: the workspace's first."
+          },
+          {
+            "name": "status",
+            "type": "\"ready\" | \"review\"",
+            "required": false,
+            "description": "ready = every check passes; review = at least one fails."
+          },
+          {
+            "name": "q",
+            "type": "string",
+            "required": false,
+            "description": "LRN, sender, receiver or plates contains."
+          },
+          {
+            "name": "page",
+            "type": "integer",
+            "required": false,
+            "description": "Page number (asks for one page)."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Orders per page, at most 200 (default 50)."
+          }
+        ]
+      }
+    ],
+    "related": [],
+    "faq": [],
+    "mentions": []
+  },
+  {
+    "slug": "mcp-talonic-create-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_create_app",
+    "seoTitle": "talonic_create_app — Create App",
+    "description": "MCP tool: create a new app. It starts disabled with no versions; the slug can no longer change once a version is published.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Create a new app. It starts disabled with no versions; the slug can no longer change once a version is published. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user asks to set up a new app. ARGS: slug (lowercase letters, digits, hyphens, 3-64 chars), display_name, mode, optional one-sentence description.",
+          "Modes: rules (decides from written rules), assisted (rules with people confirming), external (an outside agent decides through the decision-task tools), autonomous (finds candidate rules in the app's data).",
+          "RETURNS: the manifest; use its `id` (UUID) with every other app tool.",
+          "FLOW: talonic_create_app -> talonic_save_app_draft -> talonic_interpret_app_rules -> talonic_publish_app -> talonic_run_app (dry_run first) -> talonic_get_app_run / talonic_get_run_verdicts -> talonic_save_app_acceptance + talonic_check_app_acceptance -> talonic_enable_app."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "slug",
+            "type": "string",
+            "required": true,
+            "description": "Lowercase letters, digits and hyphens, 3-64 chars."
+          },
+          {
+            "name": "display_name",
+            "type": "string",
+            "required": true,
+            "description": ""
+          },
+          {
+            "name": "mode",
+            "type": "\"rules\" | \"assisted\" | \"external\" | \"autonomous\"",
+            "required": true,
+            "description": ""
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false,
+            "description": "One sentence about the app."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app",
+        "slug": "mcp-talonic-get-app"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_app",
+    "seoTitle": "talonic_get_app — Get App",
+    "description": "MCP tool: read one app's manifest: mode, active version, enabled state, contract (what it reads and acts on), output contract, thresholds, triggers, fallback.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read one app's manifest: mode, active version, enabled state, contract (what it reads and acts on), output contract, thresholds, triggers, fallback. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: inspecting an app before changing or running it. NOT FOR: the editable draft (talonic_get_app_logic) or listing apps (talonic_list_apps)."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_create_app",
+        "slug": "mcp-talonic-create-app"
+      },
+      {
+        "label": "talonic_get_app_logic",
+        "slug": "mcp-talonic-get-app-logic"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-app-logic",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_app_logic",
+    "seoTitle": "talonic_get_app_logic — Get App Logic",
+    "description": "MCP tool: read an app's logic: the editable draft and the active published version, including each rule with its interpretation state and plain-language readback.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read an app's logic: the editable draft and the active published version, including each rule with its interpretation state and plain-language readback. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: before editing, or to get the draft's full content for talonic_save_app_draft."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app",
+        "slug": "mcp-talonic-get-app"
+      },
+      {
+        "label": "talonic_get_app_fields",
+        "slug": "mcp-talonic-get-app-fields"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-app-fields",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_app_fields",
+    "seoTitle": "talonic_get_app_fields — Get App Fields",
+    "description": "MCP tool: list the fields the app's rules can use, per bound data source. This is everything the app can see.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List the fields the app's rules can use, per bound data source. This is everything the app can see. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: before writing or fixing rules, so they name fields that exist."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app_logic",
+        "slug": "mcp-talonic-get-app-logic"
+      },
+      {
+        "label": "talonic_save_app_draft",
+        "slug": "mcp-talonic-save-app-draft"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-save-app-draft",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_save_app_draft",
+    "seoTitle": "talonic_save_app_draft — Save App Draft",
+    "description": "MCP tool: create or replace the app's single draft version: logic (rule sentences, or the external connection), input bindings, output contract (JSON Schema 2020-12), thresholds, triggers, fallback. Drafts are the only versions that can change.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Create or replace the app's single draft version: logic (rule sentences, or the external connection), input bindings, output contract (JSON Schema 2020-12), thresholds, triggers, fallback. Drafts are the only versions that can change. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: authoring configuration in full. For a plain-language change to an existing draft prefer talonic_propose_app_edit + talonic_apply_app_edit.",
+          "ARGS: app_id, content (the full version content object; read the current one with talonic_get_app_logic). RETURNS: { version, status, content_hash }; pass version to talonic_publish_app."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Full version content object."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app_fields",
+        "slug": "mcp-talonic-get-app-fields"
+      },
+      {
+        "label": "talonic_interpret_app_rules",
+        "slug": "mcp-talonic-interpret-app-rules"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-interpret-app-rules",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_interpret_app_rules",
+    "seoTitle": "talonic_interpret_app_rules — Interpret App Rules",
+    "description": "MCP tool: turn the draft's pending rule sentences into checkable rules against the app's fields, and save the draft.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Turn the draft's pending rule sentences into checkable rules against the app's fields, and save the draft. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id; optional card_ids (default: all pending), guidance (plain language, e.g. 'the city is in shipper_city_state') for rules that stayed pending, locale for the readbacks.",
+          "RETURNS: the rules plus warnings saying why any rule stayed pending."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "card_ids",
+            "type": "array",
+            "required": false,
+            "description": "Rule card ids; omit for all pending."
+          },
+          {
+            "name": "guidance",
+            "type": "string",
+            "required": false,
+            "description": "Plain-language hint for stuck rules."
+          },
+          {
+            "name": "locale",
+            "type": "string",
+            "required": false,
+            "description": "Language of reasons and readbacks, e.g. de."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_save_app_draft",
+        "slug": "mcp-talonic-save-app-draft"
+      },
+      {
+        "label": "talonic_propose_app_edit",
+        "slug": "mcp-talonic-propose-app-edit"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-propose-app-edit",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_propose_app_edit",
+    "seoTitle": "talonic_propose_app_edit — Propose App Edit",
+    "description": "MCP tool: turn a plain-language change request into typed edit operations on the app's rules (add, rewrite, delete, pause, resume, fallback, mode). Nothing is saved.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Turn a plain-language change request into typed edit operations on the app's rules (add, rewrite, delete, pause, resume, fallback, mode). Nothing is saved. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user describes a change in words. Show the summary to the user, then apply the accepted ops with talonic_apply_app_edit."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "required": true,
+            "description": "The change, in plain language."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_interpret_app_rules",
+        "slug": "mcp-talonic-interpret-app-rules"
+      },
+      {
+        "label": "talonic_apply_app_edit",
+        "slug": "mcp-talonic-apply-app-edit"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-apply-app-edit",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_apply_app_edit",
+    "seoTitle": "talonic_apply_app_edit — Apply App Edit",
+    "description": "MCP tool: apply accepted edit operations from talonic_propose_app_edit to the draft. They are re-checked against the current draft; changed rules are interpreted again and warnings returned.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Apply accepted edit operations from talonic_propose_app_edit to the draft. They are re-checked against the current draft; changed rules are interpreted again and warnings returned. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, ops (from the proposal, unchanged)."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "ops",
+            "type": "array",
+            "required": true,
+            "description": "Accepted ops from the proposal."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_propose_app_edit",
+        "slug": "mcp-talonic-propose-app-edit"
+      },
+      {
+        "label": "talonic_list_app_versions",
+        "slug": "mcp-talonic-list-app-versions"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-app-versions",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_app_versions",
+    "seoTitle": "talonic_list_app_versions — List App Versions",
+    "description": "MCP tool: list an app's versions, newest first: version number, status (draft, published, superseded), content hash, published_at.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List an app's versions, newest first: version number, status (draft, published, superseded), content hash, published_at. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: you need the draft's version number for talonic_publish_app, or to see what is live."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_apply_app_edit",
+        "slug": "mcp-talonic-apply-app-edit"
+      },
+      {
+        "label": "talonic_publish_app",
+        "slug": "mcp-talonic-publish-app"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-publish-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_publish_app",
+    "seoTitle": "talonic_publish_app — Publish App",
+    "description": "MCP tool: publish the app's draft: freezes it, makes it the active version (the previous one is superseded) and locks the slug on first publish.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Publish the app's draft: freezes it, makes it the active version (the previous one is superseded) and locks the slug on first publish. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the draft is tested (talonic_run_app with dry_run, talonic_check_app_acceptance) and the user wants it live. Publishing does not enable the app; call talonic_enable_app for triggers to fire.",
+          "ARGS: app_id and the draft's version number (from talonic_save_app_draft or talonic_list_app_versions). A number that is not the current draft is HTTP 409."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "required": true,
+            "description": "The draft's version number."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_app_versions",
+        "slug": "mcp-talonic-list-app-versions"
+      },
+      {
+        "label": "talonic_enable_app",
+        "slug": "mcp-talonic-enable-app"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-enable-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_enable_app",
+    "seoTitle": "talonic_enable_app — Enable App",
+    "description": "MCP tool: enable an app so its triggers fire and it can be run. Needs a published version. Enabling an app that acts on outside systems needs a workspace owner (HTTP 403 otherwise).",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Enable an app so its triggers fire and it can be run. Needs a published version. Enabling an app that acts on outside systems needs a workspace owner (HTTP 403 otherwise). Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user asks to switch the app on. ARGS: app_id."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_publish_app",
+        "slug": "mcp-talonic-publish-app"
+      },
+      {
+        "label": "talonic_disable_app",
+        "slug": "mcp-talonic-disable-app"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-disable-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_disable_app",
+    "seoTitle": "talonic_disable_app — Disable App",
+    "description": "MCP tool: disable an app at once (the kill switch): triggers stop and open work is no longer offered. Past runs and records are kept.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Disable an app at once (the kill switch): triggers stop and open work is no longer offered. Past runs and records are kept. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user asks to stop or pause an app. ARGS: app_id."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_enable_app",
+        "slug": "mcp-talonic-enable-app"
+      },
+      {
+        "label": "talonic_get_app_acceptance",
+        "slug": "mcp-talonic-get-app-acceptance"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-app-acceptance",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_app_acceptance",
+    "seoTitle": "talonic_get_app_acceptance — Get App Acceptance Set",
+    "description": "MCP tool: read the app's acceptance set: the labeled expected results a correct run must reproduce, and the accepted mismatch share. null when none is saved.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read the app's acceptance set: the labeled expected results a correct run must reproduce, and the accepted mismatch share. null when none is saved. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_disable_app",
+        "slug": "mcp-talonic-disable-app"
+      },
+      {
+        "label": "talonic_save_app_acceptance",
+        "slug": "mcp-talonic-save-app-acceptance"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-save-app-acceptance",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_save_app_acceptance",
+    "seoTitle": "talonic_save_app_acceptance — Save App Acceptance Set",
+    "description": "MCP tool: replace the app's acceptance set: the expected results a correct run must reproduce, plus tolerance (accepted mismatch share, 0 to 1). This is the app's definition of done.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Replace the app's acceptance set: the expected results a correct run must reproduce, plus tolerance (accepted mismatch share, 0 to 1). This is the app's definition of done. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, cases (per subject: subject_key + expected_outcome and/or expected_auto; for single-decision apps: expected_decision), optional tolerance (default 0)."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "cases",
+            "type": "array",
+            "required": true,
+            "description": ""
+          },
+          {
+            "name": "tolerance",
+            "type": "number",
+            "required": false,
+            "description": "Accepted mismatch share (default 0)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app_acceptance",
+        "slug": "mcp-talonic-get-app-acceptance"
+      },
+      {
+        "label": "talonic_check_app_acceptance",
+        "slug": "mcp-talonic-check-app-acceptance"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-check-app-acceptance",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_check_app_acceptance",
+    "seoTitle": "talonic_check_app_acceptance — Check App Acceptance",
+    "description": "MCP tool: score a run against the app's acceptance set by comparing recorded results: the same run always gets the same score. Returns score, pass/fail and each mismatch.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Score a run against the app's acceptance set by comparing recorded results: the same run always gets the same score. Returns score, pass/fail and each mismatch. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: after talonic_run_app, to decide whether the app is ready to publish or still correct. ARGS: app_id, optional run_id (default: the latest completed run)."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": false,
+            "description": "Run to score; default the latest completed run."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_save_app_acceptance",
+        "slug": "mcp-talonic-save-app-acceptance"
+      },
+      {
+        "label": "talonic_run_app",
+        "slug": "mcp-talonic-run-app"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-run-app",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_run_app",
+    "seoTitle": "talonic_run_app — Run App",
+    "description": "MCP tool: start one run of an app's active version and return it. A rules app usually finishes in the call with its decision; an external app stops at awaiting_decision until its decision task is submitted.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Start one run of an app's active version and return it. A rules app usually finishes in the call with its decision; an external app stops at awaiting_decision until its decision task is submitted. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: testing or executing an app. Set dry_run:true first: a full trace with no side effects (no actions, no webhooks to outside systems).",
+          "ARGS: app_id, optional input object, dry_run, idempotency_key (reusing a key returns the existing run instead of starting another). Consumes credits.",
+          "NEXT: talonic_get_app_run for status and decision; talonic_get_run_verdicts for per-subject results."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "input",
+            "type": "object",
+            "required": false,
+            "description": "Run input, checked against the app's input schema."
+          },
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "required": false,
+            "description": "Full trace, no side effects."
+          },
+          {
+            "name": "idempotency_key",
+            "type": "string",
+            "required": false,
+            "description": ""
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_check_app_acceptance",
+        "slug": "mcp-talonic-check-app-acceptance"
+      },
+      {
+        "label": "talonic_list_app_runs",
+        "slug": "mcp-talonic-list-app-runs"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-app-runs",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_app_runs",
+    "seoTitle": "talonic_list_app_runs — List App Runs",
+    "description": "MCP tool: list an app's runs, newest first, with status, decision and who decided; `total` counts every run.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List an app's runs, newest first, with status, decision and who decided; `total` counts every run. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, optional limit (max 200) and offset."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Page size (default 50, max 200)."
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "Rows to skip before the page."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_run_app",
+        "slug": "mcp-talonic-run-app"
+      },
+      {
+        "label": "talonic_get_app_run",
+        "slug": "mcp-talonic-get-app-run"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-app-run",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_app_run",
+    "seoTitle": "talonic_get_app_run — Get App Run",
+    "description": "MCP tool: read one run: status, decision, decided_by, thresholds applied, reviews raised, timing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read one run: status, decision, decided_by, thresholds applied, reviews raised, timing. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: checking a run you started or found. include_events:true adds the run's journal (every event in order).",
+          "NOT FOR: Spec/pipeline runs (talonic_get_run). ARGS: run_id, optional include_events."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "App run UUID (run_id from talonic_run_app or talonic_list_app_runs)."
+          },
+          {
+            "name": "include_events",
+            "type": "boolean",
+            "required": false,
+            "description": ""
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_app_runs",
+        "slug": "mcp-talonic-list-app-runs"
+      },
+      {
+        "label": "talonic_get_run_record",
+        "slug": "mcp-talonic-get-run-record"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-run-record",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_run_record",
+    "seoTitle": "talonic_get_run_record — Get Run Record",
+    "description": "MCP tool: export a finished run's sealed decision record: the immutable, audit-ready result with its decision, who decided (rules, a person or an outside agent) and the evidence.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Export a finished run's sealed decision record: the immutable, audit-ready result with its decision, who decided (rules, a person or an outside agent) and the evidence. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user needs the final, auditable outcome. A run that has not finished has no record yet (HTTP 404). ARGS: run_id."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "App run UUID (run_id from talonic_run_app or talonic_list_app_runs)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_app_run",
+        "slug": "mcp-talonic-get-app-run"
+      },
+      {
+        "label": "talonic_get_run_verdicts",
+        "slug": "mcp-talonic-get-run-verdicts"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-get-run-verdicts",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_get_run_verdicts",
+    "seoTitle": "talonic_get_run_verdicts — Get Run Verdicts",
+    "description": "MCP tool: read a batch run's per-subject results: a summary plus one row per subject with its overall outcome, the auto flag, and each rule's outcome with reasons and evidence.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read a batch run's per-subject results: a summary plus one row per subject with its overall outcome, the auto flag, and each rule's outcome with reasons and evidence. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: inspecting what a run decided per record. Single-decision runs have none (HTTP 404; use talonic_get_app_run).",
+          "ARGS: run_id; optional rolled (overall outcome), auto, rule + status (always together), limit (max 200), cursor (from `next`)."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "App run UUID (run_id from talonic_run_app or talonic_list_app_runs)."
+          },
+          {
+            "name": "rolled",
+            "type": "\"passed\" | \"failed\" | \"indeterminate\" | \"not_applicable\"",
+            "required": false,
+            "description": "Filter by overall outcome."
+          },
+          {
+            "name": "auto",
+            "type": "boolean",
+            "required": false,
+            "description": "Filter by the auto flag."
+          },
+          {
+            "name": "rule",
+            "type": "string",
+            "required": false,
+            "description": "Rule id; needs status."
+          },
+          {
+            "name": "status",
+            "type": "\"passed\" | \"failed\" | \"indeterminate\" | \"not_applicable\"",
+            "required": false,
+            "description": "That rule's outcome; needs rule."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Page size (default 50, max 200)."
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "required": false,
+            "description": "`next` from the previous page."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_run_record",
+        "slug": "mcp-talonic-get-run-record"
+      },
+      {
+        "label": "talonic_list_app_reviews",
+        "slug": "mcp-talonic-list-app-reviews"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-app-reviews",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_app_reviews",
+    "seoTitle": "talonic_list_app_reviews — List Human Reviews",
+    "description": "MCP tool: list Human Reviews: questions apps raised for a person (approvals, missing data, judgment calls, exceptions), newest first, with `total`.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List Human Reviews: questions apps raised for a person (approvals, missing data, judgment calls, exceptions), newest first, with `total`. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: finding open reviews to answer, or checking the result of one already resolved (status 'resolved' shows its values). Omit app_id for the whole workspace.",
+          "ARGS: optional app_id, status, kind, assignee_user_id, limit (max 200), offset."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": false,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "status",
+            "type": "\"open\" | \"assigned\" | \"resolved\" | \"expired\" | \"cancelled\"",
+            "required": false,
+            "description": ""
+          },
+          {
+            "name": "kind",
+            "type": "\"resolution\" | \"approval\" | \"data_request\" | \"judgment\"",
+            "required": false,
+            "description": ""
+          },
+          {
+            "name": "assignee_user_id",
+            "type": "string",
+            "required": false,
+            "description": "Only reviews assigned to this user."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Page size (default 50, max 200)."
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "Rows to skip before the page."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_get_run_verdicts",
+        "slug": "mcp-talonic-get-run-verdicts"
+      },
+      {
+        "label": "talonic_raise_app_review",
+        "slug": "mcp-talonic-raise-app-review"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-raise-app-review",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_raise_app_review",
+    "seoTitle": "talonic_raise_app_review — Raise Human Review",
+    "description": "MCP tool: ask a person a question on an app instead of guessing: a Human Review with a JSON Schema for the answer.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Ask a person a question on an app instead of guessing: a Human Review with a JSON Schema for the answer. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: a decision needs a person's input. ARGS: app_id, kind (resolution | approval | data_request | judgment), question, input_contract (JSON Schema the answer must satisfy), optional run_id, context, team_id.",
+          "NEXT: the answer arrives through talonic_resolve_app_review (or the web app); read it with talonic_list_app_reviews status 'resolved'."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": false,
+            "description": "App run UUID (run_id from talonic_run_app or talonic_list_app_runs)."
+          },
+          {
+            "name": "kind",
+            "type": "\"resolution\" | \"approval\" | \"data_request\" | \"judgment\"",
+            "required": true,
+            "description": ""
+          },
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": ""
+          },
+          {
+            "name": "context",
+            "type": "object",
+            "required": false,
+            "description": ""
+          },
+          {
+            "name": "input_contract",
+            "type": "object",
+            "required": true,
+            "description": "JSON Schema the answer must satisfy."
+          },
+          {
+            "name": "team_id",
+            "type": "string",
+            "required": false,
+            "description": "Review team to assign."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_app_reviews",
+        "slug": "mcp-talonic-list-app-reviews"
+      },
+      {
+        "label": "talonic_resolve_app_review",
+        "slug": "mcp-talonic-resolve-app-review"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-resolve-app-review",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_resolve_app_review",
+    "seoTitle": "talonic_resolve_app_review — Resolve Human Review",
+    "description": "MCP tool: answer a Human Review: values (validated against the review's input_contract) plus optional feedback that teaches the app (proposal_verdict correct | incorrect | partial, correction, generalize).",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Answer a Human Review: values (validated against the review's input_contract) plus optional feedback that teaches the app (proposal_verdict correct | incorrect | partial, correction, generalize). Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user gives the answer. 'approval' reviews accept only a person's answer; an API key or agent is refused (HTTP 403). Needs operate access on the app.",
+          "RETURNS: the resolved review with its values. ARGS: review_id, values, optional feedback."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "review_id",
+            "type": "string",
+            "required": true,
+            "description": "Human Review UUID (id from talonic_list_app_reviews)."
+          },
+          {
+            "name": "values",
+            "type": "object",
+            "required": true,
+            "description": "Answer values matching the review's input_contract."
+          },
+          {
+            "name": "feedback",
+            "type": "object",
+            "required": false,
+            "description": "Optional feedback that teaches the app."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_raise_app_review",
+        "slug": "mcp-talonic-raise-app-review"
+      },
+      {
+        "label": "talonic_interview_app_review",
+        "slug": "mcp-talonic-interview-app-review"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-interview-app-review",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_interview_app_review",
+    "seoTitle": "talonic_interview_app_review — Interview Human Review",
+    "description": "MCP tool: hold one turn of a guided conversation on an open Human Review: send the reviewer's message and the earlier turns (the server keeps no state); get back a follow-up question or a readback with proposed answer values.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Hold one turn of a guided conversation on an open Human Review: send the reviewer's message and the earlier turns (the server keeps no state); get back a follow-up question or a readback with proposed answer values. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ready:true only when the proposed values satisfy the review's input contract. Nothing is submitted: finish with talonic_resolve_app_review.",
+          "ARGS: review_id, message, optional transcript [{ role: user | assistant, text }]."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "review_id",
+            "type": "string",
+            "required": true,
+            "description": "Human Review UUID (id from talonic_list_app_reviews)."
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "required": true,
+            "description": "The reviewer's message for this turn."
+          },
+          {
+            "name": "transcript",
+            "type": "array",
+            "required": false,
+            "description": "Earlier turns, oldest first."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_resolve_app_review",
+        "slug": "mcp-talonic-resolve-app-review"
+      },
+      {
+        "label": "talonic_list_app_precedents",
+        "slug": "mcp-talonic-list-app-precedents"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-list-app-precedents",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_list_app_precedents",
+    "seoTitle": "talonic_list_app_precedents — List App Precedents",
+    "description": "MCP tool: list an app's precedents: past resolved reviews it reuses for similar future runs.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List an app's precedents: past resolved reviews it reuses for similar future runs. Listed only when the credential can read the workspace's apps. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, optional similar_to (match keys object) to narrow to similar cases. An app with none returns an empty list."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "App id: the UUID `id` from talonic_list_apps or talonic_create_app (not the app_… public id)."
+          },
+          {
+            "name": "similar_to",
+            "type": "object",
+            "required": false,
+            "description": "Match keys of the case."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_interview_app_review",
+        "slug": "mcp-talonic-interview-app-review"
+      },
+      {
+        "label": "talonic_mining_list_rounds",
+        "slug": "mcp-talonic-mining-list-rounds"
+      }
+    ],
+    "mentions": [
+      "app",
+      "Human Review",
+      "app run"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-list-rounds",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_list_rounds",
+    "seoTitle": "talonic_mining_list_rounds — List Mining Rounds",
+    "description": "MCP tool: list an autonomous app's rule-finding rounds, newest first: phase, status, what each found, and for a round waiting for an outside driver its task state (claimed by whom, lease, deadline). `total` counts every round.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List an autonomous app's rule-finding rounds, newest first: phase, status, what each found, and for a round waiting for an outside driver its task state (claimed by whom, lease, deadline). `total` counts every round. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: finding a round to drive or checking progress. ARGS: app_id, optional limit (max 200), offset."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": ""
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": ""
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_list_app_precedents",
+        "slug": "mcp-talonic-list-app-precedents"
+      },
+      {
+        "label": "talonic_mining_get_round",
+        "slug": "mcp-talonic-mining-get-round"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-get-round",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_get_round",
+    "seoTitle": "talonic_mining_get_round — Get Mining Round",
+    "description": "MCP tool: read one rule-finding round: phase, status, budget, findings, candidate rules, summary, and the driver block for an externally driven round.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read one rule-finding round: phase, status, budget, findings, candidate rules, summary, and the driver block for an externally driven round. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, run_id."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "The round's run id (run_id from talonic_mining_list_rounds, or the decision task's run_id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_mining_list_rounds",
+        "slug": "mcp-talonic-mining-list-rounds"
+      },
+      {
+        "label": "talonic_mining_start_round",
+        "slug": "mcp-talonic-mining-start-round"
+      },
+      {
+        "label": "talonic_claim_decision_task",
+        "slug": "mcp-talonic-claim-decision-task"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-start-round",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_start_round",
+    "seoTitle": "talonic_mining_start_round — Start Mining Round",
+    "description": "MCP tool: start a rule-finding round on an autonomous app. Without phase the app's plan picks the next one; reconcile reviews rules whose candidates lapsed (needs configure access). dry_run re-grades without searching.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Start a rule-finding round on an autonomous app. Without phase the app's plan picks the next one; reconcile reviews rules whose candidates lapsed (needs configure access). dry_run re-grades without searching. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: the user asks to look for new rules now. Only one externally driven round per app can be open (HTTP 409 with the open task otherwise).",
+          "RETURNS: { run_id, status, phase, … }. A round with an outside driver then waits for a claim: see talonic_list_decision_tasks."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "phase",
+            "type": "\"discovery\" | \"hypothesis\" | \"reconcile\"",
+            "required": false,
+            "description": ""
+          },
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "required": false,
+            "description": ""
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_mining_get_round",
+        "slug": "mcp-talonic-mining-get-round"
+      },
+      {
+        "label": "talonic_mining_list_round_tools",
+        "slug": "mcp-talonic-mining-list-round-tools"
+      },
+      {
+        "label": "talonic_claim_decision_task",
+        "slug": "mcp-talonic-claim-decision-task"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-list-round-tools",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_list_round_tools",
+    "seoTitle": "talonic_mining_list_round_tools — List Round Tools",
+    "description": "MCP tool: list the tools you may call on a round you hold the claim on, with their inputs, the round's remaining budget and the retry rule for a busy round.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "List the tools you may call on a round you hold the claim on, with their inputs, the round's remaining budget and the retry rule for a busy round. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "USE WHEN: right after claiming the round's decision task, or to check remaining budget.",
+          "FLOW for a round waiting for an outside driver: talonic_list_decision_tasks (the app's tasks) -> talonic_claim_decision_task (keep execution_epoch) -> talonic_read_decision_package (the round's brief and tools) -> talonic_mining_list_round_tools -> talonic_mining_call_round_tool, repeatedly, with talonic_heartbeat_decision_task before the lease ends -> talonic_submit_decision_task with outcome { summary, protocol_feedback }, evidence [] and a one-line rationale.",
+          "AUTH: a tlnc_ key needs a per-app 'decide' grant (plus 'read' for the round reads); an OAuth connector session needs the apps:decide scope and a live workspace role of senior_member or above. A 403 names what is missing: tell the user, do not retry."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "The round's run id (run_id from talonic_mining_list_rounds, or the decision task's run_id)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_mining_start_round",
+        "slug": "mcp-talonic-mining-start-round"
+      },
+      {
+        "label": "talonic_mining_call_round_tool",
+        "slug": "mcp-talonic-mining-call-round-tool"
+      },
+      {
+        "label": "talonic_claim_decision_task",
+        "slug": "mcp-talonic-claim-decision-task"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-call-round-tool",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_call_round_tool",
+    "seoTitle": "talonic_mining_call_round_tool — Call Round Tool",
+    "description": "MCP tool: call one round tool by name with its input, as the current claimant. The call runs under the app's grants and the round's budgets; a tool's own error comes back as is_error:true with a reason, not as a failure of this call.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Call one round tool by name with its input, as the current claimant. The call runs under the app's grants and the round's budgets; a tool's own error comes back as is_error:true with a reason, not as a failure of this call. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Busy rounds are retried for you. A call that runs long is polled for up to wait_seconds (default 25, max 120); if it is still running you get its call_id: poll talonic_mining_get_round_tool_call.",
+          "Do not call tools on one round in parallel. close_round is not a tool here: close the round with talonic_submit_decision_task.",
+          "ARGS: app_id, run_id, execution_epoch, name, input (object, default {}), optional wait_seconds. A stale or foreign claim or an expired lease is HTTP 409: claim again.",
+          "AUTH: a tlnc_ key needs a per-app 'decide' grant (plus 'read' for the round reads); an OAuth connector session needs the apps:decide scope and a live workspace role of senior_member or above. A 403 names what is missing: tell the user, do not retry."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "The round's run id (run_id from talonic_mining_list_rounds, or the decision task's run_id)."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "execution_epoch from talonic_claim_decision_task. A stale epoch is HTTP 409."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "A tool name from talonic_mining_list_round_tools."
+          },
+          {
+            "name": "input",
+            "type": "object",
+            "required": false,
+            "description": "The tool's input object."
+          },
+          {
+            "name": "wait_seconds",
+            "type": "integer",
+            "required": false,
+            "description": "Seconds to keep polling a long call (default 25)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_mining_list_round_tools",
+        "slug": "mcp-talonic-mining-list-round-tools"
+      },
+      {
+        "label": "talonic_mining_get_round_tool_call",
+        "slug": "mcp-talonic-mining-get-round-tool-call"
+      },
+      {
+        "label": "talonic_claim_decision_task",
+        "slug": "mcp-talonic-claim-decision-task"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-mining-get-round-tool-call",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_mining_get_round_tool_call",
+    "seoTitle": "talonic_mining_get_round_tool_call — Get Round Tool Call",
+    "description": "MCP tool: read a round tool call that was still running: status running | done, and its content and is_error once done. Only the round's current claimant can read it.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read a round tool call that was still running: status running | done, and its content and is_error once done. Only the round's current claimant can read it. Listed only when the workspace has an autonomous app. The platform checks the caller's role, per-app access and key scopes on every call."
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "ARGS: app_id, run_id, call_id, execution_epoch.",
+          "AUTH: a tlnc_ key needs a per-app 'decide' grant (plus 'read' for the round reads); an OAuth connector session needs the apps:decide scope and a live workspace role of senior_member or above. A 403 names what is missing: tell the user, do not retry."
+        ]
+      },
+      {
+        "type": "param-table",
+        "title": "Parameters",
+        "params": [
+          {
+            "name": "app_id",
+            "type": "string",
+            "required": true,
+            "description": "Id (UUID) of an autonomous app, from talonic_list_apps where mode is 'autonomous'."
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "required": true,
+            "description": "The round's run id (run_id from talonic_mining_list_rounds, or the decision task's run_id)."
+          },
+          {
+            "name": "call_id",
+            "type": "string",
+            "required": true,
+            "description": "call_id from talonic_mining_call_round_tool."
+          },
+          {
+            "name": "execution_epoch",
+            "type": "integer",
+            "required": true,
+            "description": "execution_epoch from talonic_claim_decision_task. A stale epoch is HTTP 409."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_mining_call_round_tool",
+        "slug": "mcp-talonic-mining-call-round-tool"
+      },
+      {
+        "label": "talonic_claim_decision_task",
+        "slug": "mcp-talonic-claim-decision-task"
+      }
+    ],
+    "mentions": [
+      "rule finding",
+      "mining round"
     ]
   }
 ]

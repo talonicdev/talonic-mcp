@@ -39,7 +39,6 @@ const D = {
 }
 
 const policyId = () => zUuid().describe("The data policy id (from GET /v1/data-policies)")
-const p = (id: string) => `/v1/data-policies/${encodeURIComponent(id)}`
 
 /**
  * Register the four `talonic_data_policy_*` tools.
@@ -67,7 +66,15 @@ export function registerDataPolicyTools(
       D.check,
       { data_policy_id: policyId() },
       write,
-      (a) => runTool(() => apiJson(getToken, baseUrl, "POST", `${p(a.data_policy_id)}/compile`)),
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `/v1/data-policies/${encodeURIComponent(a.data_policy_id)}/compile`,
+          ),
+        ),
     ],
     [
       "talonic_data_policy_preview",
@@ -84,12 +91,20 @@ export function registerDataPolicyTools(
       { ...write, readOnlyHint: true },
       (a) =>
         runTool(() =>
-          apiJson(getToken, baseUrl, "POST", `${p(a.data_policy_id)}/test`, {
-            body: {
-              record_set_id: a.record_set_id,
-              ...(a.sample_record_id !== undefined ? { sample_record_id: a.sample_record_id } : {}),
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `/v1/data-policies/${encodeURIComponent(a.data_policy_id)}/test`,
+            {
+              body: {
+                record_set_id: a.record_set_id,
+                ...(a.sample_record_id !== undefined
+                  ? { sample_record_id: a.sample_record_id }
+                  : {}),
+              },
             },
-          }),
+          ),
         ),
     ],
     [
@@ -103,9 +118,16 @@ export function registerDataPolicyTools(
       { ...write, idempotentHint: false },
       (a) =>
         runTool(() =>
-          apiJson(getToken, baseUrl, "POST", `${p(a.data_policy_id)}/publish`, {
-            body: a.expected_version !== undefined ? { expected_version: a.expected_version } : {},
-          }),
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `/v1/data-policies/${encodeURIComponent(a.data_policy_id)}/publish`,
+            {
+              body:
+                a.expected_version !== undefined ? { expected_version: a.expected_version } : {},
+            },
+          ),
         ),
     ],
     [
@@ -122,12 +144,18 @@ export function registerDataPolicyTools(
       { ...write, idempotentHint: false },
       (a) =>
         runTool(() =>
-          apiJson(getToken, baseUrl, "POST", `${p(a.data_policy_id)}/runs`, {
-            body: {
-              source_run_id: a.source_run_id,
-              ...(a.user_schema_id !== undefined ? { user_schema_id: a.user_schema_id } : {}),
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `/v1/data-policies/${encodeURIComponent(a.data_policy_id)}/runs`,
+            {
+              body: {
+                source_run_id: a.source_run_id,
+                ...(a.user_schema_id !== undefined ? { user_schema_id: a.user_schema_id } : {}),
+              },
             },
-          }),
+          ),
         ),
     ],
   ]

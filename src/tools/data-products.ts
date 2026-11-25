@@ -70,9 +70,6 @@ const D = {
 }
 
 const productId = () => zUuid().describe("The data product id (from GET /v1/data-products)")
-const p = (id: string) => `/v1/data-products/${encodeURIComponent(id)}`
-const counterPath = (a: { data_product_id: string; target_field: string; prefix: string }) =>
-  `${p(a.data_product_id)}/sequence-counters/${encodeURIComponent(a.target_field)}/${encodeURIComponent(a.prefix)}`
 
 const idRule = z
   .object({
@@ -133,7 +130,7 @@ export function registerDataProductTools(
       },
       write,
       (a) =>
-        call("PUT", `${p(a.data_product_id)}/definition`, {
+        call("PUT", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/definition`, {
           body: {
             definition: a.definition,
             ...(a.expected_definition_version !== undefined
@@ -148,7 +145,7 @@ export function registerDataProductTools(
       D.runs,
       { data_product_id: productId() },
       readOnly,
-      (a) => call("GET", `${p(a.data_product_id)}/runs`),
+      (a) => call("GET", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/runs`),
     ],
     [
       "talonic_data_product_add_run",
@@ -159,7 +156,10 @@ export function registerDataProductTools(
         run_id: zUuid().describe("The structuring run or resolution run to add"),
       },
       write,
-      (a) => call("POST", `${p(a.data_product_id)}/runs`, { body: { run_id: a.run_id } }),
+      (a) =>
+        call("POST", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/runs`, {
+          body: { run_id: a.run_id },
+        }),
     ],
     [
       "talonic_data_product_remove_run",
@@ -170,7 +170,11 @@ export function registerDataProductTools(
         run_id: zUuid().describe("The run to remove (from talonic_data_product_runs)"),
       },
       { ...destructive, idempotentHint: true },
-      (a) => call("DELETE", `${p(a.data_product_id)}/runs/${encodeURIComponent(a.run_id)}`),
+      (a) =>
+        call(
+          "DELETE",
+          `/v1/data-products/${encodeURIComponent(a.data_product_id)}/runs/${encodeURIComponent(a.run_id)}`,
+        ),
     ],
     [
       "talonic_data_product_disagreements",
@@ -178,7 +182,11 @@ export function registerDataProductTools(
       D.disagreements,
       { data_product_id: productId() },
       readOnly,
-      (a) => call("GET", `${p(a.data_product_id)}/pending-resolutions`),
+      (a) =>
+        call(
+          "GET",
+          `/v1/data-products/${encodeURIComponent(a.data_product_id)}/pending-resolutions`,
+        ),
     ],
     [
       "talonic_data_product_resolve_field",
@@ -206,7 +214,7 @@ export function registerDataProductTools(
       },
       write,
       (a) =>
-        call("POST", `${p(a.data_product_id)}/resolve-field`, {
+        call("POST", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/resolve-field`, {
           body: {
             document_id: a.document_id,
             field_name: a.field_name,
@@ -222,7 +230,7 @@ export function registerDataProductTools(
       D.suggest,
       { data_product_id: productId() },
       { ...readOnly, idempotentHint: false },
-      (a) => call("POST", `${p(a.data_product_id)}/auto-review`),
+      (a) => call("POST", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/auto-review`),
     ],
     [
       "talonic_data_product_resolve_singles",
@@ -230,7 +238,11 @@ export function registerDataProductTools(
       D.resolveSingles,
       { data_product_id: productId() },
       write,
-      (a) => call("POST", `${p(a.data_product_id)}/auto-resolve-singles`),
+      (a) =>
+        call(
+          "POST",
+          `/v1/data-products/${encodeURIComponent(a.data_product_id)}/auto-resolve-singles`,
+        ),
     ],
     [
       "talonic_data_product_issue_ids",
@@ -245,7 +257,7 @@ export function registerDataProductTools(
       },
       write,
       (a) =>
-        call("POST", `${p(a.data_product_id)}/apply-id-rules`, {
+        call("POST", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/apply-id-rules`, {
           body: a.rules !== undefined ? { rules: a.rules } : {},
         }),
     ],
@@ -255,7 +267,8 @@ export function registerDataProductTools(
       D.regenerateIds,
       { data_product_id: productId() },
       destructive,
-      (a) => call("POST", `${p(a.data_product_id)}/regenerate-ids`),
+      (a) =>
+        call("POST", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/regenerate-ids`),
     ],
     [
       "talonic_data_product_generated_ids",
@@ -263,7 +276,8 @@ export function registerDataProductTools(
       D.generatedIds,
       { data_product_id: productId() },
       readOnly,
-      (a) => call("GET", `${p(a.data_product_id)}/generated-ids`),
+      (a) =>
+        call("GET", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/generated-ids`),
     ],
     [
       "talonic_data_product_sequence_counters",
@@ -271,7 +285,8 @@ export function registerDataProductTools(
       D.counters,
       { data_product_id: productId() },
       readOnly,
-      (a) => call("GET", `${p(a.data_product_id)}/sequence-counters`),
+      (a) =>
+        call("GET", `/v1/data-products/${encodeURIComponent(a.data_product_id)}/sequence-counters`),
     ],
     [
       "talonic_data_product_set_sequence_counter",
@@ -285,7 +300,12 @@ export function registerDataProductTools(
           .describe("`cross` for a counter shared across products"),
       },
       { ...destructive, idempotentHint: true },
-      (a) => call("PATCH", counterPath(a), { body: { value: a.value, scope: a.scope } }),
+      (a) =>
+        call(
+          "PATCH",
+          `/v1/data-products/${encodeURIComponent(a.data_product_id)}/sequence-counters/${encodeURIComponent(a.target_field)}/${encodeURIComponent(a.prefix)}`,
+          { body: { value: a.value, scope: a.scope } },
+        ),
     ],
     [
       "talonic_data_product_counter_ids",
@@ -299,9 +319,13 @@ export function registerDataProductTools(
       },
       readOnly,
       (a) =>
-        call("GET", `${counterPath(a)}/ids`, {
-          params: { scope: a.scope, limit: a.limit, offset: a.offset },
-        }),
+        call(
+          "GET",
+          `/v1/data-products/${encodeURIComponent(a.data_product_id)}/sequence-counters/${encodeURIComponent(a.target_field)}/${encodeURIComponent(a.prefix)}/ids`,
+          {
+            params: { scope: a.scope, limit: a.limit, offset: a.offset },
+          },
+        ),
     ],
   ]
   for (const [name, title, description, inputSchema, annotations, handler] of tools) {
