@@ -79,7 +79,7 @@ const GET_DESCRIPTION =
   "One process with its draft: fields, steps (id, kind, name, settings) and the arrows between them. Use it to see step ids before talonic_process_change with step_id, or to read what a process does."
 
 const CREATE_DESCRIPTION =
-  "Set up a new process as a DRAFT. Pass `description` in the user's own words (what comes in, what is read or checked, who decides, what goes out), or `workflow_json` with an exported n8n workflow to take it over. Nothing runs and nothing is sent until talonic_process_publish. The answer names what a person still has to choose (`stillOpen`, `questions`): tell the user those. Uses a model call for `description`."
+  "Set up a new process as a DRAFT. Pass `description` in the user's own words (what comes in, what is read or checked, who decides, what goes out), or `workflow_json` with an exported n8n workflow to take it over. Nothing runs and nothing is sent until talonic_process_publish. The answer names what a person still has to choose (`stillOpen`, `questions`): tell the user those."
 
 const CHANGE_DESCRIPTION =
   "Change a process draft from an instruction in plain words: add, remove or reorder steps, change who decides, what is sent, any setting. With `step_id` only that step's settings change. Touches the draft only; the live version stays until talonic_process_publish. If the answer is `needs_confirmation`, NOTHING was saved: the change means fewer people or checks look at items. Tell the user exactly those points and ask; call again with `confirmed: true` only after they said yes, never on a first call."

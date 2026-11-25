@@ -1,0 +1,271 @@
+{
+  "about": "Routes a tool may call although the public spec (api.talonic.com/v1/docs/openapi.json) lacks them. Each entry says why and where the platform serves it. scripts/check-routes.mjs fails when an entry is no longer used or the spec has it now, so this list only shrinks. Never add a route the platform does not serve.",
+  "gaps": [
+    {
+      "method": "GET",
+      "path_prefix": "/v1/growth/",
+      "kind": "internal",
+      "reason": "Talonic-internal growth reads (talonic_growth_*), listed only after the growth access probe; deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/growth/growth-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/growth/access",
+      "kind": "internal",
+      "reason": "Growth access probe; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/growth/growth-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/agent-tasks/admin/access",
+      "kind": "internal",
+      "reason": "Superadmin probe for the talonic_admin_*_agent_task tools; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts (v1/agent-tasks/admin)"
+    },
+    {
+      "method": null,
+      "path": "/v1/agent-tasks/admin/tasks",
+      "kind": "internal",
+      "reason": "Superadmin-only; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/agent-tasks/admin/tasks/{}",
+      "kind": "internal",
+      "reason": "Superadmin-only; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent-tasks/admin/tasks/{}/claim",
+      "kind": "internal",
+      "reason": "Superadmin-only; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent-tasks/admin/tasks/{}/heartbeat",
+      "kind": "internal",
+      "reason": "Superadmin-only; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent-tasks/admin/tasks/{}/submit",
+      "kind": "internal",
+      "reason": "Superadmin-only; internal, deliberately not in the public spec.",
+      "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/portfolio",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml. Platform follow-up: document /v1/portfolio/*.",
+      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/companies/{}",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/conflicts",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/portfolio/refresh",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/parties/{}/contracts",
+      "kind": "undocumented",
+      "reason": "Served on platform main (parties-api.controller.ts @Get(':id/contracts')), missing from openapi.yaml. Platform follow-up: document the party sections, names, directory link and address choice.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/parties/{}/documents",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/parties/{}/history",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/parties/{}/names",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/parties/names/{}",
+      "kind": "undocumented",
+      "reason": "PATCH and DELETE served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/parties/{}/directory-link",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/parties/{}/address-choice",
+      "kind": "undocumented",
+      "reason": "Served on platform main, missing from openapi.yaml.",
+      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/apps/{}/mining",
+      "kind": "pending-spec",
+      "reason": "Rule-finding round routes (talonic_mining_*). Served today; their spec operations land with platform PR #2348 (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/rule-mining.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/processes/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/export",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/resources",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/extract-pipeline",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/try",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/examples",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/processes/{}/examples/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/examples",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/evaluate",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/scripts",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/groups",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/processes/groups/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/lookup-data/build",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path_prefix": "/v1/processes/{}/form-preview/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path_prefix": "/v1/processes/{}/steps/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path_prefix": "/v1/processes/{}/sign-offs/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path_prefix": "/v1/processes/{}/runs/{}/steps/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    }
+  ]
+}

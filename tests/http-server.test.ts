@@ -26,6 +26,9 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       priceBaselineAccess: async () => false,
       agentTasksAccess: async () => true,
       decisionTasksAccess: async () => true,
+      appsToolsetAccess: async () => false,
+      miningAccess: async () => false,
+      toolGroupsAccess: async () => [],
       tokenAccepted: async () => true,
       ...options,
     }),
@@ -297,6 +300,27 @@ describe("HTTP server routing", () => {
     expect(Object.keys(upload.inputSchema.properties)).not.toContain("file_path")
   })
 
+  it("tools/list includes a probe-gated tool group only when its probe passes", async () => {
+    const list = async () => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    await stopHarness(h)
+    h = await startHarness({ toolGroupsAccess: async () => [] })
+    expect(await list()).not.toContain("talonic_aggregate")
+    await stopHarness(h)
+    h = await startHarness({ toolGroupsAccess: async () => ["aggregate", "events"] })
+    const text = await list()
+    expect(text).toContain("talonic_aggregate_catalog")
+    expect(text).toContain("talonic_list_events")
+    expect(text).not.toContain("talonic_contract_desk_")
+  })
+
   it("tools/list includes the parties tools only when the Parties probe passes", async () => {
     const list = async () => {
       const res = await fetch(`${h.baseUrl}/mcp`, {
@@ -318,7 +342,7 @@ describe("HTTP server routing", () => {
       : (text.split("\n").find((l) => l.startsWith("data: ")) ?? "").slice(6)
     const tools = (JSON.parse(json) as any).result.tools as Array<{ name: string }>
     const names = tools.map((t) => t.name).filter((n) => n.startsWith("talonic_parties_"))
-    expect(names).toHaveLength(12)
+    expect(names).toHaveLength(18)
     expect(names).toContain("talonic_parties_read")
   })
 
