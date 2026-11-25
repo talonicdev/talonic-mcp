@@ -7,7 +7,7 @@ import { widgetToolMeta } from "../widgets/types.js"
 const DESCRIPTION = [
   "Read Talonic's machine-readable credit pricing catalog: fixed per-unit rates so you can predict spend BEFORE running anything.",
   "",
-  "USE WHEN: estimating the cost of a planned extraction/structuring/matching job, or answering a pricing question. Public — works without spending credits.",
+  "USE WHEN: estimating the cost of planned work (reading documents, extracting fields, matching records), or answering a pricing question. Public — works without spending credits.",
   "NOT FOR: the workspace's current balance (use talonic_get_balance) or what it has already spent (use talonic_get_usage).",
   "ARGS: none.",
   "RETURNS: currency, credits_per_eur, multipliers (e.g. batch 0.5x), and units[] — each { unit, label, credits, eur, free }.",

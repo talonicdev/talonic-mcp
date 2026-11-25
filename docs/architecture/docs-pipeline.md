@@ -72,12 +72,12 @@ Adding a new tool surface (like `talonic_request_upload`, added in 0.1.46) requi
 
 ### In `talonic-mcp`
 
-1. **`src/content/sections/tools.ts`** — add the new section. Mirror the shape of an existing tool: `slug`, `parentSlug: "tools"`, `title`, `seoTitle`, `description`, `content[]`, `related[]`, `faq[]`, `mentions[]`.
-2. **`src/content/seo.ts`** — add `{ id: "<slug>", label: "<tool_name>" }` to the `tools` entry of `MCP_NAV_SECTIONS`. Without this, breadcrumb + prev/next derivation in `helpers.ts` returns null/empty.
+1. **`src/content/tool-pages.ts`** — add the tool's page copy: `task` (its group on Tools by task), `seoTitle` (50-60 chars), `description` (150-160), optional `credits`, `examples`, `faq`, `related`, `mentions`. Only public groups and `talonic_process_*` tools; app-gated and internal tools are never documented here.
+2. **`npm run docs:gen`** — rewrites `src/content/generated/tool-registry.ts` from a real `tools/list` and `docs/sections.json` from the rendered sections. The reference page (`src/content/sections/tool-reference.ts`), its nav entry (`seo.ts`), its Tools-by-task line and its `MCP_PATHS` route (`routes.ts`) all follow from the snapshot. `tests/content/generated-docs.test.ts` fails when either file is stale or a tool has no page copy.
 
 ### In `talonicdev/website`
 
-3. **`src/app/docs/mcp/tools/<short-name>/page.tsx`** — new 16-line file mirroring `filter/page.tsx`. The slug passed to `<McpContentPage slug="..." />` must match the section slug in `talonic-mcp/src/content/sections/tools.ts`.
+3. **`src/app/docs/mcp/tools/<short-name>/page.tsx`** — new 16-line file mirroring `filter/page.tsx`. The slug passed to `<McpContentPage slug="..." />` must match the section slug (the tool name with `_` → `-`); `MCP_PATHS` from `@talonic/mcp/content` gives the intended URL for every section.
 4. **Three sibling registries**, all of which must include the new tool:
    - `src/lib/docs-sync.ts` → add to `MCP_PAGE_MAP` (drives `mcpPageMeta()` title + breadcrumbs).
    - `src/app/docs/layout.tsx` → add to the slug → URL map (drives the sidebar's active-state highlighting).
@@ -90,7 +90,7 @@ That's the full list. After both pushes land, Vercel rebuilds and the new tool p
 | Symptom | Likely cause | File to fix |
 |---|---|---|
 | `/docs/mcp/tools/<short>` returns 404 | Missing `page.tsx` route | Create `src/app/docs/mcp/tools/<short>/page.tsx` (website) |
-| Page renders but content is empty | Page exists, but `getMcpSection(slug)` returned null | Section missing from `src/content/sections/tools.ts` (mcp), OR slug typo |
+| Page renders but content is empty | Page exists, but `getMcpSection(slug)` returned null | Tool missing from the generated registry (run `npm run docs:gen`) or from `src/content/tool-pages.ts` (mcp), OR slug typo |
 | `/docs/mcp/talonic-<slug>` 404s | Missing redirect | Add to `next.config.ts` (website) |
 | Sidebar doesn't highlight the active tool | Missing slug → URL map entry | Add to `src/app/docs/layout.tsx` (website) |
 | Wrong title / wrong breadcrumbs | Missing `MCP_PAGE_MAP` entry | Add to `src/lib/docs-sync.ts` (website) |
@@ -122,7 +122,7 @@ When something authenticated breaks, check (in order): (1) the secret value (did
 
 …changed in the push, but `docs/sections.json` did not. **Opt out** with `[skip docs]` in any commit message in the push, used only for genuinely-non-doc-affecting changes (refactors, internal-only fixes, CI infrastructure, debug instrumentation).
 
-⚠️ **The guard watches `docs/sections.json`, the dormant mirror — *not* the rendered MCP docs surface.** The rendered surface has its own lock since 2026-11-25: `tests/content/tool-sections.test.ts` (run by `npm test` in CI and in the publish job) fails when a tool is documented only in `docs/sections.json` (every `talonic_*` mirror entry needs a section in `src/content/sections/*.ts` and a nav entry), when a public widget tool lacks a rendered section, or when a `talonic_process_*` page's parameter table drifts from the tool's input schema. The 21 process tools live in `src/content/sections/processes.ts`.
+⚠️ **The guard watches `docs/sections.json`, the dormant mirror — *not* the rendered MCP docs surface.** The rendered surface has its own lock since 2026-11-25: `tests/content/tool-sections.test.ts` (run by `npm test` in CI and in the publish job) fails when a tool is documented only in `docs/sections.json` (every `talonic_*` mirror entry needs a section in `src/content/sections/*.ts` and a nav entry), when a public widget tool lacks a rendered section, or when a `talonic_process_*` page's parameter table drifts from the tool's input schema. Since the reorganisation (2026-11-25) `docs/sections.json` is generated from the rendered sections (`npm run docs:gen`) and `tests/content/generated-docs.test.ts` fails when it is stale, so the guard can no longer pass on a mirror that disagrees with the live pages. `tests/content/terminology.test.ts` runs the platform's docs denylist (no models, vendors or internal mechanics) over every rendered section and every public tool description.
 
 **Route-drift guard.** `npm run check:routes` (`scripts/check-routes.mjs`, in `ci.yml` and before publishing in `publish.yml`) fails when a `/v1/...` route string in `src/tools/**` is not an operation of the live public spec, with a pinned fallback (`scripts/openapi-routes.pinned.json`). Documented gaps go in `scripts/route-gaps.json` with a reason; `tests/tools/route-branches.test.ts` checks every request each tool and each argument-picked branch actually sends.
 

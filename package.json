@@ -69,6 +69,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "check:routes": "node scripts/check-routes.mjs",
     "inventory": "npm run build && node scripts/tool-inventory.mjs --write",
+    "docs:gen": "npm run build && node scripts/gen-docs.mjs --registry && npm run build && node scripts/gen-docs.mjs --mirror",
     "clean": "rm -rf dist coverage",
     "start": "node dist/server.js",
     "start:http": "node dist/http-server.js",

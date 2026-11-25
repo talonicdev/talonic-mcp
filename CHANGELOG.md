@@ -31,9 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `talonic_parties_documents`, `talonic_parties_history` (a party's documents and history, paged), `talonic_parties_names` (aliases and former names: add, confirm / reject, remove), `talonic_parties_directory_link` (link to or unlink from the CRM directory), `talonic_parties_address_choice` (CRM or contract address for letters), `talonic_parties_sync` (refill from the data products, optional wait). `talonic_parties_party` takes `overview` and `product_id`; `talonic_parties_search` takes `scope`, `product_id` and `offset`. Eighteen parties tools in all, still listed only where the Parties app is on.
 - `talonic_find_data` takes `account` (one portfolio company, by name or alias) and `concepts[]`, matching the platform's `find_data`; a test holds the tool's parameters to the platform's schema.
-- Rendered docs pages for the 21 `talonic_process_*` tools (`src/content/sections/processes.ts`, nav under Tool Reference); before, they existed only in the unrendered `docs/sections.json`.
+- Rendered docs pages for the 21 `talonic_process_*` tools (nav under Tools); before, they existed only in the unrendered `docs/sections.json`.
+- **MCP docs reorganised** (`@talonic/mcp/content`, rendered at talonic.com/docs/mcp): an overview of what an agent can do; one Connect page with a section per client (Claude.ai and Claude Desktop, ChatGPT, Claude Code, Cursor, Cline, Continue, Cowork; `MCP_CLIENTS` is exported so the site can show them as tabs); Tools by task; Files and uploads; four recipes (set up a workspace end to end, process an inbox, audit invoices, answer a contract question); Run Talonic tasks from your own agent; Troubleshooting and Limits. Every old page slug still resolves. `MCP_PATHS` is exported with the intended URL of every section.
+- **Generated tool reference.** One page per public tool (the 40 listed in every session and the 21 process tools), rendered from a real `tools/list` snapshot (`npm run docs:gen`) plus hand-written copy in `src/content/tool-pages.ts`; app-gated and internal tools are never listed. `docs/sections.json` is now generated from the rendered sections too.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **CI refuses a tool whose route is not in the public API.** `npm run check:routes` checks every `/v1/...` route string in `src/tools/**` against the live spec (`api.talonic.com/v1/docs/openapi.json`, pinned fallback), verb included, and refuses a literal in a uuid path slot; `tests/tools/route-branches.test.ts` calls every tool and every argument-picked branch. Known gaps are listed with a reason in `scripts/route-gaps.json`.
 - `tests/content/tool-sections.test.ts` fails when a tool is documented only in `docs/sections.json`.
@@ -67,11 +71,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **Cards in the Ink design.** Ink's palette and type (`--void-*` tokens from the platform's `ink/restructure`: accent #512DA8 / #C9B6F5, neutral surfaces, quieter dividers and chips) replace the generic indigo/grey for all ten cards, in light and dark. The answer card renders its markdown as prose (bold, lists, code, https links, tables, escape-first so model text can never become markup), drops the boxed raw-markdown block, the ask/conversation ids and the token count, shows a "Verified" style verdict, numbered sources, and one quiet meta line (credits · queries · seconds).
 
 ## [0.1.100] - 2026-11-21
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Questions steer to `talonic_ask` at the moment the model reaches for SQL.** Results of `query_data`, `describe_data`, `workspace_overview` and `plan_fields` via `talonic_invoke_agent_tool` carry one extra content item (`structuredContent.next_step`) saying that `talonic_ask` does the same work server-side in one cited call. An unknown-field refusal (the model guessed a `field_key`, as in the 2026-11-20 claude.ai session) adds that `talonic_ask` resolves field names itself. `content[0]` stays parseable JSON.
 
@@ -89,6 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **Questions go to `talonic_ask`.** In claude.ai the model answered a simple question by exploring the workspace itself: accounts, the field registry (13,000+ mostly one-off candidate fields), specs, schemas, `workspace_overview`, then a chain of `query_data` SQL attempts, about 20 calls and over a minute. `talonic_ask` runs that same toolset server-side and returns one cited answer, but the model skipped it because it costs credits and the SQL route is free. The server instructions and `talonic_ask` now name it the default for any question about document contents; `talonic_invoke_agent_tool`, `talonic_list_agent_tools`, `talonic_list_fields`, `talonic_list_specs`, `talonic_list_schemas` and `talonic_list_accounts` say they are not a warm-up for answering one. `talonic_list_fields` tells the model to pass `maturity: core|proven`.
 - **Readable tool titles.** Claude shows each call as "Talonic: <title>"; titles drop the repeated "Talonic" and internal wording ("Invoke Platform Agent Tool" → "Query workspace data", "Poll a Spec run" → "Check run progress", …).
 - **Cards show the spinning Talonic mark while loading** (Ink's mark and loop; still under `prefers-reduced-motion`).
@@ -96,6 +106,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.97] - 2026-11-20
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Inline cards only for answers.** Once cards rendered in Claude (0.1.96), every tool call drew one, so a single question filled the chat with 20+ full-height cards of field lists, specs, schemas and raw SQL rows. Only ten tools now declare a card: `talonic_extract`, `talonic_ask`, `talonic_get_answer`, `talonic_get_run_results`, `talonic_request_upload`, `talonic_get_balance`, `talonic_get_usage`, `talonic_get_pricing`, `talonic_save_schema`, `talonic_create_account`. Lookups the model makes for itself show only the collapsed tool-call row. The run-results card shows 12 rows and 6 columns at most.
 
@@ -113,6 +125,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **App tools no longer vanish mid-session.** One generic per-token probe cache replaces ten copies: a timeout, network error, 5xx or 429 reuses the last known answer and is not cached, instead of dropping a whole app's tools for five minutes.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Agent-task (5) and decision-task (7) tools are listed on the hosted server only where the workspace uses them** (an Agent task exists / an External-mode app exists). A normal claude.ai user now sees 28 tools (was 38) and a 71 KB `tools/list` (was 99 KB). Local installs keep them by default (`includeAgentTaskTools`, `includeDecisionTaskTools`).
 - Server instructions open with a which-tool-for-which-question table and only describe flows whose tools are registered.
@@ -138,6 +152,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.93] - 2026-10-29
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Claude Connectors Directory review (Anthropic, 2026-10-25).** `talonic_request_upload` names no chat client any more; `talonic_invoke_agent_tool` states that the platform runs every caller, API key or OAuth session, as the read-only viewer role (`data.read` only), matching its read-only annotation; `talonic_extract` describes what it returns (schema-validated JSON, per-field confidence, provenance on request); the server instructions spell out the call order search, then document_id, then extract. The steering sentences the review quoted ("callable on EVERY turn", "you are mistaken", "never tell the user") were already removed in 0.1.85. Locked by `tests/claude-directory-compliance.test.ts`.
 
@@ -170,6 +186,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **Doc Gen tools know contract parties and red passages.** `talonic_doc_gen_update_template` takes `rescan` (find the template's red-text passages again); field sources describe `party` (a role's attribute: addressee, owner addressee, effective partner, partner, Verwalter, tenant, previous and new owner), `variant`, `condition` (including `ask`: a person decides per document, `yes` or `no` in `draft` and `generate`) and `fixed`.
 
 ## [0.1.88] - 2026-10-12
@@ -196,6 +214,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **OpenAI plugin review compliance.** The 2026-10-07 plugin-dashboard scan held five items; all addressed:
   - Server instructions rewritten as neutral routing guidance (`buildServerInstructions`): no "you are mistaken, invoke it anyway" override, no pricing, no "for ANY document" steering.
   - `talonic_list_agent_tools` + `talonic_invoke_agent_tool` (a generic executor) are no longer listed for ChatGPT / OpenAI callers, detected by User-Agent (`isOpenAiClient`); other clients keep them. New `includeGenericExecutor` option on `createServer`.
@@ -205,6 +225,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.84] - 2026-10-06
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **SEO copy for every public docs section.** `seoTitle` and `description` on all 52 public sections now sit within 50–60 / 150–160 characters, including the 14 Specs/Run/Ask and decision-task tools; wording checked against each tool's implementation. Locked by `tests/content/seo-lengths.test.ts`.
 - **Neutral example data.** The `talonic_find_data` example no longer uses a customer filename.
@@ -252,6 +274,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **CI: the MCP Registry publish waits up to four minutes for npm to serve the new version, retries three times, and warns instead of failing** (`.github/workflows/publish.yml`). `mcp-publisher publish` validates the release against npm, and npm's read replicas can lag `npm publish` by minutes — the 0.1.77 release was refused with a 404 about 70 seconds after the publish returned, and because the step is `continue-on-error` the run stayed green while the Registry silently kept the previous version. The workflow now polls `npm view @talonic/mcp@<version>` for up to four minutes before publishing to the Registry, retries the Registry publish three times, and emits a `::warning::` annotation when it still fails so the gap is visible in the run summary instead of hiding behind a green check. A new failure-mode row in `docs/architecture/docs-pipeline.md` documents the symptom and the manual recovery (`mcp-publisher login github && mcp-publisher publish`); the step stays soft — npm remains the source of truth for installs.
 
 ## [0.1.77] - 2026-09-22
@@ -273,6 +297,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Corrected the docs-pipeline map** in `docs/architecture/docs-pipeline.md`, `AGENTS.md` and `CLAUDE.md`: `docs/sections.json` feeds the `mcp` domain of `@talonic/docs`, which no page renders; the live MCP docs come from `src/content/sections/*.ts`.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **SEO metadata across all 32 doc sections** within the 50–60 character `seoTitle` and 150–160 character `description` targets, no dead `related[]` links; Configuration documents `PORT`, `MCP_RESOURCE_URL`, `OAUTH_AUTHORIZATION_SERVER`.
 - ChatGPT submission manifest lists the six registry tools.
@@ -301,6 +327,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - High-value npm keywords for discoverability.
 
 ## [0.1.72] - 2026-07-07
@@ -325,6 +353,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - Formatting only (prettier pass on the pricing tool).
 
 ## [0.1.68] - 2026-06-21
@@ -336,6 +366,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.67] - 2026-06-20
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Phase 1 retrieval tuning:** broadened the semantic signal and softened the schema-required rule (decisions D1/D2/D3) so more real-world queries land.
 - ChatGPT App Directory **approval** recorded (`docs/chatgpt-apps-sdk/submission-record.md`), with the approved submission JSON and screenshot tooling preserved.
@@ -356,6 +388,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **Agent-facing tool descriptions rewritten** — a one-line WHAT, `USE WHEN` / `NOT FOR` redirects to sibling tools, and explicit chaining cues (by-name → `talonic_search`), replacing the ~2.5k-character prose blocks that made models hesitate (design in `docs/superpowers/specs`).
 
 ## [0.1.63] - 2026-06-09
@@ -373,6 +407,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.61] - 2026-06-08
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Apps SDK domain-verification challenge token updated to the current value.
 
@@ -398,6 +434,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - Widget styling: padded stat tiles, larger margins, responsive grid.
 
 ## [0.1.56] - 2026-06-03
@@ -407,6 +445,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Branded inline widgets for every tool.** All nine tools render a ChatGPT Apps SDK card (previously only `talonic_extract` did): `talonic_search` (grouped matches), `talonic_filter` (results table + warnings), `talonic_get_document` (metadata + triage), `talonic_to_markdown` (scrollable markdown), `talonic_list_schemas` (schema table), `talonic_save_schema` (confirmation), `talonic_get_balance` (balance card), `talonic_request_upload` (upload-link card). Each tool declares `_meta["openai/outputTemplate"]`.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Widget scaffolding refactored into `src/widgets/shared.ts`** — shared base CSS, render helpers, the `window.openai` data-channel bootstrap, the `_meta` block (widget domain + CSP) and a `registerWidget()` helper; each widget supplies only its `render(payload)` body.
 
@@ -419,6 +459,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.54] - 2026-06-03
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Comprehensive docs refresh (README / AGENTS / CLAUDE / STATUS / MCP docs) for the nine-tool surface and the verified browser-handoff upload flow.
 
@@ -442,6 +484,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `talonic_list_schemas` now returns **compact summaries** (id, short_id, name, description, version, field count) and drops the heavy full `definition` blob from the list response. Fetch a single schema's definition on demand instead of paying for every definition on every list call.
 
 ## [0.1.50] - 2026-05-28
@@ -458,11 +502,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - **`talonic_request_upload` polling guidance hardened.** The description now states explicitly that a user message like "done" or "uploaded" confirms only the browser-side upload — the agent must still poll `talonic_get_document` until `status` is `completed` before calling `talonic_extract`. `talonic_get_document`'s description documents the full lifecycle (`pending_upload → queued → extracting → completed`).
 
 ## [0.1.48] - 2026-05-28
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - **Aligned the browser-handoff poll target with the platform fix.** After the platform began enqueuing extraction on upload, the happy-path lifecycle became `pending_upload → queued → extracting → completed` and no longer surfaces `uploaded` in normal operation. `talonic_request_upload` and `talonic_get_document` descriptions now tell agents to poll for `completed`. Added unit tests for `talonic_request_upload` (happy path, custom base URL, per-call token refresh, non-2xx and network-error paths).
 
@@ -499,6 +547,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `talonic_filter` SCHEMA TYPING block restructured into a **preventive / reactive** pair: agents call `talonic_search` first and gate numeric operators (`gt`/`gte`/`lt`/`lte`/`between`) on `field.dataType === "number"` before constructing the filter, with the API's `warnings[]` array remaining the reactive safety net. Closes the schema-typing footgun end-to-end.
 
 ## [0.1.38] - 2026-05-18
@@ -508,6 +558,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`warnings` field on `talonic_filter`'s outputSchema** (`src/tools/filter.ts`). The Talonic API surfaces a `warnings[]` array on filter responses when a numeric operator is applied to a string-typed field — the schema-typing footgun where `gt`/`gte`/`lt`/`lte`/`between` against a string-typed field like `invoice_total` (with currency symbols mixed in) silently returns zero matches. The MCP outputSchema previously did not declare `warnings`, so Zod's default strip mode dropped the field from `structuredContent` before the agent could read it. The schema now accepts an optional array of permissive (`.passthrough()`) warning objects covering `code`, `message`, `field`, `field_id`, and `suggestion`; all keys are optional and unknown keys forward through.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `talonic_filter` SCHEMA TYPING block extended with a one-line nudge telling agents to surface `warnings[].message` (and `suggestion`, when present) to the user verbatim rather than silently retrying.
 - Internal: `outputSchema` is now `export`ed from `src/tools/filter.ts` so tests can validate it directly via `z.object(filterOutputSchema)`.
@@ -520,6 +572,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - Internal: HTTP request handler extracted into an exported `createRequestHandler()` factory with the session map scoped per-call (production builds exactly one; tests spin up isolated instances). `httpServer.listen` gated behind an `isDirectInvocation()` check mirroring `server.ts` so importing the module from a test does not bind to port 3000.
 
 ### Tests
@@ -529,6 +583,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.36] - 2026-05-13
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Post-submission state refresh in `STATUS.md`: Claude Connectors Directory submission marked as submitted (2026-05-12); Smithery listing recorded at `https://smithery.ai/servers/talonic/talonic`; 8-tool / 2-resource surface re-verified in the surfaces table; documentation tightened in `docs/sections.json` and the corresponding website-sync content sections.
 
@@ -540,6 +596,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`SECURITY.md`** at the repo root. Disclosure policy with `safety@talonic.ai` as the primary channel, two-business-day acknowledgement target, ten-business-day substantive response, and a 30-day fix target for confirmed production-affecting issues. Coordinated-disclosure model with a safe-harbour clause.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Disclosure email switched from a placeholder to `safety@talonic.ai` after the mailbox was stood up.
 
@@ -553,17 +611,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - README "Available on" section lists Cursor Directory in the first position.
 
 ## [0.1.32] - 2026-05-11
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `docs/sections.json` refreshed: content brought up to date with the post-OAuth surface, prettier drift across all sections cleared.
 
 ## [0.1.31] - 2026-05-11
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Prettier re-run on `src/tools/filter.ts` after the `is_not_empty` re-addition in 0.1.29.
 
@@ -574,6 +638,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`is_not_empty` filter operator re-exposed.** Checks the materialized-values index, which the upstream API now updates within seconds of extraction completing. For batch-mode extractions, results reflect data after the batch poll cycle applies. The `talonic_filter` tool description, troubleshooting docs, and README "Known limitations" section have all been updated to reflect the new behavior; the "intentionally not exposed in v0.1" caveat is gone.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `talonic_filter` description gains type-mismatch guidance to complement the existing SCHEMA TYPING block.
 
@@ -587,17 +653,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - README reframed around the Claude.ai OAuth connector flow as the primary install path, with the API-key URL kept as an alternative for clients that cannot complete the OAuth handshake.
 
 ## [0.1.27] - 2026-05-08
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `docs/sections.json` enriched with code examples; per-page content expanded to at least 4 paragraphs each, with a 6K-character target on tool pages. Improves SEO and gives the website's auto-generated docs more substance.
 
 ## [0.1.26] - 2026-05-08
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `docs/sections.json` enrichment pass: every MCP doc section has at least four paragraphs. Foundation for the further expansion in 0.1.27.
 
@@ -620,6 +692,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - Hosted MCP (`mcp.talonic.com`) is now token-rotation aware. The bearer token is extracted on every incoming MCP request and the SDK is rebuilt per request when the token changes; previously the credential was captured at session-init time and reused. Required for OAuth 2.1 access-token rotation across requests in the same session.
 - `WWW-Authenticate: Bearer resource_metadata="..."` header on 401 responses, per RFC 9728. Lets OAuth clients (Claude.ai connector, MCP Inspector) discover the authorization server.
 - `/.well-known/oauth-protected-resource` endpoint on the hosted MCP per RFC 9728. Advertises `https://api.talonic.com` as the authorization server and the three scopes the connector actually exercises (`extract:write`, `documents:read`, `schemas:read`).
@@ -633,12 +707,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `Known Limitations` section in `src/content/sections/troubleshooting.ts` rewritten to reflect the post-engineering-fix state. Removed the now-stale "per-field provenance not surfaced" entry (engineering shipped `include_provenance` in 0.1.14). Added entries for `filterable: true` discoverability, schema-type-vs-operator compatibility, and the drag-and-drop file-upload stall in Claude.ai's hosted-MCP path (workaround: use `file_url` or `document_id`, or use the local stdio install).
 - Filter callout in `src/content/sections/tools.ts` updated to highlight the `filterable: true` requirement alongside the `is_not_empty` caveat.
 
 ## [0.1.15] - 2026-05-05
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - Prettier-formatted `src/tools/extract.ts` after the 0.1.14 description update.
 
@@ -650,11 +728,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - Search and filter tool descriptions further refined for the `filterable` flag pattern; FAQ in `docs/sections.json` updated.
 
 ## [0.1.13] - 2026-05-04
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `talonic_filter` and `talonic_search` descriptions updated to reflect the upstream API addition of a `filterable` boolean on `fields[]` and `fieldMatches[]` in search responses. Agents are now guided to only use `filterable: true` entries with `talonic_filter`, avoiding the silent zero-result queries that previously came back from non-materialized fields.
 
@@ -666,6 +748,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete tool-input-and-response examples for all 7 tools in `src/content/sections/tools.ts`, including the previously-missing response block on `talonic_extract` with `schema_id`.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `talonic_extract` response example shape aligned with the SDK's canonical `confidence: { overall, fields }` form.
 
@@ -679,6 +763,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `validationError` helper in `src/tools/_shared.ts` for fast-fail input checks.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `talonic_extract` description: SCH- caveat removed (the upstream API now accepts both UUID and `SCH-XXXXXXXX` short ids on `/v1/extract`).
 - `talonic_filter`: `is_not_empty` removed from the operator enum and `FilterArgs` union. The description has a NOT SUPPORTED IN v0.1 section with workarounds (`eq`/`gt`/`contains` against a known value, or `is_empty` then invert client-side).
@@ -697,6 +783,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hosted MCP install snippets added to all six client install pages (Claude Desktop, Cursor, Cline, Continue, Cowork, generic), leading with the hosted option.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `src/version.ts` derives the version from `package.json` at build time instead of being hardcoded, with a smoke test that asserts they match.
 - Comprehensive rewrite of `docs/sections.json` to reflect the v0.1.10 surface.
@@ -730,6 +818,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - README: "Hosted MCP" install path mentioned as a primary option for Claude.ai users (URL plus apiKey query parameter pattern).
 
 ## [0.1.6] - 2026-04-30
@@ -741,6 +831,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.5] - 2026-04-30
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `@talonic/node` dependency bumped to `^0.1.3`. Picks up the SDK refactor that drops local field-name pre-resolution; canonical names like `vendor.name` are now passed straight through to the API for server-side resolution.
 - `talonic_filter` description: documents that the API now resolves canonical field names server-side, and flags that `is_not_empty` currently underreports.
@@ -768,6 +860,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
+
 - `talonic_extract` description: clarified when each file source is appropriate. `file_data` is the recommended path for chat clients; `file_path` only works when the MCP server has filesystem access to that path; `file_url` is for documents already on the public web; `document_id` re-extracts an existing workspace document.
 - `talonic_to_markdown` description: added `file_data` + `filename` to the input list with the same chat-client guidance.
 - `talonic_extract` description no longer recommends the flat key-type schema map; recommends full JSON Schema only (the flat map is silently empty-saved by the API; tracked separately).
@@ -783,6 +877,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Regression test (`tests/server-symlink.test.ts`) that spawns the bundled server through a symlink and asserts `--version` prints `SERVER_NAME` and `VERSION`. Catches future regressions of the auto-run guard before publish.
 
 ### Changed
+
+- **Tool descriptions say what a tool does for you, not how Talonic works.** The public tool descriptions, titles and parameter text drop internal mechanics (registry, pipeline phases, stages, "no model in the loop", how answers are put together) for outcomes, inputs and outputs. Literal field and enum names are unchanged, and so are parameters and behaviour. `talonic_list_specs`, `talonic_get_spec` and `talonic_run_spec` are titled "List Specs", "Look up a Spec" and "Run a Spec". A denylist test now covers every public description and docs page.
 
 - `@talonic/node` dependency bumped to `^0.1.2` to pull in the matching SDK fix for the same bug in the SDK CLI bin.
 

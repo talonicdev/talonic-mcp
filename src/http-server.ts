@@ -37,7 +37,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http"
-import { createHash } from "node:crypto"
+import { createHash, webcrypto } from "node:crypto"
 import { realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
@@ -53,6 +53,12 @@ import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
+
+// Node 18 has no global `crypto`; the MCP SDK's HTTP transport calls
+// `crypto.randomUUID()` / `crypto.getRandomValues()` on it. engines is >=18.
+if (!(globalThis as { crypto?: unknown }).crypto) {
+  Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true })
+}
 
 const PORT = Number(process.env["PORT"] ?? 3000)
 

@@ -20,9 +20,9 @@ export const ASK_MAX_WAIT_S = 55
 const POLL_HINT = "still processing — call talonic_get_answer with this ask_id in a few seconds"
 
 const ASK_DESCRIPTION = [
-  "Ask a natural-language question over the workspace's documents and get a cited, verified answer (markdown). The Talonic agent plans over the workspace's extracted fields, runs read-only SQL over extracted cells, reads document text, and grounds every load-bearing claim in a source span. Consumes credits.",
+  "Ask a natural-language question over the workspace's documents and get a cited, verified answer (markdown). Talonic looks across the extracted data and the documents' text, backs every claim that matters with a quote from a source document, and checks the answer before returning it. Consumes credits.",
   "",
-  "USE WHEN (the default for questions): the user asks anything about what their documents contain — counts, totals, duplicates, comparisons, anomalies ('which vendors invoiced us twice in May?'), or a summary across documents. One call replaces exploring fields, schemas, specs and SQL yourself; skip that exploration.",
+  "USE WHEN (the default for questions): the user asks anything about what their documents contain — counts, totals, duplicates, comparisons, anomalies ('which vendors invoiced us twice in May?'), or a summary across documents. One call replaces exploring fields, schemas, Specs and queries yourself; skip that exploration.",
   "NOT FOR: reading a known field's values (talonic_field_values, free) or filtering documents by a known value (talonic_filter, free); locating which field holds a concept (talonic_find_data).",
   "ARGS: `question`; optional `scope` { document_ids[], schema_id, pipeline_id, data_product_id, document_type, source_id, tags[], ingested_after, ingested_before } (ANDed), `conversation_id` (continue a thread), `output_format` { instruction, template }, `wait_seconds` (0–55, default 45).",
   "RETURNS: { ask_id, status ('completed'|'processing'|'error'), conversation_id, answer (markdown), citations[] { quote, document_id, kind, filename, app_url }, verification { verdict, checks_total, checks_unsupported, correction }, usage { tokens, credits_charged }, tool_calls, artifacts[], waited_ms }. If status is still 'processing' after the wait, call talonic_get_answer with the ask_id.",
@@ -42,7 +42,7 @@ const scopeSchema = z
   .object({
     document_ids: z.array(uuid).max(500).optional().describe("Only these documents."),
     schema_id: uuid.optional().describe("Only documents extracted with this schema."),
-    pipeline_id: uuid.optional().describe("Only documents of this pipeline run."),
+    pipeline_id: uuid.optional().describe("Only documents of this Spec run."),
     data_product_id: uuid
       .optional()
       .describe(
@@ -62,14 +62,16 @@ const askInputSchema = {
   scope: scopeSchema,
   conversation_id: uuid
     .optional()
-    .describe("Continue this conversation; the agent sees prior turns."),
+    .describe("Continue this conversation; earlier questions and answers are taken into account."),
   output_format: z
     .object({
       instruction: z.string().max(1000).optional(),
       template: z.string().max(4000).optional(),
     })
     .optional()
-    .describe("Shape the answer (form only, never grounding)."),
+    .describe(
+      "Shape the answer's layout (a table, a list, a template); never changes which sources it rests on.",
+    ),
   wait_seconds: z
     .number()
     .int()

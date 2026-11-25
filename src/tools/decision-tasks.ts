@@ -316,10 +316,10 @@ export interface DecisionTaskToolOptions {
 
 const DESCRIPTIONS = {
   list: [
-    "List one External-mode app's decision tasks (runs parked for an outside agent to decide), newest first.",
+    "List one External-mode app's decision tasks (runs waiting for an outside agent to decide), newest first.",
     "",
     "USE WHEN: looking for decisions to make for an app; begin with status 'available'. This is the polling alternative to the app.decision_task.offered webhook.",
-    "NOT FOR: Agent-stage document tasks (use talonic_list_agent_tasks), reading a task's input package (claim it, then talonic_read_decision_package), or taking a lease (talonic_claim_decision_task).",
+    "NOT FOR: agent tasks on documents in a Spec (use talonic_list_agent_tasks), reading a task's input package (claim it, then talonic_read_decision_package), or taking a lease (talonic_claim_decision_task).",
     "ARGS: app_id, optional status, limit, cursor. RETURNS: task metadata only (id, run_id, status, execution_epoch, lease and sla_deadline_at timing) plus pagination.next_cursor.",
     AUTH_NOTE,
   ].join("\n"),
@@ -331,7 +331,7 @@ const DESCRIPTIONS = {
     AUTH_NOTE,
   ].join("\n"),
   package: [
-    "Read one page of a claimed decision task's frozen input package: the records the decision must be made from, with their provenance locators. Only the current claimant may read it; each page read is journaled onto the run.",
+    "Read one page of a claimed decision task's fixed input: the records the decision must be made from, each with the locator to cite as evidence. Only the current claimant may read it; each page read is recorded on the run.",
     "",
     "USE WHEN: after a successful claim, walking pages from package.first_cursor while pagination.has_more is true. The first page also carries the source documents list. A mining_round package is one record { system_prompt, first_turn, tools }.",
     "NOT FOR: unclaimed tasks (HTTP 409; claim first) or listing tasks (talonic_list_decision_tasks).",
@@ -347,7 +347,7 @@ const DESCRIPTIONS = {
     AUTH_NOTE,
   ].join("\n"),
   submit: [
-    "Submit the decision for a claimed decision task; the platform verifies it transactionally and resumes the run.",
+    "Submit the decision for a claimed decision task; Talonic checks it before saving anything, then the run continues.",
     "",
     "USE WHEN: the decision is final. outcome must satisfy output_contract from the claim (plain JSON Schema, or the verdict_matrix / record_set envelope), evidence lists the package locators relied on (verbatim; [] only if the app allows unevidenced decisions), rationale is a short summary. Rejections are HTTP 422 with the reason and change nothing; the task stays claimed under your epoch, so fix and resubmit before the lease ends.",
     "NOT FOR: giving the task back undecided (talonic_release_decision_task) or declaring it undecidable (talonic_fail_decision_task). Stale epoch is HTTP 409.",
@@ -363,7 +363,7 @@ const DESCRIPTIONS = {
     AUTH_NOTE,
   ].join("\n"),
   fail: [
-    "Report that the claimed decision task cannot be decided: raises a Human Review with your reason AND applies the app's declared fallback policy (rules decide, hold for review, or fail the run).",
+    "Report that the claimed decision task cannot be decided: sends it to a person for review with your reason AND applies the app's declared fallback policy (rules decide, hold for review, or fail the run).",
     "",
     "USE WHEN: the package is insufficient or contradictory and no claimant could decide it. This ends the task (status 'failed').",
     "NOT FOR: temporary give-backs (talonic_release_decision_task) or a decision you can make with low confidence (submit it with confidence set).",

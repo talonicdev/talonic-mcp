@@ -5,7 +5,7 @@ import { jsonOk, toolError, type ToolResult, validationError } from "./_shared.j
 import { widgetToolMeta } from "../widgets/types.js"
 
 const DESCRIPTION = [
-  "Get the OCR-converted markdown text of a document.",
+  "Get the full text of a document as markdown, including scanned pages.",
   "",
   "USE WHEN: the user wants the full text — 'what does it say', summarise, or translate a document.",
   "NOT FOR: specific structured fields (use talonic_extract with a schema).",
@@ -48,7 +48,7 @@ const inputSchema = {
 
 const outputSchema = {
   document_id: z.string().describe("ID of the document the markdown was extracted from."),
-  markdown: z.string().describe("OCR-converted markdown text content of the document."),
+  markdown: z.string().describe("The document's full text as markdown."),
   cost: z
     .object({
       costCredits: z.number(),

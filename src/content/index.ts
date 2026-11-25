@@ -3,8 +3,8 @@
 //
 // ⚠ This module is the source-of-truth for talonic.com/docs/mcp/* pages.
 // The website's <McpContentPage> calls getMcpSection(slug) at render time.
-// docs/sections.json in this repo is a SEPARATE surface that feeds the
-// SDK/API/Platform doc pages on the website, NOT the MCP doc pages.
+// docs/sections.json is a dormant mirror generated FROM these sections
+// (npm run docs:gen); editing it changes no page.
 // Full architecture, "add a new tool" checklist, and failure modes:
 //   docs/architecture/docs-pipeline.md
 //
@@ -15,6 +15,9 @@
 export type { DocBlock, DocSection, RawSection, Param, HttpMethod, NavSection } from "./types"
 
 export { MCP_NAV_SECTIONS } from "./seo"
+export { MCP_PATHS } from "./routes"
+export { MCP_CLIENTS } from "./sections/connect"
+export type { McpClient } from "./sections/connect"
 
 import type { DocSection, RawSection } from "./types"
 import { deriveBreadcrumbs, derivePrevNext } from "./helpers"
@@ -22,13 +25,15 @@ import { MCP_NAV_SECTIONS } from "./seo"
 
 // --- Section imports ---
 import { sections as overview } from "./sections/overview"
-import { sections as install } from "./sections/install"
-import { sections as tools } from "./sections/tools"
-import { sections as processes } from "./sections/processes"
+import { sections as connect } from "./sections/connect"
 import { sections as apps } from "./sections/apps"
 import { sections as toolGroups } from "./sections/tool-groups"
-import { sections as features } from "./sections/features"
 import { sections as configuration } from "./sections/configuration"
+import { sections as toolsByTask } from "./sections/tools-by-task"
+import { sections as toolReference } from "./sections/tool-reference"
+import { sections as files } from "./sections/files"
+import { sections as recipes } from "./sections/recipes"
+import { sections as advanced } from "./sections/advanced"
 import { sections as troubleshooting } from "./sections/troubleshooting"
 
 // ---------------------------------------------------------------------------
@@ -37,13 +42,15 @@ import { sections as troubleshooting } from "./sections/troubleshooting"
 
 const ALL_RAW: RawSection[] = [
   ...overview,
-  ...install,
-  ...tools,
-  ...processes,
+  ...connect,
   ...apps,
   ...toolGroups,
-  ...features,
   ...configuration,
+  ...toolsByTask,
+  ...toolReference,
+  ...files,
+  ...recipes,
+  ...advanced,
   ...troubleshooting,
 ]
 

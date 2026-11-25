@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 import { getAllMcpSections } from "../../src/content/index"
 import { createServer } from "../../src/server-factory"
-import { sections } from "../../src/content/sections/tools"
+import { sections } from "../../src/content/sections/tool-reference"
 import { MCP_NAV_SECTIONS } from "../../src/content/seo"
 import { TOOL_WIDGET_KEYS } from "../../src/widgets/types"
 
@@ -21,7 +21,10 @@ describe("every public tool is documented on both surfaces", () => {
   it.each(TOOLS)("%s has a live docs section, a nav entry, and a mirror entry", (tool) => {
     const slug = slugOf(tool)
     const section = sections.find((s) => s.slug === slug)
-    expect(section, `src/content/sections/tools.ts lacks slug ${slug}`).toBeDefined()
+    expect(
+      section,
+      `no reference page ${slug}: add it to src/content/tool-pages.ts and run npm run docs:gen`,
+    ).toBeDefined()
     expect(section!.title).toBe(tool)
     expect(section!.content.length).toBeGreaterThan(3)
     expect(navIds.has(slug), `src/content/seo.ts nav lacks ${slug}`).toBe(true)

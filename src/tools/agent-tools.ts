@@ -51,13 +51,13 @@ const documentIdsArg = z
 // ── talonic_find_data ───────────────────────────────────────────────────────
 
 const FIND_DESCRIPTION = [
-  "Locate the REAL data behind a natural-language concept before querying anything: resolves a phrase ('payment volume per transaction', 'counterparty', 'Vertragslaufzeit') by meaning and by its words to the fields, values, documents and text passages that carry it — even when the field is captured under a different name.",
+  "Find where the data behind a concept lives before querying anything: turns a phrase ('payment volume per transaction', 'counterparty', 'Vertragslaufzeit') into the fields, values, documents and text passages that carry it, matching what it means as well as its words, even when the field has a different name.",
   "",
-  "USE WHEN: the user asks about a concept and you are not sure which field holds it, when talonic_list_fields / talonic_search came back empty or ambiguous, or when the answer may live in document prose rather than a captured cell. Pass `account` whenever the question names one portfolio company (an account from talonic_list_accounts), so another company's figures cannot come back.",
+  "USE WHEN: the user asks about a concept and you are not sure which field holds it, when talonic_list_fields / talonic_search came back empty or ambiguous, or when the answer may sit in a document's text rather than in a field. Pass `account` whenever the question names one portfolio company (an account from talonic_list_accounts), so another company's figures cannot come back.",
   "NOT FOR: reading a known field's values (talonic_field_values) or filtering by a known field (talonic_filter).",
   "",
   "ARGS: `query` (the concept, in the user's words), optional `concepts[]` (several concepts resolved to fields in one call; fields only, no text search), `top_k` (1–25, default 10), `document_ids` (hard scope), `account` (one account by name or alias, e.g. 'Filu'; narrows like document_ids; an unknown name returns an error listing the accounts).",
-  "RETURNS: four ranked groups — FIELDS (canonical_name, field ids/keys, maturity, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item a ready handle for the next call. Read-only.",
+  "RETURNS: four ranked groups — FIELDS (canonical_name, field ids/keys, maturity, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item ready to pass to the next call. Read-only.",
 ].join("\n")
 
 export const findDataInputSchema = {
@@ -141,14 +141,14 @@ export async function handleFindData(
 const DEDICATED: ReadonlySet<string> = new Set(["find_data"])
 
 const LIST_TOOLS_DESCRIPTION = [
-  "List the platform's agent tool registry — every retrieval, provenance and analysis primitive the in-product Talonic agent runs on (find_data, describe_data, query_data for read-only SQL over the extracted data, get_document_markdown, workspace_overview, …) with its input schema and whether THIS credential may invoke it.",
+  "List Talonic's data tools: read-only look-ups and queries over the workspace (find_data, describe_data, query_data for a read-only SQL query over the extracted data, get_document_markdown, workspace_overview, …), each with its input schema and whether THIS credential may call it.",
   "Target API: https://talonic.com/docs/api (GET /v1/agent/tools).",
   "",
   "USE WHEN: you want a capability talonic_* tools do not cover directly (e.g. SQL over the structured data, a workspace overview, cohort discovery) — list here, then call talonic_invoke_agent_tool with the tool name and its args.",
-  "NOT FOR: answering the user's question about their documents — call talonic_ask, which runs these same tools server-side in one call and returns a cited answer. Also not for discovering fields (talonic_find_data) or documents (talonic_search).",
+  "NOT FOR: answering the user's question about their documents — call talonic_ask, which answers in one call with citations. Also not for discovering fields (talonic_find_data) or documents (talonic_search).",
   "",
   "ARGS: `only_invocable` (default true — hide tools this credential cannot run), `include_schemas` (default true — include each tool's JSON input schema).",
-  "RETURNS: { tools[] of { name, description, impact, capability, can_invoke, input_schema? }, invocable_count, totalCount }. Registry tools that already have their own talonic_* tool (find_data) are left out; call the dedicated tool.",
+  "RETURNS: { tools[] of { name, description, impact, capability, can_invoke, input_schema? }, invocable_count, totalCount }. Data tools that already have their own talonic_* tool (find_data) are left out; call the dedicated tool.",
 ].join("\n")
 
 export const listAgentToolsInputSchema = {
@@ -215,12 +215,12 @@ export async function handleListAgentTools(
 // ── talonic_invoke_agent_tool ───────────────────────────────────────────────
 
 const INVOKE_DESCRIPTION = [
-  "Invoke ONE named tool from the platform's agent tool registry directly, with no model in the loop (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
-  "READ-ONLY FOR EVERY CREDENTIAL: the platform runs each caller of this route, API key or OAuth session alike, as its least-privilege viewer role, which grants only the registry's read-only tools (capability `data.read`). Write-capable registry tools are never invocable here, however you connected, so this tool reads and never changes workspace data.",
-  "Target API: Talonic agent tool registry — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
+  "Run ONE named data tool directly and get its exact output (e.g. `query_data` for a read-only SQL SELECT over the extracted data, `describe_data` for the queryable field list, `get_document_markdown` to read a document's text).",
+  "READ-ONLY FOR EVERY CREDENTIAL: the platform runs each caller of this route, API key or OAuth session alike, as its least-privilege viewer role, which grants only the read-only data tools (capability `data.read`). Tools that write are never invocable here, however you connected, so this tool reads and never changes workspace data.",
+  "Target API: Talonic data tools — https://talonic.com/docs/api (POST /v1/agent/tools/{name}/invoke; input schemas from talonic_list_agent_tools).",
   "",
   "USE WHEN: talonic_list_agent_tools showed a tool with can_invoke: true that does what you need. Pass exactly the `args` its input_schema declares.",
-  "NOT FOR: answering a question about the documents (talonic_ask runs these tools server-side and returns one cited answer). Use this only for a query the user asked for, or when talonic_ask could not answer.",
+  "NOT FOR: answering a question about the documents (talonic_ask returns one cited answer). Use this only for a query the user asked for, or when talonic_ask could not answer.",
   "",
   "ARGS: `name` (tool name), `args` (object matching the tool's input_schema), optional `document_ids` (hard scope for scope-aware tools).",
   "RETURNS: { tool, result (the tool's parsed output), citations?, artifacts?, cards? }. Denied capabilities come back as an error naming the capability required; the platform re-checks every call.",

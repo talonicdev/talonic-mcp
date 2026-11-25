@@ -5,9 +5,9 @@ import { validationError, type ToolResult, zUuid } from "./_shared.js"
 import { widgetToolMeta } from "../widgets/types.js"
 
 /**
- * Field Registry tools — the workspace's canonical vocabulary as a source of
- * truth for agents: list concepts by maturity, describe one (the concept
- * card), and read its current values across documents with provenance.
+ * Field tools: the fields a workspace's documents carry, as a source of
+ * truth for agents: list them by maturity, describe one, and read its
+ * current values across documents with evidence.
  *
  * All three hit the public `/v1/fields*` surface with the caller's bearer
  * (raw fetch — the SDK does not wrap the card / values / resolve routes yet).
@@ -19,7 +19,7 @@ const maturityArg = z
   .enum(MATURITIES)
   .optional()
   .describe(
-    "Filter by maturity: `core` (universal, fully trusted — safe to build on), `proven` (recurring, stable id), `candidate` (newly discovered, may still be merged or renamed).",
+    "Filter by maturity: `core` (established and trusted, safe to build on), `proven` (recurring, stable id), `candidate` (seen recently, may still be merged or renamed).",
   )
 
 const fieldIdArg = zUuid()
@@ -30,7 +30,7 @@ const fieldNameArg = z
   .min(1)
   .optional()
   .describe(
-    "Field NAME instead of an id — resolved through canonical name, synonyms, merge aliases and the registry's spelling fold, then followed to the live concept. Use the user's wording ('Invoice No', 'Vertragsnummer').",
+    "Field NAME instead of an id — matched against the field's name, other spellings and synonyms, including fields that were merged into it. Use the user's wording ('Invoice No', 'Vertragsnummer').",
   )
 
 /** Resolve an `{ field_id | name }` pair to a field id, following redirects for names. */
@@ -56,12 +56,12 @@ async function resolveFieldId(
 // ── talonic_list_fields ─────────────────────────────────────────────────────
 
 const LIST_DESCRIPTION = [
-  "List the workspace's Field Registry — the canonical concepts Talonic has discovered across every ingested document, each with a stable id, maturity level, data type, synonyms and occurrence count.",
+  "List the fields your workspace's documents carry (vendor name, invoice total, notice period …), each with a stable id, how established it is (maturity), data type, synonyms and how often it occurs.",
   "",
   "USE WHEN: you need to know WHAT data exists before querying it, want to pick the right concept for a question, or need the exact field id for talonic_get_field / talonic_field_values.",
-  "NOT FOR: locating a specific document (talonic_search) or filtering documents by a value (talonic_filter). Not a warm-up before answering a question about the documents: call talonic_ask for that. The registry holds many one-off candidate fields; pass maturity core or proven unless the user asks for candidates.",
+  "NOT FOR: locating a specific document (talonic_search) or filtering documents by a value (talonic_filter). Not a warm-up before answering a question about the documents: call talonic_ask for that. Many fields are one-off candidates; pass maturity core or proven unless the user asks for candidates.",
   "",
-  "ARGS: `search` (case-insensitive contains on name), `maturity` (core | proven | candidate — prefer `core`/`proven` for anything you will build on), `include_superseded` (default false: rows merged into another concept are hidden so you never see two ids for one concept), `limit`, `cursor`.",
+  "ARGS: `search` (case-insensitive contains on name), `maturity` (core | proven | candidate — prefer `core`/`proven` for anything you will build on), `include_superseded` (default false: fields merged into another are hidden so you never see two ids for one field), `limit`, `cursor`.",
   "RETURNS: data[] of { id, canonical_name, display_name, data_type, maturity, tier, synonyms, description, occurrence_count, superseded_by, links } plus cursor pagination.",
 ].join("\n")
 
@@ -74,7 +74,9 @@ export const listFieldsInputSchema = {
   include_superseded: z
     .boolean()
     .optional()
-    .describe("Include rows merged into a survivor (they carry `superseded_by`). Default false."),
+    .describe(
+      "Include fields merged into another one (they carry `superseded_by`). Default false.",
+    ),
   limit: z.number().int().min(1).max(100).optional().describe("Page size (default 20, max 100)."),
   cursor: z.string().optional().describe("Opaque cursor from pagination.next_cursor."),
 }
@@ -108,12 +110,12 @@ export async function handleListFields(
 // ── talonic_get_field ───────────────────────────────────────────────────────
 
 const GET_DESCRIPTION = [
-  "Get the CONCEPT CARD for one Field Registry field: what it means (curated description + extraction instruction), its synonyms and aliases, maturity, where it occurs (document/occurrence counts, first/last seen, document-type spread), its value distribution (top values with counts, distinct count, examples), schema usage, and identity links (superseded_by, absorbed concepts).",
+  "Describe one field: what it means, its synonyms and other names, maturity, where it occurs (document and occurrence counts, first and last seen, which document types), its values (top values with counts, distinct count, examples), which schemas use it, and the fields merged into it (superseded_by).",
   "",
-  "USE WHEN: you must decide whether a field is the right concept for a question, need example values or the value shape before writing a filter, or hold a field NAME from the user and need the live concept behind it.",
+  "USE WHEN: you must decide whether a field is the right one for a question, need example values or the value shape before writing a filter, or hold a field NAME from the user and need the field behind it.",
   "NOT FOR: listing many fields (talonic_list_fields) or reading every value (talonic_field_values).",
   "",
-  "ARGS: exactly one of `field_id` or `name`. Names are resolved through canonical name → spelling fold → merge aliases → synonyms (then case-insensitive fallbacks) and followed to the live concept; the response says which arm matched. `include_history: true` appends the curation trail (merges, renames, maturity moves).",
+  "ARGS: exactly one of `field_id` or `name`. A name is matched against field names, other spellings and synonyms and followed to the current field; `resolution` says how it matched. `include_history: true` adds the field's history (merges, renames, maturity changes).",
   "RETURNS: the card { id, canonical_name, maturity, data_type, definition, identity, occurrence, values, usage, links } plus `resolution` when a name was given and `history` when requested.",
 ].join("\n")
 
@@ -123,9 +125,7 @@ export const getFieldInputSchema = {
   include_history: z
     .boolean()
     .optional()
-    .describe(
-      "Append the concept's curation history (tier changes, merges, renames), newest first.",
-    ),
+    .describe("Add the field's history (maturity changes, merges, renames), newest first."),
 }
 
 export interface GetFieldArgs {
@@ -167,9 +167,9 @@ export async function handleGetField(
 // ── talonic_field_values ────────────────────────────────────────────────────
 
 const VALUES_DESCRIPTION = [
-  "Read a field's CURRENT VALUES across documents, with provenance — one row per bound occurrence: document id + filename + type, the value, confidence, the raw name it was captured under, the verbatim source text, and how confidently the raw name was matched to this concept (`resolved_by`).",
+  "Read a field's CURRENT VALUES across documents, with evidence: one row per value, with the document id, filename and type, the value, its confidence, the label it appeared under in the document, the exact source text, and how the label was matched to this field (`resolved_by`).",
   "",
-  "USE WHEN: the user asks 'what are all the X across my documents', you need to tabulate or aggregate one concept across the corpus, or you want the evidence (source text + document) behind a value.",
+  "USE WHEN: the user asks 'what are all the X across my documents', you need to tabulate or total one field across all documents, or you want the evidence (source text + document) behind a value.",
   "NOT FOR: multi-field row-shaped queries over documents (talonic_filter) or one document's full field set (talonic_get_document).",
   "",
   "ARGS: exactly one of `field_id` or `name`; optional `document_id` (one document), `value` (case-insensitive contains filter), `limit` (max 100), `cursor`.",
