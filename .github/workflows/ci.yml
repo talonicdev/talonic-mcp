@@ -36,3 +36,10 @@ jobs:
 
       - name: Test
         run: npm test
+
+      # Route-drift guard: every /v1 route string in src/tools/** must be an
+      # operation of the live public spec (pinned fallback when unreachable).
+      # A tool must not ship before its route is in the public API.
+      - name: Route-drift guard
+        if: matrix.node-version == '22.x'
+        run: npm run check:routes

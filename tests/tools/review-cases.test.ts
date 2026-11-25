@@ -7,7 +7,6 @@ import { createServer } from "../../src/server-factory"
 const DOC = "11111111-1111-4111-8111-111111111111"
 const RUN = "22222222-2222-4222-8222-222222222222"
 const ID = "33333333-3333-4333-8333-333333333333"
-const VAL = "44444444-4444-4444-8444-444444444444"
 const API = "https://api.talonic.com"
 const token = () => "tlnc_key"
 
@@ -196,20 +195,6 @@ describe("review tools: method, path and body", () => {
       { run_id: RUN, field_name: "total" },
       "GET",
       `/v1/validation/runs/${RUN}/confusion-matrix/total`,
-      undefined,
-    ],
-    [
-      "talonic_review_update_expected_value",
-      { golden_sample_id: ID, value_id: VAL, expected_value: null },
-      "PATCH",
-      `/v1/validation/ground-truth/${ID}/values/${VAL}`,
-      { expected_value: null },
-    ],
-    [
-      "talonic_review_rematch_golden_sample",
-      { golden_sample_id: ID },
-      "POST",
-      `/v1/validation/ground-truth/${ID}/rematch`,
       undefined,
     ],
     [
@@ -404,7 +389,6 @@ describe("Idempotency-Key on writes", () => {
       reviewTools,
       { pipeline_document_id: DOC, field_key: "t", assign: true },
     ],
-    ["talonic_review_rematch_golden_sample", reviewTools, { golden_sample_id: ID }],
     ["talonic_cases_narrate", casesTools, { case_key: ID }],
   ])(
     "%s sends no key unless one is given (repeating it on purpose works)",
@@ -464,7 +448,7 @@ describe("probe gating", () => {
     ).toBe(false)
     expect(
       names({ includeReviewTools: true }).filter((n) => n.startsWith("talonic_review_")),
-    ).toHaveLength(22)
+    ).toHaveLength(20)
     expect(
       names({ includeCasesTools: true }).filter((n) => n.startsWith("talonic_cases_")),
     ).toHaveLength(11)

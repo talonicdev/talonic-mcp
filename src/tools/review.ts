@@ -499,50 +499,6 @@ export function reviewTools(getToken: () => string, baseUrl?: string): ReviewToo
         ),
     },
     {
-      name: "talonic_review_update_expected_value",
-      title: "Correct an expected value",
-      description: lines(
-        "Correct one expected value in a golden sample (your own answers a benchmark compares against); null clears it.",
-        `ARGS: golden_sample_id, value_id, expected_value (string or null), idempotency_key?. ${WRITE_SCOPE} ${IDEMPOTENT_SENTENCE}`,
-        "RETURNS: the updated value.",
-      ),
-      inputSchema: {
-        golden_sample_id: zUuid(),
-        value_id: zUuid(),
-        expected_value: z.string().max(10000).nullable(),
-        idempotency_key: idempotencyArg,
-      },
-      annotations: write(true),
-      handler: (a) =>
-        send(
-          "talonic_review_update_expected_value",
-          a,
-          true,
-          "PATCH",
-          `/v1/validation/ground-truth/${encodeURIComponent(a.golden_sample_id)}/values/${encodeURIComponent(a.value_id)}`,
-          { expected_value: a.expected_value },
-        ),
-    },
-    {
-      name: "talonic_review_rematch_golden_sample",
-      title: "Re-link a golden sample to documents",
-      description: lines(
-        "Re-link a golden sample's rows to workspace documents, for example after uploading the documents it names.",
-        `ARGS: golden_sample_id, idempotency_key?. ${WRITE_SCOPE}`,
-        "RETURNS: { matched, unmatched }.",
-      ),
-      inputSchema: { golden_sample_id: zUuid(), idempotency_key: idempotencyArg },
-      annotations: write(true),
-      handler: (a) =>
-        send(
-          "talonic_review_rematch_golden_sample",
-          a,
-          false,
-          "POST",
-          `/v1/validation/ground-truth/${encodeURIComponent(a.golden_sample_id)}/rematch`,
-        ),
-    },
-    {
       name: "talonic_review_decide_flags",
       title: "Accept or reject flagged values",
       description: lines(
