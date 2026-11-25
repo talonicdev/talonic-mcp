@@ -140,6 +140,13 @@
       "kind": "undocumented",
       "reason": "Served on platform main, missing from openapi.yaml.",
       "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/apps/{}/mining",
+      "kind": "pending-spec",
+      "reason": "Rule-finding round routes (talonic_mining_*). Served today; their spec operations land with platform PR #2348 (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/rule-mining.controller.ts"
     }
   ]
 }
