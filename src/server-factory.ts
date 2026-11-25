@@ -18,6 +18,7 @@ import { registerAccounts } from "./tools/accounts.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
+import { registerAppWorkflowTools } from "./tools/app-workflows.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
@@ -179,6 +180,13 @@ export interface CreateServerOptions {
    * Baseline app never lists tools that would 404. Listing visibility only.
    */
   includePriceBaselineTools?: boolean
+
+  /**
+   * Ids of the app-workflow groups (`tools/app-workflows.ts`) whose probe
+   * passed for the credential; their tools are registered, the rest are not.
+   * Listing visibility only.
+   */
+  appWorkflowGroups?: readonly string[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -459,6 +467,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
+  }
+  if (options.appWorkflowGroups?.length) {
+    registerAppWorkflowTools(server, rawToken, baseUrl, options.appWorkflowGroups)
   }
 
   // Resource registrations.

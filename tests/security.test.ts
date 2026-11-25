@@ -44,6 +44,7 @@ const allProbesOff = {
   processesAccess: off,
   agentTasksAccess: off,
   decisionTasksAccess: off,
+  appWorkflowGroups: async () => [],
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {

@@ -7102,5 +7102,3055 @@
       "workflow",
       "Process Plane"
     ]
+  },
+  {
+    "slug": "mcp-talonic-ar-overview",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_overview",
+    "seoTitle": "talonic_ar_overview — Receivables cockpit",
+    "description": "MCP tool: The receivables cockpit: aging of open receivables, cash application and bill-ready statistics, recoverable money found on receivables, latest decisions.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The receivables cockpit: aging of open receivables, cash application and bill-ready statistics, recoverable money found on receivables, latest decisions. USE WHEN: the headline (how much is open, how much applied straight through, which loads can bill). NOT FOR: the remittance or load lists (talonic_ar_cash_application_preview, talonic_ar_bill_ready_preview). ARGS: none. RETURNS: the cockpit object. 422 until the receivables sources are bound in Money Found. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_cash_application_preview",
+        "slug": "mcp-talonic-ar-cash-application-preview"
+      },
+      {
+        "label": "talonic_ar_cash_application_apply",
+        "slug": "mcp-talonic-ar-cash-application-apply"
+      },
+      {
+        "label": "talonic_ar_bill_ready_preview",
+        "slug": "mcp-talonic-ar-bill-ready-preview"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Receivables cockpit"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ar-cash-application-preview",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_cash_application_preview",
+    "seoTitle": "talonic_ar_cash_application_preview — Preview the cash application",
+    "description": "MCP tool: Match every remittance line to the open invoices and show the result: statistics over all remittances and one page of them, exceptions first. Writes nothing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Match every remittance line to the open invoices and show the result: statistics over all remittances and one page of them, exceptions first. Writes nothing. USE WHEN: before applying cash, to see what lands and what needs a person. NOT FOR: recording the result (talonic_ar_cash_application_apply). ARGS: `page`, `limit`, `invalid_only` (only remittances with a deduction ruled invalid). RETURNS: { stats, remittances[], page }. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "page",
+            "type": "integer",
+            "required": false,
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Rows per page (default 50, at most 500)."
+          },
+          {
+            "name": "invalid_only",
+            "type": "boolean",
+            "required": false,
+            "description": "Only remittances with an invalid deduction."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_overview",
+        "slug": "mcp-talonic-ar-overview"
+      },
+      {
+        "label": "talonic_ar_cash_application_apply",
+        "slug": "mcp-talonic-ar-cash-application-apply"
+      },
+      {
+        "label": "talonic_ar_bill_ready_preview",
+        "slug": "mcp-talonic-ar-bill-ready-preview"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Preview the cash application"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ar-cash-application-apply",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_cash_application_apply",
+    "seoTitle": "talonic_ar_cash_application_apply — Record the cash application",
+    "description": "MCP tool: Record the decisions of the cash application (payments applied or exception, invoices paid / partially paid / short paid, deductions open). Safe to repeat: recorded decisions are not recorded again. Posts nothing to another system.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Record the decisions of the cash application (payments applied or exception, invoices paid / partially paid / short paid, deductions open). Safe to repeat: recorded decisions are not recorded again. Posts nothing to another system. USE WHEN: after talonic_ar_cash_application_preview, once the result is right. NOT FOR: previewing (talonic_ar_cash_application_preview). ARGS: none. RETURNS: { recorded, result } (result = the first page as it now stands). Needs apps:receivables:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_overview",
+        "slug": "mcp-talonic-ar-overview"
+      },
+      {
+        "label": "talonic_ar_cash_application_preview",
+        "slug": "mcp-talonic-ar-cash-application-preview"
+      },
+      {
+        "label": "talonic_ar_bill_ready_preview",
+        "slug": "mcp-talonic-ar-bill-ready-preview"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Record the cash application"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ar-bill-ready-preview",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_bill_ready_preview",
+    "seoTitle": "talonic_ar_bill_ready_preview — Preview bill readiness",
+    "description": "MCP tool: Per load, the checks (delivered, proof of delivery present and signed, carrier cost within contract, accessorials settled, rate agreed) and the verdict auto_bill, review or not_ready. Writes nothing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Per load, the checks (delivered, proof of delivery present and signed, carrier cost within contract, accessorials settled, rate agreed) and the verdict auto_bill, review or not_ready. Writes nothing. USE WHEN: deciding which loads may bill without a person. NOT FOR: recording the verdicts (talonic_ar_bill_ready_apply). ARGS: `page`, `limit`. RETURNS: { stats, loads[], page }. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "page",
+            "type": "integer",
+            "required": false,
+            "description": "Page number, from 1."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Rows per page (default 50, at most 500)."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_overview",
+        "slug": "mcp-talonic-ar-overview"
+      },
+      {
+        "label": "talonic_ar_cash_application_preview",
+        "slug": "mcp-talonic-ar-cash-application-preview"
+      },
+      {
+        "label": "talonic_ar_cash_application_apply",
+        "slug": "mcp-talonic-ar-cash-application-apply"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Preview bill readiness"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ar-bill-ready-apply",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_bill_ready_apply",
+    "seoTitle": "talonic_ar_bill_ready_apply — Record bill readiness",
+    "description": "MCP tool: Record bill_ready or review on every load. A load a person moved to billed, review or on_hold keeps its state.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Record bill_ready or review on every load. A load a person moved to billed, review or on_hold keeps its state. USE WHEN: after talonic_ar_bill_ready_preview. NOT FOR: previewing (talonic_ar_bill_ready_preview). ARGS: none. RETURNS: { recorded, result }. Needs apps:receivables:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_overview",
+        "slug": "mcp-talonic-ar-overview"
+      },
+      {
+        "label": "talonic_ar_cash_application_preview",
+        "slug": "mcp-talonic-ar-cash-application-preview"
+      },
+      {
+        "label": "talonic_ar_cash_application_apply",
+        "slug": "mcp-talonic-ar-cash-application-apply"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Record bill readiness"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ar-tmw-mapping",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ar_tmw_mapping",
+    "seoTitle": "talonic_ar_tmw_mapping — Trimble TMW mapping",
+    "description": "MCP tool: How Trimble TMW tables map onto the receivables inputs, with the status conventions.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "How Trimble TMW tables map onto the receivables inputs, with the status conventions. USE WHEN: setting up receivables from a Trimble TMW export. NOT FOR: the receivables data (talonic_ar_overview). ARGS: none. RETURNS: { mapping }. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ar_overview",
+        "slug": "mcp-talonic-ar-overview"
+      },
+      {
+        "label": "talonic_ar_cash_application_preview",
+        "slug": "mcp-talonic-ar-cash-application-preview"
+      },
+      {
+        "label": "talonic_ar_cash_application_apply",
+        "slug": "mcp-talonic-ar-cash-application-apply"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Trimble TMW mapping"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-get",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_get",
+    "seoTitle": "talonic_spend_audit_get — The spend audit",
+    "description": "MCP tool: The spend audit: every vendor with its verdicts and open to-dos, the lists it was built from, display options and assumptions.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The spend audit: every vendor with its verdicts and open to-dos, the lists it was built from, display options and assumptions. USE WHEN: reviewing what is still missing per vendor. NOT FOR: the share link (talonic_spend_audit_get_share). ARGS: none. RETURNS: the audit object. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      },
+      {
+        "label": "talonic_spend_audit_explain_todo",
+        "slug": "mcp-talonic-spend-audit-explain-todo"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "The spend audit"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-set-options",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_set_options",
+    "seoTitle": "talonic_spend_audit_set_options — Spend audit display options",
+    "description": "MCP tool: Set the audit's display options.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Set the audit's display options. USE WHEN: hiding or showing price-confirmed vendors. NOT FOR: the assumptions text (talonic_spend_audit_set_assumptions). ARGS: `show_price_confirmed`. Needs apps:spend-audit:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "show_price_confirmed",
+            "type": "boolean",
+            "required": false,
+            "description": "Show vendors whose prices are confirmed."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      },
+      {
+        "label": "talonic_spend_audit_explain_todo",
+        "slug": "mcp-talonic-spend-audit-explain-todo"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Spend audit display options"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-set-assumptions",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_set_assumptions",
+    "seoTitle": "talonic_spend_audit_set_assumptions — Spend audit assumptions",
+    "description": "MCP tool: Replace the basis and assumptions text shown under the audit.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Replace the basis and assumptions text shown under the audit. USE WHEN: stating what the audit rests on. NOT FOR: display options (talonic_spend_audit_set_options). ARGS: `text` (at most 10,000 characters). Needs apps:spend-audit:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "The text."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_explain_todo",
+        "slug": "mcp-talonic-spend-audit-explain-todo"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Spend audit assumptions"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-explain-todo",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_explain_todo",
+    "seoTitle": "talonic_spend_audit_explain_todo — Close a vendor to-do with a reason",
+    "description": "MCP tool: Close one vendor's to-do with a reason instead of a document.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Close one vendor's to-do with a reason instead of a document. USE WHEN: no document is needed for that vendor. NOT FOR: reopening (talonic_spend_audit_reopen_todo). ARGS: `key` (vendor key from talonic_spend_audit_get), `reason`. Needs apps:spend-audit:write and the upload permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "The vendor key."
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "required": true,
+            "description": "Why no document is needed."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Close a vendor to-do with a reason"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-reopen-todo",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_reopen_todo",
+    "seoTitle": "talonic_spend_audit_reopen_todo — Reopen a vendor to-do",
+    "description": "MCP tool: Reopen a to-do that was closed with a reason.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Reopen a to-do that was closed with a reason. USE WHEN: the reason no longer holds. NOT FOR: closing one (talonic_spend_audit_explain_todo). ARGS: `key`. Needs apps:spend-audit:write and the upload permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "The vendor key."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Reopen a vendor to-do"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-share",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_share",
+    "seoTitle": "talonic_spend_audit_share — Publish the spend audit",
+    "description": "MCP tool: PUBLISHES the audit outside the workspace: answers a new link and password; the previous link stops working. Confirm with the user first.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "PUBLISHES the audit outside the workspace: answers a new link and password; the previous link stops working. Confirm with the user first. USE WHEN: the user asks to send the audit to the client. NOT FOR: reading the current link (talonic_spend_audit_get_share). ARGS: none. RETURNS: { url, password }. Needs apps:spend-audit:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Publish the spend audit"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-get-share",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_get_share",
+    "seoTitle": "talonic_spend_audit_get_share — Current spend audit link",
+    "description": "MCP tool: The published link and its password, or nothing when the audit is not published.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The published link and its password, or nothing when the audit is not published. USE WHEN: the user asks for the link again. NOT FOR: publishing (talonic_spend_audit_share). ARGS: none. Needs the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Current spend audit link"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-spend-audit-unshare",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_spend_audit_unshare",
+    "seoTitle": "talonic_spend_audit_unshare — Revoke the spend audit link",
+    "description": "MCP tool: Revoke the published link; nobody outside the workspace can open the audit any more.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Revoke the published link; nobody outside the workspace can open the audit any more. USE WHEN: the user asks to stop sharing. NOT FOR: a new link (talonic_spend_audit_share). ARGS: none. Needs apps:spend-audit:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_spend_audit_get",
+        "slug": "mcp-talonic-spend-audit-get"
+      },
+      {
+        "label": "talonic_spend_audit_set_options",
+        "slug": "mcp-talonic-spend-audit-set-options"
+      },
+      {
+        "label": "talonic_spend_audit_set_assumptions",
+        "slug": "mcp-talonic-spend-audit-set-assumptions"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Revoke the spend audit link"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-objects-recent",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_objects_recent",
+    "seoTitle": "talonic_objects_recent — Latest decisions",
+    "description": "MCP tool: The latest decisions recorded on business objects (invoices, loads, payments, contracts, leases, ledger rows), newest first.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The latest decisions recorded on business objects (invoices, loads, payments, contracts, leases, ledger rows), newest first. USE WHEN: what was decided lately, across apps. NOT FOR: one object's history (talonic_object_get). ARGS: `limit` (default 50). Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "How many."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_objects_by_type",
+        "slug": "mcp-talonic-objects-by-type"
+      },
+      {
+        "label": "talonic_object_get",
+        "slug": "mcp-talonic-object-get"
+      },
+      {
+        "label": "talonic_object_record_decision",
+        "slug": "mcp-talonic-object-record-decision"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Latest decisions"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-objects-by-type",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_objects_by_type",
+    "seoTitle": "talonic_objects_by_type — Objects of one type",
+    "description": "MCP tool: Without `state`: how many objects of a type are in each state. With `state`: the objects in that state.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Without `state`: how many objects of a type are in each state. With `state`: the objects in that state. USE WHEN: counting or listing invoices, loads or leases by state. NOT FOR: one object (talonic_object_get). ARGS: `type` (e.g. invoice, load, lease, money_found_row), `state`, `limit`, `offset`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "The object type."
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "required": false,
+            "description": "A state, e.g. paid."
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_objects_recent",
+        "slug": "mcp-talonic-objects-recent"
+      },
+      {
+        "label": "talonic_object_get",
+        "slug": "mcp-talonic-object-get"
+      },
+      {
+        "label": "talonic_object_record_decision",
+        "slug": "mcp-talonic-object-record-decision"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Objects of one type"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-object-get",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_object_get",
+    "seoTitle": "talonic_object_get — One object and its history",
+    "description": "MCP tool: The current state of one business object and every decision recorded on it, with who and the evidence.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The current state of one business object and every decision recorded on it, with who and the evidence. USE WHEN: why an invoice, load or lease is in its state. NOT FOR: recording a decision (talonic_object_record_decision). ARGS: `type`, `key`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "type"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "The object key."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_objects_recent",
+        "slug": "mcp-talonic-objects-recent"
+      },
+      {
+        "label": "talonic_objects_by_type",
+        "slug": "mcp-talonic-objects-by-type"
+      },
+      {
+        "label": "talonic_object_record_decision",
+        "slug": "mcp-talonic-object-record-decision"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One object and its history"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-object-record-decision",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_object_record_decision",
+    "seoTitle": "talonic_object_record_decision — Record a decision on an object",
+    "description": "MCP tool: Record a decision on one business object; it is attributed to this connection, never to a person.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Record a decision on one business object; it is attributed to this connection, never to a person. USE WHEN: the user decided (e.g. a lease is checked, an invoice is disputed). NOT FOR: Money Found rows (talonic_money_found_set_row_state). ARGS: `type`, `key`, `to_state`, optional `from_state` (refused when the object is elsewhere), `note`, `evidence[]`. Needs records:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "type"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "key"
+          },
+          {
+            "name": "to_state",
+            "type": "string",
+            "required": true,
+            "description": "The new state."
+          },
+          {
+            "name": "from_state",
+            "type": "string",
+            "required": false,
+            "description": "from state"
+          },
+          {
+            "name": "note",
+            "type": "string",
+            "required": false,
+            "description": "note"
+          },
+          {
+            "name": "evidence",
+            "type": "object[]",
+            "required": false,
+            "description": "evidence"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_objects_recent",
+        "slug": "mcp-talonic-objects-recent"
+      },
+      {
+        "label": "talonic_objects_by_type",
+        "slug": "mcp-talonic-objects-by-type"
+      },
+      {
+        "label": "talonic_object_get",
+        "slug": "mcp-talonic-object-get"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Record a decision on an object"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-payables-desk-page",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_payables_desk_page",
+    "seoTitle": "talonic_payables_desk_page — Payables desk",
+    "description": "MCP tool: One page of supplier invoices with what the checks read and found on each, or ready: false with the reason.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One page of supplier invoices with what the checks read and found on each, or ready: false with the reason. USE WHEN: working through supplier invoices before payment. NOT FOR: the payment rules (talonic_payables_desk_policy). ARGS: `offset`, `limit` (at most 500). Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_payables_desk_policy",
+        "slug": "mcp-talonic-payables-desk-policy"
+      },
+      {
+        "label": "talonic_payables_desk_save_policy",
+        "slug": "mcp-talonic-payables-desk-save-policy"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Payables desk"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-payables-desk-policy",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_payables_desk_policy",
+    "seoTitle": "talonic_payables_desk_policy — Payment rules",
+    "description": "MCP tool: The payment rules in force (order and approval thresholds, currency, rates), where they come from, and their version.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The payment rules in force (order and approval thresholds, currency, rates), where they come from, and their version. USE WHEN: before changing the rules. NOT FOR: the invoices (talonic_payables_desk_page). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_payables_desk_page",
+        "slug": "mcp-talonic-payables-desk-page"
+      },
+      {
+        "label": "talonic_payables_desk_save_policy",
+        "slug": "mcp-talonic-payables-desk-save-policy"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Payment rules"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-payables-desk-save-policy",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_payables_desk_save_policy",
+    "seoTitle": "talonic_payables_desk_save_policy — Save the payment rules",
+    "description": "MCP tool: Save the payment rules. Send the version read so a save over a newer one is refused (409).",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Save the payment rules. Send the version read so a save over a newer one is refused (409). USE WHEN: changing thresholds or rates. NOT FOR: reading them (talonic_payables_desk_policy). ARGS: `orderAbove`, `approvalAbove`, `currency`, `rates`, `version`. Needs apps:payables-desk:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "orderAbove",
+            "type": "number",
+            "required": true,
+            "description": "orderAbove"
+          },
+          {
+            "name": "approvalAbove",
+            "type": "number",
+            "required": true,
+            "description": "approvalAbove"
+          },
+          {
+            "name": "currency",
+            "type": "string | null",
+            "required": false,
+            "description": "currency"
+          },
+          {
+            "name": "rates",
+            "type": "object",
+            "required": false,
+            "description": "rates"
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "required": false,
+            "description": "version"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_payables_desk_page",
+        "slug": "mcp-talonic-payables-desk-page"
+      },
+      {
+        "label": "talonic_payables_desk_policy",
+        "slug": "mcp-talonic-payables-desk-policy"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Save the payment rules"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-list-structures",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_list_structures",
+    "seoTitle": "talonic_workbook_list_structures — Target structures",
+    "description": "MCP tool: The workspace's target structures (each made from a client's example table) with their mapping counts.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The workspace's target structures (each made from a client's example table) with their mapping counts. USE WHEN: choosing the structure to map a workbook onto. NOT FOR: one structure's fields (talonic_workbook_get_structure). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      },
+      {
+        "label": "talonic_workbook_update_structure",
+        "slug": "mcp-talonic-workbook-update-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Target structures"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-create-structure",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_create_structure",
+    "seoTitle": "talonic_workbook_create_structure — Create a target structure",
+    "description": "MCP tool: Create, or replace, a target structure from the example table in a captured workbook.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Create, or replace, a target structure from the example table in a captured workbook. USE WHEN: a client sent their example table. NOT FOR: editing fields (talonic_workbook_update_structure). ARGS: `document_id`, `name`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "name"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      },
+      {
+        "label": "talonic_workbook_update_structure",
+        "slug": "mcp-talonic-workbook-update-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Create a target structure"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-get-structure",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_get_structure",
+    "seoTitle": "talonic_workbook_get_structure — One target structure",
+    "description": "MCP tool: One target structure with its fields.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One target structure with its fields. USE WHEN: before editing it. NOT FOR: its label mappings (talonic_workbook_list_mappings). ARGS: `structure_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_update_structure",
+        "slug": "mcp-talonic-workbook-update-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One target structure"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-update-structure",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_update_structure",
+    "seoTitle": "talonic_workbook_update_structure — Edit a target structure",
+    "description": "MCP tool: Set field defaults and aliases (only the fields named change) and, with `checks`, replace the identity checks (a total that must equal its parts).",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Set field defaults and aliases (only the fields named change) and, with `checks`, replace the identity checks (a total that must equal its parts). USE WHEN: a person decided a default, an alias or a check. NOT FOR: label mappings (talonic_workbook_correct_mapping). ARGS: `structure_id`, `fields[] { name, default?, aliases? }`, `checks[] { name, total, parts[] }`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          },
+          {
+            "name": "fields",
+            "type": "object[]",
+            "required": false,
+            "description": "fields"
+          },
+          {
+            "name": "checks",
+            "type": "object[]",
+            "required": false,
+            "description": "checks"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Edit a target structure"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-list-mappings",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_list_mappings",
+    "seoTitle": "talonic_workbook_list_mappings — Label mappings",
+    "description": "MCP tool: How each row and column label maps onto the structure, who decided it, and whether a person approved it.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "How each row and column label maps onto the structure, who decided it, and whether a person approved it. USE WHEN: reviewing labels before projecting workbooks. NOT FOR: correcting one (talonic_workbook_correct_mapping). ARGS: `structure_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Label mappings"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-correct-mapping",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_correct_mapping",
+    "seoTitle": "talonic_workbook_correct_mapping — Correct a label mapping",
+    "description": "MCP tool: Correct one label's mapping; it counts as approved and every later workbook uses it. scope header_leaf applies the metric or ignore decision to every column header ending in the same label.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Correct one label's mapping; it counts as approved and every later workbook uses it. scope header_leaf applies the metric or ignore decision to every column header ending in the same label. USE WHEN: a label maps wrongly. NOT FOR: approving one as it stands (talonic_workbook_approve_mapping). ARGS: `structure_id`, `label_key`, `scope`, `metric`, `set`, `ignore`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          },
+          {
+            "name": "label_key",
+            "type": "string",
+            "required": true,
+            "description": "The label key from talonic_workbook_list_mappings."
+          },
+          {
+            "name": "scope",
+            "type": "label | header_leaf",
+            "required": false,
+            "description": "scope"
+          },
+          {
+            "name": "metric",
+            "type": "string",
+            "required": false,
+            "description": "metric"
+          },
+          {
+            "name": "set",
+            "type": "object",
+            "required": false,
+            "description": "set"
+          },
+          {
+            "name": "ignore",
+            "type": "boolean",
+            "required": false,
+            "description": "ignore"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Correct a label mapping"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-approve-mapping",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_approve_mapping",
+    "seoTitle": "talonic_workbook_approve_mapping — Approve a label mapping",
+    "description": "MCP tool: Approve one label's mapping as it stands.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Approve one label's mapping as it stands. USE WHEN: the mapping is right. NOT FOR: changing it (talonic_workbook_correct_mapping). ARGS: `structure_id`, `label_key`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          },
+          {
+            "name": "label_key",
+            "type": "string",
+            "required": true,
+            "description": "label key"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Approve a label mapping"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-get-capture",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_get_capture",
+    "seoTitle": "talonic_workbook_get_capture — A workbook's capture",
+    "description": "MCP tool: What was captured from one workbook: the run, its tables with counts, its pictures with their position. run: null when never captured.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "What was captured from one workbook: the run, its tables with counts, its pictures with their position. run: null when never captured. USE WHEN: finding the table ids of a workbook. NOT FOR: one table's cells (talonic_workbook_table). ARGS: `document_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "A workbook's capture"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-checks",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_checks",
+    "seoTitle": "talonic_workbook_checks — Workbook consistency findings",
+    "description": "MCP tool: Totals that do not add up and similar findings; identity findings too when `structure_id` is given.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Totals that do not add up and similar findings; identity findings too when `structure_id` is given. USE WHEN: checking a workbook before using its figures. NOT FOR: the facts (talonic_workbook_facts). ARGS: `document_id`, `structure_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": false,
+            "description": "structure id"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Workbook consistency findings"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-facts",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_facts",
+    "seoTitle": "talonic_workbook_facts — Workbook facts",
+    "description": "MCP tool: The workbook's facts under a target structure, each with its figure, fields and source cell.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The workbook's facts under a target structure, each with its figure, fields and source cell. USE WHEN: reading the mapped figures. NOT FOR: projecting them first (talonic_workbook_project). ARGS: `document_id`, `structure_id`, `metric`, `limit` (at most 5,000), `offset`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          },
+          {
+            "name": "metric",
+            "type": "string",
+            "required": false,
+            "description": "metric"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Workbook facts"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-project",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_project",
+    "seoTitle": "talonic_workbook_project — Project a workbook onto a structure",
+    "description": "MCP tool: Map the workbook's labels and write its facts under the structure, replacing the facts it held for that structure.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Map the workbook's labels and write its facts under the structure, replacing the facts it held for that structure. USE WHEN: after the mappings are reviewed. NOT FOR: reading facts (talonic_workbook_facts). ARGS: `document_id`, `structure_id`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "structure_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The target structure id."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Project a workbook onto a structure"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-table",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_table",
+    "seoTitle": "talonic_workbook_table — One table as a grid",
+    "description": "MCP tool: One captured table rebuilt as a grid with every value cell and the header, label, title, context and note cells that give it meaning.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One captured table rebuilt as a grid with every value cell and the header, label, title, context and note cells that give it meaning. USE WHEN: showing a table, or a cell in place (`around`). NOT FOR: everything about one cell (talonic_workbook_cell). ARGS: `document_id`, `table_id`, `limit`, `around` (A1), `from` (row). Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "table_id",
+            "type": "UUID",
+            "required": true,
+            "description": "table id"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "around",
+            "type": "string",
+            "required": false,
+            "description": "around"
+          },
+          {
+            "name": "from",
+            "type": "integer",
+            "required": false,
+            "description": "from"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One table as a grid"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-cell",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_cell",
+    "seoTitle": "talonic_workbook_cell — One captured cell",
+    "description": "MCP tool: Everything known about one cell: value, raw text, scale, currency, column path, row labels, notes, formula.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Everything known about one cell: value, raw text, scale, currency, column path, row labels, notes, formula. USE WHEN: explaining where a figure comes from. NOT FOR: the whole table (talonic_workbook_table). ARGS: `document_id`, `table_id`, `a1`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          },
+          {
+            "name": "table_id",
+            "type": "UUID",
+            "required": true,
+            "description": "table id"
+          },
+          {
+            "name": "a1",
+            "type": "string",
+            "required": true,
+            "description": "a1"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One captured cell"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-workbook-recapture",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_workbook_recapture",
+    "seoTitle": "talonic_workbook_recapture — Capture a workbook again",
+    "description": "MCP tool: Capture the workbook again now.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Capture the workbook again now. USE WHEN: the capture is missing or out of date. NOT FOR: projecting facts (talonic_workbook_project). ARGS: `document_id`. Needs documents:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The workbook document id."
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_workbook_list_structures",
+        "slug": "mcp-talonic-workbook-list-structures"
+      },
+      {
+        "label": "talonic_workbook_create_structure",
+        "slug": "mcp-talonic-workbook-create-structure"
+      },
+      {
+        "label": "talonic_workbook_get_structure",
+        "slug": "mcp-talonic-workbook-get-structure"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Capture a workbook again"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-record-set-page",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_record_set_page",
+    "seoTitle": "talonic_record_set_page — Record set grid page",
+    "description": "MCP tool: One page of a record set with its fields and cells, the shape the web grid shows. Rows you may not see are left out.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One page of a record set with its fields and cells, the shape the web grid shows. Rows you may not see are left out. USE WHEN: reading cell values of a record set. NOT FOR: one cell's provenance (talonic_record_set_cell_provenance). ARGS: `record_set_id`, `limit` (at most 500), `offset`, `cursor`, `field_keys[]`, `record_ids[]`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "record_set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "record set id"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "required": false,
+            "description": "cursor"
+          },
+          {
+            "name": "field_keys",
+            "type": "string[]",
+            "required": false,
+            "description": "field keys"
+          },
+          {
+            "name": "record_ids",
+            "type": "string[]",
+            "required": false,
+            "description": "record ids"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_record_set_cell_provenance",
+        "slug": "mcp-talonic-record-set-cell-provenance"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Record set grid page"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-record-set-cell-provenance",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_record_set_cell_provenance",
+    "seoTitle": "talonic_record_set_cell_provenance — Cell provenance",
+    "description": "MCP tool: One cell's value, confidence, status, source and audit reference.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One cell's value, confidence, status, source and audit reference. USE WHEN: where a value came from. NOT FOR: many cells (talonic_record_set_page). ARGS: `record_set_id`, `record_id`, `field_key`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "record_set_id",
+            "type": "UUID",
+            "required": true,
+            "description": "record set id"
+          },
+          {
+            "name": "record_id",
+            "type": "UUID",
+            "required": true,
+            "description": "record id"
+          },
+          {
+            "name": "field_key",
+            "type": "string",
+            "required": true,
+            "description": "field key"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_record_set_page",
+        "slug": "mcp-talonic-record-set-page"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Cell provenance"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-bill",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_bill",
+    "seoTitle": "talonic_ap_bill — One AP bill",
+    "description": "MCP tool: One bill by its key: status, holds, missing information, risk, lines and links.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One bill by its key: status, holds, missing information, risk, lines and links. USE WHEN: one bill in detail. NOT FOR: lists (talonic_ap_bills). ARGS: `key` (bill key). Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "key"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill_documents",
+        "slug": "mcp-talonic-ap-bill-documents"
+      },
+      {
+        "label": "talonic_ap_order",
+        "slug": "mcp-talonic-ap-order"
+      },
+      {
+        "label": "talonic_ap_summary",
+        "slug": "mcp-talonic-ap-summary"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One AP bill"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-bill-documents",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_bill_documents",
+    "seoTitle": "talonic_ap_bill_documents — Documents of an AP bill",
+    "description": "MCP tool: The documents one bill links to (order, contract, delivery notes) and why.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The documents one bill links to (order, contract, delivery notes) and why. USE WHEN: checking a bill against its order or contract. NOT FOR: the bill itself (talonic_ap_bill). ARGS: `key`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "key"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill",
+        "slug": "mcp-talonic-ap-bill"
+      },
+      {
+        "label": "talonic_ap_order",
+        "slug": "mcp-talonic-ap-order"
+      },
+      {
+        "label": "talonic_ap_summary",
+        "slug": "mcp-talonic-ap-summary"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Documents of an AP bill"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-order",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_order",
+    "seoTitle": "talonic_ap_order — One purchase order",
+    "description": "MCP tool: One purchase order by its number, with its invoices and the documents they are checked with.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One purchase order by its number, with its invoices and the documents they are checked with. USE WHEN: everything billed against an order. NOT FOR: one bill (talonic_ap_bill). ARGS: `key` (order number). Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "key"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill",
+        "slug": "mcp-talonic-ap-bill"
+      },
+      {
+        "label": "talonic_ap_bill_documents",
+        "slug": "mcp-talonic-ap-bill-documents"
+      },
+      {
+        "label": "talonic_ap_summary",
+        "slug": "mcp-talonic-ap-summary"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One purchase order"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-summary",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_summary",
+    "seoTitle": "talonic_ap_summary — AP counts per status",
+    "description": "MCP tool: How many bills are ready, need information, are being evaluated or are held, with their amounts.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "How many bills are ready, need information, are being evaluated or are held, with their amounts. USE WHEN: a quick count. NOT FOR: totals with entities (talonic_ap_overview). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill",
+        "slug": "mcp-talonic-ap-bill"
+      },
+      {
+        "label": "talonic_ap_bill_documents",
+        "slug": "mcp-talonic-ap-bill-documents"
+      },
+      {
+        "label": "talonic_ap_order",
+        "slug": "mcp-talonic-ap-order"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "AP counts per status"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-set-language",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_set_language",
+    "seoTitle": "talonic_ap_set_language — AP reviewer language",
+    "description": "MCP tool: Set the language reviewers write their reasons in.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Set the language reviewers write their reasons in. USE WHEN: the team works in another language. NOT FOR: the AP configuration (talonic_ap_save_config). ARGS: `language` (en, es, de, fr, it, pt, pt-PT). Needs apps:payables:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "language",
+            "type": "en | es | de | fr | it | pt | pt-PT",
+            "required": true,
+            "description": "language"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill",
+        "slug": "mcp-talonic-ap-bill"
+      },
+      {
+        "label": "talonic_ap_bill_documents",
+        "slug": "mcp-talonic-ap-bill-documents"
+      },
+      {
+        "label": "talonic_ap_order",
+        "slug": "mcp-talonic-ap-order"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "AP reviewer language"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-ap-set-rule-important",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_ap_set_rule_important",
+    "seoTitle": "talonic_ap_set_rule_important — Mark a payment rule important",
+    "description": "MCP tool: A failed payment rule marked important holds its bill at high risk.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "A failed payment rule marked important holds its bill at high risk. USE WHEN: a rule must never be missed. NOT FOR: whether payment depends on the rule (the effect). ARGS: `rule_id`, `important`. Needs apps:payables:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "rule_id",
+            "type": "UUID",
+            "required": true,
+            "description": "rule id"
+          },
+          {
+            "name": "important",
+            "type": "boolean",
+            "required": true,
+            "description": "important"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_ap_bill",
+        "slug": "mcp-talonic-ap-bill"
+      },
+      {
+        "label": "talonic_ap_bill_documents",
+        "slug": "mcp-talonic-ap-bill-documents"
+      },
+      {
+        "label": "talonic_ap_order",
+        "slug": "mcp-talonic-ap-order"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Mark a payment rule important"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-compliance-get-framework",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_compliance_get_framework",
+    "seoTitle": "talonic_compliance_get_framework — One compliance framework",
+    "description": "MCP tool: One framework with its reading state, ON/OFF and its rules.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One framework with its reading state, ON/OFF and its rules. USE WHEN: before editing its rules. NOT FOR: all frameworks (the frameworks list). ARGS: `document_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "document id"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_compliance_reread_framework",
+        "slug": "mcp-talonic-compliance-reread-framework"
+      },
+      {
+        "label": "talonic_compliance_add_rule",
+        "slug": "mcp-talonic-compliance-add-rule"
+      },
+      {
+        "label": "talonic_compliance_update_rule",
+        "slug": "mcp-talonic-compliance-update-rule"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "One compliance framework"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-compliance-reread-framework",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_compliance_reread_framework",
+    "seoTitle": "talonic_compliance_reread_framework — Read a framework's rules again",
+    "description": "MCP tool: Read the framework's rules again from its document; the rules are replaced when the reading finishes.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read the framework's rules again from its document; the rules are replaced when the reading finishes. USE WHEN: the document changed or the rules were read wrongly. NOT FOR: editing one rule (talonic_compliance_update_rule). ARGS: `document_id`. Needs apps:compliance:write; 409 while the app is off. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "document id"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_compliance_get_framework",
+        "slug": "mcp-talonic-compliance-get-framework"
+      },
+      {
+        "label": "talonic_compliance_add_rule",
+        "slug": "mcp-talonic-compliance-add-rule"
+      },
+      {
+        "label": "talonic_compliance_update_rule",
+        "slug": "mcp-talonic-compliance-update-rule"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Read a framework's rules again"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-compliance-add-rule",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_compliance_add_rule",
+    "seoTitle": "talonic_compliance_add_rule — Add a compliance rule",
+    "description": "MCP tool: Add a rule written by a person to a framework.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Add a rule written by a person to a framework. USE WHEN: a rule is missing. NOT FOR: changing a rule (talonic_compliance_update_rule). ARGS: `document_id`, `text`, optional obligation, section, applies_to, condition, threshold, testable. Needs apps:compliance:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "document id"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "text"
+          },
+          {
+            "name": "obligation",
+            "type": "string",
+            "required": false,
+            "description": "How binding the rule is."
+          },
+          {
+            "name": "section",
+            "type": "string",
+            "required": false,
+            "description": "section"
+          },
+          {
+            "name": "applies_to",
+            "type": "string",
+            "required": false,
+            "description": "applies to"
+          },
+          {
+            "name": "condition",
+            "type": "string",
+            "required": false,
+            "description": "condition"
+          },
+          {
+            "name": "threshold",
+            "type": "string",
+            "required": false,
+            "description": "threshold"
+          },
+          {
+            "name": "testable",
+            "type": "boolean",
+            "required": false,
+            "description": "testable"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_compliance_get_framework",
+        "slug": "mcp-talonic-compliance-get-framework"
+      },
+      {
+        "label": "talonic_compliance_reread_framework",
+        "slug": "mcp-talonic-compliance-reread-framework"
+      },
+      {
+        "label": "talonic_compliance_update_rule",
+        "slug": "mcp-talonic-compliance-update-rule"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Add a compliance rule"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-compliance-update-rule",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_compliance_update_rule",
+    "seoTitle": "talonic_compliance_update_rule — Edit a compliance rule",
+    "description": "MCP tool: Edit one rule; only the fields sent change.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Edit one rule; only the fields sent change. USE WHEN: a rule reads wrongly. NOT FOR: removing it (talonic_compliance_delete_rule). ARGS: `rule_id` plus the fields to change. Needs apps:compliance:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "rule_id",
+            "type": "UUID",
+            "required": true,
+            "description": "rule id"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": false,
+            "description": "text"
+          },
+          {
+            "name": "obligation",
+            "type": "string",
+            "required": false,
+            "description": "How binding the rule is."
+          },
+          {
+            "name": "section",
+            "type": "string",
+            "required": false,
+            "description": "section"
+          },
+          {
+            "name": "applies_to",
+            "type": "string",
+            "required": false,
+            "description": "applies to"
+          },
+          {
+            "name": "condition",
+            "type": "string",
+            "required": false,
+            "description": "condition"
+          },
+          {
+            "name": "threshold",
+            "type": "string",
+            "required": false,
+            "description": "threshold"
+          },
+          {
+            "name": "testable",
+            "type": "boolean",
+            "required": false,
+            "description": "testable"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_compliance_get_framework",
+        "slug": "mcp-talonic-compliance-get-framework"
+      },
+      {
+        "label": "talonic_compliance_reread_framework",
+        "slug": "mcp-talonic-compliance-reread-framework"
+      },
+      {
+        "label": "talonic_compliance_add_rule",
+        "slug": "mcp-talonic-compliance-add-rule"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Edit a compliance rule"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-compliance-delete-rule",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_compliance_delete_rule",
+    "seoTitle": "talonic_compliance_delete_rule — Remove a compliance rule",
+    "description": "MCP tool: Take one rule out of its framework.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Take one rule out of its framework. USE WHEN: the rule does not belong. NOT FOR: switching a whole framework off. ARGS: `rule_id`. Needs apps:compliance:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "rule_id",
+            "type": "UUID",
+            "required": true,
+            "description": "rule id"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_compliance_get_framework",
+        "slug": "mcp-talonic-compliance-get-framework"
+      },
+      {
+        "label": "talonic_compliance_reread_framework",
+        "slug": "mcp-talonic-compliance-reread-framework"
+      },
+      {
+        "label": "talonic_compliance_add_rule",
+        "slug": "mcp-talonic-compliance-add-rule"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Remove a compliance rule"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-catalog",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_catalog",
+    "seoTitle": "talonic_money_found_catalog — What Money Found offers",
+    "description": "MCP tool: The roles a configuration binds, their fields, and the levers with what each needs.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The roles a configuration binds, their fields, and the levers with what each needs. USE WHEN: setting Money Found up. NOT FOR: the configuration in force (talonic_money_found_config). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      },
+      {
+        "label": "talonic_money_found_save_config",
+        "slug": "mcp-talonic-money-found-save-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "What Money Found offers"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-config",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_config",
+    "seoTitle": "talonic_money_found_config — Money Found configuration",
+    "description": "MCP tool: The configuration in force, or config: null.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The configuration in force, or config: null. USE WHEN: before changing it. NOT FOR: a proposal (talonic_money_found_propose_config). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      },
+      {
+        "label": "talonic_money_found_save_config",
+        "slug": "mcp-talonic-money-found-save-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Money Found configuration"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-propose-config",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_propose_config",
+    "seoTitle": "talonic_money_found_propose_config — Propose a Money Found configuration",
+    "description": "MCP tool: Propose a configuration from the workspace's Specs and tables. Saves nothing; show it to the user, then confirm with talonic_money_found_save_config.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Propose a configuration from the workspace's Specs and tables. Saves nothing; show it to the user, then confirm with talonic_money_found_save_config. USE WHEN: no configuration yet, or the sources changed. NOT FOR: saving (talonic_money_found_save_config). ARGS: `as_of` (YYYY-MM-DD). Needs apps:money-found:write; 409 while the app is off. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "as_of",
+            "type": "string",
+            "required": false,
+            "description": "as of"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_save_config",
+        "slug": "mcp-talonic-money-found-save-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Propose a Money Found configuration"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-save-config",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_save_config",
+    "seoTitle": "talonic_money_found_save_config — Confirm a Money Found configuration",
+    "description": "MCP tool: Confirm a configuration (validated in full; a binding to a missing source or field is dropped). The ledger rebuilds on the next read.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Confirm a configuration (validated in full; a binding to a missing source or field is dropped). The ledger rebuilds on the next read. USE WHEN: the user accepted a proposal or a change. NOT FOR: proposing one (talonic_money_found_propose_config). ARGS: `config` (the whole object). Needs apps:money-found:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "config",
+            "type": "object",
+            "required": true,
+            "description": "config"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Confirm a Money Found configuration"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-structure-clauses",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_structure_clauses",
+    "seoTitle": "talonic_money_found_structure_clauses — Read clause numbers",
+    "description": "MCP tool: Read tiers, rates and dates out of the configured contracts' clause text and save them into the configuration.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read tiers, rates and dates out of the configured contracts' clause text and save them into the configuration. USE WHEN: after confirming a configuration, so rebate and commitment levers run. NOT FOR: cost bearers (talonic_money_found_cost_clauses). ARGS: none. Needs apps:money-found:write; 422 without a configuration. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Read clause numbers"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-cost-clauses",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_cost_clauses",
+    "seoTitle": "talonic_money_found_cost_clauses — Read who bears each cost",
+    "description": "MCP tool: Read who bears each cost from the contracts' own text and save it; an answer counts only when its quote is found. dry_run counts only.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read who bears each cost from the contracts' own text and save it; an answer counts only when its quote is found. dry_run counts only. USE WHEN: pass-through costs matter. NOT FOR: clause numbers (talonic_money_found_structure_clauses). ARGS: `keys[]`, `limit`, `dry_run`. Needs apps:money-found:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "keys",
+            "type": "string[]",
+            "required": false,
+            "description": "keys"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "required": false,
+            "description": "dry run"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Read who bears each cost"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-delete-config",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_delete_config",
+    "seoTitle": "talonic_money_found_delete_config — Remove the Money Found configuration",
+    "description": "MCP tool: Remove the configuration; the ledger without one answers again.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Remove the configuration; the ledger without one answers again. USE WHEN: the user asks to start over. NOT FOR: changing it (talonic_money_found_save_config). ARGS: none. Needs apps:money-found:write and the workspace permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Remove the Money Found configuration"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-money-found-set-row-state",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_money_found_set_row_state",
+    "seoTitle": "talonic_money_found_set_row_state — Record a decision on a ledger row",
+    "description": "MCP tool: Record open, in_progress, resolved or dismissed on one ledger row; the next ledger read shows it.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Record open, in_progress, resolved or dismissed on one ledger row; the next ledger read shows it. USE WHEN: the user acted on a finding. NOT FOR: re-reviewing a contract price row. ARGS: `lever_id`, `key` (row key), `state`, `note`. Needs apps:money-found:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "lever_id",
+            "type": "string",
+            "required": true,
+            "description": "lever id"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "key"
+          },
+          {
+            "name": "state",
+            "type": "open | in_progress | resolved | dismissed",
+            "required": true,
+            "description": "state"
+          },
+          {
+            "name": "note",
+            "type": "string",
+            "required": false,
+            "description": "note"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_money_found_catalog",
+        "slug": "mcp-talonic-money-found-catalog"
+      },
+      {
+        "label": "talonic_money_found_config",
+        "slug": "mcp-talonic-money-found-config"
+      },
+      {
+        "label": "talonic_money_found_propose_config",
+        "slug": "mcp-talonic-money-found-propose-config"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Record a decision on a ledger row"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-price-baseline-needed",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_price_baseline_needed",
+    "seoTitle": "talonic_price_baseline_needed — What is missing to price contracts",
+    "description": "MCP tool: Per contract and year, the inputs still missing before its prices can be computed.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Per contract and year, the inputs still missing before its prices can be computed. USE WHEN: planning what to collect. NOT FOR: the register (talonic_price_baseline_register). ARGS: `years[]`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "years",
+            "type": "integer[]",
+            "required": false,
+            "description": "years"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_price_baseline_invoices",
+        "slug": "mcp-talonic-price-baseline-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_scan_invoices",
+        "slug": "mcp-talonic-price-baseline-scan-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_match_invoice",
+        "slug": "mcp-talonic-price-baseline-match-invoice"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "What is missing to price contracts"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-price-baseline-invoices",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_price_baseline_invoices",
+    "seoTitle": "talonic_price_baseline_invoices — Invoices found",
+    "description": "MCP tool: The invoices found with their matched contract and price check; with `filter` or paging, one window and the headline.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The invoices found with their matched contract and price check; with `filter` or paging, one window and the headline. USE WHEN: which invoices are unmatched or off contract. NOT FOR: candidate contracts of one invoice (talonic_price_baseline_match_invoice). ARGS: `filter`, `limit` (at most 500), `offset`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "filter",
+            "type": "string",
+            "required": false,
+            "description": "filter"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_price_baseline_needed",
+        "slug": "mcp-talonic-price-baseline-needed"
+      },
+      {
+        "label": "talonic_price_baseline_scan_invoices",
+        "slug": "mcp-talonic-price-baseline-scan-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_match_invoice",
+        "slug": "mcp-talonic-price-baseline-match-invoice"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Invoices found"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-price-baseline-scan-invoices",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_price_baseline_scan_invoices",
+    "seoTitle": "talonic_price_baseline_scan_invoices — Find new invoices",
+    "description": "MCP tool: Find invoices not yet listed and match the unmatched ones again.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Find invoices not yet listed and match the unmatched ones again. USE WHEN: new invoices arrived. NOT FOR: assigning one (talonic_price_baseline_assign_invoice). ARGS: none. Needs apps:price-baseline:write; 409 while the app is off. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_price_baseline_needed",
+        "slug": "mcp-talonic-price-baseline-needed"
+      },
+      {
+        "label": "talonic_price_baseline_invoices",
+        "slug": "mcp-talonic-price-baseline-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_match_invoice",
+        "slug": "mcp-talonic-price-baseline-match-invoice"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Find new invoices"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-price-baseline-match-invoice",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_price_baseline_match_invoice",
+    "seoTitle": "talonic_price_baseline_match_invoice — Candidate contracts for an invoice",
+    "description": "MCP tool: The contracts an invoice may bill, scored. Changes nothing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The contracts an invoice may bill, scored. Changes nothing. USE WHEN: before assigning an invoice's contract. NOT FOR: assigning (talonic_price_baseline_assign_invoice). ARGS: `document_id`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "document id"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_price_baseline_needed",
+        "slug": "mcp-talonic-price-baseline-needed"
+      },
+      {
+        "label": "talonic_price_baseline_invoices",
+        "slug": "mcp-talonic-price-baseline-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_scan_invoices",
+        "slug": "mcp-talonic-price-baseline-scan-invoices"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Candidate contracts for an invoice"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-price-baseline-assign-invoice",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_price_baseline_assign_invoice",
+    "seoTitle": "talonic_price_baseline_assign_invoice — Assign an invoice's contract",
+    "description": "MCP tool: Assign the contract an invoice bills (`model_id`), null to match again, or skip=true when it is not a bill; its price check runs again.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Assign the contract an invoice bills (`model_id`), null to match again, or skip=true when it is not a bill; its price check runs again. USE WHEN: after talonic_price_baseline_match_invoice. NOT FOR: previewing (talonic_price_baseline_match_invoice). ARGS: `document_id`, `model_id`, `skip`. Needs apps:price-baseline:write. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_id",
+            "type": "UUID",
+            "required": true,
+            "description": "document id"
+          },
+          {
+            "name": "model_id",
+            "type": "string | null",
+            "required": false,
+            "description": "model id"
+          },
+          {
+            "name": "skip",
+            "type": "boolean",
+            "required": false,
+            "description": "skip"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_price_baseline_needed",
+        "slug": "mcp-talonic-price-baseline-needed"
+      },
+      {
+        "label": "talonic_price_baseline_invoices",
+        "slug": "mcp-talonic-price-baseline-invoices"
+      },
+      {
+        "label": "talonic_price_baseline_scan_invoices",
+        "slug": "mcp-talonic-price-baseline-scan-invoices"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Assign an invoice's contract"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-contract-check-settings",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_contract_check_settings",
+    "seoTitle": "talonic_contract_check_settings — Contract Check settings",
+    "description": "MCP tool: The settings with what is needed to choose them: data products, the CRM table's columns, sample rows, contract types.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The settings with what is needed to choose them: data products, the CRM table's columns, sample rows, contract types. USE WHEN: before changing the settings. NOT FOR: values of one column (talonic_contract_check_column_values). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_contract_check_save_settings",
+        "slug": "mcp-talonic-contract-check-save-settings"
+      },
+      {
+        "label": "talonic_contract_check_column_values",
+        "slug": "mcp-talonic-contract-check-column-values"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Contract Check settings"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-contract-check-save-settings",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_contract_check_save_settings",
+    "seoTitle": "talonic_contract_check_save_settings — Save Contract Check settings",
+    "description": "MCP tool: Save which data product the contracts come from and the check settings.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Save which data product the contracts come from and the check settings. USE WHEN: setting Contract Check up. NOT FOR: reading them (talonic_contract_check_settings). ARGS: `data_product_id`, `settings`. Needs write and the upload permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "data_product_id",
+            "type": "UUID",
+            "required": false,
+            "description": "data product id"
+          },
+          {
+            "name": "settings",
+            "type": "object",
+            "required": false,
+            "description": "settings"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_contract_check_settings",
+        "slug": "mcp-talonic-contract-check-settings"
+      },
+      {
+        "label": "talonic_contract_check_column_values",
+        "slug": "mcp-talonic-contract-check-column-values"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Save Contract Check settings"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-contract-check-column-values",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_contract_check_column_values",
+    "seoTitle": "talonic_contract_check_column_values — Values of a CRM column",
+    "description": "MCP tool: Up to 100 distinct values of one CRM column, to choose a setting from; more: true when there are more.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Up to 100 distinct values of one CRM column, to choose a setting from; more: true when there are more. USE WHEN: filling a setting that names CRM values. NOT FOR: the settings (talonic_contract_check_settings). ARGS: `column`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "column",
+            "type": "string",
+            "required": true,
+            "description": "column"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_contract_check_settings",
+        "slug": "mcp-talonic-contract-check-settings"
+      },
+      {
+        "label": "talonic_contract_check_save_settings",
+        "slug": "mcp-talonic-contract-check-save-settings"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Values of a CRM column"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-chart-pdfs-page",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_chart_pdfs_page",
+    "seoTitle": "talonic_chart_pdfs_page — PDF documents for chart reading",
+    "description": "MCP tool: One window of the workspace's PDF documents with total.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One window of the workspace's PDF documents with total. USE WHEN: choosing documents whose charts to read. NOT FOR: what reading would cost (talonic_chart_read_charts_preview). ARGS: `limit`, `offset`. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "limit"
+          },
+          {
+            "name": "offset",
+            "type": "integer",
+            "required": false,
+            "description": "offset"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_chart_read_charts_available",
+        "slug": "mcp-talonic-chart-read-charts-available"
+      },
+      {
+        "label": "talonic_chart_read_charts_preview",
+        "slug": "mcp-talonic-chart-read-charts-preview"
+      },
+      {
+        "label": "talonic_chart_read_charts",
+        "slug": "mcp-talonic-chart-read-charts"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "PDF documents for chart reading"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-chart-read-charts-available",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_chart_read_charts_available",
+    "seoTitle": "talonic_chart_read_charts_available — Whether chart reading is offered",
+    "description": "MCP tool: { available }: whether reading the charts of selected documents is offered here.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "{ available }: whether reading the charts of selected documents is offered here. USE WHEN: before offering it to the user. NOT FOR: the cost (talonic_chart_read_charts_preview). ARGS: none. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_chart_pdfs_page",
+        "slug": "mcp-talonic-chart-pdfs-page"
+      },
+      {
+        "label": "talonic_chart_read_charts_preview",
+        "slug": "mcp-talonic-chart-read-charts-preview"
+      },
+      {
+        "label": "talonic_chart_read_charts",
+        "slug": "mcp-talonic-chart-read-charts"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Whether chart reading is offered"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-chart-read-charts-preview",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_chart_read_charts_preview",
+    "seoTitle": "talonic_chart_read_charts_preview — Preview reading charts",
+    "description": "MCP tool: What reading the charts of these documents would read and cost at most. Admits nothing.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "What reading the charts of these documents would read and cost at most. Admits nothing. USE WHEN: always before talonic_chart_read_charts. NOT FOR: reading (talonic_chart_read_charts). ARGS: `document_ids[]`. Needs the upload permission. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "document ids"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_chart_pdfs_page",
+        "slug": "mcp-talonic-chart-pdfs-page"
+      },
+      {
+        "label": "talonic_chart_read_charts_available",
+        "slug": "mcp-talonic-chart-read-charts-available"
+      },
+      {
+        "label": "talonic_chart_read_charts",
+        "slug": "mcp-talonic-chart-read-charts"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Preview reading charts"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-chart-read-charts",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_chart_read_charts",
+    "seoTitle": "talonic_chart_read_charts — Read charts of selected documents",
+    "description": "MCP tool: Read the charts of the selected documents, one outcome per document. Costs credits: preview first and confirm with the user.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Read the charts of the selected documents, one outcome per document. Costs credits: preview first and confirm with the user. USE WHEN: after talonic_chart_read_charts_preview. NOT FOR: previewing (talonic_chart_read_charts_preview). ARGS: `document_ids[]`. Needs apps:chart-to-data:write and the upload permission; 409 while the app is off. Listed only when the workspace added the app and the credential may read it; the platform checks the scope and the person's role on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "document_ids",
+            "type": "UUID[]",
+            "required": true,
+            "description": "document ids"
+          }
+        ]
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_chart_pdfs_page",
+        "slug": "mcp-talonic-chart-pdfs-page"
+      },
+      {
+        "label": "talonic_chart_read_charts_available",
+        "slug": "mcp-talonic-chart-read-charts-available"
+      },
+      {
+        "label": "talonic_chart_read_charts_preview",
+        "slug": "mcp-talonic-chart-read-charts-preview"
+      }
+    ],
+    "faq": [],
+    "mentions": [
+      "Read charts of selected documents"
+    ]
   }
 ]
