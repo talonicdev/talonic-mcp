@@ -107,6 +107,18 @@ export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
 export const processesAccessCached = makeAccessCache(pathProbe("/v1/processes"))
 /** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
+/** @internal Exported for tests. */
+export const dataProductsAccessCached = makeAccessCache((t) =>
+  probeAccessState(t, base(), "/v1/data-products", () => true, { limit: 1 }),
+)
+/** @internal Exported for tests. */
+export const dataPoliciesAccessCached = makeAccessCache((t) =>
+  probeAccessState(t, base(), "/v1/data-policies", () => true, { limit: 1 }),
+)
+/** @internal Exported for tests. */
+export const workspaceDataAccessCached = makeAccessCache(pathProbe("/v1/catalog"))
+/** @internal Exported for tests. */
+export const schemaReviewAccessCached = makeAccessCache(pathProbe("/v1/schema-graph/review-queue"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
 export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
 /** Superadmin only. @internal Exported for tests. */
@@ -362,6 +374,14 @@ export interface CreateRequestHandlerOptions {
   submissionsAccess?: (token: string) => Promise<boolean>
   /** Override the Price Baseline tool visibility check (primarily for tests). */
   priceBaselineAccess?: (token: string) => Promise<boolean>
+  /** Override the data product tool visibility check (primarily for tests). */
+  dataProductsAccess?: (token: string) => Promise<boolean>
+  /** Override the data policy tool visibility check (primarily for tests). */
+  dataPoliciesAccess?: (token: string) => Promise<boolean>
+  /** Override the workspace data (catalog, suggestions) tool visibility check (primarily for tests). */
+  workspaceDataAccess?: (token: string) => Promise<boolean>
+  /** Override the schema review tool visibility check (primarily for tests). */
+  schemaReviewAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
   /** Override the credential check that answers 401 (primarily for tests). */
@@ -662,6 +682,10 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeDataProductTools,
+      includeDataPolicyTools,
+      includeWorkspaceDataTools,
+      includeSchemaReviewTools,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,6 +700,10 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.dataProductsAccess ?? dataProductsAccessCached)(token),
+      (options.dataPoliciesAccess ?? dataPoliciesAccessCached)(token),
+      (options.workspaceDataAccess ?? workspaceDataAccessCached)(token),
+      (options.schemaReviewAccess ?? schemaReviewAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -692,6 +720,10 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeDataProductTools,
+      includeDataPolicyTools,
+      includeWorkspaceDataTools,
+      includeSchemaReviewTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

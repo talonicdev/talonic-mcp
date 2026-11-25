@@ -23,6 +23,10 @@ import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
+import { probeDataProductsAccess } from "./tools/data-products.js"
+import { probeDataPoliciesAccess } from "./tools/data-policies.js"
+import { probeWorkspaceDataAccess } from "./tools/workspace-data.js"
+import { probeSchemaReviewAccess } from "./tools/schema-review.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
@@ -109,6 +113,10 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -121,6 +129,10 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeDataProductsAccess(apiKey, baseUrl),
+    probeDataPoliciesAccess(apiKey, baseUrl),
+    probeWorkspaceDataAccess(apiKey, baseUrl),
+    probeSchemaReviewAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -136,6 +148,10 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
   })
 
   const transport = new StdioServerTransport()

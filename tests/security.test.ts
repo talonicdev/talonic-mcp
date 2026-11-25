@@ -44,6 +44,10 @@ const allProbesOff = {
   processesAccess: off,
   agentTasksAccess: off,
   decisionTasksAccess: off,
+  dataProductsAccess: off,
+  dataPoliciesAccess: off,
+  workspaceDataAccess: off,
+  schemaReviewAccess: off,
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {
@@ -144,6 +148,10 @@ describe("a rejected credential does not fan out", () => {
         processesAccess: probe,
         agentTasksAccess: probe,
         decisionTasksAccess: probe,
+        dataProductsAccess: probe,
+        dataPoliciesAccess: probe,
+        workspaceDataAccess: probe,
+        schemaReviewAccess: probe,
         tokenAccepted: off,
       }),
     )
