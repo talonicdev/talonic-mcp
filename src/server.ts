@@ -24,6 +24,7 @@ import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { probeToolGroups } from "./tools/tool-groups.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -109,6 +110,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    toolGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -121,6 +123,7 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeToolGroups(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -136,6 +139,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    toolGroups,
   })
 
   const transport = new StdioServerTransport()

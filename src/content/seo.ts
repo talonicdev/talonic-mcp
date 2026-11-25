@@ -91,6 +91,21 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: "tool-groups",
+    label: "App and Admin Tools",
+    children: [
+      { id: "data-management-tools", label: "Documents, extractions, jobs and schemas" },
+      { id: "events-tools", label: "Events" },
+      { id: "aggregate-tools", label: "Workspace metrics" },
+      { id: "admin-tools", label: "Workspace administration" },
+      { id: "contract-desk-tools", label: "Contract Desk" },
+      { id: "transport-folders-tools", label: "Transport Folders" },
+      { id: "compliance-tools", label: "Compliance" },
+      { id: "money-found-tools", label: "Money Found" },
+      { id: "customs-declaration-tools", label: "Customs declaration" },
+    ],
+  },
+  {
     id: "features",
     label: "Features",
     children: [

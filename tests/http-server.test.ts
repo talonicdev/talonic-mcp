@@ -26,6 +26,7 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       priceBaselineAccess: async () => false,
       agentTasksAccess: async () => true,
       decisionTasksAccess: async () => true,
+      toolGroupsAccess: async () => [],
       tokenAccepted: async () => true,
       ...options,
     }),
@@ -293,6 +294,27 @@ describe("HTTP server routing", () => {
     const upload = tools.find((t) => t.name === "talonic_doc_gen_upload_template")!
     expect(Object.keys(upload.inputSchema.properties)).toContain("content_base64")
     expect(Object.keys(upload.inputSchema.properties)).not.toContain("file_path")
+  })
+
+  it("tools/list includes a probe-gated tool group only when its probe passes", async () => {
+    const list = async () => {
+      const res = await fetch(`${h.baseUrl}/mcp`, {
+        method: "POST",
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/list", params: {} }),
+      })
+      expect(res.status).toBe(200)
+      return res.text()
+    }
+    await stopHarness(h)
+    h = await startHarness({ toolGroupsAccess: async () => [] })
+    expect(await list()).not.toContain("talonic_aggregate")
+    await stopHarness(h)
+    h = await startHarness({ toolGroupsAccess: async () => ["aggregate", "events"] })
+    const text = await list()
+    expect(text).toContain("talonic_aggregate_catalog")
+    expect(text).toContain("talonic_list_events")
+    expect(text).not.toContain("talonic_contract_desk_")
   })
 
   it("tools/list includes the parties tools only when the Parties probe passes", async () => {

@@ -41,6 +41,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Build, check, publish and set up a process.** Fifteen more `talonic_process_*` tools over the new `/v1/processes` routes: `talonic_process_create` (a draft from a description or an n8n workflow), `talonic_process_change` (an instruction in plain words; a change that reduces governance returns `needs_confirmation` and saves nothing until the user agreed), `talonic_process_get`, `talonic_process_check`, `talonic_process_test_run`, `talonic_process_publish`, `talonic_process_versions`, `talonic_process_rollback`, `talonic_process_delete`, `talonic_process_item`, `talonic_process_retry`, `talonic_process_send_back`, `talonic_process_setup` (people, mailboxes, secret names, look-up data), `talonic_process_mailbox_ownership`, `talonic_process_address`. Publish, rollback, delete and address carry `destructiveHint`. No tool stores or reads a secret's value, and connecting a mailbox stays in the web app.
 
+- **Probe-gated tool groups** (`src/tools/_groups.ts`), each listed only when its probe passes for the connection, each with a docs page under "App and Admin Tools":
+  - Documents, extractions, jobs and schemas (14): `talonic_list_documents`, `talonic_reextract_document`, `talonic_delete_document`, `talonic_list_extractions`, `talonic_get_extraction`, `talonic_get_extraction_data`, `talonic_correct_extraction`, `talonic_list_jobs`, `talonic_get_job`, `talonic_get_job_results`, `talonic_create_job` (refuses a whole-workspace job unless `all_documents: true`), `talonic_cancel_job`, `talonic_update_schema`, `talonic_delete_schema`. Deletes and the schema replace carry `destructiveHint`.
+  - `talonic_list_events` over `GET /v1/events` (`after` / `since` / `next_cursor`).
+  - `talonic_aggregate_catalog` and `talonic_aggregate` over `/v1/aggregate` (supersedes PR #57: probes the catalog GET instead of taking the one-in-flight POST slot; refuses offset-less timestamps, inverted windows and bad or repeated query ids before calling).
+  - Workspace administration (11): API keys list / create / revoke, account snapshot, webhooks list / get / create / update / delete, webhook event types, buy-credits link.
+  - Contract Desk (16) and Transport Folders (13): work lists, evidence, decide / undo, assign / confirm and their withdrawals, the load's document set as an embedded PDF (up to 8 MB).
+  - Compliance (39), Money Found (5), Customs declaration (3).
+
 ## [0.1.102] - 2026-11-22
 
 ### Added
