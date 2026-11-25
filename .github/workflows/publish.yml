@@ -41,14 +41,15 @@ jobs:
 
       # Docs-drift guard.
       #
-      # talonic.com/docs/mcp is fed by docs/sections.json (via the platform's
-      # sync-external-docs workflow → @talonic/docs → the website). The file
-      # is hand-maintained — it is NOT auto-generated from src/. That used to
-      # mean tool/server changes could ship to npm + the website install
-      # docs without the public docs pages catching up, because the platform
-      # sync detects a no-op diff and skips publishing @talonic/docs.
+      # docs/sections.json is a hand-maintained mirror that the platform syncs
+      # into @talonic/docs; nothing renders it (talonic.com/docs/mcp renders
+      # src/content/, see docs/architecture/docs-pipeline.md). The live surface
+      # is held by tests/content/tool-sections.test.ts (run in "Test" below):
+      # it fails when a tool is documented only in docs/sections.json, when a
+      # public tool lacks a rendered section, or when a process tool's page
+      # drifts from its parameters.
       #
-      # Rule: if any "documentable" source path changed in this push but
+      # Rule here: if any "documentable" source path changed in this push but
       # docs/sections.json did not, fail loudly. Genuinely-non-doc-affecting
       # changes (refactors, internal-only fixes, CI) can opt out by including
       # `[skip docs]` anywhere in any commit message in the push.
@@ -89,10 +90,10 @@ jobs:
 
           echo "::error::Documentable source paths changed but docs/sections.json was not updated."
           echo ""
-          echo "talonic.com/docs/mcp is fed by docs/sections.json. Without an"
-          echo "update there, the platform sync will detect no diff and"
-          echo "@talonic/docs will not be republished — the public docs pages"
-          echo "will silently drift behind the actual product."
+          echo "docs/sections.json is the mirror the platform syncs into @talonic/docs."
+          echo "Keep it in step with src/tools/**; the rendered pages come from"
+          echo "src/content/sections/*.ts, and tests/content/tool-sections.test.ts"
+          echo "fails when a tool is documented only in the mirror."
           echo ""
           echo "Either update docs/sections.json with the corresponding content,"
           echo "or include [skip docs] in a commit message in this push if the"
@@ -109,6 +110,11 @@ jobs:
       - name: Test
         run: npm test
 
+      # Route-drift guard: refuse to publish a tool whose route is not in the
+      # live public spec (pinned fallback with a warning when unreachable).
+      - name: Route-drift guard
+        run: npm run check:routes
+
       - name: Auto-bump patch version
         id: version
         run: |
@@ -117,6 +123,8 @@ jobs:
           if [ "$CURRENT" = "$NPM_VERSION" ]; then
             npm version patch --no-git-tag-version
             NEW=$(node -p "require('./package.json').version")
+            # Same commit as the bump: main always has a heading for the package version.
+            node scripts/promote-changelog.mjs "$NEW" "$(date -u +%Y-%m-%d)"
             echo "bumped=true" >> "$GITHUB_OUTPUT"
             echo "version=$NEW" >> "$GITHUB_OUTPUT"
             echo "Auto-bumped ${CURRENT} → ${NEW}"
@@ -136,7 +144,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json server.json
+          git add package.json server.json CHANGELOG.md
           git commit -m "chore: bump @talonic/mcp to ${{ steps.version.outputs.version }} [skip ci]"
           git push
 

@@ -45,6 +45,10 @@ import { createServer } from "./server-factory.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
+import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
+import { probeMiningInUse } from "./tools/mining-driver.js"
+import { probeGroup } from "./tools/_groups.js"
+import { TOOL_GROUPS } from "./tools/tool-groups.js"
 import {
   OPERATIONS_FAMILIES,
   probeOperationsFamily,
@@ -126,6 +130,29 @@ export const agentTasksAccessCached = makeAccessCache((t) => probeAgentTasksInUs
  * @internal Exported for tests.
  */
 export const decisionTasksAccessCached = makeAccessCache((t) => probeExternalAppsInUse(t, base()))
+/**
+ * Apps toolset (build / run / reviews): the credential can read `/v1/apps`.
+ * @internal Exported for tests.
+ */
+export const appsToolsetAccessCached = makeAccessCache((t) => probeAppsToolsetAccess(t, base()))
+/**
+ * Rule-mining round tools: only for workspaces with an autonomous app.
+ * @internal Exported for tests.
+ */
+export const miningAccessCached = makeAccessCache((t) => probeMiningInUse(t, base()))
+
+/** One access cache per probe-gated tool group (`src/tools/tool-groups.ts`). */
+const toolGroupCaches = TOOL_GROUPS.map(
+  (g) => [g.key, makeAccessCache((t) => probeGroup(g, t, base()))] as const,
+)
+/**
+ * The keys of the tool groups this token may list, each from its own
+ * per-token 5-minute cache. @internal Exported for tests.
+ */
+export async function toolGroupsAccessCached(token: string): Promise<string[]> {
+  const answers = await Promise.all(toolGroupCaches.map(([, cached]) => cached(token)))
+  return toolGroupCaches.filter((_, i) => answers[i]).map(([key]) => key)
+}
 
 /**
  * Scope-catalog scopes the workspace operation tools need: `runs:read` /
@@ -402,6 +429,10 @@ export interface CreateRequestHandlerOptions {
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
   decisionTasksAccess?: (token: string) => Promise<boolean>
+  /** Override the Apps toolset visibility check (primarily for tests). */
+  appsToolsetAccess?: (token: string) => Promise<boolean>
+  /** Override the rule-mining round tool visibility check (primarily for tests). */
+  miningAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
@@ -411,6 +442,8 @@ export interface CreateRequestHandlerOptions {
   operationsAccess?: (token: string) => Promise<OperationsFamily[]>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
+  /** Override the probe-gated tool group visibility check: the keys to list (primarily for tests). */
+  toolGroupsAccess?: (token: string) => Promise<readonly string[]>
   /** Override the credential check that answers 401 (primarily for tests). */
   tokenAccepted?: (token: string) => Promise<boolean>
 }
@@ -708,7 +741,10 @@ export function createRequestHandler(
       includePortfolioTools,
       includeProcessesTools,
       includeAgentTaskTools,
-      includeDecisionTaskTools,
+      externalAppsInUse,
+      includeAppsToolset,
+      includeMiningDriverTools,
+      toolGroups,
       operationsFamilies,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
@@ -724,8 +760,14 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.appsToolsetAccess ?? appsToolsetAccessCached)(token),
+      (options.miningAccess ?? miningAccessCached)(token),
+      (options.toolGroupsAccess ?? toolGroupsAccessCached)(token),
       (options.operationsAccess ?? operationsAccessCached)(token),
     ])
+    // An externally driven mining round is claimed, heartbeated and closed
+    // through the decision-task tools, so an autonomous app lists them too.
+    const includeDecisionTaskTools = externalAppsInUse || includeMiningDriverTools
     const mcpServer = createServer({
       tokenProvider: () => token,
       includeGrowthTools,
@@ -741,6 +783,9 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeAppsToolset,
+      includeMiningDriverTools,
+      toolGroups,
       operationsFamilies,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets

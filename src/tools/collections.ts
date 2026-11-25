@@ -13,7 +13,6 @@ import { READ, REFUSALS, atLeastOne, destructive, write, type RouteTool } from "
  */
 
 const collectionId = zUuid().describe("The collection, from talonic_collections_list.")
-const C = "/v1/collections/{collection_id}"
 
 const name = z.string().min(1).max(200).describe("Name, up to 200 characters.")
 const description = z.string().max(2000).optional().describe("What the collection holds.")
@@ -70,7 +69,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
     title: "Preview a collection's documents",
     description:
       "A sample of the documents the collection holds under its current rules and hand-added documents, limited to what the key's person can see. Admin only, as in the web app.",
-    route: `GET ${C}/preview`,
+    route: "GET /v1/collections/{collection_id}/preview",
     input: { collection_id: collectionId },
     annotations: READ,
   },
@@ -81,7 +80,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Rename or describe a collection, or change its kind or aliases. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `PATCH ${C}`,
+    route: "PATCH /v1/collections/{collection_id}",
     input: { collection_id: collectionId, name: name.optional(), description, kind, aliases },
     body: ["name", "description", "kind", "aliases"],
     validate: atLeastOne("name", "description", "kind", "aliases"),
@@ -94,7 +93,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Delete a collection with its rules, hand-added documents and assignments. The documents themselves stay. People assigned to it with mode `enforced` lose the view it gave them. Cannot be undone: call only when the user asked to delete this collection by name. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `DELETE ${C}`,
+    route: "DELETE /v1/collections/{collection_id}",
     input: { collection_id: collectionId },
     annotations: destructive(true),
   },
@@ -102,7 +101,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
     name: "talonic_collections_rules",
     title: "Rules of a collection",
     description: "The rules that fill a collection: each names a `rule_type` and a `rule_value`.",
-    route: `GET ${C}/rules`,
+    route: "GET /v1/collections/{collection_id}/rules",
     input: { collection_id: collectionId },
     annotations: READ,
   },
@@ -113,7 +112,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Add a rule: every document of a source (`source_connection`, value = the source id), a document type (`document_type`, value = the type id) or a case (`case`, value = the case id) joins the collection, including documents that arrive later. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${C}/rules`,
+    route: "POST /v1/collections/{collection_id}/rules",
     input: {
       collection_id: collectionId,
       rule_type: z
@@ -135,7 +134,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Remove one rule; the documents it brought in leave the collection unless another rule or a hand-add keeps them. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `DELETE ${C}/rules/{rule_id}`,
+    route: "DELETE /v1/collections/{collection_id}/rules/{rule_id}",
     input: {
       collection_id: collectionId,
       rule_id: zUuid().describe("The rule, from talonic_collections_rules."),
@@ -147,7 +146,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
     title: "Hand-added documents of a collection",
     description:
       "The documents added to a collection by hand (not those its rules bring in), limited to what the key's person can see. For everything the collection holds, use talonic_collections_preview.",
-    route: `GET ${C}/documents`,
+    route: "GET /v1/collections/{collection_id}/documents",
     input: { collection_id: collectionId },
     annotations: READ,
   },
@@ -158,7 +157,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Add documents to a collection by hand. Every id must be a document the key's person can see (404 otherwise, nothing added). Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${C}/documents`,
+    route: "POST /v1/collections/{collection_id}/documents",
     input: {
       collection_id: collectionId,
       document_ids: z.array(zUuid()).min(1).max(1000).describe("Documents to add."),
@@ -173,7 +172,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Take one hand-added document out of a collection. A rule of the collection may still include it. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `DELETE ${C}/documents/{document_id}`,
+    route: "DELETE /v1/collections/{collection_id}/documents/{document_id}",
     input: {
       collection_id: collectionId,
       document_id: zUuid().describe("The document, from talonic_collections_documents."),
@@ -185,7 +184,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
     title: "Who a collection is assigned to",
     description:
       "The people and groups a collection is assigned to, each with its mode (`enforced` or `default`).",
-    route: `GET ${C}/assignments`,
+    route: "GET /v1/collections/{collection_id}/assignments",
     input: { collection_id: collectionId },
     annotations: READ,
   },
@@ -196,7 +195,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Assign a collection to a person (`user`) or a `group`. Mode `enforced` limits what they see to the collection's documents; `default` only preselects it for them. `enforced` changes what someone can see: call only when the user asked. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${C}/assignments`,
+    route: "POST /v1/collections/{collection_id}/assignments",
     input: {
       collection_id: collectionId,
       principal_type: z.enum(["user", "group"]).describe("A person or a group."),
@@ -215,7 +214,7 @@ export const COLLECTION_TOOLS: readonly RouteTool[] = [
       "Remove one assignment. A person who was limited to the collection (mode `enforced`) sees their usual documents again. Admin only.",
       REFUSALS,
     ].join("\n"),
-    route: `DELETE ${C}/assignments/{assignment_id}`,
+    route: "DELETE /v1/collections/{collection_id}/assignments/{assignment_id}",
     input: {
       collection_id: collectionId,
       assignment_id: zUuid().describe("The assignment, from talonic_collections_assignments."),

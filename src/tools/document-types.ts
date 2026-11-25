@@ -12,8 +12,6 @@ import { READ, REFUSALS, atLeastOne, destructive, write, type RouteTool } from "
  * processing, as in the web app.
  */
 
-const PC = "/v1/document-types/pending-confirmations"
-
 const proposalItem = z.object({
   id: zUuid().describe("The proposal, from talonic_document_types_pending."),
   action: z
@@ -74,12 +72,19 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
       "Document types proposed while new documents were sorted, waiting for a decision, with suggestions: create as is, merge similar proposals together, or merge into a close existing type. With `count_only: true`, only how many wait.",
       "Decide with talonic_document_types_resolve_pending, _resolve_pending_batch, _merge_pending, _auto_resolve or _dismiss_pending.",
     ].join("\n"),
-    route: `GET ${PC}`,
-    alsoRoutes: [`GET ${PC}/count`],
+    route: "GET /v1/document-types/pending-confirmations",
+    alsoRoutes: ["GET /v1/document-types/pending-confirmations/count"],
     input: { count_only: z.boolean().optional().describe("true: answer only { count }.") },
     handler: (a, ctx) =>
       runTool(() =>
-        apiJson(ctx.getToken, ctx.baseUrl, "GET", a["count_only"] === true ? `${PC}/count` : PC),
+        apiJson(
+          ctx.getToken,
+          ctx.baseUrl,
+          "GET",
+          a["count_only"] === true
+            ? "/v1/document-types/pending-confirmations/count"
+            : "/v1/document-types/pending-confirmations",
+        ),
       ),
     annotations: READ,
   },
@@ -90,7 +95,7 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
       "Settle one proposal: `create` makes the proposed type, `merge` folds it into `merge_into_type_id`. Its documents move with it.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${PC}/{proposal_id}/resolve`,
+    route: "POST /v1/document-types/pending-confirmations/{proposal_id}/resolve",
     input: {
       proposal_id: zUuid().describe("The proposal, from talonic_document_types_pending."),
       action: z
@@ -109,7 +114,7 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
       "Settle up to 200 proposals in one call, each with `create` or `merge`. Answers a result per item.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${PC}/resolve-batch`,
+    route: "POST /v1/document-types/pending-confirmations/resolve-batch",
     input: {
       items: z.array(proposalItem).min(1).max(200).describe("One decision per proposal, 1 to 200."),
     },
@@ -127,7 +132,7 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
       "Merge several proposals into one new type named `chosen_name`; their documents move to it.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${PC}/merge-pending`,
+    route: "POST /v1/document-types/pending-confirmations/merge-pending",
     input: {
       pending_ids: z.array(zUuid()).min(1).describe("The proposals to merge."),
       chosen_name: z.string().min(1).max(200).describe("The new type's name."),
@@ -142,7 +147,7 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
       "Settle every waiting proposal automatically: each is matched to Talonic's standard type list and merged where a matching type exists; the rest are created. Call only when the user wants all of them settled without reviewing each.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${PC}/auto-resolve`,
+    route: "POST /v1/document-types/pending-confirmations/auto-resolve",
     input: {},
     annotations: write(false),
   },
@@ -150,7 +155,7 @@ export const DOCUMENT_TYPE_TOOLS: readonly RouteTool[] = [
     name: "talonic_document_types_dismiss_pending",
     title: "Dismiss a proposed document type",
     description: ["Dismiss one proposal without creating a type.", REFUSALS].join("\n"),
-    route: `DELETE ${PC}/{proposal_id}`,
+    route: "DELETE /v1/document-types/pending-confirmations/{proposal_id}",
     input: { proposal_id: zUuid().describe("The proposal, from talonic_document_types_pending.") },
     annotations: destructive(true),
   },

@@ -18,7 +18,6 @@ import { READ, REFUSALS, destructive, write, type RouteTool } from "./_route-too
 const pipelineId = zUuid().describe(
   "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run.",
 )
-const P = "/v1/pipelines/{pipeline_id}"
 
 export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
   {
@@ -30,7 +29,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { pipeline_id, run_id, added, skipped, documents[] { id, document_id, status } }.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/documents`,
+    route: "POST /v1/pipelines/{pipeline_id}/documents",
     input: {
       pipeline_id: pipelineId,
       document_ids: z
@@ -50,7 +49,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "USE WHEN: finding which documents failed, are flagged, or belong to one submission group; getting the run document id that talonic_pipeline_field_states needs.",
       "RETURNS: { data[] (one per run document: id = run document id, document_id, filename, status, …), pagination { total, page, limit } }.",
     ].join("\n"),
-    route: `GET ${P}/documents`,
+    route: "GET /v1/pipelines/{pipeline_id}/documents",
     input: {
       pipeline_id: pipelineId,
       page: z.number().int().min(1).optional().describe("Page number, from 1."),
@@ -116,7 +115,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "The submission groups (`run_id`) that fed documents into a Spec run, newest first, paged, with how many documents each holds.",
       "RETURNS: { data[], untracked_count (documents added outside any group), pagination { total, page, limit } }.",
     ].join("\n"),
-    route: `GET ${P}/runs`,
+    route: "GET /v1/pipelines/{pipeline_id}/runs",
     input: {
       pipeline_id: pipelineId,
       page: z.number().int().min(1).optional().describe("Page number, from 1."),
@@ -134,7 +133,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { pipeline_id, enqueued, held_runs[] }. Poll talonic_get_run for progress.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/start`,
+    route: "POST /v1/pipelines/{pipeline_id}/start",
     input: { pipeline_id: pipelineId },
     annotations: write(false),
   },
@@ -146,7 +145,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { pipeline_id, retried, enqueued }.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/retry-errored`,
+    route: "POST /v1/pipelines/{pipeline_id}/retry-errored",
     input: { pipeline_id: pipelineId },
     annotations: write(false),
   },
@@ -158,7 +157,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: the rebuild summary and the new routing counts.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/retriage`,
+    route: "POST /v1/pipelines/{pipeline_id}/retriage",
     input: {
       pipeline_id: pipelineId,
       review_config: z
@@ -179,7 +178,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "`run_document_id` is the `id` of a row from talonic_pipeline_documents (not the workspace document id).",
       "RETURNS: { data[] }.",
     ].join("\n"),
-    route: `GET ${P}/documents/{run_document_id}/field-states`,
+    route: "GET /v1/pipelines/{pipeline_id}/documents/{run_document_id}/field-states",
     input: {
       pipeline_id: pipelineId,
       run_document_id: zUuid().describe(
@@ -195,7 +194,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "Every value each cell of the run held, who or what set it, and when. Narrow with `document_ids`.",
       "USE WHEN: explaining why a value changed, or auditing manual corrections.",
     ].join("\n"),
-    route: `GET ${P}/cell-history`,
+    route: "GET /v1/pipelines/{pipeline_id}/cell-history",
     input: {
       pipeline_id: pipelineId,
       document_ids: z
@@ -214,7 +213,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "For a Spec that assembles several documents into one record (e.g. an order with its invoices): every group with its row, its base document and the documents bucketed into it. Documents the key's person cannot see are left out of a group's list.",
       "RETURNS: { data[] }.",
     ].join("\n"),
-    route: `GET ${P}/assembly/groups`,
+    route: "GET /v1/pipelines/{pipeline_id}/assembly/groups",
     input: { pipeline_id: pipelineId },
     annotations: READ,
   },
@@ -225,7 +224,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "Groups of an assembling Spec run that could not settle on one base document, each with the candidate documents to choose from. Choose with talonic_pipeline_resolve_anchor.",
       "RETURNS: { data[] { group_key, candidates[] { documentId, … } } }.",
     ].join("\n"),
-    route: `GET ${P}/assembly/needs-anchor`,
+    route: "GET /v1/pipelines/{pipeline_id}/assembly/needs-anchor",
     input: { pipeline_id: pipelineId },
     annotations: READ,
   },
@@ -237,7 +236,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { group_key, status, product_record_id }. 400 when the Spec does not assemble documents.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/assembly/resolve-anchor`,
+    route: "POST /v1/pipelines/{pipeline_id}/assembly/resolve-anchor",
     input: {
       pipeline_id: pipelineId,
       group_key: z
@@ -261,7 +260,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "Assemble every group of the run again from its current documents. Existing groups and their rows are rebuilt and can change. Call only when the user asks.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/assembly/rerun`,
+    route: "POST /v1/pipelines/{pipeline_id}/assembly/rerun",
     input: { pipeline_id: pipelineId },
     annotations: destructive(false),
   },
@@ -272,7 +271,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "The business-rule holds that stop this Spec's runs, each with the runs it holds and the one-run overrides already given.",
       "RETURNS: { holds[] }. Let one run proceed with talonic_pipeline_override_hold.",
     ].join("\n"),
-    route: `GET ${P}/rule-holds`,
+    route: "GET /v1/pipelines/{pipeline_id}/rule-holds",
     input: { pipeline_id: pipelineId },
     annotations: READ,
   },
@@ -285,7 +284,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { admitted, remaining_hold_ids[], enqueued }.",
       REFUSALS,
     ].join("\n"),
-    route: `POST ${P}/runs/{run_id}/business-rule-holds/{hold_id}/override`,
+    route: "POST /v1/pipelines/{pipeline_id}/runs/{run_id}/business-rule-holds/{hold_id}/override",
     input: {
       pipeline_id: pipelineId,
       run_id: zUuid().describe("The held run."),
@@ -306,7 +305,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "The reconciliation cases this Spec's business rules raised (a mismatch between documents to look into), with their state.",
       "RETURNS: { cases[] }. The full audit export is talonic_pipeline_export_reconciliation_cases.",
     ].join("\n"),
-    route: `GET ${P}/reconciliation-cases`,
+    route: "GET /v1/pipelines/{pipeline_id}/reconciliation-cases",
     input: { pipeline_id: pipelineId },
     annotations: READ,
   },
@@ -318,7 +317,7 @@ export const PIPELINE_OPERATION_TOOLS: readonly RouteTool[] = [
       "RETURNS: { cases[] }.",
       REFUSALS,
     ].join("\n"),
-    route: `GET ${P}/reconciliation-cases/export`,
+    route: "GET /v1/pipelines/{pipeline_id}/reconciliation-cases/export",
     input: { pipeline_id: pipelineId },
     annotations: READ,
   },
