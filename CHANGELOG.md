@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
 
+## [0.1.104] - 2026-11-25
+
 ### Fixed
 
 - **Contract parties tools work again.** 0.1.103 sent seven route strings the platform no longer serves; `GET /v1/parties/issues` and `GET /v1/parties/contracts` fell into `GET /v1/parties/:id` and came back as "party not found". The tools now use the current routes, where a contract is a data-product row (`product_id` + `row_id`):
