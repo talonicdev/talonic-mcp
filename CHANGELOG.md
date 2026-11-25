@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> The publish workflow assigns the version on release; after the push that publishes it, promote this block to `## [<version>] - <date>` (the changelog lock accepts the current package version living here until then).
+> Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
+
+### Fixed
+
+- **Contract parties tools work again.** 0.1.103 sent seven route strings the platform no longer serves; `GET /v1/parties/issues` and `GET /v1/parties/contracts` fell into `GET /v1/parties/:id` and came back as "party not found". The tools now use the current routes, where a contract is a data-product row (`product_id` + `row_id`):
+  - `talonic_parties_issues` lists the parties needing attention (`GET /v1/parties?attention=true`). The `code` filter is gone (the API has none); each party's issues come with `talonic_parties_party`.
+  - `talonic_parties_contract` takes `product_id` + `row_id` (was `contract_id`) and reads `GET /v1/parties/rows/:productId/:rowId`.
+  - `talonic_parties_contracts` now lists one party's contracts (`party_id`, paged; `GET /v1/parties/:id/contracts`). The workspace-wide contract list has no API equivalent: use `talonic_parties_issues` / `talonic_parties_search` and open contracts from a party.
+  - `talonic_parties_set_role` adds a role with `product_id` + `row_id` (was `contract_id`; `POST /v1/parties/rows/:productId/:rowId/roles`). The change branch (`role_id`, `PATCH /v1/parties/roles/:roleId`) is unchanged. Role `our_party` is accepted.
+  - `talonic_parties_confirm` confirms the role ids it is given (`role_ids[]`, one `PATCH` each, per-id results). The bulk confirm by `min_confidence` has no API equivalent and is gone.
+  - `talonic_parties_read` reads one contract's documents (`product_id` + `row_id`; `POST …/read`) and waits on that row until the read is `done` or `failed`; `status: true` without a contract reports the workspace's read queue. The bulk queue (`contract_ids`, `only_unread`, `force`, `dry_run`) has no API equivalent; refilling every contract from the data is the new `talonic_parties_sync`.
+
+### Added
+
+- `talonic_parties_documents`, `talonic_parties_history` (a party's documents and history, paged), `talonic_parties_names` (aliases and former names: add, confirm / reject, remove), `talonic_parties_directory_link` (link to or unlink from the CRM directory), `talonic_parties_address_choice` (CRM or contract address for letters), `talonic_parties_sync` (refill from the data products, optional wait). `talonic_parties_party` takes `overview` and `product_id`; `talonic_parties_search` takes `scope`, `product_id` and `offset`. Eighteen parties tools in all, still listed only where the Parties app is on.
+- `talonic_find_data` takes `account` (one portfolio company, by name or alias) and `concepts[]`, matching the platform's `find_data`; a test holds the tool's parameters to the platform's schema.
+- Rendered docs pages for the 21 `talonic_process_*` tools (`src/content/sections/processes.ts`, nav under Tool Reference); before, they existed only in the unrendered `docs/sections.json`.
+
+### Changed
+
+- **CI refuses a tool whose route is not in the public API.** `npm run check:routes` checks every `/v1/...` route string in `src/tools/**` against the live spec (`api.talonic.com/v1/docs/openapi.json`, pinned fallback), verb included, and refuses a literal in a uuid path slot; `tests/tools/route-branches.test.ts` calls every tool and every argument-picked branch. Known gaps are listed with a reason in `scripts/route-gaps.json`.
+- `tests/content/tool-sections.test.ts` fails when a tool is documented only in `docs/sections.json`.
+- Tool counts in `AGENTS.md` and `STATUS.md` are generated from `tools/list` (`scripts/tool-inventory.mjs`) and test-locked; public, optional (app-gated) and internal groups are counted apart.
+- The changelog lock requires a `## [x.y.z]` heading for the package version; the publish workflow promotes `[Unreleased]` when it bumps.
+- Tool and docs text for `talonic_find_data`, the parties tools and `talonic_process_create` no longer describes internal mechanics.
+
+## [0.1.103] - 2026-11-24
 
 ### Added
 

@@ -316,7 +316,7 @@ describe("HTTP server routing", () => {
       : (text.split("\n").find((l) => l.startsWith("data: ")) ?? "").slice(6)
     const tools = (JSON.parse(json) as any).result.tools as Array<{ name: string }>
     const names = tools.map((t) => t.name).filter((n) => n.startsWith("talonic_parties_"))
-    expect(names).toHaveLength(12)
+    expect(names).toHaveLength(18)
     expect(names).toContain("talonic_parties_read")
   })
 
