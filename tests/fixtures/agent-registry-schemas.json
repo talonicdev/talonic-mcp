@@ -1,0 +1,17 @@
+{
+  "about": "Input schemas of the platform agent registry tools that have a named talonic_* MCP tool, copied from platform packages/api/src/agent/loop/agent-tools.ts (origin/staging 21d6d4447, find_data at lines 754-790). tests/tools/agent-tools.test.ts fails when a named tool's parameters drift from these. When the platform changes a registry schema, update this file and the named tool together.",
+  "source": "platform packages/api/src/agent/loop/agent-tools.ts @ 21d6d4447",
+  "tools": {
+    "find_data": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string" },
+        "concepts": { "type": "array", "items": { "type": "string" } },
+        "top_k": { "type": "number" },
+        "document_scope": { "type": "array", "items": { "type": "string" } },
+        "account": { "type": "string" }
+      },
+      "required": ["query"]
+    }
+  }
+}

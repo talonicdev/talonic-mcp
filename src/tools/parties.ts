@@ -5,19 +5,23 @@ import { validationError, type ToolResult, zUuid } from "./_shared.js"
 
 /**
  * Contract Party Management tools: who a contract's parties are and to whom
- * a letter about it goes. The platform reads the parties from the contract
- * documents (and the reference table) as suggestions; a person confirms,
+ * a letter about it goes. A contract is a row of one of the workspace's data
+ * products (`product_id` + `row_id`); the platform fills each row's parties
+ * from the data it already holds as suggestions, and a person confirms,
  * rejects or fixes them. From the roles in force on a day the platform
  * computes the effective partner and the addressee (what Document
  * Generation prints).
  *
  * All tools hit `/v1/parties/*` with the caller's bearer; the platform owns
- * every rule (Sources IAM on contracts and parties, scopes per route).
+ * every rule (Sources IAM on rows and parties, scopes per route). The routes
+ * are the ones `parties-api.controller.ts` serves; `scripts/check-routes.mjs`
+ * fails CI when one is missing from the public spec.
  *
- * The loop an agent runs: talonic_parties_status → _read (dry_run first,
- * then wait) → _issues → _contract per flagged contract → _set_role /
+ * The loop an agent runs: talonic_parties_status → talonic_parties_issues
+ * (parties needing attention) → talonic_parties_party per flagged party →
+ * talonic_parties_contract per contract → talonic_parties_set_role /
  * _confirm (only when the user asked) → _merge duplicates (only when the
- * user asked) → _issues again.
+ * user asked) → talonic_parties_issues again.
  */
 
 const readOnly = {
@@ -34,10 +38,12 @@ const write = (idempotent: boolean, destructive = false) =>
     openWorldHint: false,
   }) as const
 
-/** How often a read wait polls the queue. @internal */
+/** How often a wait polls. @internal */
 export const PARTIES_POLL_INTERVAL_MS = 5_000
-/** The longest `wait_seconds` a read accepts. @internal */
+/** The longest `wait_seconds` a read or sync accepts. @internal */
 export const READ_MAX_WAIT_S = 600
+/** The most roles one confirm call sends. @internal */
+export const CONFIRM_MAX_ROLES = 200
 
 /** Injectable clock and delay for the wait (tests). */
 export interface PartiesDeps {
@@ -47,6 +53,7 @@ export interface PartiesDeps {
 
 const ROLES = [
   "partner",
+  "our_party",
   "manager",
   "tenant",
   "previous_owner",
@@ -57,37 +64,44 @@ const ROLES = [
 const KINDS = ["person", "company", "owners_association", "unknown"] as const
 const SALUTATIONS = ["herr", "frau", "eheleute", "firma", "weg"] as const
 const ROLE_STATES = ["suggested", "confirmed", "rejected"] as const
-const ISSUE_CODES = [
-  "no_partner",
-  "several_partners",
-  "reference_disagrees",
-  "kind_unknown",
-  "address_missing",
-  "manager_without_party",
-  "tenant_without_period",
-  "owner_change_open",
-  "cost_unit_disagrees",
-  "cost_unit_missing",
-  "not_read",
-  "read_failed",
-  "possible_duplicate",
-] as const
 
 const ROLES_EXPLAINED =
-  "Roles: partner (the contract partner), manager (Verwalter: acts for a company or an owners' association and is written to on its behalf; represents_id names the role it acts for), tenant (with enters_contract: true the tenant is the temporary partner for the lease period valid_from..valid_to), previous_owner / new_owner (an owner change: the new owner holds from the transfer date valid_from), contact, invoice_recipient."
+  "Roles: partner (the contract partner), our_party (our own company on the contract), manager (Verwalter: acts for a company or an owners' association and is written to on its behalf; represents_id names the role it acts for), tenant (with enters_contract: true the tenant is the temporary partner for the lease period valid_from..valid_to), previous_owner / new_owner (an owner change: the new owner holds from the transfer date valid_from), contact, invoice_recipient."
 const COMPUTED_RULE =
   "The effective partner (the tenant entering the contract during its lease, else the partner) and the addressee (the effective partner's Verwalter when it has one, else the effective partner) are computed by the platform from the roles in force on the day; never set them yourself, fix the roles."
 const DECISION_RULE =
-  "A read only makes suggestions and never overwrites a person's decision (a confirmed role stays, a rejected one never comes back). Confirming, rejecting and merging are a person's decisions: only do them when the user asked."
+  "Suggestions never overwrite a person's decision (a confirmed role stays, a rejected one never comes back). Confirming, rejecting and merging are a person's decisions: only do them when the user asked."
+const CONTRACT_IS_A_ROW =
+  "A contract is a row of a data product: `product_id` (contracts[].row.data_product_id from talonic_parties_contracts, or products[].id from talonic_parties_status) and `row_id` (contracts[].row.row_id)."
 
 const dateArg = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "a date YYYY-MM-DD")
   .describe("ISO date YYYY-MM-DD.")
-const contractIdArg = zUuid().describe(
-  "Contract id (from talonic_parties_contracts or talonic_parties_issues).",
+const productIdArg = zUuid().describe(
+  "Data product of the contract (contracts[].row.data_product_id from talonic_parties_contracts).",
 )
-const partyIdArg = zUuid().describe("Party id (from talonic_parties_search, _contract or _issues).")
+const rowIdArg = z
+  .string()
+  .min(1)
+  .max(200)
+  .describe("The contract's row id in that product (contracts[].row.row_id).")
+const partyIdArg = zUuid().describe("Party id (from talonic_parties_search, _issues or _contract).")
+const limitArg = (max: number, dflt: number) =>
+  z
+    .number()
+    .int()
+    .min(1)
+    .max(max)
+    .optional()
+    .describe(`At most this many (1-${max}, default ${dflt}).`)
+const offsetArg = z
+  .number()
+  .int()
+  .min(0)
+  .max(1_000_000)
+  .optional()
+  .describe("Skip this many (paging; default 0).")
 
 /** Clamp a requested wait to [0, max] whole seconds. */
 function waitSeconds(requested: number | undefined, max: number): number {
@@ -100,15 +114,49 @@ function defined(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined))
 }
 
+/** `/v1/parties/rows/:productId/:rowId` (the row id is free text, so it is encoded). */
+const rowPath = (productId: string, rowId: string) =>
+  `/v1/parties/rows/${productId}/${encodeURIComponent(rowId)}`
+
+/** Poll `probe` every 5 s until `done` says so or the wait runs out. */
+async function waitUntil<T>(
+  probe: () => Promise<T>,
+  done: (v: T) => boolean,
+  waitS: number,
+  deps: PartiesDeps,
+): Promise<{ last: T; waited_ms: number; still_running: boolean; poll_error?: string }> {
+  const sleep = deps.sleep ?? defaultSleep
+  const now = deps.now ?? Date.now
+  const start = now()
+  const deadline = start + waitS * 1000
+  let last = await probe()
+  let pollError: string | undefined
+  while (!done(last) && now() < deadline) {
+    await sleep(Math.min(PARTIES_POLL_INTERVAL_MS, deadline - now()))
+    try {
+      last = await probe()
+    } catch (err) {
+      pollError = err instanceof Error ? err.message : String(err)
+      break
+    }
+  }
+  return {
+    last,
+    waited_ms: now() - start,
+    still_running: pollError !== undefined || !done(last),
+    ...(pollError ? { poll_error: pollError } : {}),
+  }
+}
+
 // ── Overview ───────────────────────────────────────────────────────────────
 
 const STATUS_DESCRIPTION = [
-  "Contract Party Management at a glance: how many contracts, how many have confirmed parties, only suggestions, or no partner; active parties; open suggestions; and the parties-read queue.",
-  "USE WHEN: starting any parties work, or to report where things stand. The loop: talonic_parties_status → talonic_parties_read (dry_run first, then with wait_seconds) → talonic_parties_issues → talonic_parties_contract per flagged contract → talonic_parties_set_role / talonic_parties_confirm → talonic_parties_merge duplicates → talonic_parties_issues again.",
-  "NOT FOR: what to fix (talonic_parties_issues); one contract (talonic_parties_contract).",
+  "Contract Party Management at a glance: whether it is set up, the data products whose rows are the contracts (with row counts), how many rows are filled, the document-read queue, the party count, how many parties need attention, when the last sync finished and the CRM directory's link counts.",
+  "USE WHEN: starting any parties work, or to report where things stand. The loop: talonic_parties_status → talonic_parties_issues → talonic_parties_party per flagged party → talonic_parties_contract per contract → talonic_parties_set_role / talonic_parties_confirm → talonic_parties_merge duplicates → talonic_parties_issues again.",
+  "NOT FOR: which parties need fixing (talonic_parties_issues); one contract (talonic_parties_contract).",
   "",
   "ARGS: none.",
-  "RETURNS: { contracts, contracts_confirmed, contracts_suggested, contracts_without_partner, parties, suggestions, reads { counts { pending, running, done, failed }, unread, failed } }.",
+  "RETURNS: { configured, first_fill, syncing, finding_fields, setup_errors[] { product_id, name, error }, products[] { id, name, rows }, rows, rows_read, reads { pending, running, done, failed }, parties, needs_attention, synced_at, directory { active, label, linked, pick, none } }.",
 ].join("\n")
 
 /** @internal */
@@ -120,75 +168,71 @@ export function handleStatus(
 }
 
 const ISSUES_DESCRIPTION = [
-  "The parties worklist: per contract what looks wrong today (no partner, several partners, the reference table names another partner, person-or-company unknown, no postal address, a Verwalter for a party no longer on the contract, a tenant entering the contract without a lease period, an owner change without a transfer date, cost unit disagreeing or missing, not read, read failed), plus parties that look like duplicates (same name, and postcode when both have one).",
-  "USE WHEN: after talonic_parties_read, deciding what to fix; open each flagged contract with talonic_parties_contract. Duplicates are merge candidates: never merged on their own (talonic_parties_merge, only when the user asked).",
-  "NOT FOR: the headline counts (talonic_parties_status); all contracts (talonic_parties_contracts).",
+  "The parties worklist: every party that needs a person, because a problem on one of its contracts names it (no partner, several partners, the reference table names another partner, person-or-company unknown, no postal address, a Verwalter for a party no longer on the contract, a tenant entering the contract without a lease period, an owner change without a transfer date, an owners' association without a Verwalter, cost unit disagreeing or missing, not read, read failed, not in the CRM directory, several CRM matches, CRM address far from the contract's) or because it has a duplicate candidate.",
+  "USE WHEN: deciding what to fix; open each party with talonic_parties_party (its contracts with their issues[] codes and details, and its duplicates[]). Duplicates are merge candidates: never merged on their own (talonic_parties_merge, only when the user asked).",
+  "NOT FOR: the headline counts (talonic_parties_status); the whole register (talonic_parties_search).",
   "",
-  `ARGS: \`code\` (only this issue; one of ${ISSUE_CODES.join(", ")}).`,
-  "RETURNS: { contracts[] { contract_id, contract_key, title, issues[] { code, detail, role_ids[], party_ids[] } }, duplicates[] { name_key, party_ids[], names[] } }.",
+  "ARGS: `query` (name, street, postcode, town or email contains), `kind` person|company|owners_association|unknown, `product_id` (only contracts of that data product), `scope` all (default: every party) | partners (contract partners only), `limit` (1-5000, default 200), `offset`.",
+  "RETURNS: { total, needs_attention, offset, limit, data[] { id, kind, display_name, street, postcode, town, email, phone, status, contracts, roles[], issues (problems plus duplicate candidates) } }.",
 ].join("\n")
 
 export const issuesInputSchema = {
-  code: z.enum(ISSUE_CODES).optional().describe("Only this issue code."),
+  query: z.string().max(300).optional().describe("Name, address or email contains."),
+  kind: z.enum(KINDS).optional().describe("Only parties of this kind."),
+  product_id: zUuid().optional().describe("Only contracts of this data product."),
+  scope: z
+    .enum(["all", "partners"])
+    .optional()
+    .describe("all (default): every party; partners: contract partners only."),
+  limit: limitArg(5000, 200),
+  offset: offsetArg,
 }
 
 /** @internal */
 export function handleIssues(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: { code?: string },
+  args: {
+    query?: string
+    kind?: string
+    product_id?: string
+    scope?: "all" | "partners"
+    limit?: number
+    offset?: number
+  },
 ): Promise<ToolResult> {
   return runTool(() =>
-    apiJson(getToken, baseUrl, "GET", "/v1/parties/issues", { params: { code: args.code } }),
+    apiJson(getToken, baseUrl, "GET", "/v1/parties", {
+      params: {
+        attention: "true",
+        scope: args.scope === "partners" ? undefined : "all",
+        q: args.query,
+        kind: args.kind,
+        product_id: args.product_id,
+        limit: args.limit,
+        offset: args.offset,
+      },
+    }),
   )
 }
 
 // ── Contracts ──────────────────────────────────────────────────────────────
 
-const CONTRACTS_DESCRIPTION = [
-  "List the workspace's contracts with their parties today: effective partner, addressee and Verwalter by name, the parties' state (confirmed: every role counted is confirmed; suggested: any is a suggestion; none: no partner), open suggestions and the read state.",
-  "USE WHEN: getting an overview, finding a contract by key, title or party name, or listing contracts still on suggestions (state: suggested) or without a partner (state: none).",
-  "NOT FOR: one contract's roles and evidence (talonic_parties_contract); what needs fixing (talonic_parties_issues).",
-  "",
-  "ARGS: `query` (contract key, title, counterparty, partner or Verwalter contains), `state` confirmed|suggested|none, `limit` (1-5000, default 500).",
-  "RETURNS: { total, data[] { id, contract_key, title, counterparty, status, partner, addressee, manager, state, suggestions, read } }.",
-].join("\n")
-
-export const contractsInputSchema = {
-  query: z.string().optional().describe("Key, title, counterparty, partner or Verwalter contains."),
-  state: z
-    .enum(["confirmed", "suggested", "none"])
-    .optional()
-    .describe("Only contracts whose parties are in this state."),
-  limit: z.number().int().min(1).max(5000).optional().describe("At most this many (default 500)."),
-}
-
-/** @internal */
-export function handleContracts(
-  getToken: () => string,
-  baseUrl: string | undefined,
-  args: { query?: string; state?: string; limit?: number },
-): Promise<ToolResult> {
-  return runTool(() =>
-    apiJson(getToken, baseUrl, "GET", "/v1/parties/contracts", {
-      params: { q: args.query, state: args.state, limit: args.limit },
-    }),
-  )
-}
-
 const CONTRACT_DESCRIPTION = [
-  "One contract's parties on a day: the computed view (partner, manager, tenant, previous and new owner, effective partner, addressee with its postal address lines, contacts, state), every role row with its party, state (suggested|confirmed|rejected), confidence and evidence (document quotes, reference table rows, a person's word), the issues, the cost unit (documents vs. contract register) and the read state.",
-  "USE WHEN: checking or fixing a flagged contract; you need role ids (roles[].id) for talonic_parties_set_role, or to answer who the partner is and where a letter goes.",
+  "One contract's parties on a day: every role row with its party, state (suggested|confirmed|rejected), confidence and evidence (data fields, document quotes, reference table rows, a person's word); the computed view (partner, manager, tenant, previous and new owner, effective partner, addressee with its postal address lines, contacts, state); the issues; the document read's state; the cost unit the documents name.",
+  "USE WHEN: checking or fixing a flagged contract; you need role ids (roles[].id) for talonic_parties_set_role or talonic_parties_confirm, or to answer who the partner is and where a letter goes.",
+  CONTRACT_IS_A_ROW,
   ROLES_EXPLAINED,
   COMPUTED_RULE,
-  "NOT FOR: the list of contracts (talonic_parties_contracts); one party across contracts (talonic_parties_party).",
+  "NOT FOR: one party's contracts (talonic_parties_contracts); the worklist (talonic_parties_issues).",
   "",
-  "ARGS: `contract_id`, `on` (YYYY-MM-DD; default today: the roles in force on that day).",
-  "RETURNS: { contract { id, contract_key, title, counterparty, status }, on, view { partner, manager, tenant, previous_owner, new_owner, effective_partner, addressee { ...party, role_id, role, state, valid_from, valid_to, address_lines[] }, contacts[], state }, roles[] { id, party_id, role, represents_id, valid_from, valid_to, enters_contract, state, confidence, evidence[], origin, decided_by, decided_at, note, party }, issues[], cost_unit { documents, quote, register[] }, reference_names[], read { status, read_at, error, notes, read_with } | null }.",
+  "ARGS: `product_id`, `row_id`, `on` (YYYY-MM-DD; default today: the roles in force on that day).",
+  "RETURNS: { row { data_product_id, product_name, row_id, label, document_ids[] }, on, roles[] { id, party_id, role, represents_id, valid_from, valid_to, enters_contract, state, confidence, evidence[], origin, decided_by, decided_at, note, party }, view { partner, manager, tenant, previous_owner, new_owner, effective_partner, addressee { ...party, address_lines[] }, contacts[], state }, issues[] { code, detail, role_ids[], party_ids[] }, read { status, read_at, error, notes, read_with }, cost_unit { documents, quote } }.",
 ].join("\n")
 
 export const contractInputSchema = {
-  contract_id: contractIdArg,
+  product_id: productIdArg,
+  row_id: rowIdArg,
   on: dateArg.optional().describe("The day to read the parties for (YYYY-MM-DD; default today)."),
 }
 
@@ -196,11 +240,73 @@ export const contractInputSchema = {
 export function handleContract(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: { contract_id: string; on?: string },
+  args: { product_id: string; row_id: string; on?: string },
 ): Promise<ToolResult> {
   return runTool(() =>
-    apiJson(getToken, baseUrl, "GET", `/v1/parties/contracts/${args.contract_id}`, {
+    apiJson(getToken, baseUrl, "GET", rowPath(args.product_id, args.row_id), {
       params: { on: args.on },
+    }),
+  )
+}
+
+// ── One party's lists: contracts, documents, history ───────────────────────
+
+type Section = "contracts" | "documents" | "history"
+
+/** One literal per section, so the route check sees each path. */
+const SECTION_PATHS: Record<Section, (partyId: string) => string> = {
+  contracts: (id) => `/v1/parties/${id}/contracts`,
+  documents: (id) => `/v1/parties/${id}/documents`,
+  history: (id) => `/v1/parties/${id}/history`,
+}
+
+const SECTION_ARGS =
+  "ARGS: `party_id`, `product_id` (only contracts of that data product), `limit` (1-500, default 50), `offset`."
+
+const CONTRACTS_DESCRIPTION = [
+  "One party's contracts, a page at a time: per contract the row (product_id, row_id, label, documents, read state), this party's roles on it with their evidence, the other parties' roles, the computed view and the contract's issues.",
+  "USE WHEN: answering which contracts a party is on and in what role, or finding the product_id and row_id to open one contract with talonic_parties_contract or to add a role with talonic_parties_set_role.",
+  "NOT FOR: one contract's full parties (talonic_parties_contract); the party's details (talonic_parties_party).",
+  "",
+  SECTION_ARGS,
+  "RETURNS: { total, offset, limit, data[] { row { data_product_id, product_name, row_id, label, document_ids[], read }, roles[], others[] { ...role, party }, view, issues[] } }.",
+].join("\n")
+
+const DOCUMENTS_DESCRIPTION = [
+  "The documents a party appears in, a page at a time: each document of its contracts with its filename, the contract's label and the quotes that name the party.",
+  "USE WHEN: showing where a party comes from, or checking the evidence before confirming its roles.",
+  "NOT FOR: the document itself (talonic_get_document); the party's contracts (talonic_parties_contracts).",
+  "",
+  SECTION_ARGS,
+  "RETURNS: { total, offset, limit, data[] { document_id, filename, row_label, quotes[] } }.",
+].join("\n")
+
+const HISTORY_DESCRIPTION = [
+  "A party's history, newest first, a page at a time: its names (aliases, former names), role dates on its contracts, its CRM directory link and the decisions people took.",
+  "USE WHEN: the user asks what changed on a party, who decided something, or since when it holds a role.",
+  "NOT FOR: its current details (talonic_parties_party).",
+  "",
+  SECTION_ARGS,
+  "RETURNS: { total, offset, limit, data[] } (each entry a dated event with what changed and who did it).",
+].join("\n")
+
+export const sectionInputSchema = {
+  party_id: partyIdArg,
+  product_id: zUuid().optional().describe("Only contracts of this data product."),
+  limit: limitArg(500, 50),
+  offset: offsetArg,
+}
+
+/** @internal */
+export function handlePartySection(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  section: Section,
+  args: { party_id: string; product_id?: string; limit?: number; offset?: number },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "GET", SECTION_PATHS[section](args.party_id), {
+      params: { product_id: args.product_id, limit: args.limit, offset: args.offset },
     }),
   )
 }
@@ -208,29 +314,49 @@ export function handleContract(
 // ── Parties ────────────────────────────────────────────────────────────────
 
 const SEARCH_DESCRIPTION = [
-  "Search the party register (people, companies, owners' associations): name, street, postcode, town, email or an external reference contains the query; each with how many contracts it holds a role on.",
+  "Search the party register (people, companies, owners' associations): name (aliases included), street, postcode, town or email contains the query; each with how many contracts it is on, its roles and how many problems it has. By default the contract partners; `scope: all` lists every party (Verwalter, tenants, contacts too).",
   "USE WHEN: finding a party to add to a contract (its id for talonic_parties_set_role), checking whether a party already exists before creating one, or finding duplicates by name.",
-  "NOT FOR: one party with its roles (talonic_parties_party); a contract's parties (talonic_parties_contract).",
+  "NOT FOR: the parties needing attention (talonic_parties_issues); one party in full (talonic_parties_party).",
   "",
-  "ARGS: `query`, `kind` person|company|owners_association|unknown, `limit` (1-1000, default 200).",
-  "RETURNS: { total, data[] { id, kind, display_name, salutation, title, first_name, last_name, company_name, legal_form, street, postcode, town, country, email, phone, preferred_channel, external_refs, status, contracts } }.",
+  "ARGS: `query`, `kind` person|company|owners_association|unknown, `product_id`, `scope` partners (default) | all, `limit` (1-5000, default 200), `offset`.",
+  "RETURNS: { total, needs_attention, offset, limit, data[] { id, kind, display_name, salutation, title, first_name, last_name, company_name, legal_form, street, postcode, town, country, email, phone, preferred_channel, external_refs, status, contracts, roles[], issues } }.",
 ].join("\n")
 
 export const searchInputSchema = {
-  query: z.string().optional().describe("Name, address, email or external reference contains."),
+  query: z.string().max(300).optional().describe("Name, address or email contains."),
   kind: z.enum(KINDS).optional().describe("Only parties of this kind."),
-  limit: z.number().int().min(1).max(1000).optional().describe("At most this many (default 200)."),
+  product_id: zUuid().optional().describe("Only contracts of this data product."),
+  scope: z
+    .enum(["partners", "all"])
+    .optional()
+    .describe("partners (default): contract partners; all: every party."),
+  limit: limitArg(5000, 200),
+  offset: offsetArg,
 }
 
 /** @internal */
 export function handleSearch(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: { query?: string; kind?: string; limit?: number },
+  args: {
+    query?: string
+    kind?: string
+    product_id?: string
+    scope?: string
+    limit?: number
+    offset?: number
+  },
 ): Promise<ToolResult> {
   return runTool(() =>
     apiJson(getToken, baseUrl, "GET", "/v1/parties", {
-      params: { q: args.query, kind: args.kind, limit: args.limit },
+      params: {
+        q: args.query,
+        kind: args.kind,
+        product_id: args.product_id,
+        scope: args.scope === "all" ? "all" : undefined,
+        limit: args.limit,
+        offset: args.offset,
+      },
     }),
   )
 }
@@ -256,18 +382,23 @@ const PARTY_FIELD_KEYS = [
 type PartyFieldKey = (typeof PARTY_FIELD_KEYS)[number]
 
 const PARTY_DESCRIPTION = [
-  "Read, change or create one party. With `party_id` alone: the party with its roles on every contract, its contacts (members), the companies it is a contact of and the documents it appears in (with quotes). With `party_id` and fields: changes those fields (the rest stay). Without `party_id`: creates a party; `display_name` is required (kind and salutation are inferred from it when not given).",
-  "USE WHEN: checking a party; fixing its name, kind (person or company decides a letter's wording), salutation or postal address (issues kind_unknown, address_missing); creating a party the documents miss before adding it to a contract with talonic_parties_set_role. Search first (talonic_parties_search) so you do not create a duplicate.",
-  "NOT FOR: its role on a contract (talonic_parties_set_role); combining duplicates (talonic_parties_merge).",
+  "Read, change or create one party. With `party_id` alone: the party with where its letters go and why, its contracts (with its roles, the other parties and each contract's issues), the documents it appears in, its contacts (members) and the companies it is a contact of, duplicate candidates, other names, history and its CRM directory link (with candidates to pick from). `overview: true` leaves the long lists out and counts them (page them with talonic_parties_contracts, _documents, _history). With `party_id` and fields: changes those fields (the rest stay; a person's value beats every other source). Without `party_id`: creates a party; `display_name` is required (kind and salutation are inferred from it when not given).",
+  "USE WHEN: checking a flagged party; fixing its name, kind (person or company decides a letter's wording), salutation or postal address (issues kind_unknown, address_missing); creating a party the data misses before adding it to a contract with talonic_parties_set_role. Search first (talonic_parties_search) so you do not create a duplicate.",
+  "NOT FOR: its role on a contract (talonic_parties_set_role); combining duplicates (talonic_parties_merge); other names (talonic_parties_names).",
   "",
-  "ARGS: `party_id` (omit to create); fields `kind` person|company|owners_association|unknown, `display_name`, `salutation` herr|frau|eheleute|firma|weg, `title`, `first_name`, `last_name`, `company_name`, `legal_form`, `street`, `postcode`, `town`, `country`, `email`, `phone`, `preferred_channel` post|email, `external_refs` { name: value } (null clears a text field).",
-  "RETURNS: read { party, merged_into, roles[] { ...role, contract }, members[] { id, function, party }, member_of[], documents[] { document_id, filename, quotes[] } }; change or create: the party.",
+  "ARGS: `party_id` (omit to create), `overview` (read only), `product_id` (read only: only contracts of that data product); fields `kind` person|company|owners_association|unknown, `display_name`, `salutation` herr|frau|eheleute|firma|weg, `title`, `first_name`, `last_name`, `company_name`, `legal_form`, `street`, `postcode`, `town`, `country`, `email`, `phone`, `preferred_channel` post|email, `external_refs` { name: value } (null clears a text field).",
+  "RETURNS: read { party, merged_into, letters { party_id, display_name, address_lines[], reason_code, reason } | null, contracts[], documents[], members[] { id, function, party }, member_of[], duplicates[] { party_id, display_name, postcode, reason }, issues[], names[], history[], directory { active, link, entry, candidates[], crm_address, document_address }, directory_people[] } (overview: contracts without the long lists, plus counts { contracts, documents, history }); change or create: the party.",
 ].join("\n")
 
 const nullableText = (max: number) => z.string().max(max).nullable().optional()
 
 export const partyInputSchema = {
   party_id: partyIdArg.optional().describe("The party to read or change; omit to create one."),
+  overview: z
+    .boolean()
+    .optional()
+    .describe("Read: leave the long lists out and count them instead."),
+  product_id: zUuid().optional().describe("Read: only contracts of this data product."),
   kind: z.enum(KINDS).optional().describe("Person, company, owners' association or unknown."),
   display_name: z
     .string()
@@ -302,7 +433,9 @@ export const partyInputSchema = {
 export function handleParty(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: { party_id?: string } & Partial<Record<PartyFieldKey, unknown>>,
+  args: { party_id?: string; overview?: boolean; product_id?: string } & Partial<
+    Record<PartyFieldKey, unknown>
+  >,
 ): Promise<ToolResult> {
   const fields = defined(Object.fromEntries(PARTY_FIELD_KEYS.map((k) => [k, args[k]])))
   const changing = Object.keys(fields).length > 0
@@ -311,7 +444,12 @@ export function handleParty(
     return runTool(() =>
       changing
         ? apiJson(getToken, baseUrl, "PATCH", path, { body: fields })
-        : apiJson(getToken, baseUrl, "GET", path),
+        : apiJson(getToken, baseUrl, "GET", path, {
+            params: {
+              view: args.overview ? "overview" : undefined,
+              product_id: args.product_id,
+            },
+          }),
     )
   }
   if (typeof args.display_name !== "string" || !args.display_name.trim()) {
@@ -325,19 +463,21 @@ export function handleParty(
 // ── Roles ──────────────────────────────────────────────────────────────────
 
 const SET_ROLE_DESCRIPTION = [
-  "Add a role to a contract, or change one role row. With `contract_id`, `party_id` and `role`: adds the party in that role (confirmed unless `state` says suggested; a party already holding that role on the contract has that row updated). With `role_id`: changes that row: confirm or reject it (`state`), move it to another role or party, set the period, the Verwalter link or enters_contract. Any change by a person is a decision: an edited suggestion becomes confirmed unless `state` says otherwise.",
+  "Add a role to a contract, or change one role row. With `product_id`, `row_id`, `party_id` and `role`: adds the party in that role (confirmed unless `state` says suggested; a party already holding that role on the contract has that row updated). With `role_id`: changes that row: confirm or reject it (`state`), move it to another role or party, set the period, the Verwalter link or enters_contract. Any change by a person is a decision: an edited suggestion becomes confirmed unless `state` says otherwise.",
   "USE WHEN: fixing a contract's parties after reading talonic_parties_contract: a partner missing (no_partner), two partners at once (reject the wrong one, or give the old one valid_to), a Verwalter for the right party (represents_id), a tenant entering the contract (enters_contract with valid_from / valid_to), an owner change (previous_owner, new_owner with valid_from = transfer date).",
+  CONTRACT_IS_A_ROW,
   ROLES_EXPLAINED,
   COMPUTED_RULE,
   DECISION_RULE,
-  "NOT FOR: confirming many suggestions at once (talonic_parties_confirm); the party's own details (talonic_parties_party).",
+  "NOT FOR: confirming several checked roles at once (talonic_parties_confirm); the party's own details (talonic_parties_party).",
   "",
-  "ARGS: add: `contract_id`, `party_id`, `role`; change: `role_id` (roles[].id from talonic_parties_contract) and optional `party_id`, `role`. Both: `state` suggested|confirmed|rejected, `represents_id` (another role id on the same contract; null clears), `valid_from`, `valid_to` (YYYY-MM-DD; null clears), `enters_contract` (tenant only), `note` (say where the decision comes from).",
-  "RETURNS: the role row { id, contract_id, party_id, role, represents_id, valid_from, valid_to, enters_contract, state, confidence, evidence[], origin, decided_by, decided_at, note }.",
+  "ARGS: add: `product_id`, `row_id`, `party_id`, `role`; change: `role_id` (roles[].id from talonic_parties_contract) and optional `party_id`, `role`. Both: `state` suggested|confirmed|rejected, `represents_id` (another role id on the same contract; null clears), `valid_from`, `valid_to` (YYYY-MM-DD; null clears), `enters_contract` (tenant only), `note` (say where the decision comes from).",
+  "RETURNS: the role row { id, data_product_id, row_id, party_id, role, represents_id, valid_from, valid_to, enters_contract, state, confidence, evidence[], origin, decided_by, decided_at, note }.",
 ].join("\n")
 
 export const setRoleInputSchema = {
-  contract_id: contractIdArg.optional().describe("Add: the contract to add the role to."),
+  product_id: productIdArg.optional().describe("Add: the contract's data product."),
+  row_id: rowIdArg.optional().describe("Add: the contract's row id in that product."),
   role_id: zUuid()
     .optional()
     .describe("Change: the role row (roles[].id from talonic_parties_contract)."),
@@ -365,7 +505,8 @@ export function handleSetRole(
   getToken: () => string,
   baseUrl: string | undefined,
   args: {
-    contract_id?: string
+    product_id?: string
+    row_id?: string
     role_id?: string
     party_id?: string
     role?: string
@@ -377,19 +518,25 @@ export function handleSetRole(
     note?: string | null
   },
 ): Promise<ToolResult> {
-  const { contract_id, role_id, ...rest } = args
+  const { product_id, row_id, role_id, ...rest } = args
   const body = defined(rest)
-  if (!!contract_id === !!role_id) {
+  const adding = product_id !== undefined || row_id !== undefined
+  if (adding === !!role_id) {
     return Promise.resolve(
-      validationError("pass contract_id (with party_id and role) to add, or role_id to change."),
+      validationError(
+        "pass product_id and row_id (with party_id and role) to add, or role_id to change.",
+      ),
     )
   }
-  if (contract_id) {
+  if (adding) {
+    if (!product_id || !row_id) {
+      return Promise.resolve(validationError("adding a role needs both product_id and row_id."))
+    }
     if (!args.party_id || !args.role) {
       return Promise.resolve(validationError("adding a role needs party_id and role."))
     }
     return runTool(() =>
-      apiJson(getToken, baseUrl, "POST", `/v1/parties/contracts/${contract_id}/roles`, { body }),
+      apiJson(getToken, baseUrl, "POST", `${rowPath(product_id, row_id)}/roles`, { body }),
     )
   }
   if (Object.keys(body).length === 0) {
@@ -405,54 +552,57 @@ export function handleSetRole(
 }
 
 const CONFIRM_DESCRIPTION = [
-  "Confirm suggested roles in bulk: by default only high-confidence suggestions (a verified quote the contract register agrees with), optionally only of named contracts or roles. Confirming says a person checked them; it is the user's decision, so only call this when the user asked. Run with dry_run first and say how many it would confirm.",
-  "USE WHEN: the user asks to accept the suggestions (all, or of some contracts / roles).",
+  `Confirm several suggested roles the user checked, by their ids (up to ${CONFIRM_MAX_ROLES}): each is confirmed on its own, so one refused role never blocks the others. Confirming says a person checked them; it is the user's decision, so only call this when the user asked, and say first how many you will confirm.`,
+  "USE WHEN: the user accepts the suggestions of one or more contracts after you showed them (role ids from talonic_parties_contract roles[].id, or talonic_parties_contracts).",
+  "There is no confirm-by-confidence across the workspace: pick the roles to confirm from the contracts you read.",
   DECISION_RULE,
   "NOT FOR: rejecting or fixing one role (talonic_parties_set_role).",
   "",
-  "ARGS: `contract_ids[]` (omit for all), `roles[]` (e.g. ['partner']), `min_confidence` high|medium|low (default high), `limit` (1-5000, default 500), `dry_run`.",
-  "RETURNS: { dry_run, confirmed, rows[] { id, contract_id, party_id, role, confidence } } (rows: the first 100).",
+  `ARGS: \`role_ids[]\` (1-${CONFIRM_MAX_ROLES}), \`note\` (say where the decision comes from; recorded on each role).`,
+  "RETURNS: { confirmed, failed, rows[] { role_id, ok, role? (the confirmed row), error? } }.",
 ].join("\n")
 
 export const confirmInputSchema = {
-  contract_ids: z.array(zUuid()).max(1000).optional().describe("Only these contracts."),
-  roles: z.array(z.enum(ROLES)).max(ROLES.length).optional().describe("Only these roles."),
-  min_confidence: z
-    .enum(["high", "medium", "low"])
-    .optional()
-    .describe("Lowest confidence confirmed (default high)."),
-  limit: z.number().int().min(1).max(5000).optional().describe("At most this many (default 500)."),
-  dry_run: z.boolean().optional().describe("Count only; nothing is confirmed."),
+  role_ids: z
+    .array(zUuid())
+    .min(1)
+    .max(CONFIRM_MAX_ROLES)
+    .describe("The role rows to confirm (roles[].id from talonic_parties_contract)."),
+  note: z.string().max(1000).optional().describe("Why; where the decision comes from."),
 }
 
 /** @internal */
 export function handleConfirm(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: {
-    contract_ids?: string[]
-    roles?: string[]
-    min_confidence?: "high" | "medium" | "low"
-    limit?: number
-    dry_run?: boolean
-  },
+  args: { role_ids: string[]; note?: string },
 ): Promise<ToolResult> {
-  return runTool(() =>
-    apiJson(getToken, baseUrl, "POST", "/v1/parties/roles/confirm", {
-      body: {
-        ...(args.contract_ids ? { contract_ids: args.contract_ids } : {}),
-        ...(args.roles ? { roles: args.roles } : {}),
-        min_confidence: args.min_confidence ?? "high",
-        ...(args.limit ? { limit: args.limit } : {}),
-        dry_run: args.dry_run ?? false,
-      },
-    }),
-  )
+  const ids = [...new Set(args.role_ids ?? [])]
+  if (!ids.length) return Promise.resolve(validationError("pass at least one role id."))
+  return runTool(async () => {
+    const rows: Array<{ role_id: string; ok: boolean; role?: unknown; error?: string }> = []
+    for (const id of ids) {
+      try {
+        const role = await apiJson(getToken, baseUrl, "PATCH", `/v1/parties/roles/${id}`, {
+          body: { state: "confirmed", ...(args.note !== undefined ? { note: args.note } : {}) },
+        })
+        rows.push({ role_id: id, ok: true, role })
+      } catch (err) {
+        rows.push({
+          role_id: id,
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+    }
+    const confirmed = rows.filter((r) => r.ok).length
+    return { confirmed, failed: rows.length - confirmed, rows }
+  })
 }
 
 const MERGE_DESCRIPTION = [
   "Merge one party into another: every role and contact link moves to the survivor (`into`); a role the survivor already holds on the same contract keeps the survivor's row and takes the merged one's evidence. The merged party stays only as a pointer to the survivor. Cannot be undone; a person's decision, so only when the user asked. Run with dry_run first.",
-  "USE WHEN: talonic_parties_issues lists duplicates (same name and postcode) and the user confirms they are the same party.",
+  "USE WHEN: talonic_parties_party lists duplicates[] and the user confirms they are the same party.",
   "NOT FOR: two different parties with similar names; moving one role to another party (talonic_parties_set_role with role_id and party_id).",
   "",
   "ARGS: `party_id` (the one that goes), `into` (the survivor), `dry_run`.",
@@ -481,112 +631,311 @@ export function handleMerge(
   )
 }
 
-// ── Reading ────────────────────────────────────────────────────────────────
+// ── Reading and syncing ────────────────────────────────────────────────────
+
+const READ_STATES_BUSY = new Set(["pending", "running"])
 
 const READ_DESCRIPTION = [
-  "Read the parties from contract documents: queues contracts for the platform to read in the background (one model call per contract) and store every party and role it finds as a suggestion, with quotes. By default every contract not read yet (only_unread); `contract_ids` reads exactly those again. With `status: true` only reports the queue. Pass `wait_seconds` to wait until the queue is empty (polls the queue every 5 s).",
-  "USE WHEN: filling the app or after new contract documents arrived: run with dry_run first and say how many contracts it will read, then without dry_run and with wait_seconds; then talonic_parties_issues.",
+  "Have one contract's documents read for its parties: the platform reads the documents in the background and adds every party and role it finds as a suggestion, with quotes, merged with what the contract's data already says. A read is extra work on the documents; ask for it only when the contract's data names too little (issues not_read, no_partner) or the user asked. A contract already queued or being read is not queued twice. With `status: true` only reports the read's state; without a contract, `status: true` reports the workspace's read queue. Pass `wait_seconds` to wait until the read is done or failed (polls every 5 s).",
+  "USE WHEN: one contract's parties are missing or wrong and its data cannot fill them; then talonic_parties_contract to see the new suggestions.",
+  CONTRACT_IS_A_ROW,
   DECISION_RULE,
-  "NOT FOR: one contract's parties (talonic_parties_contract).",
+  "NOT FOR: filling every contract from the data products again (talonic_parties_sync); reading many contracts at once (ask for one at a time, only where needed).",
   "",
-  "ARGS: `status` (only the queue); or `contract_ids[]` (omit for all), `only_unread` (default true), `force` (read again although read), `limit` (1-5000, default 500), `dry_run`; `wait_seconds` (0-600, default 0; not with dry_run).",
-  "RETURNS: dry_run { dry_run, would_queue, skipped, contracts[] (first 50) }; queued { dry_run, queued, skipped }; status { contracts, counts { pending, running, done, failed }, unread, failed[] { contract_id, contract_key, error, attempts } }. After a wait also { status, waited_ms, still_running }.",
+  "ARGS: `product_id` + `row_id` (the contract), `status` (only report; nothing is queued), `wait_seconds` (0-600, default 0).",
+  "RETURNS: queued { status: pending|running }; a contract's state { status, read_at, error, notes, read_with }; the queue (no contract) { reads { pending, running, done, failed }, rows, rows_read }. After a wait also { waited_ms, still_running } and `read` (the last state: done, failed with error, or still pending|running).",
 ].join("\n")
 
 export const readInputSchema = {
-  status: z.boolean().optional().describe("Only report the read queue; nothing is queued."),
-  contract_ids: z
-    .array(zUuid())
-    .max(5000)
-    .optional()
-    .describe("Only these contracts (read again when already read)."),
-  only_unread: z
-    .boolean()
-    .optional()
-    .describe("All contracts: only those not read yet (default true)."),
-  force: z.boolean().optional().describe("Read again although already read."),
-  limit: z.number().int().min(1).max(5000).optional().describe("Queue at most this many."),
-  dry_run: z.boolean().optional().describe("Count and list what would be read; nothing is queued."),
+  product_id: productIdArg.optional().describe("The contract's data product."),
+  row_id: rowIdArg.optional().describe("The contract's row id in that product."),
+  status: z.boolean().optional().describe("Only report; nothing is queued."),
   wait_seconds: z
     .number()
     .min(0)
     .max(READ_MAX_WAIT_S)
     .optional()
-    .describe(`Seconds to wait for the queue to empty (0-${READ_MAX_WAIT_S}).`),
+    .describe(`Seconds to wait for the read to finish (0-${READ_MAX_WAIT_S}).`),
 }
 
-interface ReadStatus {
-  counts?: Record<string, number>
+interface RowRead {
+  read?: { status?: string | null; read_at?: string | null; error?: string | null } | null
+}
+interface PartiesStatus {
+  syncing?: boolean
+  rows?: number
+  rows_read?: number
+  reads?: Record<string, number>
+  synced_at?: string | null
 }
 
-const busy = (s: ReadStatus) => (s.counts?.["pending"] ?? 0) + (s.counts?.["running"] ?? 0) > 0
+const queueBusy = (s: PartiesStatus) =>
+  (s.reads?.["pending"] ?? 0) + (s.reads?.["running"] ?? 0) > 0
 
 /** @internal */
 export function handleRead(
   getToken: () => string,
   baseUrl: string | undefined,
-  args: {
-    status?: boolean
-    contract_ids?: string[]
-    only_unread?: boolean
-    force?: boolean
-    limit?: number
-    dry_run?: boolean
-    wait_seconds?: number
-  },
+  args: { product_id?: string; row_id?: string; status?: boolean; wait_seconds?: number },
   deps: PartiesDeps = {},
 ): Promise<ToolResult> {
   const waitS = waitSeconds(args.wait_seconds, READ_MAX_WAIT_S)
-  const readStatus = () => apiJson<ReadStatus>(getToken, baseUrl, "GET", "/v1/parties/read/status")
-  return runTool(async () => {
-    let started: Record<string, unknown> | null = null
-    if (!args.status) {
-      started = await apiJson<Record<string, unknown>>(
-        getToken,
-        baseUrl,
-        "POST",
-        "/v1/parties/read",
-        {
-          body: {
-            ...(args.contract_ids ? { contract_ids: args.contract_ids } : {}),
-            ...(args.only_unread !== undefined ? { only_unread: args.only_unread } : {}),
-            ...(args.force !== undefined ? { force: args.force } : {}),
-            ...(args.limit ? { limit: args.limit } : {}),
-            dry_run: args.dry_run ?? false,
-          },
-        },
-      )
-      if (waitS === 0 || args.dry_run) return started
-    }
-    const first = await readStatus()
-    if (waitS === 0) return first
-    const sleep = deps.sleep ?? defaultSleep
-    const now = deps.now ?? Date.now
-    const start = now()
-    const deadline = start + waitS * 1000
-    let status = first
-    let pollError: string | undefined
-    while (busy(status) && now() < deadline) {
-      await sleep(Math.min(PARTIES_POLL_INTERVAL_MS, deadline - now()))
-      try {
-        status = await readStatus()
-      } catch (err) {
-        pollError = err instanceof Error ? err.message : String(err)
-        break
+  const hasRow = !!args.product_id && !!args.row_id
+  if (!!args.product_id !== !!args.row_id) {
+    return Promise.resolve(validationError("a contract needs both product_id and row_id."))
+  }
+  if (!hasRow && !args.status) {
+    return Promise.resolve(
+      validationError(
+        "pass product_id and row_id to read one contract, or status: true for the read queue. To fill every contract from the data, use talonic_parties_sync.",
+      ),
+    )
+  }
+  if (!hasRow) {
+    const queue = () => apiJson<PartiesStatus>(getToken, baseUrl, "GET", "/v1/parties/status")
+    return runTool(async () => {
+      if (waitS === 0) {
+        const s = await queue()
+        return { reads: s.reads, rows: s.rows, rows_read: s.rows_read }
       }
+      const w = await waitUntil(queue, (s) => !queueBusy(s), waitS, deps)
+      return {
+        reads: w.last.reads,
+        rows: w.last.rows,
+        rows_read: w.last.rows_read,
+        waited_ms: w.waited_ms,
+        still_running: w.still_running,
+        ...(w.poll_error ? { poll_error: w.poll_error } : {}),
+      }
+    })
+  }
+  const path = rowPath(args.product_id!, args.row_id!)
+  const rowRead = async () => (await apiJson<RowRead>(getToken, baseUrl, "GET", path)).read ?? null
+  return runTool(async () => {
+    let queued: Record<string, unknown> | null = null
+    if (!args.status) {
+      queued = await apiJson<Record<string, unknown>>(getToken, baseUrl, "POST", `${path}/read`)
+      if (waitS === 0) return queued
+    } else if (waitS === 0) {
+      return (await rowRead()) ?? { status: null }
     }
-    const stillRunning = pollError !== undefined || busy(status)
+    const w = await waitUntil(rowRead, (r) => !READ_STATES_BUSY.has(r?.status ?? ""), waitS, deps)
+    const failed = w.last?.status === "failed"
     return {
-      ...(started ?? {}),
-      status,
-      waited_ms: now() - start,
-      still_running: stillRunning,
-      ...(pollError ? { poll_error: pollError } : {}),
-      next: stillRunning
+      ...(queued ?? {}),
+      read: w.last,
+      waited_ms: w.waited_ms,
+      still_running: w.still_running,
+      ...(w.poll_error ? { poll_error: w.poll_error } : {}),
+      next: w.still_running
         ? "Still reading: call talonic_parties_read with status: true (and wait_seconds) later."
-        : "Read done: open the worklist with talonic_parties_issues.",
+        : failed
+          ? "The read failed (read.error); tell the user. The contract keeps what its data says."
+          : "Read done: open the contract with talonic_parties_contract.",
     }
   })
+}
+
+const SYNC_DESCRIPTION = [
+  "Bring the contracts' parties in line with the workspace's data products now: every contract row is filled again from its data (mapped fields, the field registry, the Contracts app), new rows are registered and sure duplicates are merged. A full pass runs in the background; named `row_ids` are filled at once. Fills only make suggestions and never overwrite a person's decision. Pass `wait_seconds` to wait until the full pass finished (polls the status every 5 s).",
+  "USE WHEN: new contracts or changed data should show now instead of at the next scheduled sync (every 15 minutes), or after the user changed group companies or the CRM directory.",
+  "NOT FOR: reading one contract's documents (talonic_parties_read).",
+  "",
+  "ARGS: `row_ids[]` (only these contract rows, up to 5000; omit for a full pass), `wait_seconds` (0-600, default 0; full pass only).",
+  "RETURNS: { started: true }; after a wait also { syncing, synced_at, rows, waited_ms, still_running }.",
+].join("\n")
+
+export const syncInputSchema = {
+  row_ids: z
+    .array(z.string().min(1).max(200))
+    .min(1)
+    .max(5000)
+    .optional()
+    .describe("Only these contract rows (contracts[].row.row_id); omit for a full pass."),
+  wait_seconds: z
+    .number()
+    .min(0)
+    .max(READ_MAX_WAIT_S)
+    .optional()
+    .describe(`Seconds to wait for a full pass to finish (0-${READ_MAX_WAIT_S}).`),
+}
+
+/** @internal */
+export function handleSync(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { row_ids?: string[]; wait_seconds?: number },
+  deps: PartiesDeps = {},
+): Promise<ToolResult> {
+  const waitS = waitSeconds(args.wait_seconds, READ_MAX_WAIT_S)
+  return runTool(async () => {
+    const started = await apiJson<Record<string, unknown>>(
+      getToken,
+      baseUrl,
+      "POST",
+      "/v1/parties/sync",
+      { body: args.row_ids ? { row_ids: args.row_ids } : {} },
+    )
+    if (waitS === 0 || args.row_ids) return started
+    const w = await waitUntil(
+      () => apiJson<PartiesStatus>(getToken, baseUrl, "GET", "/v1/parties/status"),
+      (s) => !s.syncing,
+      waitS,
+      deps,
+    )
+    return {
+      ...started,
+      syncing: w.last.syncing ?? false,
+      synced_at: w.last.synced_at ?? null,
+      rows: w.last.rows,
+      waited_ms: w.waited_ms,
+      still_running: w.still_running,
+      ...(w.poll_error ? { poll_error: w.poll_error } : {}),
+    }
+  })
+}
+
+// ── Names, CRM directory link, address choice ──────────────────────────────
+
+const NAMES_DESCRIPTION = [
+  "A party's other names: add an alias or a former name (with the day it ended), confirm or reject a suggested name, or remove a name a person added. Other names make the party findable under them (talonic_parties_search) and keep documents with an old name on the same party.",
+  "USE WHEN: the user says a party is also called X, was renamed (former name with valid_to), or a suggested name in talonic_parties_party names[] is right or wrong.",
+  "NOT FOR: the party's printed name (talonic_parties_party display_name); two parties that are one (talonic_parties_merge).",
+  "",
+  "ARGS: add: `party_id`, `name`, `kind` alias|former, `valid_to` (former only, YYYY-MM-DD), `note`; decide: `name_id` (names[].id from talonic_parties_party) and `state` confirmed|rejected; remove: `name_id` and `remove: true` (names from the data are rejected instead).",
+  "RETURNS: add / decide: the name { id, party_id, name, kind, valid_to, state, source, decided_by, decided_at }; remove: { deleted: true }.",
+].join("\n")
+
+export const namesInputSchema = {
+  party_id: partyIdArg.optional().describe("Add: the party."),
+  name: z.string().min(1).max(300).optional().describe("Add: the other name."),
+  kind: z
+    .enum(["alias", "former"])
+    .optional()
+    .describe("Add: alias (also called) or former (renamed)."),
+  valid_to: dateArg.nullable().optional().describe("Add, former name: the day it ended."),
+  note: z.string().max(500).nullable().optional().describe("Add: where this comes from."),
+  name_id: zUuid().optional().describe("Decide or remove: the name (names[].id)."),
+  state: z.enum(["confirmed", "rejected"]).optional().describe("Decide: confirmed or rejected."),
+  remove: z.boolean().optional().describe("Remove: true deletes a name a person added."),
+}
+
+/** @internal */
+export function handleNames(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: {
+    party_id?: string
+    name?: string
+    kind?: "alias" | "former"
+    valid_to?: string | null
+    note?: string | null
+    name_id?: string
+    state?: "confirmed" | "rejected"
+    remove?: boolean
+  },
+): Promise<ToolResult> {
+  if (args.name_id) {
+    if (args.party_id || args.name !== undefined || args.kind) {
+      return Promise.resolve(
+        validationError(
+          "name_id goes with state (decide) or remove: true (remove), not with add fields.",
+        ),
+      )
+    }
+    if (!!args.remove === !!args.state) {
+      return Promise.resolve(validationError("with name_id pass either state or remove: true."))
+    }
+    const path = `/v1/parties/names/${args.name_id}`
+    return runTool(() =>
+      args.remove
+        ? apiJson(getToken, baseUrl, "DELETE", path)
+        : apiJson(getToken, baseUrl, "PATCH", path, { body: { state: args.state } }),
+    )
+  }
+  if (!args.party_id || !args.name || !args.kind) {
+    return Promise.resolve(
+      validationError(
+        "pass party_id, name and kind to add a name, or name_id to decide or remove one.",
+      ),
+    )
+  }
+  if (args.valid_to && args.kind !== "former") {
+    return Promise.resolve(validationError("valid_to belongs to a former name only."))
+  }
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "POST", `/v1/parties/${args.party_id}/names`, {
+      body: defined({
+        name: args.name,
+        kind: args.kind,
+        valid_to: args.valid_to,
+        note: args.note,
+      }),
+    }),
+  )
+}
+
+const DIRECTORY_LINK_DESCRIPTION = [
+  "Link a party to its entry in the workspace's CRM directory, or unlink it (`external_id: null`). A linked party shows the CRM's address, phone and parent company over the contract sources (a person's own edit still wins); a person's link or unlink is never redone by the automatic linking. The party's contracts are filled again with the new link.",
+  "USE WHEN: talonic_parties_party shows directory.link.state pick (several CRM entries match: issue crm_pick) and the user names the right one from directory.candidates[], or a link is wrong.",
+  "NOT FOR: which address letters use when the CRM's differs (talonic_parties_address_choice).",
+  "",
+  "ARGS: `party_id`, `external_id` (the CRM entry's id from directory.candidates[].external_id; null unlinks), `kind` company|contact (the entry's kind; default company).",
+  "RETURNS: the party's directory link { state, kind, external_id, candidates[], odd_address, address_choice, decided_by }.",
+].join("\n")
+
+export const directoryLinkInputSchema = {
+  party_id: partyIdArg,
+  external_id: z
+    .string()
+    .min(1)
+    .max(100)
+    .nullable()
+    .describe("The CRM entry's id (directory.candidates[].external_id); null unlinks."),
+  kind: z.enum(["company", "contact"]).optional().describe("The entry's kind (default company)."),
+}
+
+/** @internal */
+export function handleDirectoryLink(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { party_id: string; external_id: string | null; kind?: "company" | "contact" },
+): Promise<ToolResult> {
+  if (args.external_id === undefined) {
+    return Promise.resolve(validationError("pass external_id, or null to unlink."))
+  }
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "POST", `/v1/parties/${args.party_id}/directory-link`, {
+      body: defined({ external_id: args.external_id, kind: args.kind }),
+    }),
+  )
+}
+
+const ADDRESS_CHOICE_DESCRIPTION = [
+  "Choose which address a linked party's letters use when the CRM's address is far from the contract's (issue crm_address_differs): `crm` or `document`. The party's contracts are filled again with the choice; the automatic linking never changes it.",
+  "USE WHEN: talonic_parties_party shows directory.crm_address and directory.document_address and the user says which is right.",
+  "NOT FOR: typing a new address (talonic_parties_party with street, postcode, town).",
+  "",
+  "ARGS: `party_id`, `choice` crm|document.",
+  "RETURNS: the party's directory link { state, kind, external_id, odd_address, address_choice, decided_by }.",
+].join("\n")
+
+export const addressChoiceInputSchema = {
+  party_id: partyIdArg,
+  choice: z.enum(["crm", "document"]).describe("crm: the CRM's address; document: the contract's."),
+}
+
+/** @internal */
+export function handleAddressChoice(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { party_id: string; choice: "crm" | "document" },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "POST", `/v1/parties/${args.party_id}/address-choice`, {
+      body: { choice: args.choice },
+    }),
+  )
 }
 
 // ── Contacts and group companies ───────────────────────────────────────────
@@ -639,8 +988,8 @@ export function handleMembers(
 }
 
 const GROUP_COMPANIES_DESCRIPTION = [
-  "Read the workspace's own companies (the group: lead company, subsidiaries, sisters), or replace them all with `companies`. The read uses them to tell our side from the contract partner. Replacing deletes every company not in the new list: read first, change, send the whole list, and only when the user asked.",
-  "USE WHEN: a read takes one of our own companies for the partner, or setting up the workspace.",
+  "Read the workspace's own companies (the group: lead company, subsidiaries, sisters), or replace them all with `companies`. They tell our side from the contract partner: our own companies never become a contract partner. Replacing deletes every company not in the new list: read first, change, send the whole list, and only when the user asked.",
+  "USE WHEN: one of our own companies shows up as a contract partner, or setting up the workspace.",
   "NOT FOR: contract partners (talonic_parties_party).",
   "",
   "ARGS: none to read; `companies[] { name, parent? (another name in the list), relation? subsidiary|sister|parent }` to replace.",
@@ -698,8 +1047,30 @@ export async function probePartiesAccess(token: string, baseUrl?: string): Promi
   }
 }
 
+/** The names `registerPartiesTools` lists, in order. @internal */
+export const PARTIES_TOOL_NAMES = [
+  "talonic_parties_status",
+  "talonic_parties_issues",
+  "talonic_parties_contract",
+  "talonic_parties_contracts",
+  "talonic_parties_documents",
+  "talonic_parties_history",
+  "talonic_parties_search",
+  "talonic_parties_party",
+  "talonic_parties_names",
+  "talonic_parties_directory_link",
+  "talonic_parties_address_choice",
+  "talonic_parties_set_role",
+  "talonic_parties_confirm",
+  "talonic_parties_merge",
+  "talonic_parties_read",
+  "talonic_parties_sync",
+  "talonic_parties_members",
+  "talonic_parties_group_companies",
+] as const
+
 /**
- * Register the twelve `talonic_parties_*` tools.
+ * Register the eighteen `talonic_parties_*` tools.
  *
  * @public
  */
@@ -710,7 +1081,7 @@ export function registerPartiesTools(
 ): void {
   const tools: Array<
     [
-      string,
+      (typeof PARTIES_TOOL_NAMES)[number],
       string,
       string,
       Record<string, z.ZodTypeAny>,
@@ -728,19 +1099,11 @@ export function registerPartiesTools(
     ],
     [
       "talonic_parties_issues",
-      "Contract parties worklist",
+      "Parties needing attention",
       ISSUES_DESCRIPTION,
       issuesInputSchema,
       readOnly,
       (a) => handleIssues(getToken, baseUrl, a),
-    ],
-    [
-      "talonic_parties_contracts",
-      "Contracts with their parties",
-      CONTRACTS_DESCRIPTION,
-      contractsInputSchema,
-      readOnly,
-      (a) => handleContracts(getToken, baseUrl, a),
     ],
     [
       "talonic_parties_contract",
@@ -749,6 +1112,30 @@ export function registerPartiesTools(
       contractInputSchema,
       readOnly,
       (a) => handleContract(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_parties_contracts",
+      "A party's contracts",
+      CONTRACTS_DESCRIPTION,
+      sectionInputSchema,
+      readOnly,
+      (a) => handlePartySection(getToken, baseUrl, "contracts", a),
+    ],
+    [
+      "talonic_parties_documents",
+      "A party's documents",
+      DOCUMENTS_DESCRIPTION,
+      sectionInputSchema,
+      readOnly,
+      (a) => handlePartySection(getToken, baseUrl, "documents", a),
+    ],
+    [
+      "talonic_parties_history",
+      "A party's history",
+      HISTORY_DESCRIPTION,
+      sectionInputSchema,
+      readOnly,
+      (a) => handlePartySection(getToken, baseUrl, "history", a),
     ],
     [
       "talonic_parties_search",
@@ -768,6 +1155,32 @@ export function registerPartiesTools(
       (a) => handleParty(getToken, baseUrl, a),
     ],
     [
+      "talonic_parties_names",
+      "A party's other names",
+      NAMES_DESCRIPTION,
+      namesInputSchema,
+      // Removing a name deletes it; rejecting overrides a suggestion: destructive.
+      write(true, true),
+      (a) => handleNames(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_parties_directory_link",
+      "Link a party to the CRM",
+      DIRECTORY_LINK_DESCRIPTION,
+      directoryLinkInputSchema,
+      // Replaces or removes the party's link: destructive.
+      write(true, true),
+      (a) => handleDirectoryLink(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_parties_address_choice",
+      "Choose a party's letter address",
+      ADDRESS_CHOICE_DESCRIPTION,
+      addressChoiceInputSchema,
+      write(true),
+      (a) => handleAddressChoice(getToken, baseUrl, a),
+    ],
+    [
       "talonic_parties_set_role",
       "Add or change a contract role",
       SET_ROLE_DESCRIPTION,
@@ -778,7 +1191,7 @@ export function registerPartiesTools(
     ],
     [
       "talonic_parties_confirm",
-      "Confirm suggested roles",
+      "Confirm checked roles",
       CONFIRM_DESCRIPTION,
       confirmInputSchema,
       write(true),
@@ -794,11 +1207,19 @@ export function registerPartiesTools(
     ],
     [
       "talonic_parties_read",
-      "Read parties from contracts",
+      "Read one contract's parties",
       READ_DESCRIPTION,
       readInputSchema,
       write(true),
       (a) => handleRead(getToken, baseUrl, a),
+    ],
+    [
+      "talonic_parties_sync",
+      "Refresh parties from the data",
+      SYNC_DESCRIPTION,
+      syncInputSchema,
+      write(true),
+      (a) => handleSync(getToken, baseUrl, a),
     ],
     [
       "talonic_parties_members",
