@@ -45,6 +45,8 @@ import { createServer } from "./server-factory.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
+import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
+import { probeMiningInUse } from "./tools/mining-driver.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -121,6 +123,16 @@ export const agentTasksAccessCached = makeAccessCache((t) => probeAgentTasksInUs
  * @internal Exported for tests.
  */
 export const decisionTasksAccessCached = makeAccessCache((t) => probeExternalAppsInUse(t, base()))
+/**
+ * Apps toolset (build / run / reviews): the credential can read `/v1/apps`.
+ * @internal Exported for tests.
+ */
+export const appsToolsetAccessCached = makeAccessCache((t) => probeAppsToolsetAccess(t, base()))
+/**
+ * Rule-mining round tools: only for workspaces with an autonomous app.
+ * @internal Exported for tests.
+ */
+export const miningAccessCached = makeAccessCache((t) => probeMiningInUse(t, base()))
 
 /** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
 const MAX_BODY_BYTES = 64 * 1024 * 1024
@@ -357,6 +369,10 @@ export interface CreateRequestHandlerOptions {
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
   decisionTasksAccess?: (token: string) => Promise<boolean>
+  /** Override the Apps toolset visibility check (primarily for tests). */
+  appsToolsetAccess?: (token: string) => Promise<boolean>
+  /** Override the rule-mining round tool visibility check (primarily for tests). */
+  miningAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
@@ -661,7 +677,9 @@ export function createRequestHandler(
       includePortfolioTools,
       includeProcessesTools,
       includeAgentTaskTools,
-      includeDecisionTaskTools,
+      externalAppsInUse,
+      includeAppsToolset,
+      includeMiningDriverTools,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,7 +694,12 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.appsToolsetAccess ?? appsToolsetAccessCached)(token),
+      (options.miningAccess ?? miningAccessCached)(token),
     ])
+    // An externally driven mining round is claimed, heartbeated and closed
+    // through the decision-task tools, so an autonomous app lists them too.
+    const includeDecisionTaskTools = externalAppsInUse || includeMiningDriverTools
     const mcpServer = createServer({
       tokenProvider: () => token,
       includeGrowthTools,
@@ -692,6 +715,8 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeAppsToolset,
+      includeMiningDriverTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

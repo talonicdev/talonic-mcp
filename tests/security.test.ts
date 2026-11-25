@@ -44,6 +44,8 @@ const allProbesOff = {
   processesAccess: off,
   agentTasksAccess: off,
   decisionTasksAccess: off,
+  appsToolsetAccess: off,
+  miningAccess: off,
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {

@@ -22,6 +22,8 @@ import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
+import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -109,6 +111,8 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    appsToolsetAnswer,
+    miningAnswer,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -121,7 +125,12 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeAppsToolsetAccess(apiKey, baseUrl),
+    probeMiningInUse(apiKey, baseUrl),
   ])
+  // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
+  const includeAppsToolset = appsToolsetAnswer === true
+  const includeMiningDriverTools = miningAnswer === true
   const server = createServer({
     apiKey,
     ...(baseUrl ? { baseUrl } : {}),
@@ -136,6 +145,8 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeAppsToolset,
+    includeMiningDriverTools,
   })
 
   const transport = new StdioServerTransport()

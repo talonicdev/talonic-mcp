@@ -27,6 +27,8 @@ import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerAppsTools } from "./tools/apps.js"
+import { registerAppsToolset } from "./tools/apps-toolset.js"
+import { registerMiningDriverTools } from "./tools/mining-driver.js"
 import { registerDecisionTaskTools } from "./tools/decision-tasks.js"
 import { registerToMarkdown } from "./tools/to-markdown.js"
 import { registerFieldTools } from "./tools/fields.js"
@@ -210,9 +212,27 @@ export interface CreateServerOptions {
 
   /**
    * Register the seven decision-task tools. The hosted entrypoint sets this
-   * only for workspaces with an External-mode app. Defaults to true.
+   * only for workspaces with an External-mode app (or an autonomous app,
+   * whose externally driven rounds are claimed and closed through them).
+   * Defaults to true.
    */
   includeDecisionTaskTools?: boolean
+
+  /**
+   * Register the 25 Apps toolset tools (build, publish, run, results,
+   * Human Reviews). Callers set this only after `probeAppsToolsetAccess`
+   * passed (`GET /v1/apps` → 200). Listing visibility only; the platform
+   * checks the tier, role and per-app grants on every call. Defaults to false.
+   */
+  includeAppsToolset?: boolean
+
+  /**
+   * Register the six `talonic_mining_*` round tools. Callers set this only
+   * after `probeMiningInUse` passed (the workspace has an autonomous app).
+   * The three decide-tier ones follow `decisionTasksInvocable`. Defaults to
+   * false.
+   */
+  includeMiningDriverTools?: boolean
 }
 
 /**
@@ -227,6 +247,8 @@ export function buildServerInstructions(opts: {
   includeGenericExecutor: boolean
   includeAgentTaskTools?: boolean
   includeDecisionTaskTools?: boolean
+  includeAppsToolset?: boolean
+  includeMiningDriverTools?: boolean
 }): string {
   return [
     "Talonic turns unstructured documents (PDFs, scans, images, DOCX, emails) into",
@@ -275,6 +297,20 @@ export function buildServerInstructions(opts: {
           "talonic_submit_decision_task, or release or fail the task. They need the",
           "apps:decide consent and a senior_member role or above; on HTTP 403 tell the user",
           "which consent or role is missing instead of retrying.",
+        ]
+      : []),
+    ...(opts.includeAppsToolset
+      ? [
+          "To build an app: talonic_create_app -> talonic_save_app_draft ->",
+          "talonic_interpret_app_rules -> talonic_publish_app -> talonic_run_app (dry_run first) ->",
+          "talonic_get_app_run or talonic_get_run_verdicts -> talonic_check_app_acceptance.",
+          "Human Reviews: talonic_list_app_reviews -> talonic_resolve_app_review.",
+        ]
+      : []),
+    ...(opts.includeMiningDriverTools
+      ? [
+          "A rule-finding round waiting for an outside driver is claimed and closed with the",
+          "decision-task tools; in between, call its tools with talonic_mining_call_round_tool.",
         ]
       : []),
     "Tools that change workspace data (saving schemas, app updates, decisions) should only",
@@ -377,6 +413,8 @@ export function createServer(options: CreateServerOptions): McpServer {
         includeGenericExecutor: options.includeGenericExecutor !== false,
         includeAgentTaskTools: options.includeAgentTaskTools !== false,
         includeDecisionTaskTools: options.includeDecisionTaskTools !== false,
+        includeAppsToolset: options.includeAppsToolset === true,
+        includeMiningDriverTools: options.includeMiningDriverTools === true,
       }),
     },
   )
@@ -424,6 +462,14 @@ export function createServer(options: CreateServerOptions): McpServer {
   registerAppsTools(server, rawToken, baseUrl)
   if (includeDecisionTaskTools) {
     registerDecisionTaskTools(server, rawToken, baseUrl, {
+      invocable: options.decisionTasksInvocable !== false,
+    })
+  }
+  if (options.includeAppsToolset) {
+    registerAppsToolset(server, rawToken, baseUrl)
+  }
+  if (options.includeMiningDriverTools) {
+    registerMiningDriverTools(server, rawToken, baseUrl, {
       invocable: options.decisionTasksInvocable !== false,
     })
   }
