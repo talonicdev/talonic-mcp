@@ -45,6 +45,8 @@ import { createServer } from "./server-factory.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
+import { probeGroup } from "./tools/_groups.js"
+import { TOOL_GROUPS } from "./tools/tool-groups.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -121,6 +123,19 @@ export const agentTasksAccessCached = makeAccessCache((t) => probeAgentTasksInUs
  * @internal Exported for tests.
  */
 export const decisionTasksAccessCached = makeAccessCache((t) => probeExternalAppsInUse(t, base()))
+
+/** One access cache per probe-gated tool group (`src/tools/tool-groups.ts`). */
+const toolGroupCaches = TOOL_GROUPS.map(
+  (g) => [g.key, makeAccessCache((t) => probeGroup(g, t, base()))] as const,
+)
+/**
+ * The keys of the tool groups this token may list, each from its own
+ * per-token 5-minute cache. @internal Exported for tests.
+ */
+export async function toolGroupsAccessCached(token: string): Promise<string[]> {
+  const answers = await Promise.all(toolGroupCaches.map(([, cached]) => cached(token)))
+  return toolGroupCaches.filter((_, i) => answers[i]).map(([key]) => key)
+}
 
 /** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
 const MAX_BODY_BYTES = 64 * 1024 * 1024
@@ -364,6 +379,8 @@ export interface CreateRequestHandlerOptions {
   priceBaselineAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
+  /** Override the probe-gated tool group visibility check: the keys to list (primarily for tests). */
+  toolGroupsAccess?: (token: string) => Promise<readonly string[]>
   /** Override the credential check that answers 401 (primarily for tests). */
   tokenAccepted?: (token: string) => Promise<boolean>
 }
@@ -662,6 +679,7 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      toolGroups,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,6 +694,7 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.toolGroupsAccess ?? toolGroupsAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -692,6 +711,7 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      toolGroups,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
