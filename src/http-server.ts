@@ -45,6 +45,11 @@ import { createServer } from "./server-factory.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
+import {
+  OPERATIONS_FAMILIES,
+  probeOperationsFamily,
+  type OperationsFamily,
+} from "./tools/workspace-operations.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -121,6 +126,35 @@ export const agentTasksAccessCached = makeAccessCache((t) => probeAgentTasksInUs
  * @internal Exported for tests.
  */
 export const decisionTasksAccessCached = makeAccessCache((t) => probeExternalAppsInUse(t, base()))
+
+/**
+ * Scope-catalog scopes the workspace operation tools need: `runs:read` /
+ * `runs:write` (Spec-run operations), `reviews:write` (choosing a group's base
+ * document), `documents:write` (organising, collections, document types,
+ * processing a duplicate), `workspace:read` / `workspace:write` (ingest
+ * settings). `documents:read` is already advertised.
+ */
+const OPERATIONS_SCOPES = [
+  "runs:read",
+  "runs:write",
+  "reviews:write",
+  "documents:write",
+  "workspace:read",
+  "workspace:write",
+]
+
+/** One access cache per workspace operation family (same TTL and unknown-answer rule). */
+const operationsFamilyCaches = OPERATIONS_FAMILIES.map(
+  (f) => [f.key, makeAccessCache((t) => probeOperationsFamily(f, t, base()))] as const,
+)
+/**
+ * The workspace operation families this credential can use.
+ * @internal Exported for tests.
+ */
+export async function operationsAccessCached(token: string): Promise<OperationsFamily[]> {
+  const answers = await Promise.all(operationsFamilyCaches.map(([, cached]) => cached(token)))
+  return operationsFamilyCaches.filter((_, i) => answers[i]).map(([key]) => key)
+}
 
 /** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
 const MAX_BODY_BYTES = 64 * 1024 * 1024
@@ -237,6 +271,11 @@ const GLAMA_CLAIM_TOKEN =
  * The Talonic authorization server supports more scopes than this; we
  * advertise only what the connector itself needs so the consent screen
  * stays tight.
+ *
+ * {@link OPERATIONS_SCOPES} are the scope-catalog names the workspace
+ * operation tools need. Requesting any of them makes the grant a catalog
+ * grant, where catalog names mean exactly themselves; the legacy names above
+ * keep their meaning, so the existing tools are unaffected.
  */
 function renderProtectedResourceMetadata(resourcePath = ""): {
   resource: string
@@ -247,7 +286,13 @@ function renderProtectedResourceMetadata(resourcePath = ""): {
   return {
     resource: `${RESOURCE_URL}${resourcePath}`,
     authorization_servers: [AUTHORIZATION_SERVER],
-    scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
+    scopes_supported: [
+      "extract:write",
+      "documents:read",
+      "schemas:read",
+      DECIDE_SCOPE,
+      ...OPERATIONS_SCOPES,
+    ],
     bearer_methods_supported: ["header"],
   }
 }
@@ -362,6 +407,8 @@ export interface CreateRequestHandlerOptions {
   submissionsAccess?: (token: string) => Promise<boolean>
   /** Override the Price Baseline tool visibility check (primarily for tests). */
   priceBaselineAccess?: (token: string) => Promise<boolean>
+  /** Override the workspace operation family checks (primarily for tests). */
+  operationsAccess?: (token: string) => Promise<OperationsFamily[]>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
   /** Override the credential check that answers 401 (primarily for tests). */
@@ -662,6 +709,7 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      operationsFamilies,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,6 +724,7 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.operationsAccess ?? operationsAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -692,6 +741,7 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      operationsFamilies,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

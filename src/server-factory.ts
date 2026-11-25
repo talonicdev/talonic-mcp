@@ -34,6 +34,7 @@ import { registerAgentRegistryTools } from "./tools/agent-tools.js"
 import { registerSpecTools } from "./tools/specs.js"
 import { registerRunTools } from "./tools/run.js"
 import { registerAskTools } from "./tools/ask.js"
+import { registerOperationsTools, type OperationsFamily } from "./tools/workspace-operations.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -179,6 +180,14 @@ export interface CreateServerOptions {
    * Baseline app never lists tools that would 404. Listing visibility only.
    */
   includePriceBaselineTools?: boolean
+
+  /**
+   * The workspace operation families to register (Spec-run operations, ingest
+   * operations, document organising, collections, saved filters, document
+   * types). Callers pass the families whose probe passed
+   * (`probeOperationsFamilies`). Listing visibility only. Defaults to none.
+   */
+  operationsFamilies?: readonly OperationsFamily[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -459,6 +468,10 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
+  }
+
+  if (options.operationsFamilies?.length) {
+    registerOperationsTools(server, rawToken, baseUrl, options.operationsFamilies)
   }
 
   // Resource registrations.

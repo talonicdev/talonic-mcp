@@ -24,6 +24,7 @@ import { MCP_NAV_SECTIONS } from "./seo"
 import { sections as overview } from "./sections/overview"
 import { sections as install } from "./sections/install"
 import { sections as tools } from "./sections/tools"
+import { sections as operations } from "./sections/operations"
 import { sections as features } from "./sections/features"
 import { sections as configuration } from "./sections/configuration"
 import { sections as troubleshooting } from "./sections/troubleshooting"
@@ -36,6 +37,7 @@ const ALL_RAW: RawSection[] = [
   ...overview,
   ...install,
   ...tools,
+  ...operations,
   ...features,
   ...configuration,
   ...troubleshooting,

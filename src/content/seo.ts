@@ -70,6 +70,18 @@ export const MCP_NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: "operations",
+    label: "Workspace Operations",
+    children: [
+      { id: "pipeline-operations", label: "Spec run operations" },
+      { id: "ingest-operations", label: "Ingest operations" },
+      { id: "document-organising", label: "Document organising" },
+      { id: "collections", label: "Collections" },
+      { id: "saved-filters", label: "Saved filters" },
+      { id: "document-types", label: "Document types" },
+    ],
+  },
+  {
     id: "features",
     label: "Features",
     children: [

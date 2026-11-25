@@ -26,6 +26,7 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       priceBaselineAccess: async () => false,
       agentTasksAccess: async () => true,
       decisionTasksAccess: async () => true,
+      operationsAccess: async () => [],
       tokenAccepted: async () => true,
       ...options,
     }),
@@ -186,6 +187,12 @@ describe("HTTP server routing", () => {
       "documents:read",
       "schemas:read",
       "apps:decide",
+      "runs:read",
+      "runs:write",
+      "reviews:write",
+      "documents:write",
+      "workspace:read",
+      "workspace:write",
     ])
   })
 
