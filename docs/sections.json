@@ -12330,6 +12330,12 @@
             "type": "string[]",
             "required": false,
             "description": "Tags of the new document; default the existing one's."
+          },
+          {
+            "name": "idempotency_key",
+            "type": "string",
+            "required": false,
+            "description": "A unique string for this request; send the same one when retrying so only one copy is made."
           }
         ]
       },

@@ -64,12 +64,19 @@ export async function apiJson<T = unknown>(
   baseUrl: string | undefined,
   method: HttpMethod,
   path: string,
-  opts: { params?: QueryParams; body?: unknown; signal?: AbortSignal } = {},
+  opts: {
+    params?: QueryParams
+    body?: unknown
+    signal?: AbortSignal
+    /** Extra request headers (e.g. `Idempotency-Key`); never overrides the auth headers. */
+    headers?: Record<string, string>
+  } = {},
 ): Promise<T> {
   const url = buildUrl(baseUrl, path, opts.params)
   const res = await resolveFetch(getToken)(url, {
     method,
     headers: {
+      ...(opts.headers ?? {}),
       Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
       ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),

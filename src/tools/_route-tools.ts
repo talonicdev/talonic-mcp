@@ -70,6 +70,8 @@ export interface RouteTool {
   query?: string[]
   /** Arguments sent in the JSON body (only those given). */
   body?: string[]
+  /** Arguments sent as request headers: argument name → header name. */
+  headers?: Record<string, string>
   /** A check before calling: a message refuses the call at the MCP layer. */
   validate?: (args: Record<string, unknown>) => string | null
   /** A tool whose call is not a plain JSON round-trip. */
@@ -134,10 +136,15 @@ export async function callRouteTool(
   } else if (method === "POST" || method === "PATCH" || method === "PUT") {
     body = {}
   }
+  const headers: Record<string, string> = {}
+  for (const [arg, header] of Object.entries(tool.headers ?? {})) {
+    if (typeof args[arg] === "string" && args[arg] !== "") headers[header] = args[arg] as string
+  }
   return runTool(() =>
     apiJson(ctx.getToken, ctx.baseUrl, method, fillPath(path, args), {
       params,
       ...(body !== undefined ? { body } : {}),
+      ...(Object.keys(headers).length ? { headers } : {}),
     }),
   )
 }

@@ -491,6 +491,22 @@ describe("workspace operation tools: route, verb and body", () => {
     else expect(c.body).toEqual(body)
   })
 
+  it("process_duplicate sends idempotency_key as the Idempotency-Key header, never in the body", async () => {
+    const { fetchMock, call } = stub()
+    const t = tools()
+    await t.talonic_ingest_process_duplicate.handler({
+      existing_document_id: DOC,
+      idempotency_key: "retry-1",
+    })
+    await t.talonic_ingest_process_duplicate.handler({ existing_document_id: DOC })
+    const h = (n: number) =>
+      new Headers((fetchMock.mock.calls[n] as [string, RequestInit])[1].headers)
+    expect(h(0).get("idempotency-key")).toBe("retry-1")
+    expect(call(0).body).toEqual({ existing_document_id: DOC })
+    expect(h(0).get("authorization")).toBe("Bearer tlnc_test")
+    expect(h(1).get("idempotency-key")).toBeNull()
+  })
+
   it("collections_list and document_types_pending pick their route from an argument", async () => {
     const { call } = stub()
     const t = tools()

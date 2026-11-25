@@ -51,6 +51,7 @@ export const INGEST_OPERATION_TOOLS: readonly RouteTool[] = [
     title: "Process a skipped duplicate anyway",
     description: [
       "Create a new document for an upload that was skipped as a duplicate. It reuses the existing document's content and values (the file is not read again). The existing document must be visible to the key's person. Needs the ingest permission.",
+      "Pass `idempotency_key` (any unique string, reused on retries) to make a retry safe: the same key within 24 hours returns the first copy instead of creating another. The same key for another document is refused (409).",
       "RETURNS: { document { id, filename, status } }.",
       REFUSALS,
     ].join("\n"),
@@ -72,8 +73,17 @@ export const INGEST_OPERATION_TOOLS: readonly RouteTool[] = [
         .max(50)
         .optional()
         .describe("Tags of the new document; default the existing one's."),
+      idempotency_key: z
+        .string()
+        .min(1)
+        .max(255)
+        .optional()
+        .describe(
+          "A unique string for this request; send the same one when retrying so only one copy is made.",
+        ),
     },
     body: ["existing_document_id", "filename", "source_connection_id", "tags"],
+    headers: { idempotency_key: "Idempotency-Key" },
     annotations: write(false),
   },
 ]
