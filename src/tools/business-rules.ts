@@ -85,7 +85,7 @@ const OUTCOMES_DESCRIPTION = [
   "NOT FOR: counts only (talonic_business_rules_get has the tally).",
   "",
   "ARGS: `id` (rule uuid), `status` passed|failed|indeterminate|not_applicable|evaluation_error, `limit` (the platform caps it), `offset`.",
-  "RETURNS: { total, items[] { subject, status, revision, reason, evidence[], binding_id, owner_name, updated_at } }.",
+  "RETURNS: { total, items[] { subject, status, revision, reason, evidence[], binding_id, owner_name, since (when the result in force was decided), updated_at (last checked), as_of, data_as_of, evaluated_at, cause } }.",
 ].join("\n")
 
 export const outcomesInputSchema = {
