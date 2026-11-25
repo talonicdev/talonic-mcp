@@ -42,6 +42,7 @@ const allProbesOff = {
   priceBaselineAccess: off,
   portfolioAccess: off,
   processesAccess: off,
+  specAuthoringAccess: off,
   agentTasksAccess: off,
   decisionTasksAccess: off,
 }
@@ -142,6 +143,7 @@ describe("a rejected credential does not fan out", () => {
         priceBaselineAccess: probe,
         portfolioAccess: probe,
         processesAccess: probe,
+        specAuthoringAccess: probe,
         agentTasksAccess: probe,
         decisionTasksAccess: probe,
         tokenAccepted: off,

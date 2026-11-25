@@ -106,6 +106,8 @@ export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
 /** @internal Exported for tests. */
 export const processesAccessCached = makeAccessCache(pathProbe("/v1/processes"))
 /** @internal Exported for tests. */
+export const specAuthoringAccessCached = makeAccessCache(pathProbe("/v1/specs/authoring"))
+/** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
 export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
@@ -353,6 +355,8 @@ export interface CreateRequestHandlerOptions {
   portfolioAccess?: (token: string) => Promise<boolean>
   /** Override the Process Plane tool visibility check (primarily for tests). */
   processesAccess?: (token: string) => Promise<boolean>
+  /** Override the Spec authoring tool visibility check (primarily for tests). */
+  specAuthoringAccess?: (token: string) => Promise<boolean>
   /** Override the Agent-stage task tool visibility check (primarily for tests). */
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
@@ -660,6 +664,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeSpecAuthoringTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
     ] = await Promise.all([
@@ -674,6 +679,7 @@ export function createRequestHandler(
       (options.priceBaselineAccess ?? priceBaselineAccessCached)(token),
       (options.portfolioAccess ?? portfolioAccessCached)(token),
       (options.processesAccess ?? processesAccessCached)(token),
+      (options.specAuthoringAccess ?? specAuthoringAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
     ])
@@ -690,6 +696,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeSpecAuthoringTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),

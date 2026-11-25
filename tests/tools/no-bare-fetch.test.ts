@@ -34,6 +34,7 @@ const ALLOWLISTED_PROBES: Record<string, string> = {
   "price-baseline.ts": "probePriceBaselineAccess",
   "portfolio.ts": "probePortfolioAccess",
   "processes.ts": "probeProcessesAccess",
+  "spec-authoring.ts": "probeSpecAuthoringAccess",
   "_http.ts": "probeAccessState",
 }
 

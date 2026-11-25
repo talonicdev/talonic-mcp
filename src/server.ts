@@ -22,6 +22,7 @@ import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeSpecAuthoringAccess } from "./tools/spec-authoring.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -109,6 +110,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -121,6 +123,7 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeSpecAuthoringAccess(apiKey, baseUrl),
   ])
   const server = createServer({
     apiKey,
@@ -136,6 +139,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
   })
 
   const transport = new StdioServerTransport()
