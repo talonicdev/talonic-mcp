@@ -46,6 +46,7 @@ import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
 import { isOriginAllowed } from "./origin.js"
+import { GOVERNANCE_PROBES } from "./tools/governance.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
 import { SERVER_NAME, VERSION } from "./version.js"
@@ -105,6 +106,12 @@ export const docGenAccessCached = makeAccessCache(pathProbe("/v1/doc-gen/status"
 export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
 /** @internal Exported for tests. */
 export const processesAccessCached = makeAccessCache(pathProbe("/v1/processes"))
+/** @internal Exported for tests. */
+export const teamAdminAccessCached = makeAccessCache(pathProbe(GOVERNANCE_PROBES.team))
+/** @internal Exported for tests. */
+export const recordsAdminAccessCached = makeAccessCache(pathProbe(GOVERNANCE_PROBES.records))
+/** @internal Exported for tests. */
+export const workspaceAccessCached = makeAccessCache(pathProbe(GOVERNANCE_PROBES.workspace))
 /** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
@@ -353,6 +360,12 @@ export interface CreateRequestHandlerOptions {
   portfolioAccess?: (token: string) => Promise<boolean>
   /** Override the Process Plane tool visibility check (primarily for tests). */
   processesAccess?: (token: string) => Promise<boolean>
+  /** Override the team-administration tool visibility check (primarily for tests). */
+  teamAdminAccess?: (token: string) => Promise<boolean>
+  /** Override the records-management tool visibility check (primarily for tests). */
+  recordsAdminAccess?: (token: string) => Promise<boolean>
+  /** Override the workspace tool visibility check (primarily for tests). */
+  workspaceAccess?: (token: string) => Promise<boolean>
   /** Override the Agent-stage task tool visibility check (primarily for tests). */
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
@@ -662,6 +675,9 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeTeamAdminTools,
+      includeRecordsAdminTools,
+      includeWorkspaceTools,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,6 +692,9 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.teamAdminAccess ?? teamAdminAccessCached)(token),
+      (options.recordsAdminAccess ?? recordsAdminAccessCached)(token),
+      (options.workspaceAccess ?? workspaceAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -692,6 +711,9 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeTeamAdminTools,
+      includeRecordsAdminTools,
+      includeWorkspaceTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
