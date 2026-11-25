@@ -22,9 +22,12 @@ import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
+import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAppWorkflowGroups } from "./tools/app-workflows.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { probeToolGroups } from "./tools/tool-groups.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -110,6 +113,9 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    appsToolsetAnswer,
+    miningAnswer,
+    toolGroups,
     appWorkflowGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
@@ -123,8 +129,14 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeAppsToolsetAccess(apiKey, baseUrl),
+    probeMiningInUse(apiKey, baseUrl),
+    probeToolGroups(apiKey, baseUrl),
     probeAppWorkflowGroups(apiKey, baseUrl),
   ])
+  // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
+  const includeAppsToolset = appsToolsetAnswer === true
+  const includeMiningDriverTools = miningAnswer === true
   const server = createServer({
     apiKey,
     ...(baseUrl ? { baseUrl } : {}),
@@ -139,6 +151,9 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeAppsToolset,
+    includeMiningDriverTools,
+    toolGroups,
     appWorkflowGroups,
   })
 

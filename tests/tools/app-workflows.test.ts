@@ -7,6 +7,7 @@ import {
   probeAppWorkflowGroup,
   probeAppWorkflowGroups,
 } from "../../src/tools/app-workflows"
+import { TOOL_GROUP_KEYS } from "../../src/tools/tool-groups"
 
 const ALL_IDS = APP_WORKFLOW_GROUPS.map((g) => g.id)
 const ALL_TOOLS = APP_WORKFLOW_GROUPS.flatMap((g) => g.tools)
@@ -14,7 +15,7 @@ const tool = (name: string) => ALL_TOOLS.find((t) => t.name === name)!
 
 // Public text names no models, vendors or internal mechanics (docs plan §0).
 const DENYLIST =
-  /\b(llm|claude|haiku|sonnet|opus|mistral|openai|anthropic|prompt|embedding|vector|cluster|ontolog|semantic layer|pipeline phase|n-shot|nshot|sheet capture|spec2|dataspace)\b/i
+  /\b(llms?|gpt|openai|anthropic|gemini|mistral|azure|textract|claude|haiku|sonnet|opus|ai models?|language models?|embeddings?|vectors?|n-shot|few-shot|nshot|clusters?|ontolog\w*|semantic layer|prompts?|tiers?|indexe?s?|reindex\w*|pipeline phases?|wzb|sheet capture|spec2|dataspace)\b/i
 
 function stubFetch(respond: (url: string, init: RequestInit) => Response) {
   const calls: Array<{ url: string; init: RequestInit }> = []
@@ -58,6 +59,9 @@ describe("app workflow tools", () => {
         includePartiesTools: true,
         includeMasterRecordsTools: true,
         includeSubmissionsTools: true,
+        includeAppsToolset: true,
+        includeMiningDriverTools: true,
+        toolGroups: TOOL_GROUP_KEYS,
       }),
     ).not.toThrow()
   })

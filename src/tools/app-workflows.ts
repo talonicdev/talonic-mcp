@@ -1036,7 +1036,7 @@ const MONEY_FOUND: AppWorkflowGroup = {
       name: "talonic_money_found_structure_clauses",
       title: "Read clause numbers",
       description: d(
-        "Read tiers, rates and dates out of the configured contracts' clause text and save them into the configuration.",
+        "Read rebate steps, rates and dates out of the configured contracts' clause text and save them into the configuration.",
         "USE WHEN: after confirming a configuration, so rebate and commitment levers run.",
         "NOT FOR: cost bearers (talonic_money_found_cost_clauses).",
         "ARGS: none. Needs apps:money-found:write; 422 without a configuration.",
