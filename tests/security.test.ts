@@ -31,6 +31,7 @@ function closeServer(server: Server): Promise<void> {
 }
 
 const allProbesOff = {
+  toolGroupsAccess: async () => [],
   growthAccess: off,
   adminAgentTaskAccess: off,
   contractsAccess: off,
@@ -45,6 +46,8 @@ const allProbesOff = {
   specAuthoringAccess: off,
   agentTasksAccess: off,
   decisionTasksAccess: off,
+  appsToolsetAccess: off,
+  miningAccess: off,
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {
