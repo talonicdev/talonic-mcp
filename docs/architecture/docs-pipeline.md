@@ -122,7 +122,9 @@ When something authenticated breaks, check (in order): (1) the secret value (did
 
 …changed in the push, but `docs/sections.json` did not. **Opt out** with `[skip docs]` in any commit message in the push, used only for genuinely-non-doc-affecting changes (refactors, internal-only fixes, CI infrastructure, debug instrumentation).
 
-⚠️ **The guard watches `docs/sections.json`, which feeds the SDK/API/Platform docs surface — *not* the MCP docs surface.** It is an existing safety net for that surface, retained because it has caught real drift there. It does **NOT** enforce that `src/content/sections/*.ts` was updated when MCP tools change. That second guard could be added in the future but does not exist today — for MCP tools, discipline + this doc are the only enforcement.
+⚠️ **The guard watches `docs/sections.json`, the dormant mirror — *not* the rendered MCP docs surface.** The rendered surface has its own lock since 2026-11-25: `tests/content/tool-sections.test.ts` (run by `npm test` in CI and in the publish job) fails when a tool is documented only in `docs/sections.json` (every `talonic_*` mirror entry needs a section in `src/content/sections/*.ts` and a nav entry), when a public widget tool lacks a rendered section, or when a `talonic_process_*` page's parameter table drifts from the tool's input schema. The 21 process tools live in `src/content/sections/processes.ts`.
+
+**Route-drift guard.** `npm run check:routes` (`scripts/check-routes.mjs`, in `ci.yml` and before publishing in `publish.yml`) fails when a `/v1/...` route string in `src/tools/**` is not an operation of the live public spec, with a pinned fallback (`scripts/openapi-routes.pinned.json`). Documented gaps go in `scripts/route-gaps.json` with a reason; `tests/tools/route-branches.test.ts` checks every request each tool and each argument-picked branch actually sends.
 
 ## File pointers (quick reference)
 

@@ -26,6 +26,7 @@ import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
+import { probeToolGroups } from "./tools/tool-groups.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -113,6 +114,7 @@ export async function main(
     includeProcessesTools,
     appsToolsetAnswer,
     miningAnswer,
+    toolGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -127,6 +129,7 @@ export async function main(
     probeProcessesAccess(apiKey, baseUrl),
     probeAppsToolsetAccess(apiKey, baseUrl),
     probeMiningInUse(apiKey, baseUrl),
+    probeToolGroups(apiKey, baseUrl),
   ])
   // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
   const includeAppsToolset = appsToolsetAnswer === true
@@ -147,6 +150,7 @@ export async function main(
     includeProcessesTools,
     includeAppsToolset,
     includeMiningDriverTools,
+    toolGroups,
   })
 
   const transport = new StdioServerTransport()

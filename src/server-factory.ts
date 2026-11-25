@@ -36,6 +36,7 @@ import { registerAgentRegistryTools } from "./tools/agent-tools.js"
 import { registerSpecTools } from "./tools/specs.js"
 import { registerRunTools } from "./tools/run.js"
 import { registerAskTools } from "./tools/ask.js"
+import { registerToolGroups } from "./tools/tool-groups.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -181,6 +182,17 @@ export interface CreateServerOptions {
    * Baseline app never lists tools that would 404. Listing visibility only.
    */
   includePriceBaselineTools?: boolean
+
+  /**
+   * Keys of the probe-gated tool groups to register (`src/tools/tool-groups.ts`:
+   * `data_management`, `events`, `aggregate`, `admin`, `contract_desk`,
+   * `transport_folders`, `compliance`, `money_found`, `customs_declaration`).
+   * Callers pass only the keys whose probe passed for the session's
+   * credential (`probeToolGroups` at stdio boot, `toolGroupsAccessCached`
+   * hosted). Listing visibility only; the platform authorizes every call.
+   * Defaults to none.
+   */
+  toolGroups?: readonly string[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -505,6 +517,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
+  }
+  if (options.toolGroups?.length) {
+    registerToolGroups(server, options.toolGroups, rawToken, baseUrl)
   }
 
   // Resource registrations.
