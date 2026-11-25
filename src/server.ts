@@ -17,6 +17,7 @@ import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
+import { probeBusinessRulesAccess } from "./tools/business-rules.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
@@ -108,6 +109,7 @@ export async function main(
     includeDocGenTools,
     includePartiesTools,
     includeMasterRecordsTools,
+    includeBusinessRulesTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
     includePortfolioTools,
@@ -123,6 +125,7 @@ export async function main(
     probeDocGenAccess(apiKey, baseUrl),
     probePartiesAccess(apiKey, baseUrl),
     probeMasterRecordsAccess(apiKey, baseUrl),
+    probeBusinessRulesAccess(apiKey, baseUrl),
     probeSubmissionsAccess(apiKey, baseUrl),
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
@@ -144,6 +147,7 @@ export async function main(
     includeDocGenTools,
     includePartiesTools,
     includeMasterRecordsTools,
+    includeBusinessRulesTools,
     includeSubmissionsTools,
     includePriceBaselineTools,
     includePortfolioTools,

@@ -30,6 +30,7 @@ const ALLOWLISTED_PROBES: Record<string, string> = {
   "doc-gen.ts": "probeDocGenAccess",
   "parties.ts": "probePartiesAccess",
   "master-records.ts": "probeMasterRecordsAccess",
+  "business-rules.ts": "probeBusinessRulesAccess",
   "submissions.ts": "probeSubmissionsAccess",
   "price-baseline.ts": "probePriceBaselineAccess",
   "portfolio.ts": "probePortfolioAccess",

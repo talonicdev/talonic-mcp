@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
 
+### Added
+
+- **`talonic_business_rules_*` tools (3), registered where the platform serves the central rule store.** Read-only over `/v1/business-rules/*`: `list` (rules with bindings, triggers and outcome counts; filters: query, status, limit, offset), `get` (one rule: text, interpretation, bindings, revisions with origins, latest outcome changes), `outcomes` (current outcome per subject with reason and evidence; filter: status). Probe-gated on `GET /v1/business-rules?limit=1` → 200.
+
 ## [0.1.106] - 2026-11-25
 
 ### Changed

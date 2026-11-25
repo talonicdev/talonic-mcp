@@ -106,6 +106,8 @@ export const apAccessCached = makeAccessCache(pathProbe("/v1/ap/config"))
 /** @internal Exported for tests. */
 export const masterRecordsAccessCached = makeAccessCache(pathProbe("/v1/master-records/config"))
 /** @internal Exported for tests. */
+export const businessRulesAccessCached = makeAccessCache(pathProbe("/v1/business-rules?limit=1"))
+/** @internal Exported for tests. */
 export const submissionsAccessCached = makeAccessCache(pathProbe("/v1/submissions/specs"))
 /** @internal Exported for tests. */
 export const priceBaselineAccessCached = makeAccessCache(pathProbe("/v1/price-baseline/indices"))
@@ -396,6 +398,8 @@ export interface CreateRequestHandlerOptions {
   miningAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
+  /** Override the Business Rules tool visibility check (primarily for tests). */
+  businessRulesAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
   /** Override the Price Baseline tool visibility check (primarily for tests). */
   priceBaselineAccess?: (token: string) => Promise<boolean>
@@ -695,6 +699,7 @@ export function createRequestHandler(
       includeDocGenTools,
       includePartiesTools,
       includeMasterRecordsTools,
+      includeBusinessRulesTools,
       includeSubmissionsTools,
       includePriceBaselineTools,
       includePortfolioTools,
@@ -712,6 +717,7 @@ export function createRequestHandler(
       (options.docGenAccess ?? docGenAccessCached)(token),
       (options.partiesAccess ?? partiesAccessCached)(token),
       (options.masterRecordsAccess ?? masterRecordsAccessCached)(token),
+      (options.businessRulesAccess ?? businessRulesAccessCached)(token),
       (options.submissionsAccess ?? submissionsAccessCached)(token),
       (options.priceBaselineAccess ?? priceBaselineAccessCached)(token),
       (options.portfolioAccess ?? portfolioAccessCached)(token),
@@ -734,6 +740,7 @@ export function createRequestHandler(
       includeDocGenTools,
       includePartiesTools,
       includeMasterRecordsTools,
+      includeBusinessRulesTools,
       includeSubmissionsTools,
       includePriceBaselineTools,
       includePortfolioTools,

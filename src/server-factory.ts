@@ -23,6 +23,7 @@ import { registerPartiesTools } from "./tools/parties.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
+import { registerBusinessRulesTools } from "./tools/business-rules.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
@@ -168,6 +169,12 @@ export interface CreateServerOptions {
    * Records app never lists tools that would 404. Listing visibility only.
    */
   includeMasterRecordsTools?: boolean
+  /**
+   * Register the read-only `talonic_business_rules_*` tools. Callers set this
+   * only after `probeBusinessRulesAccess` passed, so a platform without the
+   * `/v1/business-rules` routes never lists tools that would 404.
+   */
+  includeBusinessRulesTools?: boolean
 
   /**
    * Register the `talonic_submissions_*` tools. Callers set this only after
@@ -511,6 +518,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
+  }
+  if (options.includeBusinessRulesTools) {
+    registerBusinessRulesTools(server, rawToken, baseUrl)
   }
   if (options.includeSubmissionsTools) {
     registerSubmissionsTools(server, rawToken, baseUrl)
