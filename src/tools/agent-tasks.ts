@@ -61,9 +61,7 @@ export const outputs = z
     "Output field key to { value, confidence?, reasoning?, escalate?, quote?, document_id? }. Use only declared fields.",
   )
 
-const pipelineId = zUuid()
-  .optional()
-  .describe("Optional pipeline (run) UUID: only that pipeline's tasks.")
+const pipelineId = zUuid().optional().describe("Optional run UUID: only that run's tasks.")
 const listInput = { status, limit, cursor, pipeline_id: pipelineId }
 const idInput = { task_id: taskId }
 const heartbeatInput = { task_id: taskId, execution_epoch: executionEpoch }
@@ -371,39 +369,39 @@ const MUTATING = {
 
 const DESCRIPTIONS = {
   list: [
-    "List Agent-stage tasks visible to this Talonic workspace credential.",
+    "List the agent tasks waiting in this workspace: checks a Spec hands to an outside agent (your agent) instead of a person, one per document.",
     "",
-    "USE WHEN: looking for external-agent work to process; begin with status 'available'. To take a batch of one pipeline (e.g. 'take 10 tasks of pipeline X'), list with pipeline_id and status 'available', then claim each with talonic_claim_agent_task; a task another agent took returns HTTP 409, so skip it and take the next.",
+    "USE WHEN: looking for work for your agent to do; begin with status 'available'. To take a batch from one run (e.g. 'take 10 tasks of run X'), list with pipeline_id and status 'available', then claim each with talonic_claim_agent_task; a task another agent took returns HTTP 409, so skip it and take the next.",
     "NOT FOR: reading the immutable task payload (use talonic_get_agent_task) or taking a lease (use talonic_claim_agent_task).",
     "ARGS: optional status, pipeline_id, limit, and cursor. RETURNS: metadata only plus pagination.next_cursor.",
   ].join("\n"),
   get: [
-    "Fetch one Agent-stage task's immutable input snapshot, instructions, and declared output contract. This disclosure is audited.",
+    "Read one agent task: its fixed input, instructions, and the output fields it expects. Each read is recorded against the task.",
     "",
     "USE WHEN: inspecting a listed task before deciding whether to process it.",
     "NOT FOR: acquiring the task (use talonic_claim_agent_task) or returning results (use talonic_submit_agent_task).",
     "ARGS: task_id. RETURNS: metadata, input_snapshot, output_contract, instructions, and timeout_fallthrough.",
   ].join("\n"),
   claim: [
-    "Claim an available Agent-stage task, or reclaim it after its lease expires.",
+    "Claim an available agent task so no one else works on it, or reclaim it after its lease expires.",
     "",
     "USE WHEN: ready to process a task. Save the returned execution_epoch and lease_expires_at.",
     "NOT FOR: merely inspecting work (use talonic_get_agent_task) or extending an active lease (use talonic_heartbeat_agent_task).",
     "A conflicting live claim returns HTTP 409. A successful claim returns the task payload: input_snapshot, instructions, and output_contract, whose entries carry each field's Spec rules (description) and allowed codes (enumValues). Review the documents against those rules.",
   ].join("\n"),
   heartbeat: [
-    "Extend the lease on a claimed Agent-stage task.",
+    "Extend the lease on a claimed agent task so you keep it while you work.",
     "",
     "USE WHEN: processing may continue past lease_expires_at; heartbeat before expiry using the epoch from claim.",
     "NOT FOR: acquiring a task (use talonic_claim_agent_task) or submitting finished outputs (use talonic_submit_agent_task).",
     "ARGS: task_id and execution_epoch. Stale or foreign claims return HTTP 409.",
   ].join("\n"),
   submit: [
-    "Submit declared output fields for a claimed Agent-stage task and resume the parked document.",
+    "Submit the output fields for a claimed agent task; the document then continues through its Spec.",
     "",
     "USE WHEN: processing is complete and every required output in output_contract is ready.",
     "NOT FOR: undeclared fields or partial lease maintenance (use talonic_heartbeat_agent_task).",
-    "ARGS: task_id, execution_epoch, outputs keyed exactly by declared field key, and optional summary. The platform validates all fields and types transactionally before writing anything.",
+    "ARGS: task_id, execution_epoch, outputs keyed exactly by declared field key, and optional summary. Talonic checks every field and type before writing anything: all are saved or none.",
   ].join("\n"),
 } as const
 

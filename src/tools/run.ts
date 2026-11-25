@@ -27,16 +27,16 @@ export function mapRunStatus(raw: unknown): RunStatus {
 }
 
 const RUN_DESCRIPTION = [
-  "Run a Spec — the customer's configured pipeline — over documents, in one call. Two inputs: `document_ids` (documents already in the workspace; for a new file, first talonic_request_upload → poll talonic_get_document until completed) OR `file_urls` (public https files, max 20; Talonic ingests them first). Consumes credits.",
+  "Run one of the workspace's Specs over documents, in one call, and get one structured row per document. Two inputs: `document_ids` (documents already in the workspace; for a new file, first talonic_request_upload → poll talonic_get_document until completed) OR `file_urls` (public https files, max 20; Talonic fetches and reads them first). Consumes credits.",
   "",
-  "USE WHEN: the user wants to 'run the invoice pipeline on these documents', process files through their Spec, or produce the Spec's structured rows.",
+  "USE WHEN: the user wants to 'run the invoice Spec on these documents', process files through their Spec, or produce the Spec's structured rows.",
   "NOT FOR: one-off extraction with an ad-hoc schema (talonic_extract), or checking progress (talonic_get_run) / reading rows (talonic_get_run_results).",
-  "ARGS: `spec_id` (talonic_list_specs); exactly one of `document_ids[]` (1–500) or `file_urls[]` (1–20, https); optional `name`, `pipeline_mode` (`new` default | `append` to the Spec's existing pipeline); `batch_id` and flat `metadata` only with file_urls.",
+  "ARGS: `spec_id` (talonic_list_specs); exactly one of `document_ids[]` (1–500) or `file_urls[]` (1–20, https); optional `name`, `pipeline_mode` (`new` default | `append` to the Spec's current run); `batch_id` and flat `metadata` only with file_urls.",
   "RETURNS: RunEnvelope { run_kind ('pipeline'|'run'), run_id, pipeline_id, spec_id, status ('processing'|'completed'|'failed'), raw_status, input_count, documents?, message?, links }. Then poll talonic_get_run with the `pipeline_id` when run_kind is 'pipeline', or with the `run_id` when it is 'run', every 5–10 s until status is completed/failed, then talonic_get_run_results.",
 ].join("\n")
 
 const GET_RUN_DESCRIPTION = [
-  "Poll a Spec run started by talonic_run_spec: normalised status plus document-level progress and, for pipelines, per-phase progress.",
+  "Poll a Spec run started by talonic_run_spec: normalised status plus progress per document and, for run_kind 'pipeline', per step.",
   "",
   "USE WHEN: waiting for a run to finish — poll every 5–10 s; stop on `completed` or `failed`.",
   "NOT FOR: reading the structured rows (talonic_get_run_results) or starting a run (talonic_run_spec).",
@@ -45,7 +45,7 @@ const GET_RUN_DESCRIPTION = [
 ].join("\n")
 
 const RESULTS_DESCRIPTION = [
-  "Read a Spec run's structured rows — one row per document with the Spec's fields as clean values (held/pending-review cells serialize null), plus the column definitions.",
+  "Read a Spec run's structured rows — one row per document with the Spec's fields as clean values (values held for review come back null), plus the column definitions.",
   "",
   "USE WHEN: talonic_get_run reports `completed` (partial rows are also readable while `processing`).",
   "NOT FOR: progress (talonic_get_run) or per-field provenance of a single value (include: ['provenance'] here, or talonic_field_values).",
@@ -79,7 +79,7 @@ const runSpecInputSchema = {
   pipeline_mode: z
     .enum(["new", "append"])
     .optional()
-    .describe("`new` (default) or `append` to the Spec's existing pipeline."),
+    .describe("`new` (default) or `append` to the Spec's current run."),
   batch_id: z
     .string()
     .min(1)
@@ -98,7 +98,7 @@ const resultsInputSchema = {
   run_id: uuid
     .optional()
     .describe(
-      "The RunEnvelope's run_id. Alone: a run_kind 'run' submission (/v1/run). With pipeline_id: scopes the pipeline's rows to that submission.",
+      "The RunEnvelope's run_id. Alone: a run_kind 'run' submission (/v1/run). With pipeline_id: only the rows of that submission.",
     ),
   pipeline_id: uuid
     .optional()
@@ -375,11 +375,11 @@ export function registerRunTools(
   server.registerTool(
     "talonic_run_spec",
     {
-      title: "Run a pipeline",
+      title: "Run a Spec",
       description: RUN_DESCRIPTION,
       inputSchema: runSpecInputSchema,
       annotations: {
-        title: "Run a pipeline",
+        title: "Run a Spec",
         readOnlyHint: false,
         destructiveHint: false,
         openWorldHint: true,

@@ -1,114 +1,70 @@
 import type { NavSection } from "./types"
+import { TOOL_REGISTRY } from "./generated/tool-registry"
+import { TOOL_PAGES } from "./tool-pages"
+import { TASKS } from "./sections/tools-by-task"
 
-/** MCP documentation navigation — synced to website */
+const taskIndex = (name: string) => TASKS.findIndex((t) => t.task === TOOL_PAGES[name]?.task)
+
+/** Tool reference entries, grouped by task in the order of the Tools by task page. */
+const TOOL_NAV = TOOL_REGISTRY.map((t, i) => ({ t, i }))
+  .sort((a, b) => taskIndex(a.t.name) - taskIndex(b.t.name) || a.i - b.i)
+  .map(({ t }) => ({ id: t.name.replace(/_/g, "-"), label: t.name }))
+
+/**
+ * MCP documentation navigation — synced to website.
+ *
+ * Sections kept for old URLs but no longer in the nav: why-mcp,
+ * agent-decision-guide, claude-desktop, cursor, cline, continue, cowork,
+ * drag-and-drop, how-it-works.
+ */
 export const MCP_NAV_SECTIONS: NavSection[] = [
   {
     id: "overview",
     label: "Overview",
     children: [
-      { id: "mcp-introduction", label: "Introduction" },
-      { id: "why-mcp", label: "Why Use This" },
-      { id: "get-api-key", label: "Get an API Key" },
+      { id: "mcp-introduction", label: "What an agent can do" },
+      { id: "get-api-key", label: "Get an API key" },
     ],
   },
   {
     id: "install",
-    label: "Install",
+    label: "Connect",
     children: [
-      { id: "install-overview", label: "Overview" },
-      { id: "claude-desktop", label: "Claude Desktop" },
-      { id: "cursor", label: "Cursor" },
-      { id: "cline", label: "Cline" },
-      { id: "continue", label: "Continue" },
-      { id: "cowork", label: "Cowork" },
+      { id: "install-overview", label: "Connect your agent" },
+      { id: "env-variables", label: "Configuration" },
     ],
   },
   {
     id: "tools",
-    label: "Tool Reference",
+    label: "Tools",
+    children: [{ id: "tools-by-task", label: "Tools by task" }, ...TOOL_NAV],
+  },
+  {
+    id: "files",
+    label: "Files",
+    children: [{ id: "files-and-uploads", label: "Files and uploads" }],
+  },
+  {
+    id: "recipes",
+    label: "Recipes",
     children: [
-      { id: "talonic-extract", label: "talonic_extract" },
-      { id: "talonic-search", label: "talonic_search" },
-      { id: "talonic-filter", label: "talonic_filter" },
-      { id: "talonic-get-document", label: "talonic_get_document" },
-      { id: "talonic-to-markdown", label: "talonic_to_markdown" },
-      { id: "talonic-list-schemas", label: "talonic_list_schemas" },
-      { id: "talonic-get-schema", label: "talonic_get_schema" },
-      { id: "talonic-list-apps", label: "talonic_list_apps" },
-      { id: "talonic-save-schema", label: "talonic_save_schema" },
-      { id: "talonic-get-balance", label: "talonic_get_balance" },
-      { id: "talonic-get-pricing", label: "talonic_get_pricing" },
-      { id: "talonic-get-usage", label: "talonic_get_usage" },
-      { id: "talonic-request-upload", label: "talonic_request_upload" },
-      { id: "talonic-list-accounts", label: "talonic_list_accounts" },
-      { id: "talonic-create-account", label: "talonic_create_account" },
-      { id: "talonic-list-fields", label: "talonic_list_fields" },
-      { id: "talonic-get-field", label: "talonic_get_field" },
-      { id: "talonic-field-values", label: "talonic_field_values" },
-      { id: "talonic-find-data", label: "talonic_find_data" },
-      { id: "talonic-list-agent-tools", label: "talonic_list_agent_tools" },
-      { id: "talonic-invoke-agent-tool", label: "talonic_invoke_agent_tool" },
-      { id: "talonic-list-agent-tasks", label: "talonic_list_agent_tasks" },
-      { id: "talonic-get-agent-task", label: "talonic_get_agent_task" },
-      { id: "talonic-claim-agent-task", label: "talonic_claim_agent_task" },
-      { id: "talonic-heartbeat-agent-task", label: "talonic_heartbeat_agent_task" },
-      { id: "talonic-submit-agent-task", label: "talonic_submit_agent_task" },
-      { id: "talonic-list-specs", label: "talonic_list_specs" },
-      { id: "talonic-get-spec", label: "talonic_get_spec" },
-      { id: "talonic-run-spec", label: "talonic_run_spec" },
-      { id: "talonic-get-run", label: "talonic_get_run" },
-      { id: "talonic-get-run-results", label: "talonic_get_run_results" },
-      { id: "talonic-ask", label: "talonic_ask" },
-      { id: "talonic-get-answer", label: "talonic_get_answer" },
-      { id: "talonic-list-decision-tasks", label: "talonic_list_decision_tasks" },
-      { id: "talonic-claim-decision-task", label: "talonic_claim_decision_task" },
-      { id: "talonic-read-decision-package", label: "talonic_read_decision_package" },
-      { id: "talonic-heartbeat-decision-task", label: "talonic_heartbeat_decision_task" },
-      { id: "talonic-submit-decision-task", label: "talonic_submit_decision_task" },
-      { id: "talonic-release-decision-task", label: "talonic_release_decision_task" },
-      { id: "talonic-fail-decision-task", label: "talonic_fail_decision_task" },
-      { id: "talonic-process-list", label: "talonic_process_list" },
-      { id: "talonic-process-run", label: "talonic_process_run" },
-      { id: "talonic-process-status", label: "talonic_process_status" },
-      { id: "talonic-process-runs", label: "talonic_process_runs" },
-      { id: "talonic-process-waiting-for-me", label: "talonic_process_waiting_for_me" },
-      { id: "talonic-process-sign", label: "talonic_process_sign" },
-      { id: "talonic-process-get", label: "talonic_process_get" },
-      { id: "talonic-process-create", label: "talonic_process_create" },
-      { id: "talonic-process-change", label: "talonic_process_change" },
-      { id: "talonic-process-check", label: "talonic_process_check" },
-      { id: "talonic-process-test-run", label: "talonic_process_test_run" },
-      { id: "talonic-process-publish", label: "talonic_process_publish" },
-      { id: "talonic-process-versions", label: "talonic_process_versions" },
-      { id: "talonic-process-rollback", label: "talonic_process_rollback" },
-      { id: "talonic-process-delete", label: "talonic_process_delete" },
-      { id: "talonic-process-item", label: "talonic_process_item" },
-      { id: "talonic-process-retry", label: "talonic_process_retry" },
-      { id: "talonic-process-send-back", label: "talonic_process_send_back" },
-      { id: "talonic-process-setup", label: "talonic_process_setup" },
-      { id: "talonic-process-mailbox-ownership", label: "talonic_process_mailbox_ownership" },
-      { id: "talonic-process-address", label: "talonic_process_address" },
+      { id: "recipe-set-up-workspace", label: "Set up a workspace" },
+      { id: "recipe-process-inbox", label: "Process an inbox" },
+      { id: "recipe-audit-invoices", label: "Audit invoices" },
+      { id: "recipe-contract-question", label: "Answer a contract question" },
     ],
   },
   {
-    id: "features",
-    label: "Features",
-    children: [
-      { id: "drag-and-drop", label: "Drag & Drop Files" },
-      { id: "how-it-works", label: "How It Works" },
-    ],
-  },
-  {
-    id: "configuration",
-    label: "Configuration",
-    children: [{ id: "env-variables", label: "Environment Variables" }],
+    id: "advanced",
+    label: "Advanced",
+    children: [{ id: "run-talonic-tasks", label: "Run Talonic tasks from your agent" }],
   },
   {
     id: "troubleshooting",
     label: "Troubleshooting",
     children: [
-      { id: "common-issues", label: "Common Issues" },
-      { id: "known-limitations", label: "Known Limitations" },
+      { id: "common-issues", label: "Troubleshooting" },
+      { id: "known-limitations", label: "Limits" },
       { id: "upgrading", label: "Upgrading" },
     ],
   },

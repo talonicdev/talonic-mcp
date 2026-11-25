@@ -7,7 +7,7 @@ import { widgetToolMeta } from "../widgets/types.js"
 const DESCRIPTION = [
   "Read the workspace's per-function credit consumption over a trailing window: where the credits actually went.",
   "",
-  "USE WHEN: the user asks what they have spent credits on, or you want to see which function (extraction, structuring, intelligence ops) dominates spend.",
+  "USE WHEN: the user asks what they have spent credits on, or you want to see which kind of work (reading documents, structuring data, answering questions) takes most of the credits.",
   "NOT FOR: the remaining balance (use talonic_get_balance) or per-unit rates (use talonic_get_pricing).",
   "ARGS: days (optional, default 30, clamped 1-365).",
   "RETURNS: period_days, total_credits, and by_function[] — each { operation_type, operations, credits }, highest spend first.",

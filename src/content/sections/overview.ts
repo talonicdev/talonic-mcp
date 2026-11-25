@@ -1,475 +1,196 @@
 import type { RawSection } from "../types"
+import { link, tool } from "../routes"
+import { TOOL_REGISTRY } from "../generated/tool-registry"
+
+const CORE = TOOL_REGISTRY.filter((t) => t.group !== "processes").length
+const PROCESS = TOOL_REGISTRY.filter((t) => t.group === "processes").length
 
 export const sections: RawSection[] = [
   {
     slug: "mcp-introduction",
     parentSlug: "overview",
-    title: "Introduction",
-    seoTitle: "Talonic MCP Server Introduction — Document Extraction",
+    title: "What an agent can do with Talonic",
+    seoTitle: "Talonic MCP Server: What Your AI Agent Can Do — Talonic",
     description:
-      "Official Talonic MCP server for AI agents: extract structured, schema-validated JSON from any document via the Model Context Protocol, hosted or local.",
+      "Connect Claude.ai, ChatGPT, Cursor or any MCP client to Talonic. Your agent finds documents, extracts fields, answers cited questions and runs processes.",
     content: [
       {
         type: "paragraph",
-        text: "Official Talonic MCP server. Lets AI agents extract structured, schema-validated data from any document via the [Model Context Protocol](https://modelcontextprotocol.io).",
-      },
-      {
-        type: "paragraph",
-        text: "The tool set covers the full document workflow: extraction (`talonic_extract`, `talonic_to_markdown`, `talonic_request_upload`), workspace retrieval (`talonic_search`, `talonic_filter`, `talonic_get_document`), schema management (`talonic_list_schemas`, `talonic_save_schema`), cost visibility (`talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`), the Agent-task worklist (`talonic_list_agent_tasks` through `talonic_submit_agent_task`), the External-mode decision-task protocol for Talonic Apps (`talonic_list_decision_tasks` through `talonic_fail_decision_task`), Spec runs (`talonic_run_spec`, `talonic_get_run`, `talonic_get_run_results`), and cited question answering over the workspace (`talonic_ask`, `talonic_get_answer`), plus the `talonic://schemas` and `talonic://webhooks/reference` resources.",
-      },
-      {
-        type: "paragraph",
-        text: "Listed on the [official MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.talonicdev/talonic-mcp`. Verified end-to-end against production.",
-      },
-      {
-        type: "paragraph",
-        text: "The MCP server acts as a bridge between your AI agent and the Talonic document extraction API. Instead of writing custom HTTP integration code, agent developers get a standards-compliant MCP interface that any compatible client can discover and invoke automatically. The server handles authentication, file upload serialisation, retry logic, and structured error formatting so the agent can focus on the user's task.",
-      },
-      {
-        type: "paragraph",
-        text: "Installation takes under a minute. The recommended path is the hosted endpoint at `mcp.talonic.com` connected via Claude.ai's custom-connector flow, which uses OAuth 2.1 with PKCE and Dynamic Client Registration so no API key is pasted into config. For IDE-style clients, the local `npx` option uses a `TALONIC_API_KEY` environment variable and runs on any machine with Node.js 18 or later. A third path keeps the hosted endpoint but supplies a `Bearer tlnc_…` header for clients that do not yet handle the OAuth handshake.",
-      },
-      {
-        type: "paragraph",
-        text: "A typical agent conversation with Talonic starts when the user drops a document into the chat or asks the agent to process a file from a URL. The agent calls `talonic_extract` with a schema describing the fields to pull out, and receives structured JSON within seconds. From there, the agent can present the data, answer follow-up questions, or feed the extracted values into downstream workflows — all without the user leaving the conversation.",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Quick-start: extract an invoice in one tool call",
-        code: `{
-  "file_url": "https://example.com/invoice.pdf",
-  "schema": {
-    "type": "object",
-    "properties": {
-      "vendor": { "type": "string" },
-      "total": { "type": "number" },
-      "due_date": { "type": "string", "format": "date" }
-    },
-    "required": ["vendor", "total"]
-  }
-}`,
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Response: structured data with confidence",
-        code: `{
-  "status": "complete",
-  "data": {
-    "vendor": "Acme Corp",
-    "total": 2450.00,
-    "due_date": "2026-07-01"
-  },
-  "confidence": {
-    "overall": 0.96,
-    "fields": { "vendor": 0.98, "total": 0.99, "due_date": 0.94 }
-  }
-}`,
-      },
-      {
-        type: "paragraph",
-        text: "The MCP server supports every major AI coding and chat client: Claude Desktop, Cursor, Cline, Continue, and Cowork. Each client has its own config format, but the setup pattern is the same — add a JSON entry pointing to the Talonic server (hosted URL or local npx command), supply your API key, and restart the client. The server then registers its tools and resources, which the agent can discover and invoke automatically during conversations.",
+        text: "The Talonic MCP server lets an AI agent work with the documents and data in your Talonic workspace the way you would in the web app: find a document, pull fields out of it, ask a question across everything, run a Spec, sign off a step, or set up a process. It is for anyone who wants their agent (in Claude.ai, Claude Desktop, ChatGPT, Cursor, Cline, Continue, Cowork or their own) to do document work for them.",
       },
       {
         type: "callout",
         variant: "info",
-        text: "The MCP server is open-source and published to npm as `@talonic/mcp`. You can inspect the source, report issues, and contribute on GitHub. Building a Node application instead of wiring up an agent? The [Talonic Node SDK](https://talonic.com/docs/sdk) exposes the same extraction API as a typed client library.",
+        text: `New here? ${link("install-overview", "Connect your agent")} in two minutes, then try the ${link("recipe-contract-question", "contract question recipe")}.`,
+      },
+      { type: "heading", level: 2, id: "what-you-can-do", text: "What your agent can do" },
+      {
+        type: "list",
+        items: [
+          `**Find.** Locate documents by name or keyword, filter them by extracted values ("invoices over 10,000 EUR"), and find which field holds a concept. ${link("tools-by-task", "Find tools")}.`,
+          "**Read and extract.** Turn any PDF, scan, image, DOCX or email into JSON that matches the fields you ask for, with a confidence score per field and the page and passage each value came from. Or get the full text.",
+          "**Ask.** Ask a question in plain words and get an answer with citations to the documents it rests on, checked before it is returned.",
+          "**Run.** Run one of your workspace's Specs over a set of documents and read back one clean row per document.",
+          "**Review and decide.** Sign off or send back items waiting for you, and take on checks or decisions your workspace hands to an outside agent.",
+          "**Build and automate.** Describe a process in your own words (what comes in, what is checked, who signs, what goes out), test it on real documents, publish it, and watch its runs.",
+          "**Look after the workspace.** Keep each company's documents apart, check credits, pricing and usage.",
+        ],
+      },
+      { type: "heading", level: 2, id: "how-it-works", text: "How it fits together" },
+      {
+        type: "paragraph",
+        text: "Your agent calls Talonic tools; Talonic does the reading and checking and returns structured results. Every call runs as you: it sees only your workspace and can do only what your role allows, exactly like the web app. Writes that send mail, call other systems or can't be undone say so in their description, and the agent is told to call them only when you ask.",
+      },
+      {
+        type: "list",
+        items: [
+          `**${CORE} tools** are listed in every session.`,
+          `**${PROCESS} process tools** are listed when your role can see processes in the workspace.`,
+          "Apps you have enabled (for example Contracts or Accounts Payable) add their own tools to sessions that can use them; see [Apps](https://talonic.com/docs/apps).",
+        ],
+      },
+      { type: "heading", level: 2, id: "two-ways-to-connect", text: "Two ways to connect" },
+      {
+        type: "list",
+        items: [
+          "**Hosted** at `https://mcp.talonic.com/mcp`. Sign in with your Talonic account; no key to copy. Best for Claude.ai, ChatGPT and Claude Code.",
+          "**Local** with `npx -y @talonic/mcp@latest` and an API key. Best for desktop and IDE clients that start the server on your machine and can read local files.",
+        ],
+      },
+      { type: "heading", level: 2, id: "first-call", text: "Your first call" },
+      {
+        type: "paragraph",
+        text: `Once connected, ask your agent: "What documents do I have in Talonic about invoices?" It calls ${tool("talonic_search")} and lists them. Then: "Extract the vendor, total and due date from the first one." It calls ${tool("talonic_extract")} and returns JSON with a confidence score for each field.`,
+      },
+      { type: "heading", level: 2, id: "next", text: "Next" },
+      {
+        type: "list",
+        items: [
+          link("install-overview", "Connect your client"),
+          link("tools-by-task", "Tools by task"),
+          link("files-and-uploads", "Files and uploads"),
+          link("recipe-set-up-workspace", "Recipe: set up a workspace end to end"),
+        ],
       },
     ],
     related: [
-      { label: "Why Use This", slug: "why-mcp" },
-      { label: "Claude Desktop", slug: "claude-desktop" },
-      { label: "Install Overview", slug: "install-overview" },
+      { label: "Connect your agent", slug: "install-overview" },
+      { label: "Tools by task", slug: "tools-by-task" },
+      { label: "Get an API key", slug: "get-api-key" },
     ],
     faq: [
       {
-        question: "What is the Talonic MCP server?",
+        question: "Which AI clients work with the Talonic MCP server?",
         answer:
-          "An official MCP server that gives AI agents (Claude Desktop, Cursor, Cline, etc.) the ability to extract structured data from documents using the Model Context Protocol.",
+          "Any client that speaks the Model Context Protocol. Claude.ai, Claude Desktop, Claude Code, ChatGPT, Cursor, Cline, Continue and Cowork have step-by-step instructions on the Connect page.",
       },
       {
-        question: "Is the Talonic MCP server on the official MCP Registry?",
+        question: "Can the agent see other people's documents?",
         answer:
-          "Yes. It is listed as io.github.talonicdev/talonic-mcp on registry.modelcontextprotocol.io, maintained by Anthropic and the MCP steering group.",
+          "No. Every call runs with your credential and your workspace role, so the agent sees and changes exactly what you could in the web app, and nothing else.",
       },
       {
-        question: "Do I need to install anything to use the Talonic MCP server?",
+        question: "Does using the MCP server cost extra?",
         answer:
-          "Not necessarily. The hosted server at mcp.talonic.com requires zero local installation — just a URL and API key in your MCP client config. Alternatively, the local npx option requires Node.js 18+.",
-      },
-      {
-        question: "What document types does the Talonic MCP server support?",
-        answer:
-          "The server supports PDF, PNG, JPG, TIFF, DOCX, XLSX, and other common document formats. Documents can be invoices, contracts, receipts, forms, certificates, or any structured or semi-structured document. The extraction pipeline handles OCR, layout analysis, and field extraction server-side.",
-      },
-      {
-        question: "What tools does the Talonic MCP server expose?",
-        answer:
-          "Tools for every step of the document workflow: extraction (talonic_extract, talonic_to_markdown, talonic_request_upload), retrieval (talonic_search, talonic_filter, talonic_get_document), schema management (talonic_list_schemas, talonic_save_schema), cost visibility (talonic_get_balance, talonic_get_pricing, talonic_get_usage), and the Agent-task worklist, plus the talonic://schemas and talonic://webhooks/reference resources. See the Tool Reference for the full, current list.",
+          "No. Tool calls use the same credits as the web app and the API. Reading, listing and searching are free; extracting, asking and running Specs use credits. Each tool page says what it costs.",
       },
     ],
-    mentions: ["MCP", "Model Context Protocol", "AI agents", "document extraction"],
+    mentions: ["MCP server", "AI agent", "document extraction", "Model Context Protocol"],
   },
   {
     slug: "why-mcp",
     parentSlug: "overview",
-    title: "Why Use This",
-    seoTitle: "Why Use the Talonic MCP Server Instead of OCR + LLM",
+    title: "Why connect your agent to Talonic",
+    seoTitle: "Why Connect Your AI Agent to Talonic Over MCP — Talonic",
     description:
-      "Why AI agents get better document extraction from the Talonic MCP server than raw OCR plus LLM calls: schema validation, confidence scores, stable IDs.",
+      "Reading documents inside a chat gives you text. Connecting Talonic gives your agent checked fields, cited answers, your saved Specs and processes it can run.",
     content: [
       {
         type: "paragraph",
-        text: "When an agent needs to pull structured data out of a PDF, scan, image, or messy document, the usual approach is raw OCR plus an LLM call. Results are unreliable; tables get mangled, dates get misread, totals drift.",
+        text: "An agent can read a PDF you paste into a chat. What it can't do on its own is give you the same fields every time, show where each value came from, remember the thousand documents you processed last quarter, or start the approval your team runs on every invoice. Connecting Talonic adds those.",
+      },
+      {
+        type: "list",
+        items: [
+          "**Same fields, every time.** You say which fields you want once (or save them); every document comes back in that shape, with a confidence score per field.",
+          "**Evidence.** Each value links to the page and passage it came from, and answers cite the documents they rest on, so you can check before you act.",
+          "**Your whole workspace.** Questions run across every document you have added, not only the one in the chat.",
+          "**Your rules.** The agent runs the Specs and processes your team already set up, with the same permissions and sign-offs as the web app.",
+          "**Large files.** Files too big for a chat go through an upload link instead.",
+        ],
       },
       {
         type: "paragraph",
-        text: "With this MCP server installed, the agent has a `talonic_extract` tool that returns schema-validated JSON with per-field confidence scores, a detected document type, and stable IDs for follow-up calls. Companion tools cover the rest of the workflow: searching the workspace, filtering by extracted field values, fetching a document's metadata, getting OCR markdown, listing and saving schemas, requesting browser-handoff uploads, processing Agent-stage tasks, and reading the workspace credit balance, pricing catalog, and usage breakdown for budget-aware behaviour.",
-      },
-      {
-        type: "paragraph",
-        text: "The extraction pipeline runs server-side on Talonic's infrastructure, which means the agent does not need to manage OCR libraries, prompt engineering for data extraction, or post-processing heuristics. A single tool call replaces what would otherwise be a multi-step chain of OCR, schema validation, and confidence estimation inside the agent's own context window.",
-      },
-      {
-        type: "paragraph",
-        text: "Because each extraction returns **per-field confidence scores**, agents can make informed decisions about when to trust extracted values and when to escalate to the user for review. This is especially valuable for high-stakes fields like financial amounts, legal terms, and dates where silent errors are costly.",
-      },
-      {
-        type: "paragraph",
-        text: "Integration effort is minimal compared to building a custom extraction pipeline. A raw OCR + LLM approach requires choosing an OCR library, writing prompts for each document type, parsing unstructured LLM output into typed fields, implementing confidence estimation, and handling edge cases like rotated pages, multi-column layouts, and mixed languages. The Talonic MCP server replaces all of that with a single tool call that returns clean, validated JSON.",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Agent conversation: comparing raw OCR vs Talonic",
-        code: `// Without Talonic — agent must chain multiple steps:
-// 1. OCR the PDF → raw text with layout errors
-// 2. Prompt LLM to extract fields → unstructured output
-// 3. Parse LLM output → fragile regex/JSON parsing
-// 4. Validate types → manual type coercion
-// 5. Estimate confidence → no signal available
-
-// With Talonic — single tool call:
-{
-  "file_url": "https://example.com/contract.pdf",
-  "schema": {
-    "type": "object",
-    "properties": {
-      "parties": { "type": "array", "items": { "type": "string" } },
-      "effective_date": { "type": "string", "format": "date" },
-      "term_months": { "type": "integer" },
-      "governing_law": { "type": "string" }
-    }
-  }
-}
-// → Returns validated JSON + confidence scores in ~3 seconds`,
-      },
-      {
-        type: "paragraph",
-        text: "The workspace model is another key advantage. Every document processed through the MCP server is stored in your Talonic workspace with a stable `document_id`. This means an agent can extract an invoice today, and a week later the user can ask 'what was the total on that Meridian invoice?' — the agent searches the workspace, finds the document, and retrieves the previously extracted data without re-uploading or re-processing. This persistent workspace turns the MCP server from a one-shot tool into a long-term document intelligence layer.",
-      },
-      {
-        type: "callout",
-        variant: "info",
-        text: "Every document processed through the MCP server is stored in your Talonic workspace with a stable `document_id`. Subsequent operations — re-extraction with a different schema, markdown retrieval, metadata lookup — reuse that ID without re-uploading the file, saving both time and credits.",
+        text: `Start with ${link("install-overview", "Connect your agent")}, or see ${link("mcp-introduction", "what an agent can do")}.`,
       },
     ],
     related: [
-      { label: "talonic_extract", slug: "talonic-extract" },
-      { label: "Get an API Key", slug: "get-api-key" },
+      { label: "What an agent can do", slug: "mcp-introduction" },
+      { label: "Connect your agent", slug: "install-overview" },
     ],
-    faq: [
-      {
-        question: "Why use Talonic MCP instead of OCR + LLM?",
-        answer:
-          "Raw OCR + LLM calls produce unreliable results — mangled tables, misread dates, drifting totals. Talonic returns schema-validated JSON with per-field confidence scores and stable IDs for follow-up calls.",
-      },
-      {
-        question: "Does the MCP server handle retries and errors automatically?",
-        answer:
-          "Yes. The server retries on transient failures (429 rate limits, 5xx server errors) and returns structured error messages the agent can reason about, rather than raw HTTP status codes.",
-      },
-      {
-        question: "Can I re-extract a document with a different schema without re-uploading?",
-        answer:
-          "Yes. Pass the document_id from a previous extraction to talonic_extract with a new schema. The server reuses the already-ingested document, which is faster and costs fewer credits.",
-      },
-      {
-        question: "What confidence scores does Talonic provide?",
-        answer:
-          "Every extraction includes confidence.overall (0 to 1) and confidence.fields with a per-field score. Agents can use these to decide when to trust values automatically and when to escalate to the user for review. Scores above 0.9 are highly reliable; below 0.7 warrants human verification.",
-      },
-      {
-        question: "How does Talonic handle multi-language documents?",
-        answer:
-          "The extraction pipeline auto-detects the document language and returns it in the language_detected field. OCR and field extraction work across Latin, Cyrillic, CJK, and Arabic scripts. No language configuration is needed — the server handles detection and adaptation automatically.",
-      },
-    ],
-    mentions: ["OCR", "schema-validated", "confidence scores", "structured data"],
-  },
-  {
-    slug: "agent-decision-guide",
-    parentSlug: "overview",
-    title: "Agent Decision Guide",
-    seoTitle: "Agent Decision Guide — Choosing the Right Talonic Tool",
-    description:
-      "How an AI agent should choose between Talonic MCP tools, handle low-confidence extractions, and avoid wasted calls that cost credits or repeat work done.",
-    content: [
-      {
-        type: "paragraph",
-        text: "Use this guide to pick the right Talonic tool for the user's request. Match the user's intent to one of the scenarios below before calling a tool. The wrong tool returns the wrong data, costs unnecessary credits, and slows the conversation.",
-      },
-      {
-        type: "paragraph",
-        text: "Talonic's public tools are designed for distinct use cases with minimal overlap. **`talonic_extract`** is for structured field extraction with a schema, **`talonic_request_upload`** hands the user a browser link for files too large to pass through a hosted connector (Claude.ai), **`talonic_to_markdown`** is for full-text conversion, **`talonic_search`** handles fuzzy discovery, **`talonic_filter`** handles precise field-value queries, **`talonic_get_document`** returns metadata, the schema tools (**`talonic_list_schemas`**, **`talonic_save_schema`**) manage reusable extraction templates, and the billing tools (**`talonic_get_balance`** for the remaining balance, **`talonic_get_pricing`** for per-unit rates, **`talonic_get_usage`** for per-function spend) let the agent stay budget-aware before and after large batches.",
-      },
-      {
-        type: "paragraph",
-        text: "A well-built agent should check conversation history before making any tool call. If the user already extracted data from a document in an earlier turn, re-use that result rather than calling `talonic_extract` again. Repeat calls cost credits and add latency without providing new information.",
-      },
-      {
-        type: "paragraph",
-        text: "When in doubt about which tool to use, consider the user's underlying intent: do they want specific field values (extract), the full document text (to_markdown), to find documents (search/filter), or to manage extraction templates (schema tools)? This mental model covers every scenario.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "decide-extract-vs-markdown",
-        text: "User has a file (or just dropped one in)",
-      },
-      {
-        type: "list",
-        items: [
-          "**They want specific fields**: vendor, total, dates, parties, line items. Use `talonic_extract` with a `schema` (full JSON Schema is most reliable) or a `schema_id` from `talonic_list_schemas`. Don't know the fields yet? Set `auto_schema: true` for open capture — Talonic discovers them and returns a suggested schema to refine.",
-          "**They want the full text content**, e.g. for summarisation, translation, or general analysis. Use `talonic_to_markdown`. It returns OCR-converted markdown without forcing a schema.",
-          "**They want both**: extract once with a schema (which also yields markdown when `include_markdown: true` is set), avoiding two uploads.",
-        ],
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "decide-find-existing",
-        text: "User is asking about existing documents in the workspace",
-      },
-      {
-        type: "list",
-        items: [
-          "**Conceptual or fuzzy** (e.g. 'do I have any docs about indemnification?', 'find Acme contracts'): use `talonic_search`.",
-          "**Value-based on extracted fields** (e.g. 'invoices over 1000 EUR', 'contracts expiring before 2026-12-31'): use `talonic_filter`. Use `is_not_empty` for presence checks and `is_empty` for absence checks.",
-          "**They reference a specific document_id**: use `talonic_get_document` for metadata, `talonic_to_markdown` (with `document_id`) for text, or `talonic_extract` (with `document_id`) to re-extract with a new schema. Re-using a document_id is cheaper than re-uploading.",
-        ],
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "decide-schema-mgmt",
-        text: "User is working with schemas",
-      },
-      {
-        type: "list",
-        items: [
-          "**One-off extraction**: pass the schema inline on `talonic_extract`. Do not save it.",
-          "**The same schema across many documents**: call `talonic_save_schema` once, then pass the returned id (UUID or `SCH-XXXXXXXX`) as `schema_id` on every future `talonic_extract` call. Either id form is accepted.",
-          "**Discovering existing schemas** before designing a new one: call `talonic_list_schemas`. The `talonic://schemas` resource is the same list rendered as a browseable resource for clients that support it.",
-          "**Avoid clutter**: do not save a schema until the user has reviewed and confirmed the design. Iterate inline first.",
-        ],
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "decide-confidence",
-        text: "Handling confidence and human review",
-      },
-      {
-        type: "paragraph",
-        text: "Every `talonic_extract` response includes `confidence.overall` (0..1) and `confidence.fields` (per-field 0..1). Use these to decide when to escalate.",
-      },
-      {
-        type: "list",
-        items: [
-          "**`confidence.overall` below ~0.7**: tell the user the extraction may be unreliable, show the top low-confidence fields, and ask them to confirm before taking any downstream action (payment, contract execution, data import).",
-          "**Per-field confidence below ~0.7**: surface those fields with a 'needs review' marker. Do not silently use them in calculations or external API calls.",
-          "**Critical fields at any confidence**: financial amounts, legal terms, names, dates. Always confirm with the user before acting on them, even at high confidence.",
-          "**Provenance is not surfaced in v0.1.** Per-field source page or bounding box is not in the response. If the user needs to verify a specific field against the source, send them to the document via `links.dashboard` from the response.",
-        ],
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "decide-not-call",
-        text: "When not to call Talonic",
-      },
-      {
-        type: "list",
-        items: [
-          "**The user's question is general knowledge or conversation.** Do not pre-emptively extract or search.",
-          "**The needed data is already in conversation history** from a previous tool call. Re-use it. Repeat calls cost credits and slow the response.",
-          "**The user wants to discuss or revise** an extraction you already produced. Reason over the previous result instead of re-extracting.",
-          "**Schema design iteration**. Iterate the schema with the user via `talonic_extract` with an inline schema; only call `talonic_save_schema` once they confirm.",
-          "**Cost questions have dedicated read-only tools.** If the user asks 'how much will this cost', call `talonic_get_pricing`; for 'how many credits do I have left', call `talonic_get_balance`; for 'where did my credits go', call `talonic_get_usage`. Do not guess numbers or send the user to the dashboard for questions these tools answer.",
-        ],
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Worked example: 'invoices over 1000 EUR' is a filter, not an extract",
-        code: `// User: "Which of my invoices are over 1000 EUR?"
-// The documents are already extracted — do NOT re-extract. Filter instead:
-// talonic_filter({
-//   "conditions": [
-//     { "field": "total", "op": "gt", "value": 1000 }
-//   ]
-// })
-// → matching documents with their extracted field values, zero credits spent
-//   on re-processing. Only fall back to talonic_search for conceptual queries
-//   like "the contract about the Berlin office lease".`,
-      },
-      {
-        type: "callout",
-        variant: "info",
-        text: "Rule of thumb: read-only tools (`talonic_search`, `talonic_filter`, `talonic_get_document`, `talonic_list_schemas`, `talonic_get_balance`, `talonic_get_pricing`, `talonic_get_usage`) are safe to call whenever they help. Credit-consuming or write tools (`talonic_extract`, `talonic_to_markdown` on new files, `talonic_save_schema`) deserve a moment of doubt: is the answer already available without them?",
-      },
-    ],
-    related: [
-      { label: "talonic_extract", slug: "talonic-extract" },
-      { label: "talonic_filter", slug: "talonic-filter" },
-      { label: "talonic_search", slug: "talonic-search" },
-      { label: "Known Limitations", slug: "known-limitations" },
-    ],
-    faq: [
-      {
-        question: "When should an agent use talonic_extract vs talonic_to_markdown?",
-        answer:
-          "Use talonic_extract when the user wants specific structured fields (with a schema). Use talonic_to_markdown when the user wants the full text content for summarisation or analysis without a schema.",
-      },
-      {
-        question: "When should an agent use talonic_search vs talonic_filter?",
-        answer:
-          "Use talonic_search for conceptual or fuzzy queries across the workspace. Use talonic_filter when the user wants documents matching specific structured field values like 'invoices over 1000 EUR'.",
-      },
-      {
-        question: "How should an agent handle low-confidence extractions?",
-        answer:
-          "Treat confidence below ~0.7 as needing human review. Surface low-confidence fields explicitly and confirm critical fields (amounts, dates, names) with the user before any downstream action.",
-      },
-    ],
-    mentions: ["decision guide", "agent", "tool selection", "confidence", "human review", "cost"],
+    faq: [],
+    mentions: ["MCP", "document extraction", "AI agents"],
   },
   {
     slug: "get-api-key",
     parentSlug: "overview",
-    title: "Get an API Key",
-    seoTitle: "Get a Talonic API Key for the MCP Server in 30 Seconds",
+    title: "Get an API key",
+    seoTitle: "Get a Talonic API Key for the MCP Server — Talonic Docs",
     description:
-      "Create a free Talonic API key at app.talonic.com in about 30 seconds, then drop the tlnc_ value into any MCP client config. Each key has its own workspace.",
+      "Create a Talonic API key for local MCP installs and header-based clients. Hosted connectors in Claude.ai, ChatGPT and Claude Code sign you in without a key.",
     content: [
       {
         type: "paragraph",
-        text: "Each user runs against their own isolated Talonic workspace. Your documents and schemas are private to you.",
-      },
-      {
-        type: "callout",
-        variant: "info",
-        text: "If you are connecting from Claude.ai's custom-connector flow, you can skip the API-key steps below. The connector launches an OAuth 2.1 sign-in to `app.talonic.com` and the MCP server then uses a short-lived bearer token on your behalf. Get an API key when you want to install locally via `npx`, drive the hosted endpoint from a custom-header client, or use the Node SDK.",
+        text: "A local install (`npx @talonic/mcp`) and clients that send their own headers need an API key. Hosted connectors in Claude.ai, ChatGPT and Claude Code sign you in with your Talonic account instead, so you can skip this page for those.",
       },
       {
         type: "list",
         ordered: true,
         items: [
-          "Sign up at [app.talonic.com](https://app.talonic.com). Free tier: 50 extractions per day, no credit card.",
-          "Settings → API Keys → Create New Key.",
-          "Copy the `tlnc_` value into your MCP client config (snippets below).",
+          "Sign in at [app.talonic.com](https://app.talonic.com).",
+          "Open **Settings → API Keys** and choose **Create key**.",
+          "Copy the key. It starts with `tlnc_` and is shown once.",
+          `Put it in your client's config as \`TALONIC_API_KEY\` (local) or an \`Authorization: Bearer\` header (hosted). ${link("install-overview", "Connect your agent")} has the snippets.`,
         ],
       },
       {
         type: "paragraph",
-        text: "The API key authenticates every tool call the MCP server makes on your behalf. It is passed as a `TALONIC_API_KEY` environment variable in the local `npx` setup, or as a `Bearer` token in the `Authorization` header for the hosted server. The key is never sent to the AI agent itself — it stays within the MCP server process.",
-      },
-      {
-        type: "paragraph",
-        text: "Keep your API key private. Do not commit it to version control or share it in public MCP config examples. If a key is compromised, revoke it immediately in the Talonic dashboard under Settings → API Keys and generate a new one.",
-      },
-      {
-        type: "paragraph",
-        text: "The free tier includes 50 extractions per day, which is enough for development and testing. For production workloads or higher volume, upgrade your plan in the Talonic dashboard. All plans share the same API — the key determines your rate limits and quota.",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Local npx config with API key",
-        code: `{
-  "mcpServers": {
-    "talonic": {
-      "command": "npx",
-      "args": ["-y", "@talonic/mcp@latest"],
-      "env": {
-        "TALONIC_API_KEY": "tlnc_your_key_here"
-      }
-    }
-  }
-}`,
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Hosted config with API key as Bearer token",
-        code: `{
-  "mcpServers": {
-    "talonic": {
-      "url": "https://mcp.talonic.com/mcp",
-      "headers": {
-        "Authorization": "Bearer tlnc_your_key_here"
-      }
-    }
-  }
-}`,
-      },
-      {
-        type: "paragraph",
-        text: "After adding your API key to the config, verify the connection by asking your agent to call `talonic_list_schemas`. If the key is valid, the tool returns your saved schemas (or an empty list if you have not saved any yet). If the key is invalid or missing, the server returns a clear authentication error that tells the agent the key needs to be checked. This is the fastest way to confirm your setup is working end-to-end.",
-      },
-      {
-        type: "paragraph",
-        text: "Each API key is scoped to a single workspace. If you work across multiple Talonic workspaces — for example, separate environments for development and production — you will need a different API key for each. You can create multiple keys within the same workspace for different team members or applications, and revoke them independently without affecting other keys.",
+        text: "A key acts as the person who created it, in one workspace, and never with more rights than that person's role. Create a separate key per workspace and per machine so you can revoke one without breaking the others.",
       },
       {
         type: "callout",
         variant: "warning",
-        text: "Never hardcode your `tlnc_` key in source code or share it in screenshots. Use environment variables or your MCP client's config file, which is typically stored in a user-specific directory.",
+        text: "Keep keys out of source control and screenshots. If a key leaks, revoke it under **Settings → API Keys** and create a new one.",
       },
     ],
     related: [
-      { label: "Claude Desktop", slug: "claude-desktop" },
-      { label: "Install Overview", slug: "install-overview" },
+      { label: "Connect your agent", slug: "install-overview" },
+      { label: "Configuration", slug: "env-variables" },
     ],
     faq: [
       {
-        question: "How do I get a Talonic API key for MCP?",
+        question: "Do I need an API key to use Talonic in Claude.ai or ChatGPT?",
         answer:
-          "Sign up at app.talonic.com (free, no credit card), go to Settings > API Keys > Create New Key, and copy the tlnc_ value into your MCP client config.",
-      },
-      {
-        question: "Is the free tier enough for development?",
-        answer:
-          "Yes. The free tier includes 50 extractions per day with no credit card required, which is sufficient for development and testing. Upgrade in the dashboard for production workloads.",
-      },
-      {
-        question: "What should I do if my API key is compromised?",
-        answer:
-          "Revoke it immediately in the Talonic dashboard under Settings > API Keys, then generate a new one. Update your MCP client config with the new key and restart the client.",
-      },
-      {
-        question: "Can I use the same API key across multiple MCP clients?",
-        answer:
-          "Yes. The same tlnc_ key works in Claude Desktop, Cursor, Cline, Continue, Cowork, or any other MCP client simultaneously. The key is tied to your workspace, not to a specific client. Rate limits apply per-key across all clients.",
-      },
-      {
-        question: "How do I verify my API key is working?",
-        answer:
-          "After configuring your MCP client, ask the agent to call talonic_list_schemas. A successful response (even an empty list) confirms the key is valid and the server is connected. An authentication error means the key is missing, malformed, or revoked.",
+          "No. Hosted connectors sign you in with your Talonic account and keep the access token for you. You only need a key for a local install or a client that sends its own headers.",
       },
     ],
-    mentions: ["API key", "tlnc_", "free tier"],
+    mentions: ["API key", "tlnc_", "authentication"],
+  },
+  {
+    slug: "agent-decision-guide",
+    parentSlug: "overview",
+    title: "Which tool to use",
+    seoTitle: "Which Talonic MCP Tool Should My Agent Use? — Talonic",
+    description:
+      "This guide moved to Tools by task: every Talonic MCP tool grouped by what you want done, from finding documents to running and building your processes.",
+    content: [
+      {
+        type: "paragraph",
+        text: `This page moved. ${link("tools-by-task", "Tools by task")} groups every tool by what you want done.`,
+      },
+    ],
+    related: [{ label: "Tools by task", slug: "tools-by-task" }],
+    faq: [],
+    mentions: [],
   },
 ]

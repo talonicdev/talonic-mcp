@@ -12,16 +12,16 @@ import { widgetToolMeta } from "../widgets/types.js"
  */
 
 const LIST_DESCRIPTION = [
-  "List the workspace's Specs. A Spec is a saved extraction pipeline: an ordered list of processing steps plus the fields it produces; talonic_run_spec runs it over documents. Each row: id, name, description, schema_id (the schema the run's output rows follow — a DIFFERENT id from the Spec's), version / materialized_version (the published version runs use; null = never published), field_count, node_count, timestamps.",
+  "List the workspace's Specs. A Spec is a saved way of reading one kind of document: the fields it produces and the steps (reading, checks, look-ups, reviews) that fill them; talonic_run_spec runs it over documents. Each row: id, name, description, schema_id (the schema the run's output rows follow — a DIFFERENT id from the Spec's), version / materialized_version (the published version runs use; null = never published), field_count, node_count, timestamps.",
   "",
-  "USE WHEN: the user wants to run 'their pipeline' / 'the invoice Spec', or you need a spec_id for talonic_run_spec / talonic_get_spec.",
+  "USE WHEN: the user wants to run 'their invoice Spec' / 'our contract set-up', or you need a spec_id for talonic_run_spec / talonic_get_spec.",
   "NOT FOR: ad-hoc extraction schemas (talonic_list_schemas) or discovering fields (talonic_list_fields). Not a warm-up before answering a question about the documents: call talonic_ask for that.",
   "ARGS: optional `search` (name contains, case-insensitive), `limit` (1–100, default 20), `cursor` (from pagination.next_cursor), `order` (asc|desc by updated_at).",
   "RETURNS: { data[] of { id, name, description, schema_id, version, materialized_version, materialized_at, field_count, node_count, created_at, updated_at, links }, pagination { total, limit, has_more, next_cursor } }.",
 ].join("\n")
 
 const GET_DESCRIPTION = [
-  "Get one Spec's structure: identity and version state, the schema its output rows follow, `nodes[]` (the processing steps as the user configured them, in editing order), `phases[]` (the steps as they actually run, in run order; one configured validation step can run as several phases, so the two lists can differ), and `fields[]` (Spec field ↔ schema field).",
+  "Get one Spec's structure: identity and version state, the schema its output rows follow, `nodes[]` (the steps as the user set them up, in editing order), `phases[]` (the same steps in the order a run carries them out; one check can appear more than once, so the two lists can differ), and `fields[]` (Spec field ↔ schema field).",
   "",
   "USE WHEN: you need to explain what a run will do, confirm a Spec is published (`version` non-null) before talonic_run_spec, or map field names to keys.",
   "NOT FOR: listing Specs (talonic_list_specs) or starting a run (talonic_run_spec).",
@@ -111,10 +111,10 @@ export function registerSpecTools(
   server.registerTool(
     "talonic_list_specs",
     {
-      title: "List pipelines",
+      title: "List Specs",
       description: LIST_DESCRIPTION,
       inputSchema: listSpecsInputSchema,
-      annotations: { title: "List pipelines", ...READ_ONLY },
+      annotations: { title: "List Specs", ...READ_ONLY },
       _meta: widgetToolMeta("listSpecs"),
     },
     async (args) => handleListSpecs(getToken, baseUrl, args as ListSpecsArgs),
@@ -122,10 +122,10 @@ export function registerSpecTools(
   server.registerTool(
     "talonic_get_spec",
     {
-      title: "Look up a pipeline",
+      title: "Look up a Spec",
       description: GET_DESCRIPTION,
       inputSchema: getSpecInputSchema,
-      annotations: { title: "Look up a pipeline", ...READ_ONLY },
+      annotations: { title: "Look up a Spec", ...READ_ONLY },
       _meta: widgetToolMeta("getSpec"),
     },
     async (args) => handleGetSpec(getToken, baseUrl, args as GetSpecArgs),

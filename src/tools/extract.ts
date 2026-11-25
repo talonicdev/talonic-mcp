@@ -71,7 +71,7 @@ const inputSchema = {
   include_markdown: z
     .boolean()
     .optional()
-    .describe("Include OCR-converted markdown in the response alongside structured data."),
+    .describe("Also return the document's full text as markdown, alongside the fields."),
   include_provenance: z
     .boolean()
     .optional()
@@ -149,7 +149,7 @@ const outputSchema = {
   markdown: z
     .string()
     .optional()
-    .describe("OCR-converted markdown. Present only when `include_markdown: true`."),
+    .describe("The document's full text as markdown. Present only when `include_markdown: true`."),
   cost: z
     .object({
       costCredits: z.number().describe("Credits consumed by this call."),

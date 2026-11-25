@@ -1,399 +1,219 @@
-import type { RawSection } from "../types"
+import type { DocBlock, RawSection } from "../types"
+import { link, tool } from "../routes"
+
+const issue = (id: string, title: string, fix: string): DocBlock[] => [
+  { type: "heading", level: 3, id, text: title },
+  { type: "paragraph", text: fix },
+]
 
 export const sections: RawSection[] = [
   {
     slug: "common-issues",
     parentSlug: "troubleshooting",
-    title: "Common Issues",
-    seoTitle: "Common Issues — Talonic MCP Server Troubleshooting",
+    title: "Troubleshooting",
+    seoTitle: "Talonic MCP Troubleshooting: Fix Connection and Tool Errors",
     description:
-      "Fix the most common Talonic MCP server problems: a missing API key, tools not appearing in the client, extract schema errors, and filter validation failures.",
+      "Fix the common Talonic MCP problems: client won't connect, sign-in loops, authentication errors, missing tools, empty search results and stuck uploads.",
     content: [
       {
         type: "paragraph",
-        text: "This section covers the most frequently encountered issues when setting up and using the Talonic MCP server. Each issue includes a description, the root cause, and the fix. If your problem is not listed here, check the Known Limitations section or reach out via GitHub issues.",
+        text: "The common problems and their fixes, in the order people hit them. If Talonic is missing from your client's server list, the problem is the connection; if it is listed but a call fails, read the error message first, because it says what to change.",
       },
+      { type: "heading", level: 2, id: "connecting", text: "Connecting" },
+      ...issue(
+        "api-key-required",
+        '"TALONIC_API_KEY environment variable is required"',
+        "The local server could not read the key. Put it in the `env` block of your client config under exactly `TALONIC_API_KEY`, check the JSON is valid, and fully quit and reopen the client (a new conversation is not enough).",
+      ),
+      ...issue(
+        "not-listed",
+        "Talonic does not appear in the client",
+        'For a local install, `command` must be `npx` and `args` exactly `["-y", "@talonic/mcp@latest"]`. Run `npx -y @talonic/mcp@latest --version` in a terminal: it should print a version. Node.js 18 or later is required.',
+      ),
+      ...issue(
+        "sign-in",
+        "Connector sign-in does not return to the chat",
+        "Sign in at app.talonic.com with the account that owns the workspace, allow third-party cookies for app.talonic.com and your chat client, then start the connector again. With several Talonic accounts, sign out first so the right one is used. Last resort: remove the connector and add `https://mcp.talonic.com/mcp` again.",
+      ),
+      ...issue(
+        "auth-error",
+        "Every call fails with an authentication error",
+        `The key is wrong, revoked or for another workspace. Keys start with \`tlnc_\`; create a new one under **Settings → API Keys** (${link("get-api-key", "Get an API key")}). For connectors, remove and re-add the connector.`,
+      ),
+      { type: "heading", level: 2, id: "tools", text: "Tools" },
+      ...issue(
+        "missing-tools",
+        "Some tools are missing",
+        `Process tools appear only when your role can see processes; app tools only when the app is enabled for you; ChatGPT omits the two generic data-query tools. Decision-task tools marked not callable mean the connector was added before it could ask for \`apps:decide\`: remove and re-add it. ${link("tools-by-task", "Tools by task")} shows what each session lists.`,
+      ),
+      ...issue(
+        "stale-descriptions",
+        "Tool descriptions or tools look out of date",
+        "Clients cache the tool list. Restart the client, or reconnect the connector, after Talonic adds or changes tools.",
+      ),
+      ...issue(
+        "search-empty",
+        "Search returns nothing for something that exists",
+        `${tool("talonic_search")} matches words literally. Search with one short, singular keyword (\`invoice\`, not \`invoices from May\`) or the exact file name. For a concept rather than a word, use ${tool("talonic_find_data")}.`,
+      ),
+      ...issue(
+        "filter-zero",
+        'A filter like "total > 1000" returns nothing',
+        `Number comparisons work only on fields stored as numbers. Check the field's \`dataType\` with ${tool("talonic_search")} or ${tool("talonic_get_field")}, and read any \`warnings[]\` on the response: it names fields it could not match.`,
+      ),
+      ...issue(
+        "extract-schema",
+        "Extract asks for fields",
+        `${tool("talonic_extract")} needs to know what to pull: an inline \`schema\`, a saved \`schema_id\`, or \`auto_schema: true\` to have Talonic suggest the fields. The error includes a ready-to-use schema for your request.`,
+      ),
+      ...issue(
+        "empty-fields",
+        "Extract returns empty fields for a file I attached",
+        `In Claude.ai and ChatGPT, a file sent inside the tool call is cut short by the client's size limit. Use ${tool("talonic_request_upload")} instead (${link("files-and-uploads", "Files and uploads")}).`,
+      ),
+      ...issue(
+        "upload-stuck",
+        "An upload seems stuck",
+        "`pending_upload` means the link has not been used yet; `uploading`, `queued` and `extracting` are normal while a file is read. `ocr_failed`, `extraction_failed` or `error` are final: try a clearer scan or the original file. An expired link can be replaced by asking for a new one.",
+      ),
+      ...issue(
+        "slow",
+        "Long documents time out",
+        `Reading time grows with page count. If your client gives up first, use an upload link or a Spec run (${tool("talonic_run_spec")}), which return at once and let the agent check progress.`,
+      ),
+      ...issue(
+        "permission",
+        "A write is refused (403)",
+        "The call runs with your workspace role. The message names what is missing, such as a role, a grant or a scope; ask a workspace admin, or reconnect if it names a scope.",
+      ),
+      { type: "heading", level: 2, id: "report", text: "Reporting a problem" },
       {
         type: "paragraph",
-        text: "Most issues fall into two categories: **configuration problems** (the server does not start or connect) and **tool errors** (the server is running but a specific tool call fails). Configuration problems are almost always caused by malformed JSON, a missing API key, or not restarting the MCP client after editing the config.",
-      },
-      {
-        type: "paragraph",
-        text: "Tool errors typically include a structured error message with an error type and description. Read the error message carefully — it usually tells you exactly what is wrong and how to fix it. For example, a `VALIDATION_ERROR` on `talonic_filter` means the field name is not in the API's registry.",
-      },
-      {
-        type: "paragraph",
-        text: "When debugging, start by verifying the MCP server is running. Check the connected servers list in your MCP client. If Talonic is not listed, the issue is in your config or client setup. If it is listed but a tool call fails, the issue is with the tool input or API-side.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "missing-api-key",
-        text: "TALONIC_API_KEY environment variable is required",
-      },
-      {
-        type: "paragraph",
-        text: "The `env` block in your MCP client config is missing or not being read. Double-check the JSON shape. After editing the config, fully restart the client (not just the conversation).",
-      },
-
-      {
-        type: "heading",
-        level: 3,
-        id: "server-not-found",
-        text: "Talonic does not appear in connected servers",
-      },
-      {
-        type: "paragraph",
-        text: 'Make sure the `command` is `npx` and the `args` are exactly `["-y", "@talonic/mcp@latest"]`. Sanity check: run `npx -y @talonic/mcp@latest --version` in any terminal — it should print a version number.',
-      },
-
-      {
-        type: "heading",
-        level: 3,
-        id: "extract-no-schema",
-        text: "talonic_extract returns a validation error when no schema is given",
-      },
-      {
-        type: "paragraph",
-        text: "By design. To keep results reliable, the MCP layer asks for the fields you want when a call omits `schema`, `schema_id`, and `auto_schema`. The error hands back a ready-to-paste minimal JSON Schema (tailored to your `instructions`) so the retry succeeds immediately. Three ways forward: provide an inline `schema` (full JSON Schema recommended), pass a `schema_id` from `talonic_list_schemas`, or set `auto_schema: true` for open capture — Talonic discovers the fields and returns a suggested schema you can refine.",
-      },
-
-      {
-        type: "heading",
-        level: 3,
-        id: "unsupported-file",
-        text: "talonic_extract rejects with unsupported_file_type",
-      },
-      {
-        type: "paragraph",
-        text: "The MIME type was inferred as `application/octet-stream`. The SDK infers from common file extensions; if your filename has an unusual extension, this may occur. A future tool version will expose explicit `content_type` passthrough.",
-      },
-
-      {
-        type: "heading",
-        level: 3,
-        id: "filter-validation",
-        text: 'talonic_filter VALIDATION_ERROR / "No field matches name"',
-      },
-      {
-        type: "paragraph",
-        text: "The field name is not in the API's field registry. Field names must be canonical names (e.g. `vendor.name`, `policy.0_term_end`). Call `talonic_search` first; canonical names appear in `fields[].canonicalName`.",
-      },
-
-      {
-        type: "heading",
-        level: 3,
-        id: "stale-descriptions",
-        text: "Tool descriptions look wrong in my client",
-      },
-      {
-        type: "paragraph",
-        text: "Some MCP clients cache tool descriptions. Restart the client after a server update.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "auth-error",
-        text: "Authentication error on every tool call",
-      },
-      {
-        type: "paragraph",
-        text: "If every tool call returns an authentication error, the credential the server is using is missing, malformed, or revoked. For the local npx option, check that the `env` block in your config has the correct variable name (`TALONIC_API_KEY`, not `TALONIC_KEY` or `API_KEY`) and that the value starts with `tlnc_`. For the hosted server with a custom-header client, verify the `Authorization` header is formatted as `Bearer tlnc_...` with a space after `Bearer`. For the Claude.ai connector OAuth flow, see the OAuth-specific entry below.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "oauth-flow",
-        text: "Claude.ai connector: stuck on sign-in or callback",
-      },
-      {
-        type: "paragraph",
-        text: "The Claude.ai custom-connector flow uses OAuth 2.1 with PKCE against `app.talonic.com`. If the sign-in window opens but does not return to Claude.ai, or the connector reports `disconnected` after authorising, walk through these checks. Make sure you are signed in to the same Talonic account in `app.talonic.com` that owns the workspace you want to use. Allow third-party cookies for `app.talonic.com` and `claude.ai`; some browsers block the post-consent redirect otherwise. After granting consent, you should be redirected back to Claude.ai automatically; if the tab stays on `app.talonic.com`, click the Talonic logo or close the tab and reopen the connector to retry. If you have multiple Talonic accounts, sign out of `app.talonic.com` first, then start the connector flow again so the right account is used. As a last resort, remove the connector in Claude.ai and add it again with `https://mcp.talonic.com/mcp` as the URL.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "timeout-errors",
-        text: "Tool calls time out on large documents",
-      },
-      {
-        type: "paragraph",
-        text: "Large documents (20+ pages) may take longer than some MCP clients' default timeout. The Talonic API processes documents up to 100 pages, but extraction time scales with page count. If you experience timeouts, try splitting large documents into smaller sections before uploading. Alternatively, check if your MCP client has a configurable timeout setting — increasing it to 60 seconds should accommodate most documents.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "debug-checklist",
-        text: "Debug checklist",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Step-by-step debug commands",
-        code: `// 1. Verify the MCP server installs and runs:
-// Terminal: npx -y @talonic/mcp@latest --version
-// Expected: prints version number (e.g., 0.1.6)
-
-// 2. Verify your API key is valid:
-// Terminal: curl -H "Authorization: Bearer tlnc_your_key" https://api.talonic.com/v1/schemas
-// Expected: JSON response (even if empty schemas array)
-
-// 3. Validate your config JSON:
-// Paste your config into https://jsonlint.com
-// Common errors: trailing commas, missing quotes, wrong brackets
-
-// 4. Verify client picked up the config:
-// Check the connected servers list in your MCP client
-// If Talonic is missing, the config is not being read`,
-      },
-      {
-        type: "callout",
-        variant: "info",
-        text: "When reporting issues, include the MCP server version (`npx -y @talonic/mcp@latest --version`), your MCP client name and version, and the full error message. This helps diagnose problems faster.",
+        text: "Include your client and its version, the server version (`npx -y @talonic/mcp@latest --version` for local installs), the tool name and the full error message. Open an issue on [GitHub](https://github.com/talonicdev/talonic-mcp/issues) or write to support from the web app.",
       },
     ],
     related: [
-      { label: "Known Limitations", slug: "known-limitations" },
-      { label: "Upgrading", slug: "upgrading" },
-      { label: "Environment Variables", slug: "env-variables" },
+      { label: "Limits", slug: "known-limitations" },
+      { label: "Connect your agent", slug: "install-overview" },
+      { label: "Files and uploads", slug: "files-and-uploads" },
     ],
     faq: [
       {
-        question: "Why does Talonic MCP not appear in Claude Desktop?",
+        question: "Why does my agent say it can't find a document I know is there?",
         answer:
-          'Check that command is "npx" and args are ["-y", "@talonic/mcp@latest"]. Run npx -y @talonic/mcp@latest --version in a terminal to verify. Fully restart Claude Desktop (Cmd+Q).',
-      },
-      {
-        question: "Why does talonic_extract fail with a validation error?",
-        answer:
-          "The most common cause is that no fields were specified. Provide a schema (inline JSON Schema) or a schema_id from talonic_list_schemas — or set auto_schema: true for open capture, where Talonic discovers the fields and returns a suggested schema. The validation error already hands back a ready-to-paste minimal schema, so the retry succeeds on the next call.",
-      },
-      {
-        question: "How do I debug MCP server connection issues?",
-        answer:
-          "First verify the server runs standalone: npx -y @talonic/mcp@latest --version. Then check your config JSON is valid, the API key starts with tlnc_, and you have fully restarted your MCP client.",
-      },
-      {
-        question: "Why do all tool calls return authentication errors?",
-        answer:
-          "The API key is missing, malformed, or revoked. Verify the key starts with tlnc_ in your config. For local setups, check the env block uses TALONIC_API_KEY (exact name). For hosted setups, check the Authorization header format is 'Bearer tlnc_...' with a space after Bearer. Regenerate the key in the dashboard if it was revoked.",
-      },
-      {
-        question: "What should I do if large documents time out?",
-        answer:
-          "Documents over 20 pages may exceed some MCP clients' default timeout. Try splitting the document into smaller sections, or increase your MCP client's timeout setting to 60 seconds. The Talonic API supports documents up to 100 pages but processing time scales with page count.",
+          "Search matches words literally. Ask it to search for one short keyword or the exact file name, or to look for the concept instead of the word.",
       },
     ],
-    mentions: ["troubleshooting", "API key", "VALIDATION_ERROR"],
+    mentions: ["MCP troubleshooting", "connection errors", "authentication"],
   },
   {
     slug: "known-limitations",
     parentSlug: "troubleshooting",
-    title: "Known Limitations",
-    seoTitle: "Known Limitations of the Talonic MCP Server and Tools",
+    title: "Limits",
+    seoTitle: "Talonic MCP Limits: File Sizes, Batches and Timeouts",
     description:
-      "Limitations of the Talonic MCP server: the extract schema requirement, filter typing rules, the Claude.ai drag-and-drop stall, and header-based cost reporting.",
+      "The limits that shape what an agent can do with Talonic: tool-call size in hosted chats, batch sizes, waits for answers, page sizes and what uses credits.",
     content: [
       {
         type: "paragraph",
-        text: "The Talonic MCP server is production-ready but has a number of known limitations that are planned for future releases. Understanding these limitations helps agents make better decisions about when and how to use each tool.",
+        text: "The limits an agent works within, and what to do at each one.",
       },
       {
+        type: "param-table",
+        params: [
+          {
+            name: "File inside a tool call (hosted chats)",
+            type: "about 32 KB",
+            description: `Larger files arrive cut short. Use ${tool("talonic_request_upload")}, a \`file_url\` or a \`document_id\`.`,
+          },
+          {
+            name: "File by path",
+            type: "local install only",
+            description:
+              "`file_path` is read by the server on your machine; hosted sessions refuse it.",
+          },
+          {
+            name: "Spec run",
+            type: "500 documents or 20 URLs",
+            description: "Per call to `talonic_run_spec`; split larger sets into several runs.",
+          },
+          {
+            name: "Answer wait",
+            type: "up to 55 s",
+            description:
+              "`talonic_ask` returns an `ask_id` after `wait_seconds`; collect the answer with `talonic_get_answer`.",
+          },
+          {
+            name: "Run results page",
+            type: "up to 200 rows",
+            description: "Page through `talonic_get_run_results` with `cursor`.",
+          },
+          {
+            name: "Field values page",
+            type: "up to 100 rows",
+            description: "Page through `talonic_field_values` with `cursor`.",
+          },
+          {
+            name: "Decision package page",
+            type: "up to 2,000 records",
+            description: "Page through `talonic_read_decision_package` with `cursor`.",
+          },
+          {
+            name: "Usage window",
+            type: "1 to 365 days",
+            description: "`talonic_get_usage` defaults to 30 days.",
+          },
+        ],
+      },
+      { type: "heading", level: 2, id: "credits", text: "What uses credits" },
+      {
         type: "paragraph",
-        text: "Most limitations relate to the maturity of the extraction pipeline. Certain filter operators, cost reporting, and per-field provenance have constraints. These are documented here so agent developers can set accurate expectations and build appropriate fallbacks.",
+        text: `Reading a new document, extracting fields, asking a question and running a Spec or a process use credits, at the same rates as the web app and the API. Searching, filtering, listing, looking up and reading stored text are free. ${tool("talonic_get_pricing")} has the rates; ${tool("talonic_get_balance")} the balance.`,
+      },
+      {
+        type: "heading",
+        level: 2,
+        id: "in-the-web-app",
+        text: "Done in the web app, not by an agent",
       },
       {
         type: "list",
         items: [
-          "**`talonic_extract` needs to know which fields to pull.** Pass a `schema` (full JSON Schema recommended) or a `schema_id` — or set `auto_schema: true` for open capture, where Talonic discovers the fields and returns a suggested schema. A call that gives none of the three returns a validation error that hands back a ready-to-paste minimal schema, so the retry succeeds immediately.",
-          "**Schema definition: prefer full JSON Schema.** The flat key-type map is documented as accepted; if you get a 'no fields' error from the API, fall back to JSON Schema.",
-          "**Filter requires `filterable: true` fields.** Call `talonic_search` first; only entries in the response where `filterable: true` can be used as `field` (or `field_id`) on `talonic_filter`. Entries with `filterable: false` exist in the schema but have no extracted data yet.",
-          "**Schema field type affects filter operators.** Numeric operators (`gt`, `gte`, `lt`, `lte`, `between`) only work on fields typed as `number` in the schema. Numeric values stored as strings (with currency symbols, locale formatting, etc.) silently return zero results. Type your schema fields appropriately at design time.",
-          "**`is_not_empty` filter checks materialized data.** Results reflect values within seconds of extraction completing. For batch-mode documents, values are materialized after the batch poll cycle completes.",
-          "**Dragging a file directly into a Claude.ai chat does not work through the hosted connector** — use `talonic_request_upload` instead. A base64-encoded real PDF exceeds Claude.ai's tool-call argument cap (~32 KB decoded / ~43 KB base64, measured against production), so `file_data` is silently truncated and the API returns `null` fields. This is a structural platform limit, not a Talonic bug. The supported path is the browser-handoff flow: `talonic_request_upload` returns an `app.talonic.com/u/<token>` link the user opens to drop the file; poll `talonic_get_document` until `status` is `completed`, then `talonic_extract` by `document_id`. Alternatives: `file_url` or a pre-uploaded `document_id`. Local-stdio installs (Claude Desktop, Cursor, Cline, Continue, Cowork) have no cap and use `file_data` directly.",
-          "**Cost reporting depends on response headers.** `talonic_extract` returns a `cost` object (`costCredits`, `costEur`, `balanceCredits`, and the registry-vs-AI cell split) parsed from the `X-Talonic-*` response headers. It is `null` for non-extract calls and may be absent against older API deployments that do not send those headers, so treat it as optional and fall back to `talonic_get_balance` rather than assuming it is present.",
+          "Connecting a mailbox or another system, and storing passwords or secrets.",
+          "Creating API keys and managing members and roles.",
         ],
-      },
-      {
-        type: "paragraph",
-        text: "Agents should handle these limitations gracefully. For the schema requirement, always construct or reference a schema before calling `talonic_extract`. When a user asks what a run cost, read the `cost` object off the extract response and fall back to `talonic_get_balance` if it is absent; for rates and historical spend, use `talonic_get_pricing` and `talonic_get_usage` rather than guessing.",
-      },
-      {
-        type: "paragraph",
-        text: "The `is_not_empty` operator is now available and checks the materialized values index, which updates within seconds of extraction completing. For batch-mode documents, materialization occurs after the batch poll cycle applies results.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "limitations-workarounds",
-        text: "Workarounds summary",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Quick reference: limitation → workaround",
-        code: `// Schema required on talonic_extract
-// → Always pass schema (JSON Schema) or schema_id
-
-// is_not_empty checks materialized values (updated within seconds of extraction)
-
-// Drag-and-drop stalls on Claude.ai (hosted connector)
-// → Use file_url, document_id, or local stdio install
-
-// Numeric filter on string-typed field returns zero results
-// → Define numeric fields as type "number" in the schema
-
-// Filter on non-filterable field returns VALIDATION_ERROR
-// → Call talonic_search first, use fields where filterable: true`,
-      },
-      {
-        type: "paragraph",
-        text: "When building agent workflows that will run unattended, design for these limitations explicitly. Check that every `talonic_extract` call includes a schema or schema_id. Validate filter field names against `talonic_search` results before constructing conditions. For file uploads in hosted connectors with size limits, prefer `file_url` or `document_id` over `file_data`. These defensive patterns ensure the agent handles edge cases gracefully instead of failing with cryptic errors.",
-      },
-      {
-        type: "paragraph",
-        text: "The Talonic team actively tracks these limitations and publishes fixes in minor version updates. Subscribe to the `@talonic/mcp` npm package changelog or watch the GitHub repository for release notes. Limitations that are resolved in newer versions are removed from this list. If you encounter a limitation not documented here, report it via GitHub issues with the MCP server version and a minimal reproduction case.",
-      },
-      {
-        type: "callout",
-        variant: "warning",
-        text: "For predictable automated workflows, pin the fields with a `schema` or `schema_id`. When you don't yet know the fields, `auto_schema: true` (open capture) discovers them and returns a suggested schema you can save and reuse for stability.",
       },
     ],
     related: [
-      { label: "Common Issues", slug: "common-issues" },
-      { label: "talonic_extract", slug: "talonic-extract" },
-      { label: "talonic_filter", slug: "talonic-filter" },
+      { label: "Troubleshooting", slug: "common-issues" },
+      { label: "Files and uploads", slug: "files-and-uploads" },
     ],
-    faq: [
-      {
-        question: "What are the known limitations of Talonic MCP?",
-        answer:
-          "talonic_extract needs fields specified via schema, schema_id, or auto_schema: true (open capture). Filter requires filterable: true fields (use talonic_search first to discover them). Numeric filter operators require schema fields typed as number. Drag-and-drop file uploads in Claude.ai currently stall via the hosted MCP; use file_url or document_id instead, or use the local stdio install. The cost object on an extract response is header-derived, so it can be absent against older API deployments.",
-      },
-      {
-        question: "Can I extract without knowing the fields up front (schema-less)?",
-        answer:
-          "Yes. Set auto_schema: true on talonic_extract for open capture: Talonic discovers the document's fields and returns a suggested schema alongside the data. Refine and save that schema with talonic_save_schema for stable, repeatable extraction. For predictable production workflows, providing an explicit schema or schema_id is still recommended.",
-      },
-      {
-        question: "How do I check my credit balance or costs?",
-        answer:
-          "For a single extraction, read the cost object on the talonic_extract response: costCredits, costEur, and balanceCredits. For workspace-level figures, call talonic_get_balance for the remaining balance, talonic_get_pricing for per-unit rates, and talonic_get_usage for what has already been spent.",
-      },
-      {
-        question: "How do I report a new limitation or bug?",
-        answer:
-          "Open an issue on the @talonic/mcp GitHub repository with the MCP server version (npx -y @talonic/mcp@latest --version), your MCP client name and version, and a minimal reproduction case. Include the full error message if applicable.",
-      },
-      {
-        question: "How do I work around the Claude.ai drag-and-drop limitation?",
-        answer:
-          "Claude.ai's hosted connector truncates large tool-call arguments, which breaks base64 file uploads. Use file_url with a publicly reachable URL, upload the file via the Talonic dashboard and use document_id, or switch to a local stdio install (Claude Desktop, Cursor, Cline) which has no parameter size cap.",
-      },
-    ],
-    mentions: [
-      "limitations",
-      "schema",
-      "filterable",
-      "is_not_empty",
-      "drag-and-drop",
-      "rate limits",
-    ],
+    faq: [],
+    mentions: ["MCP limits", "file size", "credits"],
   },
   {
     slug: "upgrading",
     parentSlug: "troubleshooting",
     title: "Upgrading",
-    seoTitle: "Upgrading the Talonic MCP Server from Older Versions",
+    seoTitle: "Upgrading the Talonic MCP Server to the Latest Version",
     description:
-      "Upgrade @talonic/mcp from versions before 0.1.3, where a silent-bin bug stopped the server from launching through the npm symlink that every MCP client uses.",
+      "Hosted connections always run the latest Talonic MCP server. Local installs update on restart with @latest; pin an exact version when you need repeatable runs.",
     content: [
       {
         type: "paragraph",
-        text: "Versions before `0.1.3` had a bug where the bundled MCP server bin would exit silently when launched via the npm bin symlink, which is exactly how every MCP client invokes it. If you see no `talonic_*` tools despite correct config, you are hitting that bug.",
+        text: "Hosted connections (`https://mcp.talonic.com/mcp`) always run the latest version; there is nothing to do except reconnect if your client caches the tool list.",
       },
       {
         type: "paragraph",
-        text: "The fix: point your `args` at `@latest` (or `@0.1.3` explicitly) and fully restart the client:",
-      },
-      { type: "code", language: "jsonc", code: '"args": ["-y", "@talonic/mcp@latest"]' },
-      {
-        type: "paragraph",
-        text: "Using `@latest` is the recommended approach because it ensures you automatically receive new features, bug fixes, and improved tool descriptions on every client restart. If you need version stability for a production workflow, pin to a specific version like `@0.1.6` instead.",
+        text: "Local installs with `@talonic/mcp@latest` pick up the newest version the next time the client starts. Quit the client fully (not just the conversation) to restart the server. To pin, use an exact version such as `@talonic/mcp@0.1.100`; `npm view @talonic/mcp version` shows the latest.",
       },
       {
         type: "paragraph",
-        text: "After updating the `args` in your MCP client config, you must fully restart the client application. Simply starting a new conversation is not enough — the MCP server process must be terminated and re-spawned. On Claude Desktop, use Cmd+Q (macOS) or close from the system tray (Windows). On Cursor and VS Code-based clients, reload the window.",
-      },
-      {
-        type: "heading",
-        level: 3,
-        id: "upgrade-verify",
-        text: "Verify the upgrade",
-      },
-      {
-        type: "code",
-        language: "json",
-        title: "Check the installed version after upgrading",
-        code: `// In a terminal, verify the latest version installs:
-// npx -y @talonic/mcp@latest --version
-// Expected output: 0.1.6 (or the latest published version)
-
-// In your MCP client, verify tools are available:
-// Ask the agent: "What version of Talonic MCP are you using?"
-// Or call talonic_list_schemas — a successful response
-// confirms the server is running the updated version.`,
-      },
-      {
-        type: "paragraph",
-        text: "When upgrading between minor versions, tool parameters and response shapes remain backward-compatible. New versions may add optional parameters to existing tools or introduce new tools, but they will not remove or change existing parameters. This means your existing agent workflows and saved schemas continue to work without modification after an upgrade.",
-      },
-      {
-        type: "paragraph",
-        text: "If you are running a pinned version and want to check whether a newer version is available, run `npm view @talonic/mcp version` in a terminal. This shows the latest published version on npm without installing it. Compare this against your pinned version to decide whether to upgrade. The changelog in the npm package description summarises what changed between versions.",
-      },
-      {
-        type: "paragraph",
-        text: "For teams with multiple developers using the Talonic MCP server, coordinate upgrades by updating the shared MCP config file or template. If different team members run different versions, tool descriptions and capabilities may vary, leading to inconsistent agent behaviour. Using `@latest` for all team members ensures everyone has the same tools and avoids version-related debugging sessions.",
-      },
-      {
-        type: "callout",
-        variant: "info",
-        text: "If you are using the hosted server at `mcp.talonic.com`, upgrades are automatic. You do not need to change any configuration — the hosted server always runs the latest version.",
+        text: "New versions add tools and optional parameters. Existing parameters and response fields are not removed or renamed without a dated notice in the [changelog](https://github.com/talonicdev/talonic-mcp/blob/main/CHANGELOG.md).",
       },
     ],
-    related: [
-      { label: "Install Overview", slug: "install-overview" },
-      { label: "Common Issues", slug: "common-issues" },
-    ],
-    faq: [
-      {
-        question: "How do I upgrade the Talonic MCP server?",
-        answer:
-          'Set args to ["-y", "@talonic/mcp@latest"] in your MCP client config and fully restart the client. Versions before 0.1.3 had a silent-bin bug that prevented the server from booting.',
-      },
-      {
-        question: "Do I need to upgrade if I use the hosted server?",
-        answer:
-          "No. The hosted server at mcp.talonic.com is automatically updated to the latest version. No configuration changes are needed on your end.",
-      },
-      {
-        question: "Should I pin to a specific version or use @latest?",
-        answer:
-          "Use @latest for development and most use cases — it picks up fixes automatically. Pin to a specific version (e.g., @0.1.6) only if you need strict version stability in production workflows.",
-      },
-      {
-        question: "Are upgrades backward-compatible?",
-        answer:
-          "Yes. Minor version upgrades maintain backward compatibility — existing tool parameters and response shapes are preserved. New versions may add optional parameters or new tools, but will not break existing workflows, schemas, or agent integrations.",
-      },
-      {
-        question: "How do I check if a newer version is available?",
-        answer:
-          "Run npm view @talonic/mcp version in a terminal to see the latest published version on npm. Compare against your pinned version or run npx -y @talonic/mcp@latest --version to see what @latest resolves to.",
-      },
-    ],
-    mentions: ["upgrade", "silent-bin bug", "0.1.3", "@latest"],
+    related: [{ label: "Connect your agent", slug: "install-overview" }],
+    faq: [],
+    mentions: ["upgrade", "npm", "version"],
   },
 ]
