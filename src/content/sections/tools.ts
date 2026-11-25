@@ -3522,11 +3522,11 @@ Payment terms: Net 30`,
     title: "talonic_find_data",
     seoTitle: "talonic_find_data — Locate the Data Behind Any Concept",
     description:
-      "MCP tool that resolves a natural-language concept to the registry fields, values, documents and passages that carry it, by meaning. Read-only, no LLM cost.",
+      "MCP tool that resolves a natural-language concept to the fields, values, documents and passages that carry it, optionally within one account. Read-only.",
     content: [
       {
         type: "paragraph",
-        text: "Locate the **real data behind a concept** before querying anything. Semantic plus lexical retrieval resolves a phrase in the user's words ('payment volume per transaction', 'Vertragslaufzeit') to the registry fields, values, documents and text passages that carry it — even when the field was captured under a different name. It is the same `find_data` primitive the in-product Talonic agent calls first, exposed with no model in the loop.",
+        text: "Locate the **real data behind a concept** before querying anything. It resolves a phrase in the user's words ('payment volume per transaction', 'Vertragslaufzeit'), by meaning and by its words, to the fields, values, documents and text passages that carry it — even when the field was captured under a different name. Pass `account` when the question names one portfolio company, so another company's figures cannot come back.",
       },
       { type: "heading", level: 3, id: "find-data-use-when", text: "When to use" },
       {
@@ -3549,16 +3549,33 @@ Payment terms: Net 30`,
       {
         type: "param-table",
         params: [
-          { name: "query", type: "string", description: "The concept, in the user's words." },
+          {
+            name: "query",
+            type: "string",
+            required: true,
+            description: "The concept, in the user's words.",
+          },
+          {
+            name: "concepts",
+            type: "string[]",
+            description:
+              "Several concepts resolved to fields in one call (fields only, no text search).",
+          },
           {
             name: "top_k",
             type: "number",
-            description: "Max results per plane (1–25, default 10).",
+            description: "Max results per group (1–25, default 10).",
           },
           {
             name: "document_ids",
             type: "string[]",
-            description: "Hard scope: restrict every plane to these documents.",
+            description: "Hard scope: restrict every group to these documents.",
+          },
+          {
+            name: "account",
+            type: "string",
+            description:
+              "Only the documents of this account (portfolio company), by name or alias, e.g. `Filu` (see `talonic_list_accounts`). Narrows like `document_ids`; an unknown name returns an error listing the accounts.",
           },
         ],
       },
@@ -3571,13 +3588,13 @@ Payment terms: Net 30`,
             name: "result.fields",
             type: "array",
             description:
-              "Matching concepts: canonical_name, field ids/keys, tier, occurrence_count, sample values with their documents.",
+              "Matching concepts: canonical_name, field ids/keys, maturity, occurrence_count, sample values with their documents.",
           },
           {
             name: "result.values / result.documents / result.passages",
             type: "array",
             description:
-              "Value, document and passage planes — each item a ready handle for the next call.",
+              "Value, document and passage groups — each item a ready handle for the next call.",
           },
           {
             name: "citations",
@@ -3590,7 +3607,7 @@ Payment terms: Net 30`,
         type: "code",
         language: "json",
         title: "Tool input",
-        code: `{ "query": "contract end date", "top_k": 5 }`,
+        code: `{ "query": "revenue", "account": "Filu", "top_k": 5 }`,
       },
       {
         type: "code",
@@ -3599,7 +3616,7 @@ Payment terms: Net 30`,
         code: `{
   "tool": "find_data",
   "result": {
-    "fields": [{ "canonical_name": "contract_end_date", "field_key": "contract_end_date", "tier": 2, "occurrence_count": 88, "samples": [{ "value": "2027-12-31", "document_id": "f0e1…" }] }],
+    "fields": [{ "canonical_name": "contract_end_date", "field_key": "contract_end_date", "occurrence_count": 88, "samples": [{ "value": "2027-12-31", "document_id": "f0e1…" }] }],
     "documents": [{ "document_id": "f0e1…", "filename": "Supply-Agreement-2024.pdf", "score": 0.81 }],
     "passages": []
   },

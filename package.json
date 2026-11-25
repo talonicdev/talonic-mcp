@@ -67,6 +67,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "check:routes": "node scripts/check-routes.mjs",
+    "inventory": "npm run build && node scripts/tool-inventory.mjs --write",
     "clean": "rm -rf dist coverage",
     "start": "node dist/server.js",
     "start:http": "node dist/http-server.js",

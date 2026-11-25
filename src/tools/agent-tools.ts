@@ -51,26 +51,57 @@ const documentIdsArg = z
 // ── talonic_find_data ───────────────────────────────────────────────────────
 
 const FIND_DESCRIPTION = [
-  "Locate the REAL data behind a natural-language concept before querying anything: semantic + lexical retrieval that resolves a phrase ('payment volume per transaction', 'counterparty', 'Vertragslaufzeit') to the registry fields, values, documents and text passages that carry it — even when the field is captured under a different name.",
+  "Locate the REAL data behind a natural-language concept before querying anything: resolves a phrase ('payment volume per transaction', 'counterparty', 'Vertragslaufzeit') by meaning and by its words to the fields, values, documents and text passages that carry it — even when the field is captured under a different name.",
   "",
-  "USE WHEN: the user asks about a concept and you are not sure which field holds it, when talonic_list_fields / talonic_search came back empty or ambiguous, or when the answer may live in document prose rather than a captured cell.",
+  "USE WHEN: the user asks about a concept and you are not sure which field holds it, when talonic_list_fields / talonic_search came back empty or ambiguous, or when the answer may live in document prose rather than a captured cell. Pass `account` whenever the question names one portfolio company (an account from talonic_list_accounts), so another company's figures cannot come back.",
   "NOT FOR: reading a known field's values (talonic_field_values) or filtering by a known field (talonic_filter).",
   "",
-  "ARGS: `query` (the concept, in the user's words), optional `top_k` (1–25, default 10), `document_ids` (hard scope).",
-  "RETURNS: four ranked groups — FIELDS (canonical_name, field ids/keys, maturity/tier, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item a ready handle for the next call. Read-only, no LLM cost.",
+  "ARGS: `query` (the concept, in the user's words), optional `concepts[]` (several concepts resolved to fields in one call; fields only, no text search), `top_k` (1–25, default 10), `document_ids` (hard scope), `account` (one account by name or alias, e.g. 'Filu'; narrows like document_ids; an unknown name returns an error listing the accounts).",
+  "RETURNS: four ranked groups — FIELDS (canonical_name, field ids/keys, maturity, occurrence_count, sample values with their documents), VALUES, DOCUMENTS and PASSAGES — every item a ready handle for the next call. Read-only.",
 ].join("\n")
 
 export const findDataInputSchema = {
   query: z.string().min(1).describe("The natural-language concept to locate."),
+  concepts: z
+    .array(z.string().min(1).max(300))
+    .min(1)
+    .max(50)
+    .optional()
+    .describe("Several concepts resolved to fields in one call (fields only, no text search)."),
   top_k: z.number().int().min(1).max(25).optional().describe("Max results per group (default 10)."),
   document_ids: documentIdsArg,
+  account: z
+    .string()
+    .min(1)
+    .max(200)
+    .optional()
+    .describe(
+      "Only the documents of this account (portfolio company), by name or alias, e.g. 'Filu'.",
+    ),
 }
 
 export interface FindDataArgs {
   query: string
+  concepts?: string[]
   top_k?: number
   document_ids?: string[]
+  account?: string
 }
+
+/**
+ * Named-tool argument → registry argument of `find_data`
+ * (platform `agent/loop/agent-tools.ts`). `tests/tools/agent-tools.test.ts`
+ * holds the two in step with the registry's pinned schema.
+ *
+ * @internal
+ */
+export const FIND_DATA_REGISTRY_ARGS = {
+  query: "query",
+  concepts: "concepts",
+  top_k: "top_k",
+  document_ids: "document_scope",
+  account: "account",
+} as const satisfies Record<keyof typeof findDataInputSchema, string>
 
 export async function handleFindData(
   getToken: () => string,
@@ -87,8 +118,10 @@ export async function handleFindData(
         body: {
           args: {
             query: args.query,
+            ...(args.concepts?.length ? { concepts: args.concepts } : {}),
             ...(args.top_k !== undefined ? { top_k: args.top_k } : {}),
             ...(args.document_ids?.length ? { document_scope: args.document_ids } : {}),
+            ...(args.account?.trim() ? { account: args.account.trim() } : {}),
           },
         },
       },
