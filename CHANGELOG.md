@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`talonic_business_rules_*` tools (3), registered where the platform serves the central rule store.** Read-only over `/v1/business-rules/*`: `list` (rules with bindings, triggers and outcome counts; filters: query, status, limit, offset), `get` (one rule: text, interpretation, bindings, revisions with origins, latest outcome changes), `outcomes` (current outcome per subject with reason and evidence; filter: status). Probe-gated on `GET /v1/business-rules?limit=1` → 200.
+- **`talonic_business_rules_*` tools (4), registered where the platform serves the central rule store.** Read-only over `/v1/business-rules/*`: `list` (rules with bindings, triggers and outcome counts; filters: query, status, limit, offset), `get` (one rule: text, interpretation, bindings, revisions with origins, latest outcome changes), `outcomes` (current outcome per subject with reason and evidence; filter: status), `history` (one subject's checks and changes with as_of / data_as_of / evaluated_at, cause and the input set judged). Probe-gated on `GET /v1/business-rules?limit=1` → 200.
 
 ## [0.1.106] - 2026-11-25
 

@@ -12,7 +12,8 @@ import { zUuid, type ToolResult } from "./_shared.js"
  *
  * All tools hit `/v1/business-rules/*` with the caller's bearer (scope read).
  * The loop an agent runs: talonic_business_rules_list → talonic_business_rules_get
- * → talonic_business_rules_outcomes (status=failed for what needs someone).
+ * → talonic_business_rules_outcomes (status=failed for what needs someone)
+ * → talonic_business_rules_history (why one subject stands where it does).
  */
 
 const readOnly = {
@@ -107,6 +108,34 @@ export function handleOutcomes(
   )
 }
 
+const HISTORY_DESCRIPTION = [
+  "One subject's history under a business rule, newest first: every change of its outcome (with why it changed and the event it replaced) and every check that left it as it was, each with three times (as_of: the date judged for; data_as_of: when its inputs were read; evaluated_at: when it was decided) and the input set it judged (the owner's references and a copy of the values read, null once erased).",
+  'USE WHEN: answering "why is this one failing", "what did we decide on date D", or "did the data change".',
+  "NOT FOR: all subjects of a rule (talonic_business_rules_outcomes).",
+  "",
+  "ARGS: `id` (rule uuid), `subject` (the owner's own key, as talonic_business_rules_outcomes returns it), `limit` (the platform caps it).",
+  "RETURNS: { subject, total, entries[] { kind change|check|withdrawal, status, revision, reason, cause, event_id, supersedes_event_id, input_set_hash, as_of, data_as_of, evaluated_at, recorded_at }, input_sets { <hash>: { values_hash, refs, values, redacted } } }.",
+].join("\n")
+
+export const historyInputSchema = {
+  id: zUuid().describe("Business rule id."),
+  subject: z.string().min(1).describe("The owner's own subject key, e.g. a load number."),
+  limit: z.number().int().min(1).max(1000).optional().describe("Entries returned (the platform caps it)."),
+}
+
+/** @internal */
+export function handleHistory(
+  getToken: () => string,
+  baseUrl: string | undefined,
+  args: { id: string; subject: string; limit?: number },
+): Promise<ToolResult> {
+  return runTool(() =>
+    apiJson(getToken, baseUrl, "GET", `/v1/business-rules/${encodeURIComponent(args.id)}/history`, {
+      params: { subject: args.subject, limit: args.limit },
+    }),
+  )
+}
+
 /**
  * Probe whether the platform serves the Business Rules read routes for this
  * token (`GET /v1/business-rules?limit=1` → 200). A deployment without them
@@ -127,7 +156,7 @@ export async function probeBusinessRulesAccess(token: string, baseUrl?: string):
 }
 
 /**
- * Register the three read-only `talonic_business_rules_*` tools.
+ * Register the four read-only `talonic_business_rules_*` tools.
  *
  * @public
  */
@@ -142,6 +171,7 @@ export function registerBusinessRulesTools(
     ["talonic_business_rules_list", "List business rules", LIST_DESCRIPTION, listInputSchema, (a) => handleList(getToken, baseUrl, a)],
     ["talonic_business_rules_get", "One business rule", GET_DESCRIPTION, getInputSchema, (a) => handleGet(getToken, baseUrl, a)],
     ["talonic_business_rules_outcomes", "A business rule's outcomes", OUTCOMES_DESCRIPTION, outcomesInputSchema, (a) => handleOutcomes(getToken, baseUrl, a)],
+    ["talonic_business_rules_history", "One subject's history under a rule", HISTORY_DESCRIPTION, historyInputSchema, (a) => handleHistory(getToken, baseUrl, a)],
   ]
   for (const [name, title, description, inputSchema, handler] of tools) {
     server.registerTool(

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   handleGet,
+  handleHistory,
   handleList,
   handleOutcomes,
   probeBusinessRulesAccess,
@@ -53,6 +54,12 @@ describe("business rules tool handlers", () => {
     expect(call().url).toBe(`https://api.talonic.com/v1/business-rules/${RULE}/outcomes?status=failed&limit=50`)
   })
 
+  it("history asks for one subject, encoded", async () => {
+    const call = stub({ entries: [], total: 0 })
+    await handleHistory(token, undefined, { id: RULE, subject: "LOAD 7/2", limit: 10 })
+    expect(call().url).toBe(`https://api.talonic.com/v1/business-rules/${RULE}/history?subject=LOAD+7%2F2&limit=10`)
+  })
+
   it("an API error comes back as a tool error", async () => {
     stub({ message: "Business rule not found" }, 404)
     const res = await handleGet(token, undefined, { id: RULE })
@@ -67,10 +74,11 @@ describe("business rules tool registration", () => {
       n.startsWith("talonic_business_rules_"),
     )
 
-  it("lists the three tools only when the probe passed", () => {
+  it("lists the four tools only when the probe passed", () => {
     expect(names({})).toEqual([])
     expect(names({ includeBusinessRulesTools: true }).sort()).toEqual([
       "talonic_business_rules_get",
+      "talonic_business_rules_history",
       "talonic_business_rules_list",
       "talonic_business_rules_outcomes",
     ])
@@ -78,7 +86,7 @@ describe("business rules tool registration", () => {
 
   it("marks every tool read-only", () => {
     const tools = (createServer({ apiKey: "tlnc_test", includeBusinessRulesTools: true }) as any)._registeredTools
-    for (const n of ["talonic_business_rules_list", "talonic_business_rules_get", "talonic_business_rules_outcomes"]) {
+    for (const n of ["talonic_business_rules_list", "talonic_business_rules_get", "talonic_business_rules_outcomes", "talonic_business_rules_history"]) {
       expect(tools[n].annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false })
     }
   })

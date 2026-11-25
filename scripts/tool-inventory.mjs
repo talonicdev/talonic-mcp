@@ -12,7 +12,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 export const DOCS = ["AGENTS.md", "STATUS.md"]
@@ -96,6 +96,13 @@ export const GROUPS = [
     audience: "optional",
     gate: "Master Records app (`GET /v1/master-records/config` probe)",
     flags: { includeMasterRecordsTools: true },
+  },
+  {
+    key: "business_rules",
+    label: "Business Rules (`talonic_business_rules_*`)",
+    audience: "optional",
+    gate: "Platform serves `/v1/business-rules` (`GET /v1/business-rules?limit=1` probe)",
+    flags: { includeBusinessRulesTools: true },
   },
   {
     key: "portfolio",
@@ -202,7 +209,8 @@ export function currentBlock(text) {
 }
 
 async function main(argv) {
-  const { createServer, VERSION } = await import(join(ROOT, "dist", "index.js"))
+  // A file URL, not a path: a Windows path ("Q:\…") is not a valid ESM specifier.
+  const { createServer, VERSION } = await import(pathToFileURL(join(ROOT, "dist", "index.js")).href)
   const { Client } = await import("@modelcontextprotocol/sdk/client/index.js")
   const { InMemoryTransport } = await import("@modelcontextprotocol/sdk/inMemory.js")
   const block = renderBlock(await inventory(createServer, { Client, InMemoryTransport }), VERSION)
