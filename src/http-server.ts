@@ -250,6 +250,23 @@ const GLAMA_CLAIM_TOKEN =
  * advertise only what the connector itself needs so the consent screen
  * stays tight.
  */
+/**
+ * Catalog scopes the probe-gated data product, data policy, workspace data and
+ * schema review tools use. The platform's OAuth scope list must contain each
+ * before a release that advertises them (else `/oauth/authorize` 400s).
+ */
+export const PRODUCTS_SCOPES = [
+  "products:read",
+  "products:write",
+  "specs:read",
+  "specs:write",
+  "runs:write",
+  "records:read",
+  "records:write",
+  "reviews:read",
+  "reviews:write",
+] as const
+
 function renderProtectedResourceMetadata(resourcePath = ""): {
   resource: string
   authorization_servers: string[]
@@ -259,7 +276,13 @@ function renderProtectedResourceMetadata(resourcePath = ""): {
   return {
     resource: `${RESOURCE_URL}${resourcePath}`,
     authorization_servers: [AUTHORIZATION_SERVER],
-    scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
+    scopes_supported: [
+      "extract:write",
+      "documents:read",
+      "schemas:read",
+      DECIDE_SCOPE,
+      ...PRODUCTS_SCOPES,
+    ],
     bearer_methods_supported: ["header"],
   }
 }

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data policy tools.** Four probe-gated `talonic_data_policy_*` tools: check, preview on one record set, publish (409 `revision_conflict`, 400 `POLICY_SCRIPT_SYNTAX_ERROR`) and run a policy on a completed structuring run. All need an Admin of the workspace. Listed only when `GET /v1/data-policies` answers for the credential.
 - **Workspace data catalog and suggestions.** Nine probe-gated tools: `talonic_catalog_list`, `talonic_catalog_get` and `talonic_catalog_rows` (rows with their source documents, filtered by `where`, with a `withheld` count), and `talonic_suggestion_*` to list and answer questions about the workspace's data and to decide suggested field mappings and matches between tables. Listed only when `GET /v1/catalog` answers for the credential.
 - **Schema review and link keys.** Probe-gated `talonic_schema_review_queue`, `talonic_schema_review_approve`, `talonic_schema_review_reject` (the decision records who and when) and `talonic_link_key_set` (needs an Admin of the workspace; turning a key on links existing documents in the background). Listed only when `GET /v1/schema-graph/review-queue` answers for the credential.
+- **OAuth scopes for these tools.** The hosted server also advertises `products:read`, `products:write`, `specs:read`, `specs:write`, `runs:write`, `records:read`, `records:write`, `reviews:read` and `reviews:write`; the platform's OAuth scope list must contain them before a release that advertises them.
 
 ## [0.1.102] - 2026-11-22
 

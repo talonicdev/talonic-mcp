@@ -190,6 +190,15 @@ describe("HTTP server routing", () => {
       "documents:read",
       "schemas:read",
       "apps:decide",
+      "products:read",
+      "products:write",
+      "specs:read",
+      "specs:write",
+      "runs:write",
+      "records:read",
+      "records:write",
+      "reviews:read",
+      "reviews:write",
     ])
   })
 
