@@ -95,6 +95,12 @@ export const contractsAccessCached = makeAccessCache(pathProbe("/v1/contracts/im
 export const apAccessCached = makeAccessCache(pathProbe("/v1/ap/config"))
 /** @internal Exported for tests. */
 export const masterRecordsAccessCached = makeAccessCache(pathProbe("/v1/master-records/config"))
+/** @internal Exported for tests. A person whose thread is available. */
+export const threadAccessCached = makeAccessCache(pathProbe("/v1/thread/drafts"))
+/** @internal Exported for tests. A person with `agent:read`. */
+export const agentTurnsAccessCached = makeAccessCache(pathProbe("/v1/agent/home/page"))
+/** @internal Exported for tests. A person with `documents:read`. */
+export const myDataAccessCached = makeAccessCache(pathProbe("/v1/me/data"))
 /** @internal Exported for tests. */
 export const submissionsAccessCached = makeAccessCache(pathProbe("/v1/submissions/specs"))
 /** @internal Exported for tests. */
@@ -357,6 +363,10 @@ export interface CreateRequestHandlerOptions {
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
   decisionTasksAccess?: (token: string) => Promise<boolean>
+  /** Override the thread, agent-turn and My Data tool visibility checks (primarily for tests). */
+  threadAccess?: (token: string) => Promise<boolean>
+  agentTurnsAccess?: (token: string) => Promise<boolean>
+  myDataAccess?: (token: string) => Promise<boolean>
   /** Override the Master Records tool visibility check (primarily for tests). */
   masterRecordsAccess?: (token: string) => Promise<boolean>
   submissionsAccess?: (token: string) => Promise<boolean>
@@ -662,6 +672,9 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeThreadTools,
+      includeAgentTurnTools,
+      includeMyDataTools,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -676,6 +689,9 @@ export function createRequestHandler(
       (options.processesAccess ?? processesAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.threadAccess ?? threadAccessCached)(token),
+      (options.agentTurnsAccess ?? agentTurnsAccessCached)(token),
+      (options.myDataAccess ?? myDataAccessCached)(token),
     ])
     const mcpServer = createServer({
       tokenProvider: () => token,
@@ -692,6 +708,9 @@ export function createRequestHandler(
       includeProcessesTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeThreadTools,
+      includeAgentTurnTools,
+      includeMyDataTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
