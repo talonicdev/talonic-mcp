@@ -668,7 +668,7 @@ export function registerProcessesTools(
           .optional()
           .describe("Sign-off choices by step id"),
       },
-      readOnly,
+      write,
       (a) =>
         runTool(() =>
           apiJson(getToken, baseUrl, "POST", `${BASE}/${pid(a)}/try`, {

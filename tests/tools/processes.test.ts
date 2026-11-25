@@ -294,17 +294,11 @@ describe("talonic_process_* tools", () => {
   })
   it("marks the build and inspect additions: reads read-only, approvals and groups destructive", () => {
     const t = tools()
-    for (const n of [
-      "export",
-      "resources",
-      "try",
-      "form_preview",
-      "evaluate",
-      "scripts",
-      "sign_off",
-    ])
+    for (const n of ["export", "resources", "form_preview", "evaluate", "scripts", "sign_off"])
       expect(t[`talonic_process_${n}`].annotations.readOnlyHint, n).toBe(true)
+    // `try` writes nothing, but its route takes processes:write and the build permission.
     for (const n of [
+      "try",
       "details",
       "extract_pipeline",
       "examples",
