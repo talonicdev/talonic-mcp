@@ -17,7 +17,10 @@ import { zUuid, type ToolResult } from "./_shared.js"
  *
  * Build: talonic_process_create (a draft from words or an n8n workflow) →
  * talonic_process_change → talonic_process_check → talonic_process_test_run →
- * talonic_process_publish. Building touches a draft only; publish, rollback,
+ * talonic_process_publish. Alongside: talonic_process_try / _evaluate against
+ * kept _examples, script steps via _script_draft → _script_test →
+ * _script_approve, _details, _export, _resources, _extract_pipeline,
+ * _form_preview, _group, _build_lookup_data; operate: _sign_off, _retry_item. Building touches a draft only; publish, rollback,
  * delete and replacing an address change what runs for real and are marked
  * destructive. No tool carries a secret's value.
  */
@@ -116,6 +119,54 @@ const MAILBOX_OWNERSHIP_DESCRIPTION =
 
 const ADDRESS_DESCRIPTION =
   "The address other systems send items to (a webhook). Without `make` it only says whether one exists; the address itself is shown once, when made. With `make: true` it makes one and returns `path` to post to. An existing address is replaced only with `replace: true`: the old one stops working AT ONCE and whatever sends to it stops getting through, so ask the user first. `test: true` is the address of the test copy."
+
+const DETAILS_DESCRIPTION =
+  "Rename a process, put it in a folder (`folder: null` takes it out) or replace its tags. The draft and the live version are untouched."
+
+const EXPORT_DESCRIPTION =
+  "The process draft as a file another workspace can import (pass its `doc` as `draft` with a name when creating a process there). Chosen sources, destinations and similar workspace settings are left out; secrets travel by name only."
+
+const RESOURCES_DESCRIPTION =
+  "What a published version made or uses in the workspace: schemas, deliveries, policies and the like, with the steps they belong to. The live version unless `version` is given; empty before the first publish."
+
+const EXTRACT_PIPELINE_DESCRIPTION =
+  "Move the draft's document steps (reading, checking, reviewing documents) and its fields into a new reusable pipeline that other processes can use too; one pipeline step takes their place in the draft. Changes the draft only."
+
+const TRY_DESCRIPTION =
+  "Walk the draft with made-up values (by field id, from talonic_process_get) and sign-off choices (by step id): the steps an item would take and where it stops. Runs nothing and sends nothing."
+
+const FORM_PREVIEW_DESCRIPTION =
+  "How a form step of the draft looks to the person filling it in: title, intro, button and fields with their kinds and choices."
+
+const EXAMPLES_DESCRIPTION =
+  "Examples are items kept from runs that a draft is checked against with talonic_process_evaluate. Without `keep` or `remove` this lists them. `keep: { run_id, item_key, note? }` keeps an item of a run (the way it went and what it ended with; replaces an earlier example of the same item). `remove: example_id` removes one."
+
+const EVALUATE_DESCRIPTION =
+  "Check the draft against every kept example: how many still go the same way, and for each that would now go another way, where the ways part. Runs nothing and sends nothing. Use after changing a draft, before talonic_process_publish."
+
+const SCRIPTS_DESCRIPTION =
+  "Per script step of the draft, the latest test (by the script's `hash`, passed or not, with results) and approval. A script step goes live only when its current script passed a test and a person approved it."
+
+const SCRIPT_DRAFT_DESCRIPTION =
+  "Write a script for a script step from what it should do, in plain words. Saves nothing: returns the script, its `hash` and an explanation; put it on the step with talonic_process_change or the draft, then talonic_process_script_test. The step must already name the fields it writes. Uses credits."
+
+const SCRIPT_TEST_DESCRIPTION =
+  "Test a script step's current script on up to 10 recent records of this process, writing nothing: before and after per field, and `ok`. Needs one earlier run of the process (a test run is enough)."
+
+const SCRIPT_APPROVE_DESCRIPTION =
+  "Approve the exact script that passed its test, by its `hash` from talonic_process_scripts. An approval is a person's decision that lets the script go live: call only when the user has read the script and says to approve it."
+
+const SIGN_OFF_DESCRIPTION =
+  "One sign-off step as the caller sees it: the brief (who signs, instructions, fields, choices), whether the caller may sign, and only then the items waiting with the values to check and the latest decisions. Pass an item's `documentId` in `items` to talonic_process_sign or talonic_process_send_back."
+
+const RETRY_ITEM_DESCRIPTION =
+  "Try one failed step again for one item of a run: an email or a call is sent again, an item a signer sent back goes back to its signers. `canRetry` on talonic_process_item says where this applies. Use when the cause is fixed."
+
+const GROUP_DESCRIPTION =
+  "Create, change or delete a group of people a sign-off or form step can wait for (the same groups as Team & Roles; list them with talonic_process_setup). Without `group_id` it creates one (`name`, optional `description`, `member_ids`). With `group_id`: `name`/`description` change it, `member_ids` replaces its members, `delete: true` deletes it (steps that named it no longer wait for its members). Members must be active members of the workspace. Who signs is a governance decision: call only when the user asks."
+
+const BUILD_LOOKUP_DATA_DESCRIPTION =
+  "Build the shared data look-up steps read, from the reference data and snapshots the workspace holds. Safe to start again; check progress with talonic_process_setup (`lookupData.state` becomes `ready`). Uses credits."
 
 /**
  * Register the `talonic_process_*` tools.
@@ -532,6 +583,324 @@ export function registerProcessesTools(
               })
             : apiJson(getToken, baseUrl, "GET", `${BASE}/${pid(a)}/address`),
         ),
+    ],
+    [
+      "talonic_process_details",
+      "Rename, file or tag a process",
+      DETAILS_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        name: z.string().min(1).max(200).optional(),
+        folder: z
+          .string()
+          .max(120)
+          .nullable()
+          .optional()
+          .describe("null takes it out of its folder"),
+        tags: z.array(z.string().min(1).max(40)).max(20).optional().describe("Replaces the tags"),
+      },
+      write,
+      (a) =>
+        runTool(() => {
+          const body = {
+            ...(a.name !== undefined ? { name: a.name } : {}),
+            ...(a.folder !== undefined ? { folder: a.folder } : {}),
+            ...(a.tags !== undefined ? { tags: a.tags } : {}),
+          }
+          if (!Object.keys(body).length) throw new Error("Pass name, folder or tags.")
+          return apiJson(getToken, baseUrl, "PATCH", `${BASE}/${pid(a)}`, { body })
+        }),
+    ],
+    [
+      "talonic_process_export",
+      "Export a process",
+      EXPORT_DESCRIPTION,
+      { process_id: zUuid() },
+      readOnly,
+      (a) => runTool(() => apiJson(getToken, baseUrl, "GET", `${BASE}/${pid(a)}/export`)),
+    ],
+    [
+      "talonic_process_resources",
+      "What a process version made",
+      RESOURCES_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        version: z
+          .number()
+          .int()
+          .min(1)
+          .optional()
+          .describe("A published version; default the live one"),
+      },
+      readOnly,
+      (a) =>
+        runTool(() =>
+          apiJson(getToken, baseUrl, "GET", `${BASE}/${pid(a)}/resources`, {
+            params: a.version ? { version: String(a.version) } : undefined,
+          }),
+        ),
+    ],
+    [
+      "talonic_process_extract_pipeline",
+      "Move document steps into a pipeline",
+      EXTRACT_PIPELINE_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        name: z.string().min(1).max(200).optional().describe("Name of the new pipeline"),
+      },
+      write,
+      (a) =>
+        runTool(() =>
+          apiJson(getToken, baseUrl, "POST", `${BASE}/${pid(a)}/extract-pipeline`, {
+            body: a.name ? { name: a.name } : {},
+          }),
+        ),
+    ],
+    [
+      "talonic_process_try",
+      "Walk a draft with made-up values",
+      TRY_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        values: z.record(z.string(), z.unknown()).optional().describe("Values by field id"),
+        choices: z
+          .record(z.string(), z.string())
+          .optional()
+          .describe("Sign-off choices by step id"),
+      },
+      readOnly,
+      (a) =>
+        runTool(() =>
+          apiJson(getToken, baseUrl, "POST", `${BASE}/${pid(a)}/try`, {
+            body: { values: a.values ?? {}, choices: a.choices ?? {} },
+          }),
+        ),
+    ],
+    [
+      "talonic_process_form_preview",
+      "Preview a form step",
+      FORM_PREVIEW_DESCRIPTION,
+      { process_id: zUuid(), step_id: z.string().min(1).max(80) },
+      readOnly,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "GET",
+            `${BASE}/${pid(a)}/form-preview/${encodeURIComponent(a.step_id)}`,
+          ),
+        ),
+    ],
+    [
+      "talonic_process_examples",
+      "Examples a draft is checked against",
+      EXAMPLES_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        keep: z
+          .object({
+            run_id: zUuid(),
+            item_key: z.string().min(1).max(200),
+            note: z.string().max(500).optional(),
+          })
+          .optional()
+          .describe("Keep this item of a run as an example"),
+        remove: zUuid().optional().describe("The id of an example to remove"),
+      },
+      write,
+      (a) =>
+        runTool(() => {
+          if (a.keep && a.remove) throw new Error("Pass keep or remove, not both.")
+          if (a.keep)
+            return apiJson(getToken, baseUrl, "POST", `${BASE}/${pid(a)}/examples`, {
+              body: {
+                runId: a.keep.run_id,
+                itemKey: a.keep.item_key,
+                ...(a.keep.note ? { note: a.keep.note } : {}),
+              },
+            })
+          if (a.remove)
+            return apiJson(
+              getToken,
+              baseUrl,
+              "DELETE",
+              `${BASE}/${pid(a)}/examples/${encodeURIComponent(a.remove)}`,
+            )
+          return apiJson(getToken, baseUrl, "GET", `${BASE}/${pid(a)}/examples`)
+        }),
+    ],
+    [
+      "talonic_process_evaluate",
+      "Check a draft against its examples",
+      EVALUATE_DESCRIPTION,
+      { process_id: zUuid() },
+      readOnly,
+      (a) => runTool(() => apiJson(getToken, baseUrl, "POST", `${BASE}/${pid(a)}/evaluate`)),
+    ],
+    [
+      "talonic_process_scripts",
+      "Script tests and approvals",
+      SCRIPTS_DESCRIPTION,
+      { process_id: zUuid() },
+      readOnly,
+      (a) => runTool(() => apiJson(getToken, baseUrl, "GET", `${BASE}/${pid(a)}/scripts`)),
+    ],
+    [
+      "talonic_process_script_draft",
+      "Write a script for a step",
+      SCRIPT_DRAFT_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        step_id: z.string().min(1).max(80),
+        purpose: z.string().min(1).max(2000).describe("What the script should do, in plain words"),
+      },
+      write,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `${BASE}/${pid(a)}/steps/${encodeURIComponent(a.step_id)}/script/draft`,
+            {
+              body: { purpose: a.purpose },
+            },
+          ),
+        ),
+    ],
+    [
+      "talonic_process_script_test",
+      "Test a step's script",
+      SCRIPT_TEST_DESCRIPTION,
+      { process_id: zUuid(), step_id: z.string().min(1).max(80) },
+      write,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `${BASE}/${pid(a)}/steps/${encodeURIComponent(a.step_id)}/script/test`,
+          ),
+        ),
+    ],
+    [
+      "talonic_process_script_approve",
+      "Approve a step's script",
+      SCRIPT_APPROVE_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        step_id: z.string().min(1).max(80),
+        hash: z.string().min(8).max(128).describe("The tested script's hash"),
+      },
+      destructive,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `${BASE}/${pid(a)}/steps/${encodeURIComponent(a.step_id)}/script/approve`,
+            {
+              body: { hash: a.hash },
+            },
+          ),
+        ),
+    ],
+    [
+      "talonic_process_sign_off",
+      "One sign-off step",
+      SIGN_OFF_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        step_id: z.string().min(1).max(64).describe("stepId from talonic_process_waiting_for_me"),
+      },
+      readOnly,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "GET",
+            `${BASE}/${pid(a)}/sign-offs/${encodeURIComponent(a.step_id)}`,
+          ),
+        ),
+    ],
+    [
+      "talonic_process_retry_item",
+      "Retry one step for one item",
+      RETRY_ITEM_DESCRIPTION,
+      {
+        process_id: zUuid(),
+        run_id: zUuid(),
+        step_id: z.string().min(1).max(80),
+        item_key: z.string().min(1).max(200).describe("The item's key from the run"),
+      },
+      write,
+      (a) =>
+        runTool(() =>
+          apiJson(
+            getToken,
+            baseUrl,
+            "POST",
+            `${BASE}/${pid(a)}/runs/${encodeURIComponent(a.run_id)}/steps/${encodeURIComponent(a.step_id)}/items/${encodeURIComponent(a.item_key)}/retry`,
+          ),
+        ),
+    ],
+    [
+      "talonic_process_group",
+      "Groups steps wait for",
+      GROUP_DESCRIPTION,
+      {
+        group_id: zUuid().optional().describe("Leave out to create a group"),
+        name: z.string().min(1).max(80).optional(),
+        description: z.string().max(300).optional(),
+        member_ids: z
+          .array(zUuid())
+          .max(500)
+          .optional()
+          .describe("Person ids; replaces the members"),
+        delete: z.boolean().optional().describe("true deletes the group"),
+      },
+      destructive,
+      (a) =>
+        runTool(async () => {
+          if (!a.group_id) {
+            if (!a.name) throw new Error("A new group needs a name.")
+            return apiJson(getToken, baseUrl, "POST", `${BASE}/groups`, {
+              body: {
+                name: a.name,
+                ...(a.description !== undefined ? { description: a.description } : {}),
+                ...(a.member_ids ? { member_ids: a.member_ids } : {}),
+              },
+            })
+          }
+          const g = `${BASE}/groups/${encodeURIComponent(a.group_id)}`
+          if (a.delete === true) return apiJson(getToken, baseUrl, "DELETE", g)
+          const edit = {
+            ...(a.name !== undefined ? { name: a.name } : {}),
+            ...(a.description !== undefined ? { description: a.description } : {}),
+          }
+          if (!Object.keys(edit).length && !a.member_ids)
+            throw new Error("Pass name, description, member_ids or delete.")
+          let out: unknown
+          if (Object.keys(edit).length)
+            out = await apiJson(getToken, baseUrl, "PATCH", g, { body: edit })
+          if (a.member_ids)
+            out = await apiJson(getToken, baseUrl, "PUT", `${g}/members`, {
+              body: { member_ids: a.member_ids },
+            })
+          return out
+        }),
+    ],
+    [
+      "talonic_process_build_lookup_data",
+      "Build the data look-ups read",
+      BUILD_LOOKUP_DATA_DESCRIPTION,
+      {},
+      write,
+      () => runTool(() => apiJson(getToken, baseUrl, "POST", `${BASE}/lookup-data/build`)),
     ],
   ]
   for (const [name, title, description, inputSchema, annotations, handler] of tools) {

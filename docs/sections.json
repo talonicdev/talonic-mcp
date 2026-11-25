@@ -7102,5 +7102,944 @@
       "workflow",
       "Process Plane"
     ]
+  },
+  {
+    "slug": "mcp-talonic-process-details",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_details",
+    "seoTitle": "talonic_process_details — Rename, File or Tag a Process",
+    "description": "MCP tool that renames a Talonic process, files it in a folder or sets its tags.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Rename a process, put it in a folder (`folder: null` takes it out) or replace its tags. The draft and the live version are untouched. Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "The new name."
+          },
+          {
+            "name": "folder",
+            "type": "string | null",
+            "required": false,
+            "description": "The folder; null takes the process out of its folder."
+          },
+          {
+            "name": "tags",
+            "type": "string[]",
+            "required": false,
+            "description": "Replaces the tags (up to 20)."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_details({ \"process_id\": \"1111…\", \"folder\": \"Finance\", \"tags\": [\"ap\"] })\n{ \"id\": \"1111…\", \"name\": \"Vendor bank details change\", \"folder\": \"Finance\", \"tags\": [\"ap\"] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_list",
+        "slug": "mcp-talonic-process-list"
+      },
+      {
+        "label": "talonic_process_get",
+        "slug": "mcp-talonic-process-get"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does renaming publish anything?",
+        "answer": "No. Name, folder and tags are not part of a version."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-export",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_export",
+    "seoTitle": "talonic_process_export — Export a Process",
+    "description": "MCP tool that exports a Talonic process draft as a file another workspace can import.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "The process draft as a file. Pass its `doc` as `draft`, with a name, when creating a process in another workspace. Chosen sources, destinations and similar workspace settings are left out, and secrets travel by name only. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_export({ \"process_id\": \"1111…\" })\n{ \"format\": \"talonic-process\", \"version\": 1, \"name\": \"Vendor bank details change\", \"exportedAt\": \"2026-11-25T09:00:00Z\", \"doc\": { \"fields\": [], \"steps\": [] } }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_create",
+        "slug": "mcp-talonic-process-create"
+      },
+      {
+        "label": "talonic_process_get",
+        "slug": "mcp-talonic-process-get"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does the file carry secret values?",
+        "answer": "No. A step names a secret; the importing workspace stores its own value under that name."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-resources",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_resources",
+    "seoTitle": "talonic_process_resources — What a Process Version Made",
+    "description": "MCP tool that lists what a published Talonic process version made or uses in the workspace.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "What a published version made or uses: schemas, deliveries, policies and the like, with the steps they belong to. `madeByProcess` is false for something it uses but did not create. The live version unless `version` is given; empty before the first publish. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "required": false,
+            "description": "A published version number; default the live version."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_resources({ \"process_id\": \"1111…\" })\n{ \"data\": [{ \"kind\": \"schema\", \"id\": \"4444…\", \"version\": 3, \"stepIds\": [\"s_1\"], \"madeByProcess\": true }] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_versions",
+        "slug": "mcp-talonic-process-versions"
+      },
+      {
+        "label": "talonic_process_publish",
+        "slug": "mcp-talonic-process-publish"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is anything removed when I delete the process?",
+        "answer": "No. What it made stays in the workspace."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-extract-pipeline",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_extract_pipeline",
+    "seoTitle": "talonic_process_extract_pipeline — Move Document Steps into a Pipeline",
+    "description": "MCP tool that moves a Talonic process draft's document steps into a reusable pipeline.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Moves the draft's document steps (reading, checking, reviewing documents) and its fields into a new reusable pipeline that other processes can use too. One pipeline step takes their place in the draft. Changes the draft only; publish to make it live. Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "Name of the new pipeline."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_extract_pipeline({ \"process_id\": \"1111…\", \"name\": \"Invoice reading\" })\n{ \"process\": { \"id\": \"1111…\" }, \"pipeline\": { \"id\": \"5555…\", \"name\": \"Invoice reading\" } }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_get",
+        "slug": "mcp-talonic-process-get"
+      },
+      {
+        "label": "talonic_process_check",
+        "slug": "mcp-talonic-process-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "What if the draft has no document steps?",
+        "answer": "The call is refused and nothing changes."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-try",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_try",
+    "seoTitle": "talonic_process_try — Walk a Draft with Made-up Values",
+    "description": "MCP tool that shows the path an item with given values would take through a Talonic process draft.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Walks the draft with made-up values (by field id) and sign-off choices (by step id): the steps an item would take and where it stops. Runs nothing and sends nothing. Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "values",
+            "type": "object",
+            "required": false,
+            "description": "Values by field id, from talonic_process_get."
+          },
+          {
+            "name": "choices",
+            "type": "object",
+            "required": false,
+            "description": "Sign-off choices by step id."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_try({ \"process_id\": \"1111…\", \"values\": { \"f_amount\": 12000 } })\n{ \"path\": [\"s_source\", \"s_check\", \"s_approval\"], \"stop\": \"waits for a sign-off\" }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_evaluate",
+        "slug": "mcp-talonic-process-evaluate"
+      },
+      {
+        "label": "talonic_process_test_run",
+        "slug": "mcp-talonic-process-test-run"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does it use real documents?",
+        "answer": "No. Use talonic_process_test_run for that."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-form-preview",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_form_preview",
+    "seoTitle": "talonic_process_form_preview — Preview a Form Step",
+    "description": "MCP tool that shows how a form step of a Talonic process looks to the person filling it in.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "How a form step of the draft looks to the person filling it in: title, intro, button and fields with their kinds and choices. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The step's id, from talonic_process_get."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_form_preview({ \"process_id\": \"1111…\", \"step_id\": \"s_form\" })\n{ \"title\": \"New supplier\", \"intro\": null, \"submitLabel\": \"Send\", \"needsCode\": false, \"fields\": [{ \"key\": \"f_1\", \"label\": \"IBAN\", \"help\": null, \"required\": true, \"kind\": \"string\", \"choices\": [] }] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_get",
+        "slug": "mcp-talonic-process-get"
+      },
+      {
+        "label": "talonic_process_waiting_for_me",
+        "slug": "mcp-talonic-process-waiting-for-me"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can I fill the form in from here?",
+        "answer": "No. The preview only shows it."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-examples",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_examples",
+    "seoTitle": "talonic_process_examples — Examples a Draft Is Checked Against",
+    "description": "MCP tool that lists, keeps and removes examples a Talonic process draft is checked against.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Examples are items kept from runs. Without `keep` or `remove` this lists them. `keep` keeps an item of a run with the way it went and what it ended with (replacing an earlier example of the same item); `remove` removes one. Keeping and removing need the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "keep",
+            "type": "object",
+            "required": false,
+            "description": "{ run_id, item_key, note? }: keep this item of a run."
+          },
+          {
+            "name": "remove",
+            "type": "UUID",
+            "required": false,
+            "description": "The id of an example to remove."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_examples({ \"process_id\": \"1111…\", \"keep\": { \"run_id\": \"2222…\", \"item_key\": \"doc-1\" } })\n{ \"kept\": true }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_evaluate",
+        "slug": "mcp-talonic-process-evaluate"
+      },
+      {
+        "label": "talonic_process_item",
+        "slug": "mcp-talonic-process-item"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How many examples can a process keep?",
+        "answer": "Up to 200 are listed and checked."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-evaluate",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_evaluate",
+    "seoTitle": "talonic_process_evaluate — Check a Draft Against Its Examples",
+    "description": "MCP tool that checks a Talonic process draft against its kept examples.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Checks the draft against every kept example: how many still go the same way, and for each that would now go another way, where the ways part. Runs nothing and sends nothing. Use after changing a draft and before publishing. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_evaluate({ \"process_id\": \"1111…\" })\n{ \"total\": 12, \"same\": 11, \"changed\": [{ \"exampleId\": \"6666…\", \"label\": \"INV-204\", \"was\": [\"s_1\", \"s_2\"], \"now\": [\"s_1\", \"s_3\"], \"partsAt\": \"s_1\", \"stop\": \"end\" }] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_examples",
+        "slug": "mcp-talonic-process-examples"
+      },
+      {
+        "label": "talonic_process_try",
+        "slug": "mcp-talonic-process-try"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does it cost credits?",
+        "answer": "No. It walks the draft without running any step."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-scripts",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_scripts",
+    "seoTitle": "talonic_process_scripts — Script Tests and Approvals",
+    "description": "MCP tool that shows the latest test and approval of each script step of a Talonic process.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Per script step of the draft: the latest test (by the script's `hash`, passed or not, with results) and approval. A script step goes live only when its current script passed a test and a person approved it. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_scripts({ \"process_id\": \"1111…\" })\n{ \"s_script\": { \"tested\": { \"hash\": \"9f2c…\", \"ok\": true, \"at\": \"2026-11-25T09:00:00Z\", \"results\": [] }, \"approved\": { \"hash\": \"9f2c…\", \"by\": \"7777…\", \"at\": \"2026-11-25T09:05:00Z\" } } }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_script_test",
+        "slug": "mcp-talonic-process-script-test"
+      },
+      {
+        "label": "talonic_process_script_approve",
+        "slug": "mcp-talonic-process-script-approve"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why is my approval gone?",
+        "answer": "The script changed after it was approved. Test and approve the new text."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-script-draft",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_script_draft",
+    "seoTitle": "talonic_process_script_draft — Write a Script for a Step",
+    "description": "MCP tool that writes a script for a Talonic process script step from a plain-words purpose.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Writes a script for a script step from what it should do, in plain words. Saves nothing: it returns the script, its `hash` and an explanation. Put the script on the step, then test it. The step must already name the fields it writes. Uses credits. Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The step's id, from talonic_process_get."
+          },
+          {
+            "name": "purpose",
+            "type": "string",
+            "required": true,
+            "description": "What the script should do, in plain words."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_script_draft({ \"process_id\": \"1111…\", \"step_id\": \"s_script\", \"purpose\": \"Upper-case the vendor name\" })\n{ \"lua\": \"record.set(\\\"vendor\\\", string.upper(record.get(\\\"vendor\\\") or \\\"\\\"))\", \"hash\": \"9f2c…\", \"explanation\": \"…\" }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_script_test",
+        "slug": "mcp-talonic-process-script-test"
+      },
+      {
+        "label": "talonic_process_change",
+        "slug": "mcp-talonic-process-change"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is the script saved on the step?",
+        "answer": "No. It is returned for you to put on the step."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-script-test",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_script_test",
+    "seoTitle": "talonic_process_script_test — Test a Step's Script",
+    "description": "MCP tool that tests a Talonic process script step on recent records without writing anything.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Tests a script step's current script on up to 10 recent records of this process, writing nothing: before and after per field, and `ok`. Needs one earlier run of the process (a test run is enough). Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The step's id, from talonic_process_get."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_script_test({ \"process_id\": \"1111…\", \"step_id\": \"s_script\" })\n{ \"hash\": \"9f2c…\", \"ok\": true, \"results\": [{ \"before\": { \"vendor\": \"acme\" }, \"after\": { \"vendor\": \"ACME\" } }] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_script_approve",
+        "slug": "mcp-talonic-process-script-approve"
+      },
+      {
+        "label": "talonic_process_test_run",
+        "slug": "mcp-talonic-process-test-run"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why does it say there is nothing to test on?",
+        "answer": "The process has not run yet. Run it once in a test copy first."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-script-approve",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_script_approve",
+    "seoTitle": "talonic_process_script_approve — Approve a Step's Script",
+    "description": "MCP tool that approves the exact tested script of a Talonic process script step.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Approves the exact script that passed its test, by its `hash`. An approval is a person's decision that lets the script go live: call only when the user has read the script and says to approve it. Needs the Process Plane publish permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The step's id, from talonic_process_get."
+          },
+          {
+            "name": "hash",
+            "type": "string",
+            "required": true,
+            "description": "The tested script's hash, from talonic_process_scripts."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_script_approve({ \"process_id\": \"1111…\", \"step_id\": \"s_script\", \"hash\": \"9f2c…\" })\n{ \"approved\": true, \"hash\": \"9f2c…\" }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_scripts",
+        "slug": "mcp-talonic-process-scripts"
+      },
+      {
+        "label": "talonic_process_publish",
+        "slug": "mcp-talonic-process-publish"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can I approve a script that failed its test?",
+        "answer": "No. Only a script whose current text passed its test can be approved."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-sign-off",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_sign_off",
+    "seoTitle": "talonic_process_sign_off — One Sign-off Step",
+    "description": "MCP tool that shows one Talonic process sign-off step as its signer sees it.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "One sign-off step as the caller sees it: the brief (who signs, instructions, fields, choices), whether the caller may sign, and only then the items waiting with the values to check and the latest decisions. Pass an item's `documentId` in `items` to sign or send back. Needs the Process Plane sign permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The sign-off step, from talonic_process_waiting_for_me."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_sign_off({ \"process_id\": \"1111…\", \"step_id\": \"s_approval\" })\n{ \"canSign\": true, \"step\": { \"id\": \"s_approval\", \"signers\": [\"Finance\"], \"options\": [\"Pay\", \"Hold\"] }, \"items\": [{ \"runId\": \"2222…\", \"documentId\": \"doc-1\", \"values\": [{ \"name\": \"Amount\", \"value\": \"12000\" }], \"alreadySigned\": false }], \"history\": [] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_sign",
+        "slug": "mcp-talonic-process-sign"
+      },
+      {
+        "label": "talonic_process_send_back",
+        "slug": "mcp-talonic-process-send-back"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why are there no items?",
+        "answer": "The caller is not one of the step's signers, so only the brief is shown."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-retry-item",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_retry_item",
+    "seoTitle": "talonic_process_retry_item — Retry One Step for One Item",
+    "description": "MCP tool that tries one failed step of a Talonic process run again for one item.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Tries one failed step again for one item of a run: an email or a call is sent again, and an item a signer sent back goes back to its signers. `canRetry` on talonic_process_item says where this applies. Use when the cause is fixed. Needs the Process Plane run permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "process_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The process, from talonic_process_list."
+          },
+          {
+            "name": "run_id",
+            "type": "UUID",
+            "required": true,
+            "description": "The run."
+          },
+          {
+            "name": "step_id",
+            "type": "string",
+            "required": true,
+            "description": "The step's id, from talonic_process_get."
+          },
+          {
+            "name": "item_key",
+            "type": "string",
+            "required": true,
+            "description": "The item's key, from the run."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_retry_item({ \"process_id\": \"1111…\", \"run_id\": \"2222…\", \"step_id\": \"s_mail\", \"item_key\": \"doc-1\" })\n{ \"retried\": true }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_item",
+        "slug": "mcp-talonic-process-item"
+      },
+      {
+        "label": "talonic_process_retry",
+        "slug": "mcp-talonic-process-retry"
+      }
+    ],
+    "faq": [
+      {
+        "question": "What does retried: false mean?",
+        "answer": "The step had not failed for that item, so nothing was done."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-group",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_group",
+    "seoTitle": "talonic_process_group — Groups Steps Wait For",
+    "description": "MCP tool that creates, changes and deletes the groups of people Talonic process steps wait for.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Creates, changes or deletes a group of people a sign-off or form step can wait for (the same groups as Team & Roles). Without `group_id` it creates one. With `group_id`, `name` and `description` change it, `member_ids` replaces its members, and `delete: true` deletes it. Members must be active members of the workspace. Who signs is a governance decision: call only when the user asks. Needs the Process Plane govern permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "param-table",
+        "params": [
+          {
+            "name": "group_id",
+            "type": "UUID",
+            "required": false,
+            "description": "Leave out to create a group."
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": false,
+            "description": "The group's name (needed to create one)."
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false,
+            "description": "What the group is for."
+          },
+          {
+            "name": "member_ids",
+            "type": "UUID[]",
+            "required": false,
+            "description": "Person ids; replaces the members."
+          },
+          {
+            "name": "delete",
+            "type": "boolean",
+            "required": false,
+            "description": "true deletes the group."
+          }
+        ]
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_group({ \"name\": \"Finance approvers\", \"member_ids\": [\"7777…\"] })\n{ \"id\": \"8888…\", \"name\": \"Finance approvers\", \"description\": null, \"members\": [{ \"id\": \"7777…\", \"name\": \"Dana\", \"email\": \"dana@example.com\" }] }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_setup",
+        "slug": "mcp-talonic-process-setup"
+      },
+      {
+        "label": "talonic_process_sign_off",
+        "slug": "mcp-talonic-process-sign-off"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Where do I see the groups?",
+        "answer": "talonic_process_setup lists them with the workspace's roles."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
+  },
+  {
+    "slug": "mcp-talonic-process-build-lookup-data",
+    "parentSlug": "mcp-tools",
+    "title": "talonic_process_build_lookup_data",
+    "seoTitle": "talonic_process_build_lookup_data — Build the Data Look-ups Read",
+    "description": "MCP tool that builds the shared data Talonic process look-up steps read.",
+    "content": [
+      {
+        "type": "paragraph",
+        "text": "Builds the shared data look-up steps read, from the reference data and snapshots the workspace holds. Safe to start again. Check progress with talonic_process_setup: `lookupData.state` becomes `ready`. Uses credits. Needs the Process Plane build permission. Listed only when the person behind the key holds the Process Plane view permission in the workspace; the platform checks the permission for the action on every call."
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "title": "Example",
+        "code": "// talonic_process_build_lookup_data({})\n{ \"queued\": true }"
+      }
+    ],
+    "related": [
+      {
+        "label": "talonic_process_setup",
+        "slug": "mcp-talonic-process-setup"
+      }
+    ],
+    "faq": [
+      {
+        "question": "How long does it take?",
+        "answer": "It depends on how much reference data the workspace holds; poll talonic_process_setup."
+      }
+    ],
+    "mentions": [
+      "process",
+      "workflow",
+      "Process Plane"
+    ]
   }
 ]

@@ -236,8 +236,21 @@ const GLAMA_CLAIM_TOKEN =
  * `OAUTH_SCOPES` must contain every entry or `/oauth/authorize` 400s.
  * The Talonic authorization server supports more scopes than this; we
  * advertise only what the connector itself needs so the consent screen
- * stays tight.
+ * stays tight. `processes:read` / `processes:write` are the Process Plane
+ * tools' catalog scopes: the newer process routes accept only
+ * `processes:write` for changes, and a legacy name in the same grant keeps
+ * its old meaning.
  */
+/** @internal Exported for tests. The scopes the hosted connector requests. */
+export const SCOPES_SUPPORTED: readonly string[] = [
+  "extract:write",
+  "documents:read",
+  "schemas:read",
+  DECIDE_SCOPE,
+  "processes:read",
+  "processes:write",
+]
+
 function renderProtectedResourceMetadata(resourcePath = ""): {
   resource: string
   authorization_servers: string[]
@@ -247,7 +260,7 @@ function renderProtectedResourceMetadata(resourcePath = ""): {
   return {
     resource: `${RESOURCE_URL}${resourcePath}`,
     authorization_servers: [AUTHORIZATION_SERVER],
-    scopes_supported: ["extract:write", "documents:read", "schemas:read", DECIDE_SCOPE],
+    scopes_supported: [...SCOPES_SUPPORTED],
     bearer_methods_supported: ["header"],
   }
 }
