@@ -287,6 +287,55 @@
       "kind": "pending-spec",
       "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/integrations/connectors",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/integrations/{}/authorize",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/integrations/authorizations/",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/sources/connections/{}/sync",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sources/{}/browse",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sources/{}/import",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sources/{}/imports",
+      "kind": "pending-spec",
+      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
     }
   ]
 }

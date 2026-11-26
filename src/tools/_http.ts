@@ -80,7 +80,9 @@ export async function apiJson<T = unknown>(
   if (!res.ok) {
     throw await apiHttpError(res)
   }
-  return (await res.json()) as T
+  // A 202/204 answer may carry no body: that is `null`, never a parse error.
+  const text = await res.text()
+  return (text ? JSON.parse(text) : null) as T
 }
 
 /**

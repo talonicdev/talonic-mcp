@@ -23,6 +23,7 @@ import { registerPartiesTools } from "./tools/parties.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
+import { registerIntegrationsTools } from "./tools/integrations.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
@@ -170,6 +171,15 @@ export interface CreateServerOptions {
    * Listing visibility only; the platform decides every call.
    */
   includeSpecAuthoringTools?: boolean
+
+  /**
+   * Register the integrations group (`talonic_integrations_*`,
+   * `talonic_sources_*`). Callers set this only after
+   * `probeIntegrationsAccess` passed, so a platform without the
+   * `/v1/integrations` routes, or a credential without `sources:read`, never
+   * lists tools that would 404 or 403. Listing visibility only.
+   */
+  includeIntegrationsTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -520,6 +530,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeSpecAuthoringTools) {
     registerSpecAuthoringTools(server, rawToken, baseUrl)
+  }
+  if (options.includeIntegrationsTools) {
+    registerIntegrationsTools(server, rawToken, baseUrl)
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
