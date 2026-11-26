@@ -72,7 +72,7 @@ Adding a new tool surface (like `talonic_request_upload`, added in 0.1.46) requi
 
 ### In `talonic-mcp`
 
-1. **`src/content/tool-pages.ts`** — add the tool's page copy: `task` (its group on Tools by task), `seoTitle` (50-60 chars), `description` (150-160), optional `credits`, `examples`, `faq`, `related`, `mentions`. Only public groups and `talonic_process_*` tools; app-gated and internal tools are never documented here.
+1. **`src/content/tool-pages.ts`** (or the area file in `src/content/pages/`) — add the tool's page copy: `task` (its group on Tools by task), `seoTitle` (50-60 chars), `description` (150-160), optional `credits`, `examples`, `faq`, `related`, `mentions`. Only tools in the groups of `REFERENCE_GROUPS` (`scripts/gen-docs.mjs`): the public groups, the Process Plane and the customer-facing probe-gated groups. Internal tools, and the app groups whose app is documented under talonic.com/docs/apps (Contracts, AP, Parties, Price Baseline, …), are never documented here. A new probe-gated group also needs a `GROUPS` entry in `scripts/tool-inventory.mjs` and an availability line in `src/content/sections/tool-reference.ts`.
 2. **`npm run docs:gen`** — rewrites `src/content/generated/tool-registry.ts` from a real `tools/list` and `docs/sections.json` from the rendered sections. The reference page (`src/content/sections/tool-reference.ts`), its nav entry (`seo.ts`), its Tools-by-task line and its `MCP_PATHS` route (`routes.ts`) all follow from the snapshot. `tests/content/generated-docs.test.ts` fails when either file is stale or a tool has no page copy.
 
 ### In `talonicdev/website`

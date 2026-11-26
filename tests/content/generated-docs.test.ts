@@ -8,6 +8,7 @@ import { TOOL_PAGES } from "../../src/content/tool-pages"
 import { createServer } from "../../src/server-factory"
 import {
   MIRROR_FILE,
+  REFERENCE_GROUPS,
   REGISTRY_FILE,
   registrySnapshot,
   renderMirror,
@@ -35,10 +36,11 @@ describe("the tool reference covers exactly the public tools", () => {
   const INTERNAL_OR_APP =
     /talonic_(growth|admin|contracts|ap|parties|doc_gen|price_baseline|submissions|master_records|portfolio)_/
 
-  it("has the public groups and the process tools", () => {
+  it("has the public groups, the process tools and the customer-facing probe-gated groups", () => {
     const groups = new Set(TOOL_REGISTRY.map((t) => t.group))
-    expect([...groups].sort()).toEqual(["agent_tasks", "core", "decision_tasks", "processes"])
-    expect(TOOL_REGISTRY.filter((t) => t.group === "processes")).toHaveLength(21)
+    expect([...groups].sort()).toEqual([...REFERENCE_GROUPS].sort())
+    expect(TOOL_REGISTRY.filter((t) => t.group === "processes")).toHaveLength(37)
+    for (const internal of ["growth", "admin_agent_tasks"]) expect(groups.has(internal)).toBe(false)
   })
 
   it("never names an internal or app-gated tool anywhere in the docs", () => {

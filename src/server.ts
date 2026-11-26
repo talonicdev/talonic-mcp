@@ -17,16 +17,34 @@ import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
+import { probeThreadAccess } from "./tools/thread.js"
+import { probeAgentTurnsAccess } from "./tools/agent-turns.js"
+import { probeMyDataAccess } from "./tools/my-data.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
+import { probeReviewAccess } from "./tools/review.js"
+import { probeCasesAccess } from "./tools/cases.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeSpecAuthoringAccess } from "./tools/spec-authoring.js"
+import { probeIntegrationsAccess } from "./tools/integrations.js"
 import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
+import {
+  probeRecordsAdminAccess,
+  probeTeamAdminAccess,
+  probeWorkspaceAccess,
+} from "./tools/governance.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
+import { probeDataProductsAccess } from "./tools/data-products.js"
+import { probeDataPoliciesAccess } from "./tools/data-policies.js"
+import { probeWorkspaceDataAccess } from "./tools/workspace-data.js"
+import { probeSchemaReviewAccess } from "./tools/schema-review.js"
+import { probeAppWorkflowGroups } from "./tools/app-workflows.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { probeToolGroups } from "./tools/tool-groups.js"
+import { probeOperationsFamilies } from "./tools/workspace-operations.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 const HELP_TEXT = `talonic-mcp - Talonic MCP server
@@ -99,7 +117,8 @@ export async function main(
   // where the platform serves the Contracts app, AP tools where it serves the AP app,
   // Doc Gen tools where it serves Document Generation, Parties tools where it
   // serves Contract Party Management, Master Records tools where it serves the
-  // Master Records app, Price Baseline tools where it serves Price Baseline.
+  // Master Records app, Price Baseline tools where it serves Price Baseline,
+  // review and cases tools where the credential reaches the review queue / cases.
   const [
     includeGrowthTools,
     includeAdminAgentTaskTools,
@@ -112,9 +131,25 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
+    includeIntegrationsTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
     appsToolsetAnswer,
     miningAnswer,
     toolGroups,
+    includeReviewTools,
+    includeCasesTools,
+    operationsFamilies,
+    includeTeamAdminTools,
+    includeRecordsAdminTools,
+    includeWorkspaceTools,
+    includeThreadTools,
+    includeAgentTurnTools,
+    includeMyDataTools,
+    appWorkflowGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -127,9 +162,25 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeSpecAuthoringAccess(apiKey, baseUrl),
+    probeIntegrationsAccess(apiKey, baseUrl),
+    probeDataProductsAccess(apiKey, baseUrl),
+    probeDataPoliciesAccess(apiKey, baseUrl),
+    probeWorkspaceDataAccess(apiKey, baseUrl),
+    probeSchemaReviewAccess(apiKey, baseUrl),
     probeAppsToolsetAccess(apiKey, baseUrl),
     probeMiningInUse(apiKey, baseUrl),
     probeToolGroups(apiKey, baseUrl),
+    probeReviewAccess(apiKey, baseUrl),
+    probeCasesAccess(apiKey, baseUrl),
+    probeOperationsFamilies(apiKey, baseUrl),
+    probeTeamAdminAccess(apiKey, baseUrl),
+    probeRecordsAdminAccess(apiKey, baseUrl),
+    probeWorkspaceAccess(apiKey, baseUrl),
+    probeThreadAccess(apiKey, baseUrl),
+    probeAgentTurnsAccess(apiKey, baseUrl),
+    probeMyDataAccess(apiKey, baseUrl),
+    probeAppWorkflowGroups(apiKey, baseUrl),
   ])
   // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
   const includeAppsToolset = appsToolsetAnswer === true
@@ -148,9 +199,25 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
+    includeIntegrationsTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
     includeAppsToolset,
     includeMiningDriverTools,
     toolGroups,
+    includeReviewTools,
+    includeCasesTools,
+    operationsFamilies,
+    includeTeamAdminTools,
+    includeRecordsAdminTools,
+    includeWorkspaceTools,
+    includeThreadTools,
+    includeAgentTurnTools,
+    includeMyDataTools,
+    appWorkflowGroups,
   })
 
   const transport = new StdioServerTransport()

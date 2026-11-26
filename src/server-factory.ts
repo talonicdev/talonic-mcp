@@ -18,13 +18,29 @@ import { registerAccounts } from "./tools/accounts.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
+import { registerAppWorkflowTools } from "./tools/app-workflows.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
+import { registerReviewTools } from "./tools/review.js"
+import { registerCasesTools } from "./tools/cases.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
+import { registerIntegrationsTools } from "./tools/integrations.js"
+import {
+  registerRecordsAdminTools,
+  registerTeamAdminTools,
+  registerWorkspaceTools,
+} from "./tools/governance.js"
+import { registerThreadTools } from "./tools/thread.js"
+import { registerAgentTurnTools } from "./tools/agent-turns.js"
+import { registerMyDataTools } from "./tools/my-data.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
+import { registerDataProductTools } from "./tools/data-products.js"
+import { registerDataPolicyTools } from "./tools/data-policies.js"
+import { registerWorkspaceDataTools } from "./tools/workspace-data.js"
+import { registerSchemaReviewTools } from "./tools/schema-review.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerAppsTools } from "./tools/apps.js"
 import { registerAppsToolset } from "./tools/apps-toolset.js"
@@ -34,9 +50,11 @@ import { registerToMarkdown } from "./tools/to-markdown.js"
 import { registerFieldTools } from "./tools/fields.js"
 import { registerAgentRegistryTools } from "./tools/agent-tools.js"
 import { registerSpecTools } from "./tools/specs.js"
+import { registerSpecAuthoringTools } from "./tools/spec-authoring.js"
 import { registerRunTools } from "./tools/run.js"
 import { registerAskTools } from "./tools/ask.js"
 import { registerToolGroups } from "./tools/tool-groups.js"
+import { registerOperationsTools, type OperationsFamily } from "./tools/workspace-operations.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -151,6 +169,20 @@ export interface CreateServerOptions {
   includePartiesTools?: boolean
 
   /**
+   * Register the `talonic_review_*` tools. Callers set this only after
+   * `probeReviewAccess` passed (the credential reaches the review queue).
+   * Listing visibility only.
+   */
+  includeReviewTools?: boolean
+
+  /**
+   * Register the `talonic_cases_*` tools. Callers set this only after
+   * `probeCasesAccess` passed (the credential reaches cases). Listing
+   * visibility only.
+   */
+  includeCasesTools?: boolean
+
+  /**
    * Register the `talonic_portfolio_*` tools. Callers set this only after
    * `probePortfolioAccess` passed (the workspace has the Portfolio app).
    */
@@ -163,11 +195,59 @@ export interface CreateServerOptions {
   includeProcessesTools?: boolean
 
   /**
+   * Register the `talonic_spec_*` authoring tools (create, edit, check, test,
+   * publish, rollback). Callers set this only after `probeSpecAuthoringAccess`
+   * passed (the platform serves `GET /v1/specs/authoring` to the credential).
+   * Listing visibility only; the platform decides every call.
+   */
+  includeSpecAuthoringTools?: boolean
+
+  /**
+   * Register the integrations group (`talonic_integrations_*`,
+   * `talonic_sources_*`). Callers set this only after
+   * `probeIntegrationsAccess` passed, so a platform without the
+   * `/v1/integrations` routes, or a credential without `sources:read`, never
+   * lists tools that would 404 or 403. Listing visibility only.
+   */
+  includeIntegrationsTools?: boolean
+
+  /**
+   * Register the `talonic_team_*` workspace-team tools. Callers set this only
+   * after `probeTeamAdminAccess` passed (the person may manage the team).
+   * Listing visibility only; the platform re-checks every call.
+   */
+  includeTeamAdminTools?: boolean
+
+  /**
+   * Register the `talonic_records_*` records-management tools. Callers set
+   * this only after `probeRecordsAdminAccess` passed (the person holds the
+   * data permission). Listing visibility only.
+   */
+  includeRecordsAdminTools?: boolean
+
+  /**
+   * Register the `talonic_workspace_*` tools (billing, support, scheduled
+   * deletion). Callers set this only after `probeWorkspaceAccess` passed.
+   */
+  includeWorkspaceTools?: boolean
+
+  /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
    * `probeMasterRecordsAccess` passed, so a deployment without the Master
    * Records app never lists tools that would 404. Listing visibility only.
    */
   includeMasterRecordsTools?: boolean
+
+  /**
+   * Register the `talonic_thread_*`, agent-turn and `talonic_my_data_*` tools.
+   * Callers set each only after its probe passed (`probeThreadAccess`,
+   * `probeAgentTurnsAccess`, `probeMyDataAccess`): the credential is a person
+   * who reaches that surface. Listing visibility only; the platform decides
+   * every call as that person.
+   */
+  includeThreadTools?: boolean
+  includeAgentTurnTools?: boolean
+  includeMyDataTools?: boolean
 
   /**
    * Register the `talonic_submissions_*` tools. Callers set this only after
@@ -184,6 +264,31 @@ export interface CreateServerOptions {
   includePriceBaselineTools?: boolean
 
   /**
+   * Register the `talonic_data_product_*` tools. Callers set this only after
+   * `probeDataProductsAccess` passed. Listing visibility only.
+   */
+  includeDataProductTools?: boolean
+
+  /**
+   * Register the `talonic_data_policy_*` tools. Callers set this only after
+   * `probeDataPoliciesAccess` passed. Listing visibility only.
+   */
+  includeDataPolicyTools?: boolean
+
+  /**
+   * Register the `talonic_catalog_*` and `talonic_suggestion_*` tools. Callers
+   * set this only after `probeWorkspaceDataAccess` passed. Listing visibility only.
+   */
+  includeWorkspaceDataTools?: boolean
+
+  /**
+   * Register the `talonic_schema_review_*` tools and `talonic_link_key_set`.
+   * Callers set this only after `probeSchemaReviewAccess` passed. Listing
+   * visibility only.
+   */
+  includeSchemaReviewTools?: boolean
+
+  /**
    * Keys of the probe-gated tool groups to register (`src/tools/tool-groups.ts`:
    * `data_management`, `events`, `aggregate`, `admin`, `contract_desk`,
    * `transport_folders`, `compliance`, `money_found`, `customs_declaration`).
@@ -193,6 +298,20 @@ export interface CreateServerOptions {
    * Defaults to none.
    */
   toolGroups?: readonly string[]
+  /**
+   * The workspace operation families to register (Spec-run operations, ingest
+   * operations, document organising, collections, saved filters, document
+   * types). Callers pass the families whose probe passed
+   * (`probeOperationsFamilies`). Listing visibility only. Defaults to none.
+   */
+  operationsFamilies?: readonly OperationsFamily[]
+
+  /**
+   * Ids of the app-workflow groups (`tools/app-workflows.ts`) whose probe
+   * passed for the credential; their tools are registered, the rest are not.
+   * Listing visibility only.
+   */
+  appWorkflowGroups?: readonly string[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -503,14 +622,35 @@ export function createServer(options: CreateServerOptions): McpServer {
   if (options.includePartiesTools) {
     registerPartiesTools(server, rawToken, baseUrl)
   }
+  if (options.includeReviewTools) {
+    registerReviewTools(server, rawToken, baseUrl)
+  }
+  if (options.includeCasesTools) {
+    registerCasesTools(server, rawToken, baseUrl)
+  }
   if (options.includePortfolioTools) {
     registerPortfolioTools(server, rawToken, baseUrl)
   }
   if (options.includeProcessesTools) {
     registerProcessesTools(server, rawToken, baseUrl)
   }
+  if (options.includeSpecAuthoringTools) {
+    registerSpecAuthoringTools(server, rawToken, baseUrl)
+  }
+  if (options.includeIntegrationsTools) {
+    registerIntegrationsTools(server, rawToken, baseUrl)
+  }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
+  }
+  if (options.includeTeamAdminTools) {
+    registerTeamAdminTools(server, rawToken, baseUrl)
+  }
+  if (options.includeRecordsAdminTools) {
+    registerRecordsAdminTools(server, rawToken, baseUrl)
+  }
+  if (options.includeWorkspaceTools) {
+    registerWorkspaceTools(server, rawToken, baseUrl)
   }
   if (options.includeSubmissionsTools) {
     registerSubmissionsTools(server, rawToken, baseUrl)
@@ -518,8 +658,36 @@ export function createServer(options: CreateServerOptions): McpServer {
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
   }
+  if (options.includeDataProductTools) {
+    registerDataProductTools(server, rawToken, baseUrl)
+  }
+  if (options.includeDataPolicyTools) {
+    registerDataPolicyTools(server, rawToken, baseUrl)
+  }
+  if (options.includeWorkspaceDataTools) {
+    registerWorkspaceDataTools(server, rawToken, baseUrl)
+  }
+  if (options.includeSchemaReviewTools) {
+    registerSchemaReviewTools(server, rawToken, baseUrl)
+  }
+  if (options.includeThreadTools) {
+    registerThreadTools(server, rawToken, baseUrl)
+  }
+  if (options.includeAgentTurnTools) {
+    registerAgentTurnTools(server, rawToken, baseUrl)
+  }
+  if (options.includeMyDataTools) {
+    registerMyDataTools(server, rawToken, baseUrl)
+  }
   if (options.toolGroups?.length) {
     registerToolGroups(server, options.toolGroups, rawToken, baseUrl)
+  }
+  if (options.appWorkflowGroups?.length) {
+    registerAppWorkflowTools(server, rawToken, baseUrl, options.appWorkflowGroups)
+  }
+
+  if (options.operationsFamilies?.length) {
+    registerOperationsTools(server, rawToken, baseUrl, options.operationsFamilies)
   }
 
   // Resource registrations.

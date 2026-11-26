@@ -64,12 +64,19 @@ export async function apiJson<T = unknown>(
   baseUrl: string | undefined,
   method: HttpMethod,
   path: string,
-  opts: { params?: QueryParams; body?: unknown; signal?: AbortSignal } = {},
+  opts: {
+    params?: QueryParams
+    body?: unknown
+    signal?: AbortSignal
+    /** Extra request headers (e.g. `Idempotency-Key`); never overrides auth. */
+    headers?: Record<string, string>
+  } = {},
 ): Promise<T> {
   const url = buildUrl(baseUrl, path, opts.params)
   const res = await resolveFetch(getToken)(url, {
     method,
     headers: {
+      ...(opts.headers ?? {}),
       Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
       ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
@@ -80,7 +87,9 @@ export async function apiJson<T = unknown>(
   if (!res.ok) {
     throw await apiHttpError(res)
   }
-  return (await res.json()) as T
+  // A 202/204 answer may carry no body: that is `null`, never a parse error.
+  const text = await res.text()
+  return (text ? JSON.parse(text) : null) as T
 }
 
 /**

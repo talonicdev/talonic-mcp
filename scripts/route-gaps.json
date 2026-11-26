@@ -58,95 +58,18 @@
       "served_by": "platform packages/api/src/api/platform/agent-tasks.controller.ts"
     },
     {
-      "method": null,
-      "path": "/v1/portfolio",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml. Platform follow-up: document /v1/portfolio/*.",
-      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
-    },
-    {
       "method": "GET",
-      "path": "/v1/portfolio",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/portfolio/companies/{}",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/portfolio/conflicts",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/portfolio/refresh",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/portfolio/portfolio-api.controller.ts"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/parties/{}/contracts",
-      "kind": "undocumented",
-      "reason": "Served on platform main (parties-api.controller.ts @Get(':id/contracts')), missing from openapi.yaml. Platform follow-up: document the party sections, names, directory link and address choice.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/parties/{}/documents",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/parties/{}/history",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/parties/{}/names",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": null,
-      "path": "/v1/parties/names/{}",
-      "kind": "undocumented",
-      "reason": "PATCH and DELETE served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/parties/{}/directory-link",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/parties/{}/address-choice",
-      "kind": "undocumented",
-      "reason": "Served on platform main, missing from openapi.yaml.",
-      "served_by": "platform packages/api/src/parties/parties-api.controller.ts"
-    },
-    {
-      "method": null,
-      "path_prefix": "/v1/apps/{}/mining",
+      "path": "/v1/compliance/frameworks/{document_id}",
       "kind": "pending-spec",
-      "reason": "Rule-finding round routes (talonic_mining_*). Served today; their spec operations land with platform PR #2348 (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
-      "served_by": "platform packages/api/src/api/platform/rule-mining.controller.ts"
+      "reason": "ships with platform #2411",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/compliance/frameworks/{document_id}/rules",
+      "kind": "pending-spec",
+      "reason": "ships with platform #2411",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
     }
   ]
 }

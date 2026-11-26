@@ -2,8 +2,10 @@ import type { RawSection } from "../types"
 import { link, tool } from "../routes"
 import { TOOL_REGISTRY } from "../generated/tool-registry"
 
-const CORE = TOOL_REGISTRY.filter((t) => t.group !== "processes").length
+const PUBLIC = new Set(["core", "agent_tasks", "decision_tasks"])
+const CORE = TOOL_REGISTRY.filter((t) => PUBLIC.has(t.group)).length
 const PROCESS = TOOL_REGISTRY.filter((t) => t.group === "processes").length
+const MORE = TOOL_REGISTRY.length - CORE - PROCESS
 
 export const sections: RawSection[] = [
   {
@@ -33,7 +35,9 @@ export const sections: RawSection[] = [
           "**Run.** Run one of your workspace's Specs over a set of documents and read back one clean row per document.",
           "**Review and decide.** Sign off or send back items waiting for you, and take on checks or decisions your workspace hands to an outside agent.",
           "**Build and automate.** Describe a process in your own words (what comes in, what is checked, who signs, what goes out), test it on real documents, publish it, and watch its runs.",
-          "**Look after the workspace.** Keep each company's documents apart, check credits, pricing and usage.",
+          "**Connect and organise.** Connect a source such as a drive or mailbox, import from it, tag, move and group documents, and keep collections and saved filters.",
+          "**Author Specs and curate data.** Create, check, test and publish a Spec; review flagged values and cases; keep data products and policies current.",
+          "**Look after the workspace.** Keep each company's documents apart, check credits, pricing and usage, manage the team, retention and legal holds.",
         ],
       },
       { type: "heading", level: 2, id: "how-it-works", text: "How it fits together" },
@@ -46,6 +50,7 @@ export const sections: RawSection[] = [
         items: [
           `**${CORE} tools** are listed in every session.`,
           `**${PROCESS} process tools** are listed when your role can see processes in the workspace.`,
+          `**${MORE} more tools** cover the rest of the workspace (Spec authoring, sources, Spec runs and ingest, organising documents, review and cases, data products, team and records administration, your thread, and app workflows). Each set is listed when your role can use that part of the workspace; ${link("tools-by-task", "Tools by task")} lists them all.`,
           "Apps you have enabled (for example Contracts or Accounts Payable) add their own tools to sessions that can use them; see [Apps](https://talonic.com/docs/apps).",
         ],
       },

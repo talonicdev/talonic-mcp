@@ -1788,5 +1788,6473 @@ export const TOOL_REGISTRY: RegistryTool[] = [
         "description": "true only after the user agreed to switch the existing address off"
       }
     ]
+  },
+  {
+    "name": "talonic_process_details",
+    "group": "processes",
+    "title": "Rename, file or tag a process",
+    "description": "Rename a process, put it in a folder (`folder: null` takes it out) or replace its tags. The draft and the live version are untouched.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "folder",
+        "type": "string",
+        "required": false,
+        "description": "null takes it out of its folder"
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": false,
+        "description": "Replaces the tags"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_export",
+    "group": "processes",
+    "title": "Export a process",
+    "description": "The process draft as a file another workspace can import (pass its `doc` as `draft` with a name when creating a process there). Chosen sources, destinations and similar workspace settings are left out; secrets travel by name only.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_resources",
+    "group": "processes",
+    "title": "What a process version made",
+    "description": "What a published version made or uses in the workspace: schemas, deliveries, policies and the like, with the steps they belong to. The live version unless `version` is given; empty before the first publish.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "required": false,
+        "description": "A published version; default the live one",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_extract_pipeline",
+    "group": "processes",
+    "title": "Move document steps into a pipeline",
+    "description": "Move the draft's document steps (reading, checking, reviewing documents) and its fields into a new reusable pipeline that other processes can use too; one pipeline step takes their place in the draft. Changes the draft only.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "Name of the new pipeline"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_try",
+    "group": "processes",
+    "title": "Walk a draft with made-up values",
+    "description": "Walk the draft with made-up values (by field id, from talonic_process_get) and sign-off choices (by step id): the steps an item would take and where it stops. Runs nothing and sends nothing.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "values",
+        "type": "object",
+        "required": false,
+        "description": "Values by field id"
+      },
+      {
+        "name": "choices",
+        "type": "object",
+        "required": false,
+        "description": "Sign-off choices by step id"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_form_preview",
+    "group": "processes",
+    "title": "Preview a form step",
+    "description": "How a form step of the draft looks to the person filling it in: title, intro, button and fields with their kinds and choices.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_examples",
+    "group": "processes",
+    "title": "Examples a draft is checked against",
+    "description": "Examples are items kept from runs that a draft is checked against with talonic_process_evaluate. Without `keep` or `remove` this lists them. `keep: { run_id, item_key, note? }` keeps an item of a run (the way it went and what it ended with; replaces an earlier example of the same item). `remove: example_id` removes one.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "keep",
+        "type": "object",
+        "required": false,
+        "description": "Keep this item of a run as an example"
+      },
+      {
+        "name": "remove",
+        "type": "string",
+        "required": false,
+        "description": "The id of an example to remove"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_evaluate",
+    "group": "processes",
+    "title": "Check a draft against its examples",
+    "description": "Check the draft against every kept example: how many still go the same way, and for each that would now go another way, where the ways part. Runs nothing and sends nothing. Use after changing a draft, before talonic_process_publish.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_scripts",
+    "group": "processes",
+    "title": "Script tests and approvals",
+    "description": "Per script step of the draft, the latest test (by the script's `hash`, passed or not, with results) and approval. A script step goes live only when its current script passed a test and a person approved it.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_script_draft",
+    "group": "processes",
+    "title": "Write a script for a step",
+    "description": "Write a script for a script step from what it should do, in plain words. Saves nothing: returns the script, its `hash` and an explanation; put it on the step with talonic_process_change or the draft, then talonic_process_script_test. The step must already name the fields it writes. Uses credits.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "purpose",
+        "type": "string",
+        "required": true,
+        "description": "What the script should do, in plain words"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_script_test",
+    "group": "processes",
+    "title": "Test a step's script",
+    "description": "Test a script step's current script on up to 10 recent records of this process, writing nothing: before and after per field, and `ok`. Needs one earlier run of the process (a test run is enough).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_script_approve",
+    "group": "processes",
+    "title": "Approve a step's script",
+    "description": "Approve the exact script that passed its test, by its `hash` from talonic_process_scripts. An approval is a person's decision that lets the script go live: call only when the user has read the script and says to approve it.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "hash",
+        "type": "string",
+        "required": true,
+        "description": "The tested script's hash"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_sign_off",
+    "group": "processes",
+    "title": "One sign-off step",
+    "description": "One sign-off step as the caller sees it: the brief (who signs, instructions, fields, choices), whether the caller may sign, and only then the items waiting with the values to check and the latest decisions. Pass an item's `documentId` in `items` to talonic_process_sign or talonic_process_send_back.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true,
+        "description": "stepId from talonic_process_waiting_for_me"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_retry_item",
+    "group": "processes",
+    "title": "Retry one step for one item",
+    "description": "Try one failed step again for one item of a run: an email or a call is sent again, an item a signer sent back goes back to its signers. `canRetry` on talonic_process_item says where this applies. Use when the cause is fixed.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "process_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "step_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "item_key",
+        "type": "string",
+        "required": true,
+        "description": "The item's key from the run"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_group",
+    "group": "processes",
+    "title": "Groups steps wait for",
+    "description": "Create, change or delete a group of people a sign-off or form step can wait for (the same groups as Team & Roles; list them with talonic_process_setup). Without `group_id` it creates one (`name`, optional `description`, `member_ids`). With `group_id`: `name`/`description` change it, `member_ids` replaces its members, `delete: true` deletes it (steps that named it no longer wait for its members). Members must be active members of the workspace. Who signs is a governance decision: call only when the user asks.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "group_id",
+        "type": "string",
+        "required": false,
+        "description": "Leave out to create a group"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "member_ids",
+        "type": "string[]",
+        "required": false,
+        "description": "Person ids; replaces the members"
+      },
+      {
+        "name": "delete",
+        "type": "boolean",
+        "required": false,
+        "description": "true deletes the group"
+      }
+    ]
+  },
+  {
+    "name": "talonic_process_build_lookup_data",
+    "group": "processes",
+    "title": "Build the data look-ups read",
+    "description": "Build the shared data look-up steps read, from the reference data and snapshots the workspace holds. Safe to start again; check progress with talonic_process_setup (`lookupData.state` becomes `ready`). Uses credits.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_spec_create",
+    "group": "spec_authoring",
+    "title": "Create a pipeline",
+    "description": "Create a Spec (a saved extraction pipeline: the fields to capture and the steps that produce them). Not live until published.\n\nUSE WHEN: the user wants a new pipeline for a kind of document, or wants to bring in a Spec JSON export or an existing schema.\nARGS: `name`; optional `description`; then ONE of: `doc` (a complete Spec document), `spec_json` (a Spec JSON export from the editor), `schema_id` (an existing schema to turn into a Spec), or nothing (empty draft).\nA minimal valid doc: {\"format\":1,\"name\":\"Invoices\",\"fields\":[{\"field_id\":\"f-vendor\",\"name\":\"vendor_name\",\"data_type\":\"string\",\"description\":\"Legal name of the issuing company\"},{\"field_id\":\"f-total\",\"name\":\"total_amount\",\"data_type\":\"number\"}],\"stages\":[{\"id\":\"s-source\",\"type\":\"source\"},{\"id\":\"s-extract\",\"type\":\"extraction\",\"config\":{}},{\"id\":\"s-deliver\",\"type\":\"deliver\"}],\"gates\":[],\"policies\":[]}. Give every field a stable, unique field_id and a clear description of what to capture.\nRETURNS: { spec_id, revision, doc, has_unpublished_changes, links } (or { spec_id, issues } for an import). Next: talonic_spec_check.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "doc",
+        "type": "object",
+        "required": false,
+        "description": "A complete Spec document"
+      },
+      {
+        "name": "spec_json",
+        "type": "object",
+        "required": false,
+        "description": "A Spec JSON export from the Spec editor"
+      },
+      {
+        "name": "schema_id",
+        "type": "string",
+        "required": false,
+        "description": "An existing schema to turn into a Spec"
+      }
+    ]
+  },
+  {
+    "name": "talonic_spec_edit",
+    "group": "spec_authoring",
+    "title": "Edit a pipeline draft",
+    "description": "Read or change a Spec's draft.\n\nWith only `spec_id`: returns the draft { revision, doc, published_version, has_unpublished_changes }. Read it before every edit.\nWith `doc` + `revision`: replaces the WHOLE draft. `revision` is the one you read; a 409 means someone saved in between, so read again and re-apply. Keep each field's field_id when you change a field (ground truth and rules point at it); replacing most fields needs `allow_field_reset: true`.\nWith `name` / `description`: renames the Spec.\nSaving never changes what runs: publish does (talonic_spec_publish).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "spec_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "doc",
+        "type": "object",
+        "required": false,
+        "description": "The complete new draft document"
+      },
+      {
+        "name": "revision",
+        "type": "integer",
+        "required": false,
+        "description": "The draft revision you read",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "allow_field_reset",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_spec_check",
+    "group": "spec_authoring",
+    "title": "Check a pipeline",
+    "description": "Check a Spec without saving anything: the draft, or `doc` before you save it.\nRETURNS: { valid, errors[], warnings[] }, each { code, message, path, field_id, stage_id }. A draft with errors cannot be published; warnings do not block. Free.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "spec_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "doc",
+        "type": "object",
+        "required": false,
+        "description": "A document to check instead of the saved draft"
+      }
+    ]
+  },
+  {
+    "name": "talonic_spec_test",
+    "group": "spec_authoring",
+    "title": "Test a pipeline on samples",
+    "description": "Test the draft on sample documents: a preview run that is never delivered to the workspace's destinations. A draft with unpublished changes is published first, as in the Spec editor. Uses credits.\n\nARGS: `spec_id`; `document_ids` (up to 20 documents already in the workspace, e.g. from talonic_extract or an upload) or none to use the pinned samples; `pin` true also pins the given documents as samples.\nRETURNS: { pipeline_id, version, status, links }. Then poll talonic_get_run with the pipeline_id and read rows with their evidence with talonic_get_run_results.\nA 422 listing issues: tell the user, and retry with `acknowledge_issues: true` only if they agree.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "spec_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "pin",
+        "type": "boolean",
+        "required": false,
+        "description": "Also pin document_ids as the Spec's samples"
+      },
+      {
+        "name": "acknowledge_issues",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_spec_publish",
+    "group": "spec_authoring",
+    "title": "Publish a pipeline",
+    "description": "Publish the draft as the next version: new runs use it from now on. Changes what runs for real; call only when the user asks to publish.\n\nARGS: `spec_id`; `expected_draft_revision` (the revision you checked, recommended); `acknowledge_issues` only after the user agreed to the issues a previous attempt listed.\nRefused (nothing published) when the draft has errors or unacknowledged issues. RETURNS: { version, schema_id, active, activation_pending, issues }. Run it with talonic_run_spec.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "spec_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "expected_draft_revision",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "acknowledge_issues",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_spec_rollback",
+    "group": "spec_authoring",
+    "title": "Roll back a pipeline",
+    "description": "Go back to an earlier published version: its document is published again as a NEW version (history is kept). Changes what runs for real; call only when the user asks.\n\nARGS: `spec_id`, `version`. With `preview: true` nothing changes: returns what differs between the current version and `version`, so the user can decide.\nRETURNS: { version, restored_from, active, issues } or, with preview, { from, to, diff }.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "spec_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "required": true,
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "preview",
+        "type": "boolean",
+        "required": false,
+        "description": "Only show what would change"
+      },
+      {
+        "name": "acknowledge_issues",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_integrations_connectors",
+    "group": "integrations",
+    "title": "Connectors",
+    "description": "What the workspace can connect: per connector its slug, name, kind (source or destination), method (authorize = a browser sign-in this server can start; credentials = keys or passwords, entered by a person in the Talonic web app or sent to the REST API, never through this conversation), personal (one person's own account) and available (false = not offered on this deployment). USE WHEN the user wants to connect Gmail, Google Drive, Outlook, OneDrive, SharePoint, Teams, Notion, HubSpot, Dropbox, Slack or Google Sheets. NOT FOR what is already connected: talonic_sources_connections.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_integrations_connect",
+    "group": "integrations",
+    "title": "Connect an account",
+    "description": "Start connecting an account through a browser sign-in. Returns `authorize_url`, `id` (the authorization id) and `expires_at` (30 minutes). Give the user the link: they must open it in a browser while signed in to Talonic, in this workspace, as the same person this connection acts for, then confirm and finish the provider's sign-in. Nothing is connected until they do. Then call talonic_integrations_connect_status with the id until status is connected, failed, expired or cancelled. Only for connectors whose method is authorize (talonic_integrations_connectors). Optional: `send` (gmail, outlook: the mailbox may also send mail), `intake` (gmail, notion, slack: what to read first). Connecting the same account again renews the existing connection. Personal connections (mailboxes, notes, a person's own drive) show their content only as the connecting person's access allows; other people in the workspace may see the connection without its content. Errors: 503 connector_not_configured (not offered on this deployment), 403 with a reason (missing consent or permission). NOT FOR S3, Azure Blob, SQL, Kendox, Granola or upload links: they need credentials, which never pass through an agent conversation.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connector",
+        "type": "string",
+        "required": true,
+        "description": "Connector slug with method authorize, e.g. gmail, google-drive, sharepoint"
+      },
+      {
+        "name": "send",
+        "type": "boolean",
+        "required": false,
+        "description": "gmail, outlook only: the mailbox may also send mail"
+      },
+      {
+        "name": "intake",
+        "type": "object",
+        "required": false,
+        "description": "gmail, notion, slack only: what to read first"
+      }
+    ]
+  },
+  {
+    "name": "talonic_integrations_connect_status",
+    "group": "integrations",
+    "title": "Connect status",
+    "description": "Where a browser connect started by talonic_integrations_connect stands: status pending (the user has not finished yet), connected, failed (with error code and message), expired or cancelled. On connected it returns `connection_id`, the id the talonic_sources_* tools take; for Google Sheets it returns the signed-in account instead, and a destination is made from it through the REST API. Only the person who started the connect can see it (404 for anyone else). Poll every few seconds while pending; stop after expires_at. NOT FOR starting a connect: talonic_integrations_connect.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "authorization_id",
+        "type": "string",
+        "required": true,
+        "description": "The id talonic_integrations_connect returned"
+      }
+    ]
+  },
+  {
+    "name": "talonic_sources_connections",
+    "group": "integrations",
+    "title": "Connected sources",
+    "description": "Every connected source of the workspace with its type, name, sync state, `restricted` (visible only to some people) and `connected_by`. Use the id with talonic_sources_browse, talonic_sources_import, talonic_sources_imports, talonic_sources_sync_now and talonic_sources_sync_settings. Personal connections (mailboxes, notes, a person's own drive) show their content only as the connecting person's access allows; other people in the workspace may see the connection without its content. NOT FOR connectors that could be connected: talonic_integrations_connectors.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_sources_browse",
+    "group": "integrations",
+    "title": "Browse a source",
+    "description": "List the folders and files inside a connected source, one level and page at a time: pass `folder_id` to open a folder, `page_token` from the previous answer for the next page, `q` to search by name. Shows only what the caller may see in that source. Use the file ids with talonic_sources_import. NOT FOR documents already in Talonic: talonic_search.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connection_id",
+        "type": "string",
+        "required": true,
+        "description": "The connection id from talonic_sources_connections"
+      },
+      {
+        "name": "folder_id",
+        "type": "string",
+        "required": false,
+        "description": "Folder to open; omit for the top level"
+      },
+      {
+        "name": "page_token",
+        "type": "string",
+        "required": false,
+        "description": "next page token from the previous answer"
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "Search by file or folder name"
+      }
+    ]
+  },
+  {
+    "name": "talonic_sources_import",
+    "group": "integrations",
+    "title": "Import from a source",
+    "description": "Bring chosen files from a connected source into Talonic as documents: `file_ids` from talonic_sources_browse, optional `tags`. Imported files are read like uploaded documents, which uses credits; follow progress with talonic_sources_imports. Call only when the user asked to import these files. NOT FOR keeping a source in sync: talonic_sources_sync_settings.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connection_id",
+        "type": "string",
+        "required": true,
+        "description": "The connection id from talonic_sources_connections"
+      },
+      {
+        "name": "file_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "File ids from talonic_sources_browse"
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": false,
+        "description": "Tags for the imported documents"
+      }
+    ]
+  },
+  {
+    "name": "talonic_sources_imports",
+    "group": "integrations",
+    "title": "Imports from a source",
+    "description": "Recent imports from one connected source: their state and what each brought in. NOT FOR the source's sync schedule: talonic_sources_sync_settings.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connection_id",
+        "type": "string",
+        "required": true,
+        "description": "The connection id from talonic_sources_connections"
+      }
+    ]
+  },
+  {
+    "name": "talonic_sources_sync_now",
+    "group": "integrations",
+    "title": "Sync a source now",
+    "description": "Check a connected source for new and changed files now instead of waiting for its schedule (answers 202 at once; the sync runs in the background). New files become documents and are read like uploads, which uses credits. Follow with talonic_sources_connections (sync state) or talonic_sources_imports. A personal connection can be synced only by the person who connected it. NOT FOR changing the schedule: talonic_sources_sync_settings.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connection_id",
+        "type": "string",
+        "required": true,
+        "description": "The connection id from talonic_sources_connections"
+      }
+    ]
+  },
+  {
+    "name": "talonic_sources_sync_settings",
+    "group": "integrations",
+    "title": "Source sync settings",
+    "description": "Read, or change, how a connected source stays in sync. Without `interval` and `scope` it only reads the current settings. With `interval` (off, every_minute, hourly, daily, weekly) and/or `scope` (which folders, labels, pages or prefixes are watched: an object with `type` = the connection's kind and `entries`; read the current settings first and change that shape) it changes them, and only for the connection's author or a workspace owner. A schedule other than off needs at least one scope entry. Call the change only when the user asked for it. NOT FOR syncing once now: talonic_sources_sync_now.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "connection_id",
+        "type": "string",
+        "required": true,
+        "description": "The connection id from talonic_sources_connections"
+      },
+      {
+        "name": "interval",
+        "type": "\"off\" | \"every_minute\" | \"hourly\" | \"daily\" | \"weekly\"",
+        "required": false,
+        "description": "New schedule; omit to keep it",
+        "enum": [
+          "off",
+          "every_minute",
+          "hourly",
+          "daily",
+          "weekly"
+        ]
+      },
+      {
+        "name": "scope",
+        "type": "object",
+        "required": false,
+        "description": "What is watched: { type, entries }; omit to keep it"
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_add_documents",
+    "group": "workspace_operations",
+    "title": "Add documents to a Spec run",
+    "description": "Attach workspace documents to a Spec run. They wait idle until talonic_pipeline_start; documents already in the run are skipped. One call is one submission group (`run_id`).\nEvery id must be a document the key's person can see (a hidden one answers 404 like a missing one). At most 1000 ids.\nRETURNS: { pipeline_id, run_id, added, skipped, documents[] { id, document_id, status } }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "Workspace document ids (talonic_search or talonic_filter), 1 to 1000."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_documents",
+    "group": "workspace_operations",
+    "title": "Documents of a Spec run",
+    "description": "The documents of a Spec run with their processing state, paged and filterable like the run grid in the web app.\nUSE WHEN: finding which documents failed, are flagged, or belong to one submission group; getting the run document id that talonic_pipeline_field_states needs.\nRETURNS: { data[] (one per run document: id = run document id, document_id, filename, status, …), pagination { total, page, limit } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": "Page number, from 1.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Rows per page; the platform caps it.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "Filename contains this text."
+      },
+      {
+        "name": "status",
+        "type": "string[]",
+        "required": false,
+        "description": "Only these run document states, e.g. [\"error\"] or [\"completed\"]."
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": false,
+        "description": "Documents carrying any of these tags."
+      },
+      {
+        "name": "flagged",
+        "type": "boolean",
+        "required": false,
+        "description": "true: only documents with flagged values; false: only without."
+      },
+      {
+        "name": "has_manual_edits",
+        "type": "boolean",
+        "required": false,
+        "description": "true: only documents with values a person changed."
+      },
+      {
+        "name": "overridden_by_amendment",
+        "type": "boolean",
+        "required": false,
+        "description": "true: only documents whose values a later amendment replaced."
+      },
+      {
+        "name": "sort_by",
+        "type": "string",
+        "required": false,
+        "description": "filename, status, added_at, duration, flag_count, batch, or field:<field key>."
+      },
+      {
+        "name": "sort_dir",
+        "type": "\"asc\" | \"desc\"",
+        "required": false,
+        "description": "Sort direction.",
+        "enum": [
+          "asc",
+          "desc"
+        ]
+      },
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": false,
+        "description": "One submission group (talonic_pipeline_runs), or `none` for documents added outside any group."
+      },
+      {
+        "name": "ids",
+        "type": "string[]",
+        "required": false,
+        "description": "Read exactly these run document ids."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_runs",
+    "group": "workspace_operations",
+    "title": "Submission groups of a Spec run",
+    "description": "The submission groups (`run_id`) that fed documents into a Spec run, newest first, paged, with how many documents each holds.\nRETURNS: { data[], untracked_count (documents added outside any group), pagination { total, page, limit } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": "Page number, from 1.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Rows per page; the platform caps it.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "A run id prefix or a batch id fragment."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_start",
+    "group": "workspace_operations",
+    "title": "Start a Spec run",
+    "description": "Start (or resume) processing of the run's idle documents, e.g. after talonic_pipeline_add_documents. Processing uses credits; call only when the user asked to run it. Runs stopped by a business rule are listed in `held_runs` (see talonic_pipeline_rule_holds).\nRETURNS: { pipeline_id, enqueued, held_runs[] }. Poll talonic_get_run for progress.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_retry_errored",
+    "group": "workspace_operations",
+    "title": "Retry the failed documents of a Spec run",
+    "description": "Process again only the run's documents that failed; documents that finished are untouched. Uses credits for the retried documents. To retry one failed document anywhere, re-extract that document instead.\nRETURNS: { pipeline_id, retried, enqueued }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_retriage",
+    "group": "workspace_operations",
+    "title": "Rebuild a Spec run's review queue",
+    "description": "Rebuild a finished run's review queue from its stored check results and route the items again, optionally under a new `review_config`. Nothing is checked again and no credits are spent, but the current queue is replaced: items already routed may move. Call only when the user asks.\nRETURNS: the rebuild summary and the new routing counts.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "review_config",
+        "type": "object",
+        "required": false,
+        "description": "A new review routing configuration to apply first; omit to keep the stored one."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_field_states",
+    "group": "workspace_operations",
+    "title": "Field states of one run document",
+    "description": "The state of every field of one document in a Spec run: value, confidence, whether it is flagged, waits for review, or was changed by a person.\n`run_document_id` is the `id` of a row from talonic_pipeline_documents (not the workspace document id).\nRETURNS: { data[] }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "run_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The run document id (`id` from talonic_pipeline_documents)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_cell_history",
+    "group": "workspace_operations",
+    "title": "Value history of a Spec run",
+    "description": "Every value each cell of the run held, who or what set it, and when. Narrow with `document_ids`.\nUSE WHEN: explaining why a value changed, or auditing manual corrections.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": false,
+        "description": "Only the history of these documents."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_assembly_groups",
+    "group": "workspace_operations",
+    "title": "Assembled groups of a Spec run",
+    "description": "For a Spec that assembles several documents into one record (e.g. an order with its invoices): every group with its row, its base document and the documents bucketed into it. Documents the key's person cannot see are left out of a group's list.\nRETURNS: { data[] }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_needs_anchor",
+    "group": "workspace_operations",
+    "title": "Groups that need a base document",
+    "description": "Groups of an assembling Spec run that could not settle on one base document, each with the candidate documents to choose from. Choose with talonic_pipeline_resolve_anchor.\nRETURNS: { data[] { group_key, candidates[] { documentId, … } } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_resolve_anchor",
+    "group": "workspace_operations",
+    "title": "Choose a group's base document",
+    "description": "Settle one group by choosing its base document; the group is assembled again around it. Take `group_key` and a candidate's `documentId` from talonic_pipeline_needs_anchor. Needs the `reviews:write` scope and the edit permission.\nRETURNS: { group_key, status, product_record_id }. 400 when the Spec does not assemble documents.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "group_key",
+        "type": "string",
+        "required": true,
+        "description": "The group, from talonic_pipeline_needs_anchor."
+      },
+      {
+        "name": "anchor_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The chosen candidate's `documentId`."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_rerun_assembly",
+    "group": "workspace_operations",
+    "title": "Assemble a Spec run's groups again",
+    "description": "Assemble every group of the run again from its current documents. Existing groups and their rows are rebuilt and can change. Call only when the user asks.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_rule_holds",
+    "group": "workspace_operations",
+    "title": "Business-rule holds of a Spec",
+    "description": "The business-rule holds that stop this Spec's runs, each with the runs it holds and the one-run overrides already given.\nRETURNS: { holds[] }. Let one run proceed with talonic_pipeline_override_hold.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_override_hold",
+    "group": "workspace_operations",
+    "title": "Let one held run proceed",
+    "description": "Let exactly one held run proceed despite a business-rule hold, with a reason kept on the audit trail. The hold stays open, so later runs are still stopped. The run starts when admitted (uses credits). Admin only, as in the web app; call only when the user decides.\nTake `run_id` and `hold_id` from talonic_pipeline_rule_holds.\nRETURNS: { admitted, remaining_hold_ids[], enqueued }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      },
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true,
+        "description": "The held run."
+      },
+      {
+        "name": "hold_id",
+        "type": "string",
+        "required": true,
+        "description": "The hold to override for this run."
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": true,
+        "description": "Why this run may proceed (3 to 2000 characters)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_reconciliation_cases",
+    "group": "workspace_operations",
+    "title": "Reconciliation cases of a Spec",
+    "description": "The reconciliation cases this Spec's business rules raised (a mismatch between documents to look into), with their state.\nRETURNS: { cases[] }. The full audit export is talonic_pipeline_export_reconciliation_cases.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_pipeline_export_reconciliation_cases",
+    "group": "workspace_operations",
+    "title": "Export reconciliation cases",
+    "description": "The full audit export of a Spec's reconciliation cases: the values each case saw, its evidence, its history and the holds it caused. Needs the export permission, as in the web app.\nRETURNS: { cases[] }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true,
+        "description": "The Spec run's pipeline_id, from talonic_run_spec or talonic_get_run."
+      }
+    ]
+  },
+  {
+    "name": "talonic_ingest_queue_status",
+    "group": "workspace_operations",
+    "title": "Processing queue",
+    "description": "How many of the workspace's documents are in each processing state (queued, extracting, completed, error, …). Workspace totals, as in the web app.\nUSE WHEN: checking whether uploads are still being processed, or how many failed.\nNOT FOR: one document's state (talonic_get_document).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ingest_duplicates",
+    "group": "workspace_operations",
+    "title": "Duplicate files",
+    "description": "Groups of identical files in the workspace and how many documents carry a content fingerprint. A group lists only documents the key's person can see and is left out when fewer than two remain.\nRETURNS: { duplicate_groups, total_duplicate_files, groups[] { count, document_ids[], filenames[] }, … }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ingest_skipped_duplicates",
+    "group": "workspace_operations",
+    "title": "Uploads skipped as duplicates",
+    "description": "Uploads that were not processed because an identical document already existed, newest first (up to 1000), each naming the existing document. Process one anyway with talonic_ingest_process_duplicate.\nRETURNS: { entries[] { existing_document_id, filename, … }, total }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ingest_process_duplicate",
+    "group": "workspace_operations",
+    "title": "Process a skipped duplicate anyway",
+    "description": "Create a new document for an upload that was skipped as a duplicate. It reuses the existing document's content and values (the file is not read again). The existing document must be visible to the key's person. Needs the ingest permission.\nPass `idempotency_key` (any unique string, reused on retries) to make a retry safe: the same key within 24 hours returns the first copy instead of creating another. The same key for another document is refused (409).\nRETURNS: { document { id, filename, status } }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "existing_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The document the upload matched (`existing_document_id` from talonic_ingest_skipped_duplicates)."
+      },
+      {
+        "name": "filename",
+        "type": "string",
+        "required": false,
+        "description": "Name of the new document; default the existing one's."
+      },
+      {
+        "name": "source_connection_id",
+        "type": "string",
+        "required": false,
+        "description": "Source to attach it to; default the existing one's."
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": false,
+        "description": "Tags of the new document; default the existing one's."
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "A unique string for this request; send the same one when retrying so only one copy is made."
+      }
+    ]
+  },
+  {
+    "name": "talonic_ingest_settings",
+    "group": "workspace_operations",
+    "title": "Optional ingest steps",
+    "description": "Which optional steps run when documents arrive in this workspace, each on by default: `classification` (document types), `triage` (sensitivity tags), `grounding_gate` (checking low-confidence values against the page), `entity_linking` (links between documents), `delivery` (the `document.extracted` notification to webhooks and destinations) and `registry_binding` (matching values to the workspace's fields).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ingest_update_settings",
+    "group": "workspace_operations",
+    "title": "Turn optional ingest steps on or off",
+    "description": "Turn optional ingest steps on or off; only the steps given change. Applies to documents that arrive from now on. Turning `delivery` off stops `document.extracted` notifications; turning `classification` off leaves new documents without a type. Admin only, as in the web app; call only when the user asks.\nRETURNS: the settings after the change.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "classification",
+        "type": "boolean",
+        "required": false,
+        "description": "Assign document types."
+      },
+      {
+        "name": "triage",
+        "type": "boolean",
+        "required": false,
+        "description": "Tag sensitive content."
+      },
+      {
+        "name": "grounding_gate",
+        "type": "boolean",
+        "required": false,
+        "description": "Check low-confidence values against the page."
+      },
+      {
+        "name": "entity_linking",
+        "type": "boolean",
+        "required": false,
+        "description": "Link related documents."
+      },
+      {
+        "name": "delivery",
+        "type": "boolean",
+        "required": false,
+        "description": "Send the `document.extracted` notification."
+      },
+      {
+        "name": "registry_binding",
+        "type": "boolean",
+        "required": false,
+        "description": "Match values to the workspace's fields."
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_tags",
+    "group": "workspace_operations",
+    "title": "Document tags",
+    "description": "Every distinct tag on documents the key's person can see. USE WHEN: before tagging, to reuse an existing tag instead of a near-duplicate; to offer tag filters.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_documents_system_tags",
+    "group": "workspace_operations",
+    "title": "Grouping tags set by Talonic",
+    "description": "Distinct grouping tags Talonic set on visible documents when it unpacked them (the email or archive a document came in). They are read-only labels, kept apart from the tags people set.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_documents_facets",
+    "group": "workspace_operations",
+    "title": "Document counts per filter value",
+    "description": "How many visible documents have each status, document type, source and tag. USE WHEN: building or explaining filters, or giving a quick overview of the workspace's documents.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_documents_batch_tag",
+    "group": "workspace_operations",
+    "title": "Tag many documents",
+    "description": "Add, remove or set tags on up to 1000 documents in one call. `mode`: `add` (default) merges, `remove` takes the given tags away, `set` replaces each document's tags with exactly these. All or nothing: one hidden or missing document refuses the whole batch with 404. Tags can control who sees a document, so `remove` and `set` can take access away: call only when the user asked.\nRETURNS: { updated, mode, tags[], results[] { id, status, tags[] }, audit_event_id }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "Documents to change, 1 to 1000."
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": true,
+        "description": "Tags, at most 50, each up to 64 characters."
+      },
+      {
+        "name": "mode",
+        "type": "\"add\" | \"remove\" | \"set\"",
+        "required": false,
+        "description": "add (default), remove, or set.",
+        "enum": [
+          "add",
+          "remove",
+          "set"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_set_tags",
+    "group": "workspace_operations",
+    "title": "Replace one document's tags",
+    "description": "Replace one document's tags with exactly the given list; an empty list clears them. Tags can control who sees a document: call only when the user asked. To add a tag without touching the others, use talonic_documents_batch_tag with mode `add`.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The document, from talonic_search or talonic_filter."
+      },
+      {
+        "name": "tags",
+        "type": "string[]",
+        "required": true,
+        "description": "The complete new tag list (at most 50; empty clears)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_import_batch_ids",
+    "group": "workspace_operations",
+    "title": "Import source batch ids",
+    "description": "Set the source batch id of existing documents from a list or a CSV, e.g. to group documents by the delivery or job they came in. Give `rows` ({ document_id, batch_id }) or `csv` text with the columns `document_id,batch_id`. A `document_id` cell may hold the document id, its filename (with or without extension) or its source item id. An existing batch id is overwritten.\nRETURNS: { updated, not_found[] } (the cells that matched no document).\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "rows",
+        "type": "object[]",
+        "required": false,
+        "description": "One entry per document: which document, which batch id."
+      },
+      {
+        "name": "csv",
+        "type": "string",
+        "required": false,
+        "description": "CSV text with a header row naming `document_id` and `batch_id`."
+      },
+      {
+        "name": "filename",
+        "type": "string",
+        "required": false,
+        "description": "Name the upload carries; default batch-metadata.csv."
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_display_name_rule",
+    "group": "workspace_operations",
+    "title": "Readable-name rule",
+    "description": "The workspace's rule for showing documents under a readable name instead of their raw filename: `mode` `off`, `default` (tidy the filename) or `lua` (a script), the script if any, and a sample of current filename → name pairs.\nChange it with talonic_documents_set_display_name_rule after trying a script with talonic_documents_preview_display_name_rule.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_documents_set_display_name_rule",
+    "group": "workspace_operations",
+    "title": "Set the readable-name rule",
+    "description": "Set how documents get their readable name: `off` (show filenames; clears the readable names already stored), `default` (tidy the filename) or `lua` with a `script`. New documents follow the rule; apply it to existing ones with talonic_documents_backfill_display_names. Admin only, as in the web app; call only when the user asks.\nA `script` reads `record.filename` and calls `record:set('display_name', value)`. Try it first with talonic_documents_preview_display_name_rule.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "mode",
+        "type": "\"off\" | \"default\" | \"lua\"",
+        "required": true,
+        "description": "`off`, `default` or `lua`.",
+        "enum": [
+          "off",
+          "default",
+          "lua"
+        ]
+      },
+      {
+        "name": "script",
+        "type": "string",
+        "required": false,
+        "description": "The rule script; required for `lua`, kept as a draft otherwise."
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_preview_display_name_rule",
+    "group": "workspace_operations",
+    "title": "Try a readable-name script",
+    "description": "Run a candidate rule script over a random sample of the workspace's real filenames and show the names it would give, without saving anything. Admin only.\nRETURNS: { rows[] { filename, display_name, no_label }, total, changed, no_label }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "lua_script",
+        "type": "string",
+        "required": true,
+        "description": "The script to try."
+      },
+      {
+        "name": "sample_size",
+        "type": "integer",
+        "required": false,
+        "description": "Filenames to try it on (default 50).",
+        "minimum": 1,
+        "maximum": 200
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_generate_display_name_script",
+    "group": "workspace_operations",
+    "title": "Draft a readable-name script",
+    "description": "Draft a rule script from a plain-language instruction, e.g. \"drop the number in front of the name and the date at the end\", using the workspace's own filenames as examples. Saves nothing: show the draft to the user, try it with talonic_documents_preview_display_name_rule, then save it with talonic_documents_set_display_name_rule. Admin only.\nRETURNS: { lua_script, explanation, sample_filenames[] }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "instruction",
+        "type": "string",
+        "required": true,
+        "description": "The rule in the user's own words."
+      },
+      {
+        "name": "sample_size",
+        "type": "integer",
+        "required": false,
+        "description": "Filenames to draw examples from (default 40).",
+        "minimum": 1,
+        "maximum": 200
+      }
+    ]
+  },
+  {
+    "name": "talonic_documents_display_name_coverage",
+    "group": "workspace_operations",
+    "title": "Readable-name coverage",
+    "description": "How many documents carry a readable name, how many differ from their filename, and a sample of documents still shown under their raw filename.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_documents_backfill_display_names",
+    "group": "workspace_operations",
+    "title": "Apply the readable-name rule to every document",
+    "description": "Apply the current readable-name rule to every existing document, overwriting the readable names they have. Runs in the background. Admin only; call only when the user asks.\nRETURNS: { scanned, enqueued }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_collections_list",
+    "group": "workspace_operations",
+    "title": "Collections",
+    "description": "The workspace's collections. `view`: `all` (default) lists every collection with its rule, document and assignment counts; `mine` the collections assigned to the key's person; `counts` the number of visible documents per collection.\nStart here; use the id with the other talonic_collections_* tools. Accounts are collections with kind `account`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "view",
+        "type": "\"all\" | \"mine\" | \"counts\"",
+        "required": false,
+        "description": "all (default), mine or counts.",
+        "enum": [
+          "all",
+          "mine",
+          "counts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_create",
+    "group": "workspace_operations",
+    "title": "Create a collection",
+    "description": "Create a collection (or, with kind `account`, an account). It starts empty: fill it with talonic_collections_add_rule or talonic_collections_add_documents. Admin only. 409 when the name is taken.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "Name, up to 200 characters."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false,
+        "description": "What the collection holds."
+      },
+      {
+        "name": "kind",
+        "type": "\"collection\" | \"account\"",
+        "required": false,
+        "description": "`account` makes it an account (one company; a document belongs to one account).",
+        "enum": [
+          "collection",
+          "account"
+        ]
+      },
+      {
+        "name": "aliases",
+        "type": "string[]",
+        "required": false,
+        "description": "Other names the account goes by."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_preview",
+    "group": "workspace_operations",
+    "title": "Preview a collection's documents",
+    "description": "A sample of the documents the collection holds under its current rules and hand-added documents, limited to what the key's person can see. Admin only, as in the web app.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_update",
+    "group": "workspace_operations",
+    "title": "Change a collection",
+    "description": "Rename or describe a collection, or change its kind or aliases. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "Name, up to 200 characters."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false,
+        "description": "What the collection holds."
+      },
+      {
+        "name": "kind",
+        "type": "\"collection\" | \"account\"",
+        "required": false,
+        "description": "`account` makes it an account (one company; a document belongs to one account).",
+        "enum": [
+          "collection",
+          "account"
+        ]
+      },
+      {
+        "name": "aliases",
+        "type": "string[]",
+        "required": false,
+        "description": "Other names the account goes by."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_delete",
+    "group": "workspace_operations",
+    "title": "Delete a collection",
+    "description": "Delete a collection with its rules, hand-added documents and assignments. The documents themselves stay. People assigned to it with mode `enforced` lose the view it gave them. Cannot be undone: call only when the user asked to delete this collection by name. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_rules",
+    "group": "workspace_operations",
+    "title": "Rules of a collection",
+    "description": "The rules that fill a collection: each names a `rule_type` and a `rule_value`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_add_rule",
+    "group": "workspace_operations",
+    "title": "Add a rule to a collection",
+    "description": "Add a rule: every document of a source (`source_connection`, value = the source id), a document type (`document_type`, value = the type id) or a case (`case`, value = the case id) joins the collection, including documents that arrive later. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "rule_type",
+        "type": "\"source_connection\" | \"document_type\" | \"case\"",
+        "required": true,
+        "description": "What the rule matches: a source, a document type or a case.",
+        "enum": [
+          "source_connection",
+          "document_type",
+          "case"
+        ]
+      },
+      {
+        "name": "rule_value",
+        "type": "string",
+        "required": true,
+        "description": "The id of the source, document type or case."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_remove_rule",
+    "group": "workspace_operations",
+    "title": "Remove a rule from a collection",
+    "description": "Remove one rule; the documents it brought in leave the collection unless another rule or a hand-add keeps them. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "rule_id",
+        "type": "string",
+        "required": true,
+        "description": "The rule, from talonic_collections_rules."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_documents",
+    "group": "workspace_operations",
+    "title": "Hand-added documents of a collection",
+    "description": "The documents added to a collection by hand (not those its rules bring in), limited to what the key's person can see. For everything the collection holds, use talonic_collections_preview.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_add_documents",
+    "group": "workspace_operations",
+    "title": "Add documents to a collection",
+    "description": "Add documents to a collection by hand. Every id must be a document the key's person can see (404 otherwise, nothing added). Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "Documents to add."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_remove_document",
+    "group": "workspace_operations",
+    "title": "Take a document out of a collection",
+    "description": "Take one hand-added document out of a collection. A rule of the collection may still include it. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The document, from talonic_collections_documents."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_assignments",
+    "group": "workspace_operations",
+    "title": "Who a collection is assigned to",
+    "description": "The people and groups a collection is assigned to, each with its mode (`enforced` or `default`).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_assign",
+    "group": "workspace_operations",
+    "title": "Assign a collection",
+    "description": "Assign a collection to a person (`user`) or a `group`. Mode `enforced` limits what they see to the collection's documents; `default` only preselects it for them. `enforced` changes what someone can see: call only when the user asked. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "principal_type",
+        "type": "\"user\" | \"group\"",
+        "required": true,
+        "description": "A person or a group.",
+        "enum": [
+          "user",
+          "group"
+        ]
+      },
+      {
+        "name": "principal_id",
+        "type": "string",
+        "required": true,
+        "description": "The person's user id or the group id."
+      },
+      {
+        "name": "mode",
+        "type": "\"enforced\" | \"default\"",
+        "required": true,
+        "description": "enforced: they see only the collection; default: preselected for them.",
+        "enum": [
+          "enforced",
+          "default"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_collections_unassign",
+    "group": "workspace_operations",
+    "title": "Remove a collection assignment",
+    "description": "Remove one assignment. A person who was limited to the collection (mode `enforced`) sees their usual documents again. Admin only.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "collection_id",
+        "type": "string",
+        "required": true,
+        "description": "The collection, from talonic_collections_list."
+      },
+      {
+        "name": "assignment_id",
+        "type": "string",
+        "required": true,
+        "description": "The assignment, from talonic_collections_assignments."
+      }
+    ]
+  },
+  {
+    "name": "talonic_saved_filters_list",
+    "group": "workspace_operations",
+    "title": "Saved filters",
+    "description": "The workspace's saved filter presets, newest first: name, conditions, search text, sort and source. Narrow to one source with `source_id`.\nRun a preset's conditions with talonic_filter.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "source_id",
+        "type": "string",
+        "required": false,
+        "description": "Only presets of this source."
+      }
+    ]
+  },
+  {
+    "name": "talonic_saved_filters_create",
+    "group": "workspace_operations",
+    "title": "Save a filter",
+    "description": "Save a filter preset for the key's person, so it appears in their filter picker in the web app. `conditions` take the same shape as talonic_filter's conditions.\nRETURNS: { id, name, conditions, search, sort, source_connection_id, created_at, updated_at }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "Name in the picker."
+      },
+      {
+        "name": "conditions",
+        "type": "object[]",
+        "required": false,
+        "description": "Filter conditions, as talonic_filter takes them."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Free-text search kept with the filter."
+      },
+      {
+        "name": "sort",
+        "type": "object",
+        "required": false,
+        "description": "Sort kept with the filter."
+      },
+      {
+        "name": "source_connection_id",
+        "type": "string",
+        "required": false,
+        "description": "Narrow the filter to one source."
+      }
+    ]
+  },
+  {
+    "name": "talonic_saved_filters_delete",
+    "group": "workspace_operations",
+    "title": "Delete a saved filter",
+    "description": "Delete one of the key's person's own saved filters (404 for anyone else's). Cannot be undone.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "filter_id",
+        "type": "string",
+        "required": true,
+        "description": "The preset, from talonic_saved_filters_list."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_list",
+    "group": "workspace_operations",
+    "title": "Document types",
+    "description": "The workspace's document types with how many documents each has, most used first. USE WHEN: finding a type id for talonic_document_types_resolve_pending, talonic_document_types_update or a collection rule.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_document_types_create",
+    "group": "workspace_operations",
+    "title": "Create a document type",
+    "description": "Create a document type for the workspace.\nRETURNS: { id, name, document_count, … }.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "The type's name."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false,
+        "description": "What documents of this type are."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_update",
+    "group": "workspace_operations",
+    "title": "Change a document type",
+    "description": "Rename a document type or change its description.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "type_id",
+        "type": "string",
+        "required": true,
+        "description": "The type, from talonic_document_types_list."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "The new name."
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false,
+        "description": "The new description."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_pending",
+    "group": "workspace_operations",
+    "title": "Proposed document types",
+    "description": "Document types proposed while new documents were sorted, waiting for a decision, with suggestions: create as is, merge similar proposals together, or merge into a close existing type. With `count_only: true`, only how many wait.\nDecide with talonic_document_types_resolve_pending, _resolve_pending_batch, _merge_pending, _auto_resolve or _dismiss_pending.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "count_only",
+        "type": "boolean",
+        "required": false,
+        "description": "true: answer only { count }."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_resolve_pending",
+    "group": "workspace_operations",
+    "title": "Decide one proposed document type",
+    "description": "Settle one proposal: `create` makes the proposed type, `merge` folds it into `merge_into_type_id`. Its documents move with it.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "proposal_id",
+        "type": "string",
+        "required": true,
+        "description": "The proposal, from talonic_document_types_pending."
+      },
+      {
+        "name": "action",
+        "type": "\"create\" | \"merge\"",
+        "required": true,
+        "description": "create the proposed type, or merge it into an existing one.",
+        "enum": [
+          "create",
+          "merge"
+        ]
+      },
+      {
+        "name": "merge_into_type_id",
+        "type": "string",
+        "required": false,
+        "description": "With merge: the existing type."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_resolve_pending_batch",
+    "group": "workspace_operations",
+    "title": "Decide many proposed document types",
+    "description": "Settle up to 200 proposals in one call, each with `create` or `merge`. Answers a result per item.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "items",
+        "type": "object[]",
+        "required": true,
+        "description": "One decision per proposal, 1 to 200."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_merge_pending",
+    "group": "workspace_operations",
+    "title": "Merge proposed document types into one",
+    "description": "Merge several proposals into one new type named `chosen_name`; their documents move to it.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pending_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "The proposals to merge."
+      },
+      {
+        "name": "chosen_name",
+        "type": "string",
+        "required": true,
+        "description": "The new type's name."
+      }
+    ]
+  },
+  {
+    "name": "talonic_document_types_auto_resolve",
+    "group": "workspace_operations",
+    "title": "Settle every proposed document type",
+    "description": "Settle every waiting proposal automatically: each is matched to Talonic's standard type list and merged where a matching type exists; the rest are created. Call only when the user wants all of them settled without reviewing each.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_document_types_dismiss_pending",
+    "group": "workspace_operations",
+    "title": "Dismiss a proposed document type",
+    "description": "Dismiss one proposal without creating a type.\nA 403 names its reason (insufficient_scope, insufficient_role, no_person, person_inactive, workspace_read_only): the key's person must be allowed the same action in the Talonic web app, and an OAuth connection must have granted the scope. Tell the user; do not retry.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "proposal_id",
+        "type": "string",
+        "required": true,
+        "description": "The proposal, from talonic_document_types_pending."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_list",
+    "group": "review",
+    "title": "List review items",
+    "description": "The review queue: values held for a human decision before they count, newest first, each with its current value, confidence and why it is held.\nUSE WHEN: finding review work or checking what is left. To take items for yourself use talonic_review_claim.\nNOT FOR: one item's evidence (talonic_review_inspect).\nARGS: pipeline_id?, trigger? (gate | declarative), status? (blocked | pending_review), limit?, cursor? (next_cursor of the previous page). Needs the reviews:read (or read) scope.\nRETURNS: { data[]: { pipeline_document_id, field_key, status, reason, current_value, confidence, document, pipeline }, pagination { total, has_more, next_cursor } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": false,
+        "description": "Only items of this run."
+      },
+      {
+        "name": "trigger",
+        "type": "\"gate\" | \"declarative\"",
+        "required": false,
+        "enum": [
+          "gate",
+          "declarative"
+        ]
+      },
+      {
+        "name": "status",
+        "type": "\"blocked\" | \"pending_review\"",
+        "required": false,
+        "enum": [
+          "blocked",
+          "pending_review"
+        ]
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 100
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_claim",
+    "group": "review",
+    "title": "Claim review items",
+    "description": "Claim the next review items for the person behind the credential, in queue order under the filters. Concurrent reviewers and agents get different items; items freshly held by someone else are skipped (held_by_others).\nUSE WHEN: starting review work. Keep the claim with talonic_review_claims (touch) while working; release what you will not decide.\nNOT FOR: browsing without claiming (talonic_review_list).\nARGS: pipeline_id?, field_key?, reason?, batch_size? (1-200), start_key? (\"<pipeline_document_id>:<field_key>\"), idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Pass idempotency_key to make a retry return the same batch.\nRETURNS: { claimed_by, items[], total, held_by_others }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false,
+        "description": "Only items of this review reason, as talonic_review_list shows it."
+      },
+      {
+        "name": "batch_size",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 200
+      },
+      {
+        "name": "start_key",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_claims",
+    "group": "review",
+    "title": "Keep or release review claims",
+    "description": "Keep the listed claims alive (touch) or hand them back to the queue (release). Only claims of the person behind the credential change; safe to repeat.\nUSE WHEN: working a batch for more than a few minutes (touch), or done with items you will not decide (release).\nARGS: action (touch | release), items[] { pipeline_document_id, field_key }. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace.\nRETURNS: { ok, action, items }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "action",
+        "type": "\"touch\" | \"release\"",
+        "required": true,
+        "enum": [
+          "touch",
+          "release"
+        ]
+      },
+      {
+        "name": "items",
+        "type": "object[]",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_assign",
+    "group": "review",
+    "title": "Claim or release one review item",
+    "description": "Claim (assign: true) or release (assign: false) one review item for the person behind the credential. An item freshly held by someone else answers a conflict.\nUSE WHEN: taking one specific item. For a batch use talonic_review_claim.\nARGS: pipeline_document_id, field_key, assign. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace.\nRETURNS: { assigned, assigned_to }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true,
+        "description": "The field_key of the review item."
+      },
+      {
+        "name": "assign",
+        "type": "boolean",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_inspect",
+    "group": "review",
+    "title": "Inspect a review item",
+    "description": "The evidence behind a held value: the value, its history, check results, prior decisions and the source passages it came from with their document and page. The cited page itself is at GET /v1/documents/{id}/file.\nUSE WHEN: before deciding an item. Quote a passage from the cited document as evidence_quote in talonic_review_resolve.\nNOT FOR: the whole document's comparison with reference values (talonic_review_reference_view).\nARGS: pipeline_document_id, field_key. Needs the reviews:read (or read) scope.\nRETURNS: the reviewer detail (item, field, history, verdicts, source spans, prior decisions).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true,
+        "description": "The field_key of the review item."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_reference_view",
+    "group": "review",
+    "title": "Compare a document with its reference values",
+    "description": "Every field of one document in a run beside its reference value (reference table, a check's expected value, or the matched master record); status none when there is no reference.\nUSE WHEN: deciding several fields of one document against known values.\nARGS: pipeline_document_id. Needs the reviews:read (or read) scope.\nRETURNS: { status, source, tableName, key, fields[], extras[] }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_resolve",
+    "group": "review",
+    "title": "Resolve a review item",
+    "description": "Decide a held value: approve keeps it, correct or override promotes corrected_value, accept_proposal promotes a proposed correction. The field then continues its processing; the decision is logged.\nUSE WHEN: you inspected the item and know the right value. Give evidence_quote (verbatim text from the cited document) with document_id when correcting.\nNOT FOR: a field that is not in review (talonic_review_propose_correction); a field you may not decide (talonic_review_recommend).\nARGS: pipeline_document_id, field_key, action, corrected_value?, reason?, clear_value?, evidence_quote?, document_id?, reopen? (revise an earlier decision), idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the field's new state.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true,
+        "description": "The field_key of the review item."
+      },
+      {
+        "name": "action",
+        "type": "\"approve\" | \"correct\" | \"override\" | \"accept_proposal\"",
+        "required": true,
+        "enum": [
+          "approve",
+          "correct",
+          "override",
+          "accept_proposal"
+        ]
+      },
+      {
+        "name": "corrected_value",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "clear_value",
+        "type": "boolean",
+        "required": false,
+        "description": "With correct: clear the field instead."
+      },
+      {
+        "name": "evidence_quote",
+        "type": "string",
+        "required": false,
+        "description": "Verbatim passage from document_id supporting the value."
+      },
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": false,
+        "description": "The workspace document the evidence_quote is from."
+      },
+      {
+        "name": "reopen",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_propose_correction",
+    "group": "review",
+    "title": "Propose a correction",
+    "description": "Propose a new value for a field that is NOT in review: it re-opens for a reviewer with your proposal attached. The value changes only when someone resolves it.\nUSE WHEN: you found a wrong value in finished output.\nNOT FOR: items already held for review (talonic_review_resolve).\nARGS: pipeline_document_id, field_key, proposed_value (or clear: true), reason, evidence_quote?, idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: { reopened, ... }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true,
+        "description": "The field_key of the review item."
+      },
+      {
+        "name": "proposed_value",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "clear",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "evidence_quote",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_recommend",
+    "group": "review",
+    "title": "Recommend a decision",
+    "description": "Leave a recommendation on an item the person behind the credential may not decide (a field marked complex), for a reviewer who can. The value does not change.\nUSE WHEN: talonic_review_resolve was refused for a complex field.\nARGS: pipeline_document_id, field_key, recommended_action (approve | correct), corrected_value?, reason, idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the recommendation.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_document_id",
+        "type": "string",
+        "required": true,
+        "description": "The pipeline_document_id of a review item (from talonic_review_list or talonic_review_claim)."
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true,
+        "description": "The field_key of the review item."
+      },
+      {
+        "name": "recommended_action",
+        "type": "\"approve\" | \"correct\"",
+        "required": true,
+        "enum": [
+          "approve",
+          "correct"
+        ]
+      },
+      {
+        "name": "corrected_value",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_decisions",
+    "group": "review",
+    "title": "Review decision log",
+    "description": "Who decided what: prior and final value, action and reason per field. The receipt for resolved items.\nUSE WHEN: confirming a decision was recorded, or reporting review outcomes.\nARGS: pipeline_id? (omit for the whole workspace). Needs the reviews:read (or read) scope.\nRETURNS: the decision rows.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_metrics",
+    "group": "review",
+    "title": "Review progress for a run",
+    "description": "How far review of one run has come: fields that entered review, fields decided, and the approved / corrected / overridden mix.\nARGS: pipeline_id. Needs the reviews:read (or read) scope.\nRETURNS: { fieldsInReview, decided, decisions { approve, correct, override, total }, documents { total, duplicates } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pipeline_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_notes",
+    "group": "review",
+    "title": "Review notes on a field",
+    "description": "Reviewer guidance kept for everyone reviewing a field, newest first.\nUSE WHEN: before deciding items of a field, to follow the workspace's own rules.\nARGS: field_key. Needs the reviews:read (or read) scope.\nRETURNS: notes[] { id, fieldKey, body, author, createdAt }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_add_note",
+    "group": "review",
+    "title": "Add a review note",
+    "description": "Add guidance to a field for everyone reviewing it, written as the person behind the credential.\nUSE WHEN: the user asks to record how a field should be checked.\nARGS: field_key, body, idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the note.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "body",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_bulk_approve",
+    "group": "review",
+    "title": "Approve results in bulk",
+    "description": "Approve many results waiting for approval at once, as the person behind the credential. One result that cannot be approved never stops the rest.\nARGS: result_ids[], idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: { approved, failed }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "result_ids",
+        "type": "string[]",
+        "required": true
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_compare_sources",
+    "group": "review",
+    "title": "Compare sources for an approval",
+    "description": "Field by field, what each source said for an approval decision, with the supporting passage, to choose the value to keep.\nUSE WHEN: before talonic_review_choose_value.\nARGS: decision_id, validation_run_id?. Needs the reviews:read (or read) scope.\nRETURNS: { data[]: per-field source values }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "decision_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "validation_run_id",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_choose_value",
+    "group": "review",
+    "title": "Choose the value to keep",
+    "description": "Record the value to keep for one field of an approval decision, from a source (source_pick) or typed (free_text).\nARGS: decision_id, field_name, canonical_value, selection_method, source_values[] { source_label, value, source_text, document_id }, validation_run_id?, data_product_id?, idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the recorded selection.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "decision_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "field_name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "canonical_value",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "selection_method",
+        "type": "\"source_pick\" | \"free_text\"",
+        "required": true,
+        "enum": [
+          "source_pick",
+          "free_text"
+        ]
+      },
+      {
+        "name": "source_values",
+        "type": "object[]",
+        "required": true
+      },
+      {
+        "name": "validation_run_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_list_benchmarks",
+    "group": "review",
+    "title": "List benchmark runs",
+    "description": "Benchmark runs (comparisons against your own answers and run reviews), or with kind: checks the run-to-run comparisons and rule checks, newest first.\nUSE WHEN: finding a benchmark to read accuracy from.\nARGS: kind? (benchmarks | checks; default benchmarks). Needs the reviews:read (or read) scope.\nRETURNS: { data[]: runs with comparison_type }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "kind",
+        "type": "\"benchmarks\" | \"checks\"",
+        "required": false,
+        "enum": [
+          "benchmarks",
+          "checks"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_field_accuracy",
+    "group": "review",
+    "title": "Field accuracy in a benchmark",
+    "description": "Expected against extracted values of one field across a benchmark's documents: where the field is right and how it goes wrong.\nARGS: run_id, field_name. Needs the reviews:read (or read) scope.\nRETURNS: the field's expected/actual breakdown.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "field_name",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_decide_flags",
+    "group": "review",
+    "title": "Accept or reject flagged values",
+    "description": "Decide values a run review flagged: accepting applies the suggested value, rejecting keeps the original. One result, or many at once.\nUSE WHEN: after reading talonic_review_flag_progress and the run's results.\nARGS: run_id, and either result_id + decision (accepted | rejected) or decisions[] { result_id, decision }, idempotency_key?. Needs the reviews:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the decision outcome.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "result_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "decision",
+        "type": "\"accepted\" | \"rejected\"",
+        "required": false,
+        "enum": [
+          "accepted",
+          "rejected"
+        ]
+      },
+      {
+        "name": "decisions",
+        "type": "object[]",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_review_flag_progress",
+    "group": "review",
+    "title": "Run review progress",
+    "description": "Progress of a run review: how many values were checked and how many are flagged.\nARGS: run_id. Needs the reviews:read (or read) scope.\nRETURNS: the progress counts.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_list",
+    "group": "cases",
+    "title": "List cases",
+    "description": "The workspace's cases: documents grouped by the references they make to each other. Open cases by default; resolved: true for resolved ones.\nUSE WHEN: finding a case to work on.\nNOT FOR: one case's documents and links (talonic_cases_get).\nARGS: resolved?, limit? (1-200), offset?. Needs the cases:read (or read) scope.\nRETURNS: one page of cases with total and summary.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "resolved",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 200
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_get",
+    "group": "cases",
+    "title": "Get a case",
+    "description": "One case: its documents, the links between them with the quoted passage for each, its name, whether it is resolved, and the documents it references but lacks.\nUSE WHEN: reading a case and its evidence before changing it.\nARGS: case_key. Needs the cases:read (or read) scope.\nRETURNS: the case.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "case_key",
+        "type": "string",
+        "required": true,
+        "description": "The case id (case_key from talonic_cases_list)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_update",
+    "group": "cases",
+    "title": "Rename or resolve a case",
+    "description": "Rename a case, mark it resolved, or reopen it.\nARGS: case_key, display_name?, resolved?, idempotency_key?. Needs the cases:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the updated case.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "case_key",
+        "type": "string",
+        "required": true,
+        "description": "The case id (case_key from talonic_cases_list)."
+      },
+      {
+        "name": "display_name",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "resolved",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_narrate",
+    "group": "cases",
+    "title": "Tell a case's story",
+    "description": "The case's title and a short narrative of what happened, in a language. The stored text is returned unless the case changed since.\nUSE WHEN: summarising a case for the user, or after its documents or links changed.\nARGS: case_key, lang? (e.g. en, de), idempotency_key?. Needs the cases:write scope; the person behind the credential needs the edit permission in the workspace.\nRETURNS: { title, narrative, ... }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "case_key",
+        "type": "string",
+        "required": true,
+        "description": "The case id (case_key from talonic_cases_list)."
+      },
+      {
+        "name": "lang",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_references_to_review",
+    "group": "cases",
+    "title": "References to decide",
+    "description": "References that match more than one document, each with its candidate documents, waiting for a person to decide.\nUSE WHEN: linking documents correctly; decide each with talonic_cases_resolve_reference or _reject_reference.\nARGS: limit?, offset?. Needs the cases:read (or read) scope.\nRETURNS: one page of references with candidates.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 200
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_resolve_reference",
+    "group": "cases",
+    "title": "Decide a reference",
+    "description": "Decide which document a reference points to. The decision is kept from then on and links the two documents into one case.\nARGS: reference_id, document_id, idempotency_key?. Needs the cases:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the decided reference.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "reference_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_reject_reference",
+    "group": "cases",
+    "title": "Reject a reference",
+    "description": "Reject a reference as not a real link between documents.\nARGS: reference_id, idempotency_key?. Needs the cases:write scope; the person behind the credential needs the edit permission in the workspace. Safe to retry: repeating the same call returns the first result and never applies it twice (pass idempotency_key to choose the key).\nRETURNS: the rejected reference.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "reference_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_missing_documents",
+    "group": "cases",
+    "title": "Referenced documents not uploaded",
+    "description": "Documents your documents reference that were never uploaded, grouped by reference.\nUSE WHEN: telling the user what to upload to complete their cases.\nARGS: none. Needs the cases:read (or read) scope.\nRETURNS: the missing-document report.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_cases_document_neighbors",
+    "group": "cases",
+    "title": "Documents connected to a document",
+    "description": "Documents one step from a document, with the field and value that connects them.\nARGS: document_id. Needs the cases:read (or read) scope.\nRETURNS: the neighbouring documents with the connecting field and value.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_cases_list_templates",
+    "group": "cases",
+    "title": "List case templates",
+    "description": "Case templates: the document types a complete case of each kind holds.\nARGS: none. Needs the cases:read (or read) scope.\nRETURNS: the templates.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_cases_save_template",
+    "group": "cases",
+    "title": "Create or change a case template",
+    "description": "Create a case template (no template_id) or change one (with template_id). Admins only: the person behind the credential needs the workspace permission.\nUSE WHEN: the user asks to define what a complete case contains.\nARGS: template_id?, name (required to create), description?, expected_document_types[] { doc_type_name, doc_type_id?, required? } (required to create), link_key_requirements[]?, match_threshold? (0-1, change only), idempotency_key?. Needs the cases:write scope.\nRETURNS: the template.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "template_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "expected_document_types",
+        "type": "object[]",
+        "required": false
+      },
+      {
+        "name": "link_key_requirements",
+        "type": "object[]",
+        "required": false
+      },
+      {
+        "name": "match_threshold",
+        "type": "number",
+        "required": false,
+        "minimum": 0,
+        "maximum": 1
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Optional Idempotency-Key; a retry with the same key returns the first result."
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_update_definition",
+    "group": "data_products",
+    "title": "Change a data product definition",
+    "description": "Replace the definition of a shared data product (the keyed dataset several runs contribute to: identity, roles, readiness rules). USE WHEN the user wants to change what a shared product holds. Send the full `definition` and `expected_definition_version` (the version you read): if anyone saved in between, the answer is 409 `revision_conflict`; read again and redo the change instead of overwriting. Needs `products:write`. NOT FOR: adding or removing a run (talonic_data_product_add_run / talonic_data_product_remove_run).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "definition",
+        "type": "object",
+        "required": true,
+        "description": "The full definition: identity, roles and readiness rules"
+      },
+      {
+        "name": "expected_definition_version",
+        "type": "integer",
+        "required": false,
+        "description": "The definition_version you edited",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_runs",
+    "group": "data_products",
+    "title": "Data product runs",
+    "description": "List the runs a run-backed data product reads its rows from, with their progress (documents total, completed, failed). USE WHEN the user asks which runs feed a product or whether they have finished. Needs `products:read`. NOT FOR: the fields where those runs disagree (talonic_data_product_disagreements).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_add_run",
+    "group": "data_products",
+    "title": "Add a run to a data product",
+    "description": "Link one more run (a structuring run or a resolution run of the workspace) to a run-backed data product; its rows appear in the product on the next read. Idempotent. USE WHEN the user wants another run's rows in the product. Needs `products:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: removing a run (talonic_data_product_remove_run).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true,
+        "description": "The structuring run or resolution run to add"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_remove_run",
+    "group": "data_products",
+    "title": "Remove a run from a data product",
+    "description": "Unlink a run from a data product; its rows leave the product on the next read. USE WHEN the user wants a run's rows out of the product. Confirm with the user first. Needs `products:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: listing the runs (talonic_data_product_runs).",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "run_id",
+        "type": "string",
+        "required": true,
+        "description": "The run to remove (from talonic_data_product_runs)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_disagreements",
+    "group": "data_products",
+    "title": "Fields where runs disagree",
+    "description": "For a product built to compare runs: every field where the runs produced different values, grouped by document, with each run's value, confidence and the decision taken so far, plus totals pending and reviewed. Documents the caller may not see are left out. USE WHEN the user wants to review where runs disagree. Needs `products:read`. NOT FOR: recording a decision (talonic_data_product_resolve_field).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_resolve_field",
+    "group": "data_products",
+    "title": "Decide a disagreeing field",
+    "description": "Record the value to keep for one field of one document where the runs disagree, how it was chosen (`selection_method`, for example `run` or `manual`) and the candidates seen (`source_values`, one per run). Recorded for the caller; deciding again replaces the earlier decision. USE WHEN the user picked a value, or accepted a suggestion. Needs `products:write`. NOT FOR: deciding every field only one run filled (talonic_data_product_resolve_singles).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The document the field belongs to"
+      },
+      {
+        "name": "field_name",
+        "type": "string",
+        "required": true,
+        "description": "The field to decide"
+      },
+      {
+        "name": "canonical_value",
+        "type": "string",
+        "required": true,
+        "description": "The value to keep"
+      },
+      {
+        "name": "selection_method",
+        "type": "string",
+        "required": true,
+        "description": "How the value was chosen, for example `run` or `manual`"
+      },
+      {
+        "name": "source_values",
+        "type": "object[]",
+        "required": true,
+        "description": "The candidates seen, one per run"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_suggest_resolutions",
+    "group": "data_products",
+    "title": "Suggest values for disagreeing fields",
+    "description": "Read each document behind a disagreeing field and suggest the value to keep, with a confidence (0-1) and a short reason, as document_id → field_name → suggestion. Writes nothing; can take up to a minute on a large product. USE WHEN the user wants help deciding many disagreements; show the suggestions and apply the accepted ones with talonic_data_product_resolve_field. Needs `products:write`. NOT FOR: listing the disagreements (talonic_data_product_disagreements).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_resolve_singles",
+    "group": "data_products",
+    "title": "Decide fields only one run filled",
+    "description": "Decide every disagreeing field where exactly one run has a value and the others are empty, keeping that value; answers how many were decided. Recorded for the caller. USE WHEN the user wants the obvious cases cleared before reviewing the rest. Needs `products:write`. NOT FOR: fields where runs gave different non-empty values (talonic_data_product_resolve_field).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_issue_ids",
+    "group": "data_products",
+    "title": "Issue IDs for product rows",
+    "description": "Issue unique IDs into the product's rows by its ID rules, or by the `rules` you send (target_field, condition empty|always, source_field, format containing {value} and {seq:N}). Rows that already have an ID keep it. USE WHEN the user wants IDs filled in. Needs `products:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: re-issuing every ID (talonic_data_product_regenerate_ids).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "rules",
+        "type": "object[]",
+        "required": false,
+        "description": "ID rules to apply instead of the product's own"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_regenerate_ids",
+    "group": "data_products",
+    "title": "Re-issue every product ID",
+    "description": "Clear every issued ID of the product and issue them again from its rules. USE WHEN the user wants every ID issued afresh after changing the rules. IDs already delivered elsewhere are not recalled, so confirm with the user first. Needs `products:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: filling IDs only where missing (talonic_data_product_issue_ids).",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_generated_ids",
+    "group": "data_products",
+    "title": "Issued IDs",
+    "description": "List every ID issued for the product's rows. USE WHEN the user asks which IDs a product has issued. Needs `products:read`. NOT FOR: the counters the IDs are drawn from (talonic_data_product_sequence_counters).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_sequence_counters",
+    "group": "data_products",
+    "title": "Sequence counters",
+    "description": "List the counters the product's ID rules draw from, per target field and prefix, with their current value. USE WHEN the user asks where numbering stands. Needs `products:read`. NOT FOR: the IDs one counter issued (talonic_data_product_counter_ids).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_set_sequence_counter",
+    "group": "data_products",
+    "title": "Set a sequence counter",
+    "description": "Set a counter's high-water mark; the next ID issued is value + 1. USE WHEN the user wants numbering to continue from a given value. IDs already issued stay. Lowering the value can issue an ID again that was issued before, so confirm with the user. Needs `products:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: reading the counters (talonic_data_product_sequence_counters).",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "target_field",
+        "type": "string",
+        "required": true,
+        "description": "The field the IDs are written to"
+      },
+      {
+        "name": "prefix",
+        "type": "string",
+        "required": true,
+        "description": "The counter's prefix"
+      },
+      {
+        "name": "value",
+        "type": "integer",
+        "required": true,
+        "description": "The new high-water mark",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "scope",
+        "type": "\"product\" | \"cross\"",
+        "required": true,
+        "description": "`cross` for a counter shared across products",
+        "enum": [
+          "product",
+          "cross"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_product_counter_ids",
+    "group": "data_products",
+    "title": "IDs one counter issued",
+    "description": "List the IDs one counter issued, per document, newest first, paged with limit and offset. USE WHEN the user asks which documents got which number from a counter. Needs `products:read`. NOT FOR: every ID of the product (talonic_data_product_generated_ids).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": true,
+        "description": "The data product id (from GET /v1/data-products)"
+      },
+      {
+        "name": "target_field",
+        "type": "string",
+        "required": true,
+        "description": "The field the IDs are written to"
+      },
+      {
+        "name": "prefix",
+        "type": "string",
+        "required": true,
+        "description": "The counter's prefix"
+      },
+      {
+        "name": "scope",
+        "type": "\"product\" | \"cross\"",
+        "required": false,
+        "description": "Counter scope (default product)",
+        "enum": [
+          "product",
+          "cross"
+        ]
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Page size",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Rows to skip",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_policy_check",
+    "group": "data_policies",
+    "title": "Check a data policy",
+    "description": "Check a data policy's latest version and prepare it to run; answers `{id, status: \"compiled\", rule_count}`. A rule that does not check out is a 400 naming it. USE WHEN the user edited a policy and wants to know it is valid. Needs `specs:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: seeing what the policy does to a record (talonic_data_policy_preview).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_policy_id",
+        "type": "string",
+        "required": true,
+        "description": "The data policy id (from GET /v1/data-policies)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_policy_preview",
+    "group": "data_policies",
+    "title": "Preview a data policy",
+    "description": "Preview a data policy's latest version on one record set without writing anything: one sample record as the policy would leave it and how many records the set holds (`{ok, sample, total_records}`). A rule that fails on the record answers `ok: false` with the error. A 504 means the preview took over 5 seconds: retry. USE WHEN the user wants to see the effect before publishing. Needs `specs:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: applying it to a whole run (talonic_data_policy_run).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_policy_id",
+        "type": "string",
+        "required": true,
+        "description": "The data policy id (from GET /v1/data-policies)"
+      },
+      {
+        "name": "record_set_id",
+        "type": "string",
+        "required": true,
+        "description": "The record set to preview on"
+      },
+      {
+        "name": "sample_record_id",
+        "type": "string",
+        "required": false,
+        "description": "The record to show; the first one when absent"
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_policy_publish",
+    "group": "data_policies",
+    "title": "Publish a data policy",
+    "description": "Publish a data policy's latest checked version and make it the one runs use. Send `expected_version` (the version you read): if the policy changed since, the answer is 409 `revision_conflict`; read again before retrying. A script rule with a syntax error is a 400 `POLICY_SCRIPT_SYNTAX_ERROR` naming the line. USE WHEN the user wants runs to use the current version. Confirm with the user first. Needs `specs:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: checking without publishing (talonic_data_policy_check).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_policy_id",
+        "type": "string",
+        "required": true,
+        "description": "The data policy id (from GET /v1/data-policies)"
+      },
+      {
+        "name": "expected_version",
+        "type": "integer",
+        "required": false,
+        "description": "The version you read",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_data_policy_run",
+    "group": "data_policies",
+    "title": "Run a data policy",
+    "description": "Apply a data policy's published version to a completed structuring run and start it; answers 202 with the new run. Follow it on GET /v1/resolutions/{id} and read its rows on GET /v1/resolutions/{id}/results. 409 `not_published` when the policy has no published version (publish it first). USE WHEN the user wants a run's values normalised by the policy. Needs `runs:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: a preview on one record (talonic_data_policy_preview).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_policy_id",
+        "type": "string",
+        "required": true,
+        "description": "The data policy id (from GET /v1/data-policies)"
+      },
+      {
+        "name": "source_run_id",
+        "type": "string",
+        "required": true,
+        "description": "The completed structuring run to apply the policy to"
+      },
+      {
+        "name": "user_schema_id",
+        "type": "string",
+        "required": false,
+        "description": "Write against another schema than the source run's"
+      }
+    ]
+  },
+  {
+    "name": "talonic_catalog_list",
+    "group": "workspace_data",
+    "title": "Workspace data catalog",
+    "description": "List every data set shared in the workspace: its fields with their meaning, row count and when it was last updated. `available: false` means the data set is being brought up to date; `partial: true` means it holds only its first rows. USE WHEN the user asks what data the workspace has, or before reading rows. Needs `records:read`. NOT FOR: the rows themselves (talonic_catalog_rows).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_catalog_get",
+    "group": "workspace_data",
+    "title": "One data set",
+    "description": "One data set of the workspace catalog by name: fields, row count, status, last update. USE WHEN the user names a data set. Needs `records:read`. NOT FOR: listing every data set (talonic_catalog_list) or reading its rows (talonic_catalog_rows).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "The data set name, as talonic_catalog_list lists it"
+      }
+    ]
+  },
+  {
+    "name": "talonic_catalog_rows",
+    "group": "workspace_data",
+    "title": "Rows of a data set",
+    "description": "Read rows of one data set, each with the documents it came from. Narrow with `where`, an object of field → value (or array of values, any of). Pages with `limit` (1-500, default 100) and `offset`; `pagination.has_more` says whether more remain. Rows built from a document the caller may not see are left out and counted in `withheld`. USE WHEN the user wants records of a data set with their sources. Needs `records:read`. NOT FOR: the data set's fields (talonic_catalog_get).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "The data set name, as talonic_catalog_list lists it"
+      },
+      {
+        "name": "where",
+        "type": "object | string",
+        "required": false,
+        "description": "Field → value or array of values (an object, or the same as a JSON string)"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Page size (default 100)",
+        "minimum": 1,
+        "maximum": 500
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Rows to skip",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_questions",
+    "group": "workspace_data",
+    "title": "Questions about your data",
+    "description": "List the questions Talonic asks a person about the workspace's data (which field a column holds, whether two records are the same party, a changed format), open ones first, most important first. Each lists its options by `index`. USE WHEN the user wants to see or clear open questions. Needs `reviews:read`. NOT FOR: answering one (talonic_suggestion_answer).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "status",
+        "type": "\"open\" | \"answered\" | \"deferred\" | \"dismissed\"",
+        "required": false,
+        "description": "Filter by status",
+        "enum": [
+          "open",
+          "answered",
+          "deferred",
+          "dismissed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_answer",
+    "group": "workspace_data",
+    "title": "Answer a question",
+    "description": "Answer a question with one of its options (`option` is the option's `index`); the answer applies to every subject the question covers and is recorded for the caller. 409 when the question is no longer open. USE WHEN the user chose an option. Needs `reviews:write`; a workspace without suggestions answers 403 `feature_not_enabled`. NOT FOR: listing questions (talonic_suggestion_questions).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "question_id",
+        "type": "string",
+        "required": true,
+        "description": "The question id (from talonic_suggestion_questions)"
+      },
+      {
+        "name": "option",
+        "type": "integer",
+        "required": true,
+        "description": "The chosen option's index",
+        "minimum": 0,
+        "maximum": 20
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_mappings",
+    "group": "workspace_data",
+    "title": "Suggested field mappings",
+    "description": "List suggested fields for the columns of connected sources, with a confidence. `status=suggested` lists those awaiting a decision; filter by `source_id`, page with `limit` and `offset`. USE WHEN the user reviews how source columns map to fields. Needs `reviews:read`. NOT FOR: matches between tables (talonic_suggestion_links).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "status",
+        "type": "\"suggested\" | \"auto_applied\" | \"confirmed\" | \"rejected\"",
+        "required": false,
+        "description": "Filter by status",
+        "enum": [
+          "suggested",
+          "auto_applied",
+          "confirmed",
+          "rejected"
+        ]
+      },
+      {
+        "name": "source_id",
+        "type": "string",
+        "required": false,
+        "description": "Only one source"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Page size",
+        "minimum": 1,
+        "maximum": 1000
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Rows to skip",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_decide_mapping",
+    "group": "workspace_data",
+    "title": "Decide a suggested mapping",
+    "description": "Confirm or reject a suggested mapping, or retarget it to another field (`field_registry_id`, from talonic_list_fields) or to a proposed new field (`proposed` with canonical_name). Recorded for the caller. USE WHEN the user decided a mapping. Needs `reviews:write`; a workspace without suggestions answers 403 `feature_not_enabled`. NOT FOR: deciding a match between tables (talonic_suggestion_decide_link).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "mapping_id",
+        "type": "string",
+        "required": true,
+        "description": "The mapping id (from talonic_suggestion_mappings)"
+      },
+      {
+        "name": "action",
+        "type": "\"confirm\" | \"reject\" | \"retarget\"",
+        "required": true,
+        "enum": [
+          "confirm",
+          "reject",
+          "retarget"
+        ]
+      },
+      {
+        "name": "field_registry_id",
+        "type": "string",
+        "required": false,
+        "description": "retarget: the existing field to map to (from talonic_list_fields)"
+      },
+      {
+        "name": "proposed",
+        "type": "object",
+        "required": false,
+        "description": "retarget: a new field to map to"
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_links",
+    "group": "workspace_data",
+    "title": "Suggested matches between tables",
+    "description": "List suggested matches between a column of one table and a column of another (one refers to the other, or they share values), with how much they overlap. `status=suggested` lists those awaiting a decision; filter by `source_id`, page with `limit` and `offset`. USE WHEN the user reviews how tables relate. Needs `reviews:read`. NOT FOR: column-to-field mappings (talonic_suggestion_mappings).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "status",
+        "type": "\"suggested\" | \"confirmed\" | \"rejected\"",
+        "required": false,
+        "description": "Filter by status",
+        "enum": [
+          "suggested",
+          "confirmed",
+          "rejected"
+        ]
+      },
+      {
+        "name": "source_id",
+        "type": "string",
+        "required": false,
+        "description": "Only one source"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Page size",
+        "minimum": 1,
+        "maximum": 1000
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Rows to skip",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_suggestion_decide_link",
+    "group": "workspace_data",
+    "title": "Decide a suggested match",
+    "description": "Confirm or reject a suggested match between tables; recorded for the caller. USE WHEN the user decided a match. Needs `reviews:write`; a workspace without suggestions answers 403 `feature_not_enabled`. NOT FOR: deciding a field mapping (talonic_suggestion_decide_mapping).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "link_id",
+        "type": "string",
+        "required": true,
+        "description": "The match id (from talonic_suggestion_links)"
+      },
+      {
+        "name": "action",
+        "type": "\"confirm\" | \"reject\"",
+        "required": true,
+        "enum": [
+          "confirm",
+          "reject"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_schema_review_queue",
+    "group": "schema_review",
+    "title": "Schema changes awaiting review",
+    "description": "List the schema changes waiting for a decision (those that add, remove or retype fields in a way that can affect existing output), newest first. USE WHEN the user asks what schema changes need review. Needs `specs:read`. NOT FOR: deciding one (talonic_schema_review_approve / talonic_schema_review_reject).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_schema_review_approve",
+    "group": "schema_review",
+    "title": "Approve a schema change",
+    "description": "Approve a schema change from the review queue: it becomes the live version. The decision records who decided and when. Confirm with the user first. USE WHEN the user accepts a change. Needs `specs:write`. NOT FOR: discarding a change (talonic_schema_review_reject).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "diff_id",
+        "type": "string",
+        "required": true,
+        "description": "The schema change id (from talonic_schema_review_queue)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_schema_review_reject",
+    "group": "schema_review",
+    "title": "Reject a schema change",
+    "description": "Reject a schema change from the review queue and discard the proposed changes. The decision records who decided and when. Confirm with the user first. USE WHEN the user turns a change down. Needs `specs:write`. NOT FOR: accepting a change (talonic_schema_review_approve).",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "diff_id",
+        "type": "string",
+        "required": true,
+        "description": "The schema change id (from talonic_schema_review_queue)"
+      }
+    ]
+  },
+  {
+    "name": "talonic_link_key_set",
+    "group": "schema_review",
+    "title": "Set or remove a link key",
+    "description": "Make a field a link key of the workspace (documents that share its value are linked), or stop using it as one. USE WHEN the user wants documents connected by a shared value such as a customer number. `link_key_category` says what the value identifies: a party (identity), a business event (transaction) or a document reference. Turning one on with a category starts linking existing documents in the background (`backfill_triggered: true`); follow it on GET /v1/linking/backfill/progress. Needs `records:write` and an Admin of the workspace (else 403 `insufficient_role`). NOT FOR: reviewing schema changes (talonic_schema_review_queue).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "field_id",
+        "type": "string",
+        "required": true,
+        "description": "The field id (from talonic_list_fields)"
+      },
+      {
+        "name": "link_key",
+        "type": "boolean",
+        "required": true,
+        "description": "true to use the field as a link key, false to stop"
+      },
+      {
+        "name": "link_key_category",
+        "type": "\"identity\" | \"transaction\" | \"reference\"",
+        "required": false,
+        "description": "What the value identifies",
+        "enum": [
+          "identity",
+          "transaction",
+          "reference"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_list_members",
+    "group": "team_admin",
+    "title": "List workspace members",
+    "description": "Every member of the workspace with role and status (and permissions, when you may manage the team).\nUSE WHEN: answering who is in the workspace or finding a member's id before a change.\nRETURNS: members[] { user_id, email, name, role, status, permissions? }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_team_list_pending",
+    "group": "team_admin",
+    "title": "List people waiting to join",
+    "description": "People who asked to join the workspace and wait for approval.\nNEXT: talonic_team_approve_member or talonic_team_reject_member.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_team_approve_member",
+    "group": "team_admin",
+    "title": "Approve a person waiting to join",
+    "description": "Admits one person who asked to join. They get the role they asked for, never more than you hold.\nARGS: `user_id` from talonic_team_list_pending.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The waiting person's user id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_reject_member",
+    "group": "team_admin",
+    "title": "Decline a request to join",
+    "description": "Declines one request to join the workspace.\nARGS: `user_id` from talonic_team_list_pending.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The waiting person's user id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_invite_member",
+    "group": "team_admin",
+    "title": "Invite a member",
+    "description": "Invites a person by e-mail with a role. A role may hold only permissions you hold yourself.\nARGS: `email`, `role` owner|senior_member|member|viewer.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "The person's e-mail."
+      },
+      {
+        "name": "role",
+        "type": "\"owner\" | \"senior_member\" | \"member\" | \"viewer\" | \"none\"",
+        "required": true,
+        "description": "Their role in the workspace.",
+        "enum": [
+          "owner",
+          "senior_member",
+          "member",
+          "viewer",
+          "none"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_preview_access",
+    "group": "team_admin",
+    "title": "Show a member's current access",
+    "description": "What one member holds right now: role, permissions, custom role and groups. Changes nothing.\nUSE WHEN: before proposing an access change, or to answer what someone may do.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The member's user id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_list_roles",
+    "group": "team_admin",
+    "title": "List custom roles",
+    "description": "The roles this workspace defined itself, each with its base role and permissions.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_team_list_groups",
+    "group": "team_admin",
+    "title": "List member groups",
+    "description": "The workspace's groups of members.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_team_propose_access_change",
+    "group": "team_admin",
+    "title": "Propose an access change",
+    "description": "Shows exactly what a change would change (before and after) and stores it as a proposal. Changes no access; the proposal expires if not confirmed.\nUSE WHEN: a person asks to change someone's role, permissions or group membership. Show them the before and after, then confirm only on their go-ahead.\nARGS: `kind` set_permissions|reset_permissions|change_role|group_add|group_remove, `member` (e-mail or id), and `grant` / `revoke` (permissions), `role` or `group` as the kind needs.\nRETURNS: a proposal { id, summary, before, after } or a refusal with its reason (for example a change to your own access).\nNEXT: talonic_team_confirm_access_change or talonic_team_cancel_access_change.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "kind",
+        "type": "\"set_permissions\" | \"reset_permissions\" | \"change_role\" | \"group_add\" | \"group_remove\"",
+        "required": true,
+        "enum": [
+          "set_permissions",
+          "reset_permissions",
+          "change_role",
+          "group_add",
+          "group_remove"
+        ]
+      },
+      {
+        "name": "member",
+        "type": "string",
+        "required": true,
+        "description": "The member's e-mail or user id."
+      },
+      {
+        "name": "grant",
+        "type": "\"export\" | \"ingest\" | \"edit\" | \"review_complex\" | \"run\" | \"team\" | \"integrations\" | \"billing\" | \"data\" | \"workspace\" | \"process_view\" | \"process_build\" | \"process_publish\" | \"process_run\" | \"process_sign\" | \"process_govern\"[]",
+        "required": false,
+        "description": "Permissions to add (set_permissions).",
+        "enum": [
+          "export",
+          "ingest",
+          "edit",
+          "review_complex",
+          "run",
+          "team",
+          "integrations",
+          "billing",
+          "data",
+          "workspace",
+          "process_view",
+          "process_build",
+          "process_publish",
+          "process_run",
+          "process_sign",
+          "process_govern"
+        ]
+      },
+      {
+        "name": "revoke",
+        "type": "\"export\" | \"ingest\" | \"edit\" | \"review_complex\" | \"run\" | \"team\" | \"integrations\" | \"billing\" | \"data\" | \"workspace\" | \"process_view\" | \"process_build\" | \"process_publish\" | \"process_run\" | \"process_sign\" | \"process_govern\"[]",
+        "required": false,
+        "description": "Permissions to take away (set_permissions).",
+        "enum": [
+          "export",
+          "ingest",
+          "edit",
+          "review_complex",
+          "run",
+          "team",
+          "integrations",
+          "billing",
+          "data",
+          "workspace",
+          "process_view",
+          "process_build",
+          "process_publish",
+          "process_run",
+          "process_sign",
+          "process_govern"
+        ]
+      },
+      {
+        "name": "role",
+        "type": "\"owner\" | \"senior_member\" | \"member\" | \"viewer\" | \"none\"",
+        "required": false,
+        "description": "The new role (change_role).",
+        "enum": [
+          "owner",
+          "senior_member",
+          "member",
+          "viewer",
+          "none"
+        ]
+      },
+      {
+        "name": "group",
+        "type": "string",
+        "required": false,
+        "description": "Group name or id (group_add, group_remove)."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_confirm_access_change",
+    "group": "team_admin",
+    "title": "Confirm an access change",
+    "description": "Makes a proposed access change after checking it again against the current state and your permissions. Only the person who proposed it can confirm it; every outcome is recorded in the audit log.\nCall only after the person saw the proposal's before and after and agreed.\nARGS: `proposal_id` from talonic_team_propose_access_change.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "proposal_id",
+        "type": "string",
+        "required": true,
+        "description": "The proposal id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_cancel_access_change",
+    "group": "team_admin",
+    "title": "Cancel an access proposal",
+    "description": "Cancels one of your access proposals; nothing changes.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "proposal_id",
+        "type": "string",
+        "required": true,
+        "description": "The proposal id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_team_access_activity",
+    "group": "team_admin",
+    "title": "Recent access changes",
+    "description": "The latest access changes, confirmations and refusals recorded in this workspace.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_records_list_retention_policies",
+    "group": "records_admin",
+    "title": "List retention policies",
+    "description": "The workspace's retention policies: how long documents are kept and what happens when that time ends.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_records_create_retention_policy",
+    "group": "records_admin",
+    "title": "Create a retention policy",
+    "description": "Creates a retention policy. Expiry never destroys anything: a document whose retention ends waits for a person's disposition decision.\nARGS: `name`, `duration_days`, `event_trigger` ingest_date|document_date, `disposition_action` review_then_destroy|retain_indefinitely, optional `description`, `grace_period_days`.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "duration_days",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "event_trigger",
+        "type": "\"ingest_date\" | \"document_date\"",
+        "required": false,
+        "enum": [
+          "ingest_date",
+          "document_date"
+        ]
+      },
+      {
+        "name": "grace_period_days",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "disposition_action",
+        "type": "\"review_then_destroy\" | \"retain_indefinitely\"",
+        "required": false,
+        "enum": [
+          "review_then_destroy",
+          "retain_indefinitely"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_list_dispositions",
+    "group": "records_admin",
+    "title": "Documents waiting for a disposition decision",
+    "description": "Documents whose retention ended and that wait for a person's decision. This is the preview of what retention would destroy; nothing is destroyed until a person approves it in the web app.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "state",
+        "type": "string",
+        "required": false,
+        "description": "Default pending_disposition."
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_list_legal_holds",
+    "group": "records_admin",
+    "title": "List legal holds",
+    "description": "Legal holds and what they cover. Nothing an active hold covers can be deleted, disposed of or erased.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "status",
+        "type": "\"active\" | \"released\"",
+        "required": false,
+        "enum": [
+          "active",
+          "released"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_create_legal_hold",
+    "group": "records_admin",
+    "title": "Place a legal hold",
+    "description": "Places a legal hold on the whole workspace, one source, or a set of documents. From then on nothing it covers can be destroyed. Releasing a hold is done by a person in the web app.\nARGS: `name`, `scope_type` tenant|source_connection|document_set, `scope_source_connection_id` (source_connection), `document_ids` (document_set), optional `case_reference`, `custodian`, `reason`.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "scope_type",
+        "type": "\"tenant\" | \"source_connection\" | \"document_set\"",
+        "required": true,
+        "enum": [
+          "tenant",
+          "source_connection",
+          "document_set"
+        ]
+      },
+      {
+        "name": "scope_source_connection_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "case_reference",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "custodian",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_add_hold_documents",
+    "group": "records_admin",
+    "title": "Add documents to a legal hold",
+    "description": "Adds documents to a document-set legal hold.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "hold_id",
+        "type": "string",
+        "required": true,
+        "description": "The hold id."
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_list_audit_events",
+    "group": "records_admin",
+    "title": "Read the audit log",
+    "description": "Reads the tamper-evident audit log. An action taken through the API names the person as actor and the API key or app under context.via.\nARGS: optional `from`, `to` (ISO dates), `action`, `entity_type`, `entity_id`, `page`, `limit`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "from",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "to",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "action",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "entity_type",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "entity_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 500
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_verify_audit_log",
+    "group": "records_admin",
+    "title": "Verify the audit log",
+    "description": "Checks that no audit event was changed or removed and compares the log with its daily anchors.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_records_list_erasure_requests",
+    "group": "records_admin",
+    "title": "List erasure requests",
+    "description": "Data-subject erasure requests with their status.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_records_create_erasure_request",
+    "group": "records_admin",
+    "title": "Open an erasure request",
+    "description": "Opens an erasure request for a data subject and finds the documents and values that mention the given terms. Nothing is erased: a person confirms the scope, approves and executes it in the web app.\nARGS: `subject_label` (who), `subject_terms` (names, e-mails, ids to search for).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "subject_label",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "subject_terms",
+        "type": "string[]",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_get_erasure_request",
+    "group": "records_admin",
+    "title": "One erasure request",
+    "description": "One erasure request with where the subject was found and its confirmed scope.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "request_id",
+        "type": "string",
+        "required": true,
+        "description": "The erasure request id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_records_storage_usage",
+    "group": "records_admin",
+    "title": "Storage usage",
+    "description": "Bytes stored, the storage quota (null = unlimited) and the document count.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_workspace_billing",
+    "group": "workspace_admin",
+    "title": "Billing snapshot",
+    "description": "Plan, credit balance, auto-reload settings, whether the workspace may buy credits directly, and the credit packs. Needs the billing permission.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_workspace_buy_credits_link",
+    "group": "workspace_admin",
+    "title": "Link to buy credits",
+    "description": "A URL a person opens to buy prepaid credits. Nothing is paid until they complete the purchase. A workspace billed through a cloud marketplace gets the marketplace page instead.\nARGS: optional `pack` 10|50|250|1000 (default 50).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "pack",
+        "type": "\"10\" | \"50\" | \"250\" | \"1000\"",
+        "required": false,
+        "enum": [
+          "10",
+          "50",
+          "250",
+          "1000"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "talonic_workspace_billing_portal_link",
+    "group": "workspace_admin",
+    "title": "Link to the payment portal",
+    "description": "A one-time URL a person opens to manage payment methods and download invoices. Needs a first purchase.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_workspace_create_support_ticket",
+    "group": "workspace_admin",
+    "title": "Contact Talonic support",
+    "description": "Sends a request to Talonic support with your name, e-mail and workspace, and returns its reference to quote in follow-ups.\nARGS: `category` question|bug|account|billing|feature_request|other, `message` (up to 5000 characters).",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "category",
+        "type": "\"question\" | \"bug\" | \"account\" | \"billing\" | \"feature_request\" | \"other\"",
+        "required": true,
+        "enum": [
+          "question",
+          "bug",
+          "account",
+          "billing",
+          "feature_request",
+          "other"
+        ]
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_workspace_deletion_status",
+    "group": "workspace_admin",
+    "title": "Scheduled workspace deletion",
+    "description": "Whether this workspace is scheduled for deletion, and when. Scheduling a deletion is done by a person in the web app.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_workspace_cancel_deletion",
+    "group": "workspace_admin",
+    "title": "Cancel the scheduled workspace deletion",
+    "description": "Cancels a deletion this workspace scheduled and restores its previous access. Needs the data permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_thread_state",
+    "group": "thread",
+    "title": "Read the thread",
+    "description": "Read the person's thread: the last exchange and any card waiting for their decision, plus the cursor to read later events from.\nUSE WHEN: starting a session, or checking what is waiting before deciding.\nNOT FOR: new events after a cursor (talonic_thread_events); prepared drafts with what a decision must name (talonic_thread_list_drafts).\n\nARGS: none.\nRETURNS: { enabled, events[] { seq, actor, kind, body, meta }, cursor }. enabled false: the thread is not available to this person.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_thread_events",
+    "group": "thread",
+    "title": "Read thread events",
+    "description": "Read everything written to the person's thread after a cursor, oldest first: their messages, the answers, decision cards and status rows.\nUSE WHEN: an answer arrived after talonic_thread_send stopped waiting, or to follow the thread over time.\nNOT FOR: the first read of a session (talonic_thread_state).\n\nARGS: `after` (a cursor from talonic_thread_state or a previous call), `limit` (1-200, default 100).\nRETURNS: { events[], cursor, has_more }. Keep the cursor for the next call.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "after",
+        "type": "integer",
+        "required": false,
+        "description": "The cursor to read after.",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Most events to return (default 100).",
+        "minimum": 1,
+        "maximum": 200
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_send",
+    "group": "thread",
+    "title": "Send a thread message",
+    "description": "Send one message to the person's thread, as them, and wait up to `wait_seconds` for the answer. Uses the workspace agent budget.\nUSE WHEN: the person wants to ask Talonic something or hand it a task in their own conversation.\nNOT FOR: deciding a card (talonic_thread_decide_draft / talonic_thread_decide_approval); handing in files (talonic_thread_send_files).\n\nARGS: `text`, optional `tz` (IANA, e.g. Europe/Berlin), `reply_to` (a card event id this answers), `idempotency_key` (repeat it on a retry: the message is stored and answered once), `wait_seconds` (0-60, default 20).\nRETURNS: { event, replayed, answer[] (the answer's messages and cards so far), cursor, done }. done false: read the rest with talonic_thread_events from cursor.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": "The message."
+      },
+      {
+        "name": "tz",
+        "type": "string",
+        "required": false,
+        "description": "The person's IANA time zone."
+      },
+      {
+        "name": "reply_to",
+        "type": "string",
+        "required": false,
+        "description": "The card event this message answers."
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false,
+        "description": "Your retry token; the same key never sends twice."
+      },
+      {
+        "name": "wait_seconds",
+        "type": "integer",
+        "required": false,
+        "description": "How long to wait for the answer (default 20).",
+        "minimum": 0,
+        "maximum": 60
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_send_files",
+    "group": "thread",
+    "title": "Hand files to the thread",
+    "description": "Hand the person's thread up to five files with an optional message. Each file is kept as the person's own document, visible to nobody else, and the files are answered together like one message.\nUSE WHEN: the person gives Talonic a receipt, a contract or a photo to read or file.\nNOT FOR: adding documents to the workspace for everyone (talonic_extract).\n\nARGS: `files[]` { filename, content_base64 } (at most 25 MB each), optional `text`, `tz`, `idempotency_key`.\nRETURNS: { event, replayed }. Read the answer with talonic_thread_events after event.seq.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "files",
+        "type": "object[]",
+        "required": true,
+        "description": "The files, base64."
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "required": false,
+        "description": "Words sent with the files."
+      },
+      {
+        "name": "tz",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "idempotency_key",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_decide_approval",
+    "group": "thread",
+    "title": "Decide a held action",
+    "description": "Approve or decline an action the thread is holding for the person (an approval card without a draft). Decided once; a second decision is refused. Only on the person's explicit answer.\nUSE WHEN: the person said yes or no to a held action shown in the thread.\nNOT FOR: prepared drafts (emails, process starts, shares): talonic_thread_decide_draft.\n\nARGS: `approval_id` (meta.approvalId of the card), `approved`.\nRETURNS: { ok }. The outcome arrives as thread events.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": true,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "approval_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "approved",
+        "type": "boolean",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_list_drafts",
+    "group": "thread",
+    "title": "List prepared drafts",
+    "description": "List the drafts the thread prepared and is waiting for the person to approve: an email, a start of one of their processes, or sharing one of their documents. Each names what a decision must quote back.\nUSE WHEN: before talonic_thread_decide_draft, to show the person exactly what would happen.\nNOT FOR: held actions without a draft (talonic_thread_state shows them).\n\nARGS: none.\nRETURNS: { drafts[] { approval_id, draft_id, draft_version, payload_hash, kind message|process|share, shown } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_thread_decide_draft",
+    "group": "thread",
+    "title": "Approve or decline a draft",
+    "description": "Approve or decline one prepared draft, naming the version the person saw. Approving sends the email, starts the process or shares the document; only on the person's explicit answer to exactly what `shown` said. A repeat returns the first answer (replayed true); nothing happens twice.\nUSE WHEN: the person approved or declined a draft listed by talonic_thread_list_drafts.\nNOT FOR: guessing consent; if unsure, ask the person first.\n\nARGS: `approval_id`, `draft_id`, `draft_version`, `payload_hash` (all from the listed draft), `approved`.\nRETURNS: { outcome done|failed|uncertain|declined|stale|expired|running, line, replayed, current? }. stale: the draft changed; show `current` and ask again.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": true,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "approval_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "draft_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "draft_version",
+        "type": "integer",
+        "required": true,
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "payload_hash",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "approved",
+        "type": "boolean",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_list_sheets",
+    "group": "thread",
+    "title": "List screens",
+    "description": "List the person's screens: tasks over a set of records (contracts to renew, invoices to check) the thread opened for them. Open ones first.\nUSE WHEN: finding a screen to read or decide on.\nNOT FOR: one screen's records (talonic_thread_get_sheet).\n\nARGS: none.\nRETURNS: { sheets[] { id, title, status open|done, createdAt, updatedAt } }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_thread_get_sheet",
+    "group": "thread",
+    "title": "Read a screen",
+    "description": "Read one screen: its records as the person can read them now, the choices it offers, and what was written about each record (suggestion, reason, decision, version).\nUSE WHEN: before deciding records, or to report a screen's state.\nNOT FOR: the list (talonic_thread_list_sheets).\n\nARGS: `sheet_id`.\nRETURNS: the screen with rows[] and hidden (records the person cannot read, counted only).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "sheet_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_decide_sheet",
+    "group": "thread",
+    "title": "Decide a record on a screen",
+    "description": "Record, change or take back (decision null) the person's decision on one record of a screen, naming the record version they saw. Records a choice only; it carries nothing out.\nUSE WHEN: the person chose for a record shown by talonic_thread_get_sheet.\nNOT FOR: closing the screen (talonic_thread_close_sheet).\n\nARGS: `sheet_id`, `row_key`, `decision` (one of the screen's choices, or null), `expected_version`.\nRETURNS: { version }. A 409 means the record changed since: read it again.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "sheet_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "row_key",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "decision",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "expected_version",
+        "type": "integer",
+        "required": true,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_close_sheet",
+    "group": "thread",
+    "title": "Close a screen",
+    "description": "Mark one of the person's screens done. Its decisions are kept.\nUSE WHEN: the person finished a screen.\nNOT FOR: deciding records (talonic_thread_decide_sheet).\n\nARGS: `sheet_id`.\nRETURNS: { ok }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "sheet_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_thread_figure",
+    "group": "thread",
+    "title": "Check a stated figure",
+    "description": "Check one figure the thread stated: how it was counted, the records behind it, and whether anything changed since.\nUSE WHEN: the person asks where a number came from.\nNOT FOR: asking a new question (talonic_thread_send).\n\nARGS: `figure_id` (from the answer's meta), optional `offset` for the next page of records.\nRETURNS: the definition, rows and a changed flag.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "figure_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_agent_get_turn",
+    "group": "agent_turns",
+    "title": "Read an agent turn",
+    "description": "Read one of the person's agent turns: status (awaiting_confirmation while a step waits for their decision), events and result.\nUSE WHEN: before talonic_agent_confirm_turn, to show the person the step that waits.\nNOT FOR: answers of talonic_ask (talonic_get_answer).\n\nARGS: `turn_id`.\nRETURNS: { id, status, events[], result, userMessage }. Another person's turn is not found.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "turn_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_agent_confirm_turn",
+    "group": "agent_turns",
+    "title": "Confirm a paused agent step",
+    "description": "Run (confirmed true) or decline (false) the step one of the person's turns is waiting for. Only on the person's explicit answer. A repeat, or a turn not waiting, changes nothing.\nUSE WHEN: the person approved or declined the paused step shown by talonic_agent_get_turn.\nNOT FOR: drafts in the thread (talonic_thread_decide_draft); turns started by talonic_ask, which cannot be continued.\n\nARGS: `turn_id`, `confirmed`.\nRETURNS: { ok, id, status }.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": true,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "turn_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "confirmed",
+        "type": "boolean",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_agent_home_page",
+    "group": "agent_turns",
+    "title": "Read the home page",
+    "description": "Read the person's own home page in the workspace: its HTML, when it was built, and how many builds back it can be stepped.\nUSE WHEN: the person asks what their home page shows.\nNOT FOR: workspace data (talonic_search, talonic_ask).\n\nARGS: none.\nRETURNS: { html (null when none), builtAt, undo }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_my_data",
+    "group": "my_data",
+    "title": "Read my data and who sees it",
+    "description": "Read the person's own data: per source they connected and item they brought in, who can see it now (only_me, shared, company).\nUSE WHEN: the person asks what of theirs is in the workspace or who can see their mail or notes.\nNOT FOR: workspace documents in general (talonic_search).\n\nARGS: none.\nRETURNS: the feed of sources and items with their visibility.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_my_data_share",
+    "group": "my_data",
+    "title": "Share or stop sharing a source",
+    "description": "Share a source the person connected with named colleagues, or stop sharing it (an empty list stops it for everyone; the person keeps access). Only the person who connected the source can; only on their explicit instruction.\nUSE WHEN: the person asks to share their mailbox or notes with someone, or to stop.\nNOT FOR: single items or tags (talonic_my_data_share_items).\n\nARGS: `source_id`, `action` share|stop_sharing, `user_ids`.\nRETURNS: the updated sharing state.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "source_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "\"share\" | \"stop_sharing\"",
+        "required": true,
+        "enum": [
+          "share",
+          "stop_sharing"
+        ]
+      },
+      {
+        "name": "user_ids",
+        "type": "string[]",
+        "required": true,
+        "description": "Colleagues; empty with stop_sharing stops it for everyone."
+      }
+    ]
+  },
+  {
+    "name": "talonic_my_data_share_items",
+    "group": "my_data",
+    "title": "Share or stop sharing items",
+    "description": "Share chosen items of a source the person connected (an email with its attachments) with one colleague, or stop sharing them (without recipient_id: with everyone).\nUSE WHEN: the person wants one colleague to see particular emails or notes.\nNOT FOR: a whole source (talonic_my_data_share).\n\nARGS: `source_id`, `action` share|stop_sharing, `document_ids`, `recipient_id` (required to share).\nRETURNS: what was shared or stopped.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "source_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "\"share\" | \"stop_sharing\"",
+        "required": true,
+        "enum": [
+          "share",
+          "stop_sharing"
+        ]
+      },
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true
+      },
+      {
+        "name": "recipient_id",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_my_data_field_requests",
+    "group": "my_data",
+    "title": "List field requests",
+    "description": "List field requests to the person (colleagues asking for their values of a field) and by the person. Only where field sharing is on in the workspace.\nUSE WHEN: before deciding a request (talonic_my_data_decide_field_request).\nNOT FOR: who sees a whole source (talonic_my_data).\n\nARGS: none.\nRETURNS: { incoming[], outgoing[] } with each request's state.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_my_data_decide_field_request",
+    "group": "my_data",
+    "title": "Decide a field request",
+    "description": "Decide a field request as the person: as holder approve, deny (with text as the reason), clarify (text as the question) or stop a grant; as asker withdraw or answer (text). Only on the person's explicit instruction.\nUSE WHEN: the person decided a request listed by talonic_my_data_field_requests.\nNOT FOR: sharing a whole source (talonic_my_data_share).\n\nARGS: `request_id`, `action` approve|deny|clarify|stop|withdraw|answer, `text` (required for deny, clarify, answer).\nRETURNS: the request after the decision.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "request_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "\"approve\" | \"deny\" | \"clarify\" | \"stop\" | \"withdraw\" | \"answer\"",
+        "required": true,
+        "enum": [
+          "approve",
+          "deny",
+          "clarify",
+          "stop",
+          "withdraw",
+          "answer"
+        ]
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_ar_overview",
+    "group": "app_receivables",
+    "title": "Receivables cockpit",
+    "description": "The receivables cockpit: aging of open receivables, cash application and bill-ready statistics, recoverable money found on receivables, latest decisions.\nUSE WHEN: the headline (how much is open, how much applied straight through, which loads can bill).\nNOT FOR: the remittance or load lists (talonic_ar_cash_application_preview, talonic_ar_bill_ready_preview).\nARGS: none. RETURNS: the cockpit object. 422 until the receivables sources are bound in Money Found.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ar_cash_application_preview",
+    "group": "app_receivables",
+    "title": "Preview the cash application",
+    "description": "Match every remittance line to the open invoices and show the result: statistics over all remittances and one page of them, exceptions first. Writes nothing.\nUSE WHEN: before applying cash, to see what lands and what needs a person.\nNOT FOR: recording the result (talonic_ar_cash_application_apply).\nARGS: `page`, `limit`, `invalid_only` (only remittances with a deduction ruled invalid). RETURNS: { stats, remittances[], page }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": "Page number, from 1.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Rows per page (default 50, at most 500).",
+        "minimum": 1,
+        "maximum": 500
+      },
+      {
+        "name": "invalid_only",
+        "type": "boolean",
+        "required": false,
+        "description": "Only remittances with an invalid deduction."
+      }
+    ]
+  },
+  {
+    "name": "talonic_ar_cash_application_apply",
+    "group": "app_receivables",
+    "title": "Record the cash application",
+    "description": "Record the decisions of the cash application (payments applied or exception, invoices paid / partially paid / short paid, deductions open). Safe to repeat: recorded decisions are not recorded again. Posts nothing to another system.\nUSE WHEN: after talonic_ar_cash_application_preview, once the result is right.\nNOT FOR: previewing (talonic_ar_cash_application_preview).\nARGS: none. RETURNS: { recorded, result } (result = the first page as it now stands). Needs apps:receivables:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ar_bill_ready_preview",
+    "group": "app_receivables",
+    "title": "Preview bill readiness",
+    "description": "Per load, the checks (delivered, proof of delivery present and signed, carrier cost within contract, accessorials settled, rate agreed) and the verdict auto_bill, review or not_ready. Writes nothing.\nUSE WHEN: deciding which loads may bill without a person.\nNOT FOR: recording the verdicts (talonic_ar_bill_ready_apply).\nARGS: `page`, `limit`. RETURNS: { stats, loads[], page }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": "Page number, from 1.",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Rows per page (default 50, at most 500).",
+        "minimum": 1,
+        "maximum": 500
+      }
+    ]
+  },
+  {
+    "name": "talonic_ar_bill_ready_apply",
+    "group": "app_receivables",
+    "title": "Record bill readiness",
+    "description": "Record bill_ready or review on every load. A load a person moved to billed, review or on_hold keeps its state.\nUSE WHEN: after talonic_ar_bill_ready_preview.\nNOT FOR: previewing (talonic_ar_bill_ready_preview).\nARGS: none. RETURNS: { recorded, result }. Needs apps:receivables:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_ar_tmw_mapping",
+    "group": "app_receivables",
+    "title": "Trimble TMW mapping",
+    "description": "How Trimble TMW tables map onto the receivables inputs, with the status conventions.\nUSE WHEN: setting up receivables from a Trimble TMW export.\nNOT FOR: the receivables data (talonic_ar_overview).\nARGS: none. RETURNS: { mapping }.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_spend_audit_get",
+    "group": "app_spend_audit",
+    "title": "The spend audit",
+    "description": "The spend audit: every vendor with its verdicts and open to-dos, the lists it was built from, display options and assumptions.\nUSE WHEN: reviewing what is still missing per vendor.\nNOT FOR: the share link (talonic_spend_audit_get_share).\nARGS: none. RETURNS: the audit object.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_spend_audit_set_options",
+    "group": "app_spend_audit",
+    "title": "Spend audit display options",
+    "description": "Set the audit's display options.\nUSE WHEN: hiding or showing price-confirmed vendors.\nNOT FOR: the assumptions text (talonic_spend_audit_set_assumptions).\nARGS: `show_price_confirmed`. Needs apps:spend-audit:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "show_price_confirmed",
+        "type": "boolean",
+        "required": false,
+        "description": "Show vendors whose prices are confirmed."
+      }
+    ]
+  },
+  {
+    "name": "talonic_spend_audit_set_assumptions",
+    "group": "app_spend_audit",
+    "title": "Spend audit assumptions",
+    "description": "Replace the basis and assumptions text shown under the audit.\nUSE WHEN: stating what the audit rests on.\nNOT FOR: display options (talonic_spend_audit_set_options).\nARGS: `text` (at most 10,000 characters). Needs apps:spend-audit:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": "The text."
+      }
+    ]
+  },
+  {
+    "name": "talonic_spend_audit_explain_todo",
+    "group": "app_spend_audit",
+    "title": "Close a vendor to-do with a reason",
+    "description": "Close one vendor's to-do with a reason instead of a document.\nUSE WHEN: no document is needed for that vendor.\nNOT FOR: reopening (talonic_spend_audit_reopen_todo).\nARGS: `key` (vendor key from talonic_spend_audit_get), `reason`. Needs apps:spend-audit:write and the upload permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The vendor key."
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": true,
+        "description": "Why no document is needed."
+      }
+    ]
+  },
+  {
+    "name": "talonic_spend_audit_reopen_todo",
+    "group": "app_spend_audit",
+    "title": "Reopen a vendor to-do",
+    "description": "Reopen a to-do that was closed with a reason.\nUSE WHEN: the reason no longer holds.\nNOT FOR: closing one (talonic_spend_audit_explain_todo).\nARGS: `key`. Needs apps:spend-audit:write and the upload permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The vendor key."
+      }
+    ]
+  },
+  {
+    "name": "talonic_spend_audit_share",
+    "group": "app_spend_audit",
+    "title": "Publish the spend audit",
+    "description": "PUBLISHES the audit outside the workspace: answers a new link and password; the previous link stops working. Confirm with the user first.\nUSE WHEN: the user asks to send the audit to the client.\nNOT FOR: reading the current link (talonic_spend_audit_get_share).\nARGS: none. RETURNS: { url, password }. Needs apps:spend-audit:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": true,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_spend_audit_get_share",
+    "group": "app_spend_audit",
+    "title": "Current spend audit link",
+    "description": "The published link and its password, or nothing when the audit is not published.\nUSE WHEN: the user asks for the link again.\nNOT FOR: publishing (talonic_spend_audit_share).\nARGS: none. Needs the workspace permission.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_spend_audit_unshare",
+    "group": "app_spend_audit",
+    "title": "Revoke the spend audit link",
+    "description": "Revoke the published link; nobody outside the workspace can open the audit any more.\nUSE WHEN: the user asks to stop sharing.\nNOT FOR: a new link (talonic_spend_audit_share).\nARGS: none. Needs apps:spend-audit:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": true,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_objects_recent",
+    "group": "app_objects",
+    "title": "Latest decisions",
+    "description": "The latest decisions recorded on business objects (invoices, loads, payments, contracts, leases, ledger rows), newest first.\nUSE WHEN: what was decided lately, across apps.\nNOT FOR: one object's history (talonic_object_get).\nARGS: `limit` (default 50).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "How many.",
+        "minimum": 1,
+        "maximum": 500
+      }
+    ]
+  },
+  {
+    "name": "talonic_objects_by_type",
+    "group": "app_objects",
+    "title": "Objects of one type",
+    "description": "Without `state`: how many objects of a type are in each state. With `state`: the objects in that state.\nUSE WHEN: counting or listing invoices, loads or leases by state.\nNOT FOR: one object (talonic_object_get).\nARGS: `type` (e.g. invoice, load, lease, money_found_row), `state`, `limit`, `offset`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "type",
+        "type": "string",
+        "required": true,
+        "description": "The object type."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "required": false,
+        "description": "A state, e.g. paid."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 1000
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_object_get",
+    "group": "app_objects",
+    "title": "One object and its history",
+    "description": "The current state of one business object and every decision recorded on it, with who and the evidence.\nUSE WHEN: why an invoice, load or lease is in its state.\nNOT FOR: recording a decision (talonic_object_record_decision).\nARGS: `type`, `key`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "type",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The object key."
+      }
+    ]
+  },
+  {
+    "name": "talonic_object_record_decision",
+    "group": "app_objects",
+    "title": "Record a decision on an object",
+    "description": "Record a decision on one business object; it is attributed to this connection, never to a person.\nUSE WHEN: the user decided (e.g. a lease is checked, an invoice is disputed).\nNOT FOR: Money Found rows (talonic_money_found_set_row_state).\nARGS: `type`, `key`, `to_state`, optional `from_state` (refused when the object is elsewhere), `note`, `evidence[]`. Needs records:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "type",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "to_state",
+        "type": "string",
+        "required": true,
+        "description": "The new state."
+      },
+      {
+        "name": "from_state",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "note",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "evidence",
+        "type": "object[]",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_payables_desk_page",
+    "group": "app_payables_desk",
+    "title": "Payables desk",
+    "description": "One page of supplier invoices with what the checks read and found on each, or ready: false with the reason.\nUSE WHEN: working through supplier invoices before payment.\nNOT FOR: the payment rules (talonic_payables_desk_policy).\nARGS: `offset`, `limit` (at most 500).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 500
+      }
+    ]
+  },
+  {
+    "name": "talonic_payables_desk_policy",
+    "group": "app_payables_desk",
+    "title": "Payment rules",
+    "description": "The payment rules in force (order and approval thresholds, currency, rates), where they come from, and their version.\nUSE WHEN: before changing the rules.\nNOT FOR: the invoices (talonic_payables_desk_page).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_payables_desk_save_policy",
+    "group": "app_payables_desk",
+    "title": "Save the payment rules",
+    "description": "Save the payment rules. Send the version read so a save over a newer one is refused (409).\nUSE WHEN: changing thresholds or rates.\nNOT FOR: reading them (talonic_payables_desk_policy).\nARGS: `orderAbove`, `approvalAbove`, `currency`, `rates`, `version`. Needs apps:payables-desk:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "orderAbove",
+        "type": "number",
+        "required": true,
+        "minimum": 0
+      },
+      {
+        "name": "approvalAbove",
+        "type": "number",
+        "required": true,
+        "minimum": 0
+      },
+      {
+        "name": "currency",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "rates",
+        "type": "object",
+        "required": false
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_list_structures",
+    "group": "app_workbook",
+    "title": "Target structures",
+    "description": "The workspace's target structures (each made from a client's example table) with their mapping counts.\nUSE WHEN: choosing the structure to map a workbook onto.\nNOT FOR: one structure's fields (talonic_workbook_get_structure).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_workbook_create_structure",
+    "group": "app_workbook",
+    "title": "Create a target structure",
+    "description": "Create, or replace, a target structure from the example table in a captured workbook.\nUSE WHEN: a client sent their example table.\nNOT FOR: editing fields (talonic_workbook_update_structure).\nARGS: `document_id`, `name`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_get_structure",
+    "group": "app_workbook",
+    "title": "One target structure",
+    "description": "One target structure with its fields.\nUSE WHEN: before editing it.\nNOT FOR: its label mappings (talonic_workbook_list_mappings).\nARGS: `structure_id`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_update_structure",
+    "group": "app_workbook",
+    "title": "Edit a target structure",
+    "description": "Set field defaults and aliases (only the fields named change) and, with `checks`, replace the identity checks (a total that must equal its parts).\nUSE WHEN: a person decided a default, an alias or a check.\nNOT FOR: label mappings (talonic_workbook_correct_mapping).\nARGS: `structure_id`, `fields[] { name, default?, aliases? }`, `checks[] { name, total, parts[] }`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      },
+      {
+        "name": "fields",
+        "type": "object[]",
+        "required": false
+      },
+      {
+        "name": "checks",
+        "type": "object[]",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_list_mappings",
+    "group": "app_workbook",
+    "title": "Label mappings",
+    "description": "How each row and column label maps onto the structure, who decided it, and whether a person approved it.\nUSE WHEN: reviewing labels before projecting workbooks.\nNOT FOR: correcting one (talonic_workbook_correct_mapping).\nARGS: `structure_id`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_correct_mapping",
+    "group": "app_workbook",
+    "title": "Correct a label mapping",
+    "description": "Correct one label's mapping; it counts as approved and every later workbook uses it. scope header_leaf applies the metric or ignore decision to every column header ending in the same label.\nUSE WHEN: a label maps wrongly.\nNOT FOR: approving one as it stands (talonic_workbook_approve_mapping).\nARGS: `structure_id`, `label_key`, `scope`, `metric`, `set`, `ignore`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      },
+      {
+        "name": "label_key",
+        "type": "string",
+        "required": true,
+        "description": "The label key from talonic_workbook_list_mappings."
+      },
+      {
+        "name": "scope",
+        "type": "\"label\" | \"header_leaf\"",
+        "required": false,
+        "enum": [
+          "label",
+          "header_leaf"
+        ]
+      },
+      {
+        "name": "metric",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "set",
+        "type": "object",
+        "required": false
+      },
+      {
+        "name": "ignore",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_approve_mapping",
+    "group": "app_workbook",
+    "title": "Approve a label mapping",
+    "description": "Approve one label's mapping as it stands.\nUSE WHEN: the mapping is right.\nNOT FOR: changing it (talonic_workbook_correct_mapping).\nARGS: `structure_id`, `label_key`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      },
+      {
+        "name": "label_key",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_get_capture",
+    "group": "app_workbook",
+    "title": "A workbook's capture",
+    "description": "What was captured from one workbook: the run, its tables with counts, its pictures with their position. run: null when never captured.\nUSE WHEN: finding the table ids of a workbook.\nNOT FOR: one table's cells (talonic_workbook_table).\nARGS: `document_id`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_checks",
+    "group": "app_workbook",
+    "title": "Workbook consistency findings",
+    "description": "Totals that do not add up and similar findings; identity findings too when `structure_id` is given.\nUSE WHEN: checking a workbook before using its figures.\nNOT FOR: the facts (talonic_workbook_facts).\nARGS: `document_id`, `structure_id`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_facts",
+    "group": "app_workbook",
+    "title": "Workbook facts",
+    "description": "The workbook's facts under a target structure, each with its figure, fields and source cell.\nUSE WHEN: reading the mapped figures.\nNOT FOR: projecting them first (talonic_workbook_project).\nARGS: `document_id`, `structure_id`, `metric`, `limit` (at most 5,000), `offset`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      },
+      {
+        "name": "metric",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 5000
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_project",
+    "group": "app_workbook",
+    "title": "Project a workbook onto a structure",
+    "description": "Map the workbook's labels and write its facts under the structure, replacing the facts it held for that structure.\nUSE WHEN: after the mappings are reviewed.\nNOT FOR: reading facts (talonic_workbook_facts).\nARGS: `document_id`, `structure_id`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "structure_id",
+        "type": "string",
+        "required": true,
+        "description": "The target structure id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_table",
+    "group": "app_workbook",
+    "title": "One table as a grid",
+    "description": "One captured table rebuilt as a grid with every value cell and the header, label, title, context and note cells that give it meaning.\nUSE WHEN: showing a table, or a cell in place (`around`).\nNOT FOR: everything about one cell (talonic_workbook_cell).\nARGS: `document_id`, `table_id`, `limit`, `around` (A1), `from` (row).",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "table_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 5000
+      },
+      {
+        "name": "around",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_cell",
+    "group": "app_workbook",
+    "title": "One captured cell",
+    "description": "Everything known about one cell: value, raw text, scale, currency, column path, row labels, notes, formula.\nUSE WHEN: explaining where a figure comes from.\nNOT FOR: the whole table (talonic_workbook_table).\nARGS: `document_id`, `table_id`, `a1`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      },
+      {
+        "name": "table_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "a1",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_workbook_recapture",
+    "group": "app_workbook",
+    "title": "Capture a workbook again",
+    "description": "Capture the workbook again now.\nUSE WHEN: the capture is missing or out of date.\nNOT FOR: projecting facts (talonic_workbook_project).\nARGS: `document_id`. Needs documents:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true,
+        "description": "The workbook document id."
+      }
+    ]
+  },
+  {
+    "name": "talonic_record_set_page",
+    "group": "app_record_sets",
+    "title": "Record set grid page",
+    "description": "One page of a record set with its fields and cells, the shape the web grid shows. Rows you may not see are left out.\nUSE WHEN: reading cell values of a record set.\nNOT FOR: one cell's provenance (talonic_record_set_cell_provenance).\nARGS: `record_set_id`, `limit` (at most 500), `offset`, `cursor`, `field_keys[]`, `record_ids[]`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "record_set_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 500
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "field_keys",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "record_ids",
+        "type": "string[]",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_record_set_cell_provenance",
+    "group": "app_record_sets",
+    "title": "Cell provenance",
+    "description": "One cell's value, confidence, status, source and audit reference.\nUSE WHEN: where a value came from.\nNOT FOR: many cells (talonic_record_set_page).\nARGS: `record_set_id`, `record_id`, `field_key`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "record_set_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "record_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "field_key",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_compliance_get_framework",
+    "group": "app_compliance",
+    "title": "One compliance framework",
+    "description": "One framework with its reading state, ON/OFF and its rules.\nUSE WHEN: before editing its rules.\nNOT FOR: all frameworks (the frameworks list).\nARGS: `document_id`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_compliance_reread_framework",
+    "group": "app_compliance",
+    "title": "Read a framework's rules again",
+    "description": "Read the framework's rules again from its document; the rules are replaced when the reading finishes.\nUSE WHEN: the document changed or the rules were read wrongly.\nNOT FOR: editing one rule (talonic_compliance_update_rule).\nARGS: `document_id`. Needs apps:compliance:write; 409 while the app is off.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_compliance_add_rule",
+    "group": "app_compliance",
+    "title": "Add a compliance rule",
+    "description": "Add a rule written by a person to a framework.\nUSE WHEN: a rule is missing.\nNOT FOR: changing a rule (talonic_compliance_update_rule).\nARGS: `document_id`, `text`, optional obligation, section, applies_to, condition, threshold, testable. Needs apps:compliance:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "obligation",
+        "type": "string",
+        "required": false,
+        "description": "How binding the rule is."
+      },
+      {
+        "name": "section",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "applies_to",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "condition",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "threshold",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "testable",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_compliance_update_rule",
+    "group": "app_compliance",
+    "title": "Edit a compliance rule",
+    "description": "Edit one rule; only the fields sent change.\nUSE WHEN: a rule reads wrongly.\nNOT FOR: removing it (talonic_compliance_delete_rule).\nARGS: `rule_id` plus the fields to change. Needs apps:compliance:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "rule_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "obligation",
+        "type": "string",
+        "required": false,
+        "description": "How binding the rule is."
+      },
+      {
+        "name": "section",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "applies_to",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "condition",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "threshold",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "testable",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_compliance_delete_rule",
+    "group": "app_compliance",
+    "title": "Remove a compliance rule",
+    "description": "Take one rule out of its framework.\nUSE WHEN: the rule does not belong.\nNOT FOR: switching a whole framework off.\nARGS: `rule_id`. Needs apps:compliance:write.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "rule_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_money_found_catalog",
+    "group": "app_money_found",
+    "title": "What Money Found offers",
+    "description": "The roles a configuration binds, their fields, and the levers with what each needs.\nUSE WHEN: setting Money Found up.\nNOT FOR: the configuration in force (talonic_money_found_config).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_money_found_config",
+    "group": "app_money_found",
+    "title": "Money Found configuration",
+    "description": "The configuration in force, or config: null.\nUSE WHEN: before changing it.\nNOT FOR: a proposal (talonic_money_found_propose_config).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_money_found_propose_config",
+    "group": "app_money_found",
+    "title": "Propose a Money Found configuration",
+    "description": "Propose a configuration from the workspace's Specs and tables. Saves nothing; show it to the user, then confirm with talonic_money_found_save_config.\nUSE WHEN: no configuration yet, or the sources changed.\nNOT FOR: saving (talonic_money_found_save_config).\nARGS: `as_of` (YYYY-MM-DD). Needs apps:money-found:write; 409 while the app is off.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "as_of",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_money_found_save_config",
+    "group": "app_money_found",
+    "title": "Confirm a Money Found configuration",
+    "description": "Confirm a configuration (validated in full; a binding to a missing source or field is dropped). The ledger rebuilds on the next read.\nUSE WHEN: the user accepted a proposal or a change.\nNOT FOR: proposing one (talonic_money_found_propose_config).\nARGS: `config` (the whole object). Needs apps:money-found:write.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "config",
+        "type": "object",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_money_found_structure_clauses",
+    "group": "app_money_found",
+    "title": "Read clause numbers",
+    "description": "Read rebate steps, rates and dates out of the configured contracts' clause text and save them into the configuration.\nUSE WHEN: after confirming a configuration, so rebate and commitment levers run.\nNOT FOR: cost bearers (talonic_money_found_cost_clauses).\nARGS: none. Needs apps:money-found:write; 422 without a configuration.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_money_found_cost_clauses",
+    "group": "app_money_found",
+    "title": "Read who bears each cost",
+    "description": "Read who bears each cost from the contracts' own text and save it; an answer counts only when its quote is found. dry_run counts only.\nUSE WHEN: pass-through costs matter.\nNOT FOR: clause numbers (talonic_money_found_structure_clauses).\nARGS: `keys[]`, `limit`, `dry_run`. Needs apps:money-found:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "keys",
+        "type": "string[]",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 5000
+      },
+      {
+        "name": "dry_run",
+        "type": "boolean",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_money_found_delete_config",
+    "group": "app_money_found",
+    "title": "Remove the Money Found configuration",
+    "description": "Remove the configuration; the ledger without one answers again.\nUSE WHEN: the user asks to start over.\nNOT FOR: changing it (talonic_money_found_save_config).\nARGS: none. Needs apps:money-found:write and the workspace permission.",
+    "readOnly": false,
+    "destructive": true,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_money_found_set_row_state",
+    "group": "app_money_found",
+    "title": "Record a decision on a ledger row",
+    "description": "Record open, in_progress, resolved or dismissed on one ledger row; the next ledger read shows it.\nUSE WHEN: the user acted on a finding.\nNOT FOR: re-reviewing a contract price row.\nARGS: `lever_id`, `key` (row key), `state`, `note`. Needs apps:money-found:write.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "lever_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "state",
+        "type": "\"open\" | \"in_progress\" | \"resolved\" | \"dismissed\"",
+        "required": true,
+        "enum": [
+          "open",
+          "in_progress",
+          "resolved",
+          "dismissed"
+        ]
+      },
+      {
+        "name": "note",
+        "type": "string",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_contract_check_settings",
+    "group": "app_contract_check",
+    "title": "Contract Check settings",
+    "description": "The settings with what is needed to choose them: data products, the CRM table's columns, sample rows, contract types.\nUSE WHEN: before changing the settings.\nNOT FOR: values of one column (talonic_contract_check_column_values).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_contract_check_save_settings",
+    "group": "app_contract_check",
+    "title": "Save Contract Check settings",
+    "description": "Save which data product the contracts come from and the check settings.\nUSE WHEN: setting Contract Check up.\nNOT FOR: reading them (talonic_contract_check_settings).\nARGS: `data_product_id`, `settings`. Needs write and the upload permission.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "data_product_id",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "settings",
+        "type": "object",
+        "required": false
+      }
+    ]
+  },
+  {
+    "name": "talonic_contract_check_column_values",
+    "group": "app_contract_check",
+    "title": "Values of a CRM column",
+    "description": "Up to 100 distinct values of one CRM column, to choose a setting from; more: true when there are more.\nUSE WHEN: filling a setting that names CRM values.\nNOT FOR: the settings (talonic_contract_check_settings).\nARGS: `column`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "column",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_chart_pdfs_page",
+    "group": "app_chart_to_data",
+    "title": "PDF documents for chart reading",
+    "description": "One window of the workspace's PDF documents with total.\nUSE WHEN: choosing documents whose charts to read.\nNOT FOR: what reading would cost (talonic_chart_read_charts_preview).\nARGS: `limit`, `offset`.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "minimum": 1,
+        "maximum": 500
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    ]
+  },
+  {
+    "name": "talonic_chart_read_charts_available",
+    "group": "app_chart_to_data",
+    "title": "Whether chart reading is offered",
+    "description": "{ available }: whether reading the charts of selected documents is offered here.\nUSE WHEN: before offering it to the user.\nNOT FOR: the cost (talonic_chart_read_charts_preview).\nARGS: none.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": []
+  },
+  {
+    "name": "talonic_chart_read_charts_preview",
+    "group": "app_chart_to_data",
+    "title": "Preview reading charts",
+    "description": "What reading the charts of these documents would read and cost at most. Admits nothing.\nUSE WHEN: always before talonic_chart_read_charts.\nNOT FOR: reading (talonic_chart_read_charts).\nARGS: `document_ids[]`. Needs the upload permission.",
+    "readOnly": true,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "talonic_chart_read_charts",
+    "group": "app_chart_to_data",
+    "title": "Read charts of selected documents",
+    "description": "Read the charts of the selected documents, one outcome per document. Costs credits: preview first and confirm with the user.\nUSE WHEN: after talonic_chart_read_charts_preview.\nNOT FOR: previewing (talonic_chart_read_charts_preview).\nARGS: `document_ids[]`. Needs apps:chart-to-data:write and the upload permission; 409 while the app is off.",
+    "readOnly": false,
+    "destructive": false,
+    "openWorld": false,
+    "notForOpenAi": false,
+    "params": [
+      {
+        "name": "document_ids",
+        "type": "string[]",
+        "required": true
+      }
+    ]
   }
 ]

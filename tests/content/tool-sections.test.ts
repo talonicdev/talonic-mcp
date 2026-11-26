@@ -78,8 +78,8 @@ describe("the Process Plane tools have rendered, accurate pages", () => {
     return Object.keys(json.properties ?? {}).sort()
   }
 
-  it("there are twenty-one", () => {
-    expect(processTools).toHaveLength(21)
+  it("there are thirty-seven", () => {
+    expect(processTools).toHaveLength(37)
   })
 
   it.each(processTools)(
