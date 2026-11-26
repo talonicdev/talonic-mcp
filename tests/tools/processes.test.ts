@@ -45,29 +45,47 @@ describe("talonic_process_* tools", () => {
       Object.keys(tools())
         .filter((n) => n.startsWith("talonic_process_"))
         .sort(),
-    ).toEqual([
-      "talonic_process_address",
-      "talonic_process_change",
-      "talonic_process_check",
-      "talonic_process_create",
-      "talonic_process_delete",
-      "talonic_process_get",
-      "talonic_process_item",
-      "talonic_process_list",
-      "talonic_process_mailbox_ownership",
-      "talonic_process_publish",
-      "talonic_process_retry",
-      "talonic_process_rollback",
-      "talonic_process_run",
-      "talonic_process_runs",
-      "talonic_process_send_back",
-      "talonic_process_setup",
-      "talonic_process_sign",
-      "talonic_process_status",
-      "talonic_process_test_run",
-      "talonic_process_versions",
-      "talonic_process_waiting_for_me",
-    ])
+    ).toEqual(
+      [
+        "talonic_process_address",
+        "talonic_process_change",
+        "talonic_process_check",
+        "talonic_process_create",
+        "talonic_process_delete",
+        "talonic_process_get",
+        "talonic_process_item",
+        "talonic_process_list",
+        "talonic_process_mailbox_ownership",
+        "talonic_process_publish",
+        "talonic_process_retry",
+        "talonic_process_rollback",
+        "talonic_process_run",
+        "talonic_process_runs",
+        "talonic_process_send_back",
+        "talonic_process_setup",
+        "talonic_process_sign",
+        "talonic_process_status",
+        "talonic_process_test_run",
+        "talonic_process_versions",
+        "talonic_process_waiting_for_me",
+        "talonic_process_details",
+        "talonic_process_export",
+        "talonic_process_resources",
+        "talonic_process_extract_pipeline",
+        "talonic_process_try",
+        "talonic_process_form_preview",
+        "talonic_process_examples",
+        "talonic_process_evaluate",
+        "talonic_process_scripts",
+        "talonic_process_script_draft",
+        "talonic_process_script_test",
+        "talonic_process_script_approve",
+        "talonic_process_sign_off",
+        "talonic_process_retry_item",
+        "talonic_process_group",
+        "talonic_process_build_lookup_data",
+      ].sort(),
+    )
   })
 
   it("marks reads read-only and running and signing as writes", () => {
@@ -272,6 +290,167 @@ describe("talonic_process_* tools", () => {
       await tools()[`talonic_process_${name}`].handler(args)
       expect(call(), name).toMatchObject({ url, method })
       expect(call().body, name).toEqual(body)
+    }
+  })
+  it("marks the build and inspect additions: reads read-only, approvals and groups destructive", () => {
+    const t = tools()
+    for (const n of ["export", "resources", "form_preview", "evaluate", "scripts", "sign_off"])
+      expect(t[`talonic_process_${n}`].annotations.readOnlyHint, n).toBe(true)
+    // `try` writes nothing, but its route takes processes:write and the build permission.
+    for (const n of [
+      "try",
+      "details",
+      "extract_pipeline",
+      "examples",
+      "script_draft",
+      "script_test",
+      "retry_item",
+      "build_lookup_data",
+    ]) {
+      expect(t[`talonic_process_${n}`].annotations.readOnlyHint, n).toBe(false)
+      expect(t[`talonic_process_${n}`].annotations.destructiveHint, n).toBe(false)
+    }
+    for (const n of ["script_approve", "group"])
+      expect(t[`talonic_process_${n}`].annotations.destructiveHint, n).toBe(true)
+  })
+
+  it("sends the build and inspect additions to their routes", async () => {
+    const G = "33333333-3333-4333-8333-333333333333"
+    const cases: Array<[string, Record<string, unknown>, string, string, unknown]> = [
+      [
+        "details",
+        { process_id: PROC, name: "AP intake", folder: null, tags: ["ap"] },
+        "PATCH",
+        `${API}/${PROC}`,
+        { name: "AP intake", folder: null, tags: ["ap"] },
+      ],
+      ["export", { process_id: PROC }, "GET", `${API}/${PROC}/export`, undefined],
+      ["resources", { process_id: PROC }, "GET", `${API}/${PROC}/resources`, undefined],
+      [
+        "resources",
+        { process_id: PROC, version: 2 },
+        "GET",
+        `${API}/${PROC}/resources?version=2`,
+        undefined,
+      ],
+      [
+        "extract_pipeline",
+        { process_id: PROC, name: "Invoice reading" },
+        "POST",
+        `${API}/${PROC}/extract-pipeline`,
+        { name: "Invoice reading" },
+      ],
+      [
+        "try",
+        { process_id: PROC, values: { f_1: 12000 }, choices: { s_2: "Pay" } },
+        "POST",
+        `${API}/${PROC}/try`,
+        { values: { f_1: 12000 }, choices: { s_2: "Pay" } },
+      ],
+      [
+        "form_preview",
+        { process_id: PROC, step_id: "s_3" },
+        "GET",
+        `${API}/${PROC}/form-preview/s_3`,
+        undefined,
+      ],
+      ["examples", { process_id: PROC }, "GET", `${API}/${PROC}/examples`, undefined],
+      [
+        "examples",
+        { process_id: PROC, keep: { run_id: RUN, item_key: "doc 1", note: "edge case" } },
+        "POST",
+        `${API}/${PROC}/examples`,
+        { runId: RUN, itemKey: "doc 1", note: "edge case" },
+      ],
+      [
+        "examples",
+        { process_id: PROC, remove: G },
+        "DELETE",
+        `${API}/${PROC}/examples/${G}`,
+        undefined,
+      ],
+      ["evaluate", { process_id: PROC }, "POST", `${API}/${PROC}/evaluate`, undefined],
+      ["scripts", { process_id: PROC }, "GET", `${API}/${PROC}/scripts`, undefined],
+      [
+        "script_draft",
+        { process_id: PROC, step_id: "s_4", purpose: "Upper-case the vendor" },
+        "POST",
+        `${API}/${PROC}/steps/s_4/script/draft`,
+        { purpose: "Upper-case the vendor" },
+      ],
+      [
+        "script_test",
+        { process_id: PROC, step_id: "s_4" },
+        "POST",
+        `${API}/${PROC}/steps/s_4/script/test`,
+        undefined,
+      ],
+      [
+        "script_approve",
+        { process_id: PROC, step_id: "s_4", hash: "abcdef0123" },
+        "POST",
+        `${API}/${PROC}/steps/s_4/script/approve`,
+        { hash: "abcdef0123" },
+      ],
+      [
+        "sign_off",
+        { process_id: PROC, step_id: "ok" },
+        "GET",
+        `${API}/${PROC}/sign-offs/ok`,
+        undefined,
+      ],
+      [
+        "retry_item",
+        { process_id: PROC, run_id: RUN, step_id: "mail", item_key: "row-17#2" },
+        "POST",
+        `${API}/${PROC}/runs/${RUN}/steps/mail/items/row-17%232/retry`,
+        undefined,
+      ],
+      [
+        "group",
+        { name: "Finance", member_ids: [G] },
+        "POST",
+        `${API}/groups`,
+        { name: "Finance", member_ids: [G] },
+      ],
+      ["group", { group_id: G, delete: true }, "DELETE", `${API}/groups/${G}`, undefined],
+      [
+        "group",
+        { group_id: G, member_ids: [G] },
+        "PUT",
+        `${API}/groups/${G}/members`,
+        { member_ids: [G] },
+      ],
+      ["group", { group_id: G, name: "Ops" }, "PATCH", `${API}/groups/${G}`, { name: "Ops" }],
+      ["build_lookup_data", {}, "POST", `${API}/lookup-data/build`, undefined],
+    ]
+    for (const [name, args, method, url, body] of cases) {
+      const call = stub({})
+      const out = await tools()[`talonic_process_${name}`].handler(args)
+      expect(out.isError, name).toBeFalsy()
+      expect(call(), name).toMatchObject({ url, method })
+      expect(call().body, name).toEqual(body)
+    }
+  })
+
+  it("renames and changes members of a group in two calls, and refuses empty or conflicting arguments", async () => {
+    const G = "33333333-3333-4333-8333-333333333333"
+    const call = stub({})
+    await tools().talonic_process_group.handler({ group_id: G, name: "Ops", member_ids: [] })
+    expect([call(0).method, call(1).method, call(1).url]).toEqual([
+      "PATCH",
+      "PUT",
+      `${API}/groups/${G}/members`,
+    ])
+    stub({})
+    for (const [name, args] of [
+      ["group", { group_id: G }],
+      ["group", { description: "no name" }],
+      ["details", { process_id: PROC }],
+      ["examples", { process_id: PROC, keep: { run_id: RUN, item_key: "a" }, remove: G }],
+    ] as const) {
+      const out = await tools()[`talonic_process_${name}`].handler(args)
+      expect(out.isError, name).toBe(true)
     }
   })
 })

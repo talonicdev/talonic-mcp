@@ -168,6 +168,125 @@
       "kind": "pending-spec",
       "reason": "Spec authoring route (talonic_spec_*). Its spec operation lands with platform PR #2358 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
       "served_by": "platform packages/api/src/api/platform/specs-authoring.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/processes/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/export",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/resources",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/extract-pipeline",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/try",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/examples",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/processes/{}/examples/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/examples",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/{}/evaluate",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/processes/{}/scripts",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/groups",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/processes/groups/{}",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/processes/lookup-data/build",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path_prefix": "/v1/processes/{}/form-preview/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path_prefix": "/v1/processes/{}/steps/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path_prefix": "/v1/processes/{}/sign-offs/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path_prefix": "/v1/processes/{}/runs/{}/steps/",
+      "kind": "pending-spec",
+      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     }
   ]
 }
