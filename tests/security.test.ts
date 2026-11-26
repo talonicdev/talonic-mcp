@@ -51,6 +51,7 @@ const allProbesOff = {
   miningAccess: off,
   reviewAccess: off,
   casesAccess: off,
+  operationsAccess: async () => [],
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {

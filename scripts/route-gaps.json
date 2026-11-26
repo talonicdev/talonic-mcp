@@ -497,6 +497,48 @@
       "kind": "pending-spec",
       "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/extract/queue-status",
+      "kind": "pending-spec",
+      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ingest-operations.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/settings/ingest-stages",
+      "kind": "pending-spec",
+      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/capture-settings.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/collections",
+      "kind": "pending-spec",
+      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/collections.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/collections/{}",
+      "kind": "pending-spec",
+      "reason": "talonic_collections_list builds /v1/collections/{mine|counts} from its view argument. A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/collections.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/document-types/pending-confirmations",
+      "kind": "pending-spec",
+      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/document-types.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/document-types/pending-confirmations/count",
+      "kind": "pending-spec",
+      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/document-types.controller.ts"
     }
   ]
 }

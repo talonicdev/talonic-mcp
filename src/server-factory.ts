@@ -41,6 +41,7 @@ import { registerSpecAuthoringTools } from "./tools/spec-authoring.js"
 import { registerRunTools } from "./tools/run.js"
 import { registerAskTools } from "./tools/ask.js"
 import { registerToolGroups } from "./tools/tool-groups.js"
+import { registerOperationsTools, type OperationsFamily } from "./tools/workspace-operations.js"
 import { SERVER_NAME, VERSION } from "./version.js"
 
 /**
@@ -228,6 +229,13 @@ export interface CreateServerOptions {
    * Defaults to none.
    */
   toolGroups?: readonly string[]
+  /**
+   * The workspace operation families to register (Spec-run operations, ingest
+   * operations, document organising, collections, saved filters, document
+   * types). Callers pass the families whose probe passed
+   * (`probeOperationsFamilies`). Listing visibility only. Defaults to none.
+   */
+  operationsFamilies?: readonly OperationsFamily[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -567,6 +575,10 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.toolGroups?.length) {
     registerToolGroups(server, options.toolGroups, rawToken, baseUrl)
+  }
+
+  if (options.operationsFamilies?.length) {
+    registerOperationsTools(server, rawToken, baseUrl, options.operationsFamilies)
   }
 
   // Resource registrations.

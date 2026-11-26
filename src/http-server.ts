@@ -49,6 +49,11 @@ import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probeGroup } from "./tools/_groups.js"
 import { TOOL_GROUPS } from "./tools/tool-groups.js"
+import {
+  OPERATIONS_FAMILIES,
+  probeOperationsFamily,
+  type OperationsFamily,
+} from "./tools/workspace-operations.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
 import { FAVICON_BYTES } from "./favicon.js"
@@ -167,6 +172,35 @@ const toolGroupCaches = TOOL_GROUPS.map(
 export async function toolGroupsAccessCached(token: string): Promise<string[]> {
   const answers = await Promise.all(toolGroupCaches.map(([, cached]) => cached(token)))
   return toolGroupCaches.filter((_, i) => answers[i]).map(([key]) => key)
+}
+
+/**
+ * Scope-catalog scopes the workspace operation tools need: `runs:read` /
+ * `runs:write` (Spec-run operations), `reviews:write` (choosing a group's base
+ * document), `documents:write` (organising, collections, document types,
+ * processing a duplicate), `workspace:read` / `workspace:write` (ingest
+ * settings). `documents:read` is already advertised.
+ */
+const OPERATIONS_SCOPES = [
+  "runs:read",
+  "runs:write",
+  "reviews:write",
+  "documents:write",
+  "workspace:read",
+  "workspace:write",
+]
+
+/** One access cache per workspace operation family (same TTL and unknown-answer rule). */
+const operationsFamilyCaches = OPERATIONS_FAMILIES.map(
+  (f) => [f.key, makeAccessCache((t) => probeOperationsFamily(f, t, base()))] as const,
+)
+/**
+ * The workspace operation families this credential can use.
+ * @internal Exported for tests.
+ */
+export async function operationsAccessCached(token: string): Promise<OperationsFamily[]> {
+  const answers = await Promise.all(operationsFamilyCaches.map(([, cached]) => cached(token)))
+  return operationsFamilyCaches.filter((_, i) => answers[i]).map(([key]) => key)
 }
 
 /** Largest JSON-RPC body from a caller with a credential (base64 `file_data`). */
@@ -293,6 +327,11 @@ const GLAMA_CLAIM_TOKEN =
  * tools' catalog scopes: the newer process routes accept only
  * `processes:write` for changes, and a legacy name in the same grant keeps
  * its old meaning.
+ *
+ * {@link OPERATIONS_SCOPES} are the scope-catalog names the workspace
+ * operation tools need. Requesting any of them makes the grant a catalog
+ * grant, where catalog names mean exactly themselves; the legacy names above
+ * keep their meaning, so the existing tools are unaffected.
  */
 /** @internal Exported for tests. The scopes the hosted connector requests. */
 export const SCOPES_SUPPORTED: readonly string[] = [
@@ -305,6 +344,7 @@ export const SCOPES_SUPPORTED: readonly string[] = [
   "sources:read",
   "sources:write",
   "documents:write",
+  ...OPERATIONS_SCOPES.filter((s) => s !== "documents:write"),
 ]
 
 function renderProtectedResourceMetadata(resourcePath = ""): {
@@ -443,6 +483,8 @@ export interface CreateRequestHandlerOptions {
   submissionsAccess?: (token: string) => Promise<boolean>
   /** Override the Price Baseline tool visibility check (primarily for tests). */
   priceBaselineAccess?: (token: string) => Promise<boolean>
+  /** Override the workspace operation family checks (primarily for tests). */
+  operationsAccess?: (token: string) => Promise<OperationsFamily[]>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
   /** Override the probe-gated tool group visibility check: the keys to list (primarily for tests). */
@@ -752,6 +794,7 @@ export function createRequestHandler(
       toolGroups,
       includeReviewTools,
       includeCasesTools,
+      operationsFamilies,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -773,6 +816,7 @@ export function createRequestHandler(
       (options.toolGroupsAccess ?? toolGroupsAccessCached)(token),
       (options.reviewAccess ?? reviewAccessCached)(token),
       (options.casesAccess ?? casesAccessCached)(token),
+      (options.operationsAccess ?? operationsAccessCached)(token),
     ])
     // An externally driven mining round is claimed, heartbeated and closed
     // through the decision-task tools, so an autonomous app lists them too.
@@ -799,6 +843,7 @@ export function createRequestHandler(
       toolGroups,
       includeReviewTools,
       includeCasesTools,
+      operationsFamilies,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

@@ -29,6 +29,7 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       appsToolsetAccess: async () => false,
       miningAccess: async () => false,
       toolGroupsAccess: async () => [],
+      operationsAccess: async () => [],
       tokenAccepted: async () => true,
       ...options,
     }),
@@ -194,6 +195,11 @@ describe("HTTP server routing", () => {
       "sources:read",
       "sources:write",
       "documents:write",
+      "runs:read",
+      "runs:write",
+      "reviews:write",
+      "workspace:read",
+      "workspace:write",
     ])
   })
 
