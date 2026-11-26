@@ -2,6 +2,20 @@
   "about": "Routes a tool may call although the public spec (api.talonic.com/v1/docs/openapi.json) lacks them. Each entry says why and where the platform serves it. scripts/check-routes.mjs fails when an entry is no longer used or the spec has it now, so this list only shrinks. Never add a route the platform does not serve.",
   "gaps": [
     {
+      "method": null,
+      "path": "/v1/governance",
+      "kind": "pending-spec",
+      "reason": "Base constant of the access tools (talonic_access_*); every route under it is covered by the /v1/governance/ entry.",
+      "served_by": "platform packages/api governance controllers"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/governance/",
+      "kind": "pending-spec",
+      "reason": "Access requests and sharing (talonic_access_*), listed only after the sharing probe (GET /v1/governance/sharing answers available: true); not yet in the public spec.",
+      "served_by": "platform packages/api governance controllers"
+    },
+    {
       "method": "GET",
       "path_prefix": "/v1/growth/",
       "kind": "internal",

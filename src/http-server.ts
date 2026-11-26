@@ -48,6 +48,7 @@ import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
 import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probeGroup } from "./tools/_groups.js"
+import { probeAccessSharingState } from "./tools/access.js"
 import { TOOL_GROUPS } from "./tools/tool-groups.js"
 import { isOriginAllowed } from "./origin.js"
 import { getWidgetTemplateHtml, getWidgetTemplateMeta } from "./widgets/register.js"
@@ -115,6 +116,8 @@ export const docGenAccessCached = makeAccessCache(pathProbe("/v1/doc-gen/status"
 export const portfolioAccessCached = makeAccessCache(pathProbe("/v1/portfolio"))
 /** @internal Exported for tests. */
 export const processesAccessCached = makeAccessCache(pathProbe("/v1/processes"))
+/** Access and sharing: `GET /v1/governance/sharing` answers `available: true`. @internal Exported for tests. */
+export const accessAccessCached = makeAccessCache((t) => probeAccessSharingState(t, base()))
 /** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
@@ -386,6 +389,8 @@ export interface CreateRequestHandlerOptions {
   portfolioAccess?: (token: string) => Promise<boolean>
   /** Override the Process Plane tool visibility check (primarily for tests). */
   processesAccess?: (token: string) => Promise<boolean>
+  /** Override the access and sharing tool visibility check (primarily for tests). */
+  accessAccess?: (token: string) => Promise<boolean>
   /** Override the Agent-stage task tool visibility check (primarily for tests). */
   agentTasksAccess?: (token: string) => Promise<boolean>
   /** Override the decision-task tool visibility check (primarily for tests). */
@@ -699,6 +704,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeAccessTools,
       includeAgentTaskTools,
       externalAppsInUse,
       includeAppsToolset,
@@ -716,6 +722,7 @@ export function createRequestHandler(
       (options.priceBaselineAccess ?? priceBaselineAccessCached)(token),
       (options.portfolioAccess ?? portfolioAccessCached)(token),
       (options.processesAccess ?? processesAccessCached)(token),
+      (options.accessAccess ?? accessAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
       (options.appsToolsetAccess ?? appsToolsetAccessCached)(token),
@@ -738,6 +745,7 @@ export function createRequestHandler(
       includePriceBaselineTools,
       includePortfolioTools,
       includeProcessesTools,
+      includeAccessTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
       includeAppsToolset,

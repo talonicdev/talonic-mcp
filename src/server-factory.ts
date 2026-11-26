@@ -22,6 +22,7 @@ import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
+import { registerAccessTools } from "./tools/access.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
@@ -161,6 +162,12 @@ export interface CreateServerOptions {
    * permission in the workspace).
    */
   includeProcessesTools?: boolean
+  /**
+   * Register the `talonic_access_*` tools. Callers set this only after
+   * `probeAccessSharingAccess` passed (`GET /v1/governance/sharing` answers
+   * `available: true`).
+   */
+  includeAccessTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -508,6 +515,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeProcessesTools) {
     registerProcessesTools(server, rawToken, baseUrl)
+  }
+  if (options.includeAccessTools) {
+    registerAccessTools(server, rawToken, baseUrl)
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
