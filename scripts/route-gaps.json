@@ -840,6 +840,531 @@
       "kind": "pending-spec",
       "reason": "The My Data tool probe. Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
       "served_by": "platform packages/api/src/me/me-data-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/ar/connectors/trimble-tmw",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ar/overview",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ar/cash-application",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/ar/cash-application/apply",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ar/bill-ready",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/ar/bill-ready/apply",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ar/connectors/trimble-tmw",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/spend-audit",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/spend-audit",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/spend-audit/options",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/spend-audit/assumptions",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/spend-audit/todos/{key}/explain",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/spend-audit/todos/{key}/explain",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/spend-audit/share",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/spend-audit/share",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/spend-audit/share",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/objects/recent",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects/recent",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects/{type}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects/{type}/{key}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/objects/{type}/{key}/events",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/payables-desk/policy",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payables-desk/desk",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payables-desk/policy",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/payables-desk/policy",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/sheet-capture/specs",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/specs",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sheet-capture/specs",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/specs/{structure_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/sheet-capture/specs/{structure_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/specs/{structure_id}/mappings",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/sheet-capture/specs/{structure_id}/mappings/{label_key}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sheet-capture/specs/{structure_id}/mappings/{label_key}/approve",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/documents/{document_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/documents/{document_id}/checks",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/documents/{document_id}/facts",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sheet-capture/documents/{document_id}/facts",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/documents/{document_id}/tables/{table_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sheet-capture/documents/{document_id}/tables/{table_id}/cells/{a1}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sheet-capture/documents/{document_id}/run",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/record-sets/{record_set_id}/page",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/record-sets/{record_set_id}/cells/{record_id}/{field_key}/provenance",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ap/bill",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ap/bill/file",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ap/order",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/ap/summary",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/ap/language",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/ap/rules/rules/{rule_id}/important",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/compliance/frameworks/{document_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/compliance/frameworks/{document_id}/extract",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/compliance/frameworks/{document_id}/rules",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/compliance/rules/{rule_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/compliance/rules/{rule_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/money-found/config",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/money-found/catalog",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/money-found/config",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/money-found/config/propose",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/money-found/config",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/money-found/config/structure-clauses",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/money-found/config/cost-clauses",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/money-found/config",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/money-found/rows/{lever_id}/{key}/state",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/price-baseline/needed",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/price-baseline/invoices",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/price-baseline/invoices/scan",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/price-baseline/invoices/{document_id}/match",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/price-baseline/invoices/{document_id}",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/contract-check/settings",
+      "kind": "pending-spec",
+      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/contract-check/settings",
+      "kind": "pending-spec",
+      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/contract-check/settings",
+      "kind": "pending-spec",
+      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/contract-check/settings/values",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": null,
+      "path": "/v1/chart-to-data/read-charts",
+      "kind": "pending-spec",
+      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/chart-to-data/pdfs/page",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/chart-to-data/read-charts",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chart-to-data/read-charts",
+      "kind": "pending-spec",
+      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "served_by": "platform PR #2375 (talonicdev/platform)"
     }
   ]
 }

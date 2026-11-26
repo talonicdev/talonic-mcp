@@ -41,6 +41,7 @@ import { probeDataProductsAccess } from "./tools/data-products.js"
 import { probeDataPoliciesAccess } from "./tools/data-policies.js"
 import { probeWorkspaceDataAccess } from "./tools/workspace-data.js"
 import { probeSchemaReviewAccess } from "./tools/schema-review.js"
+import { probeAppWorkflowGroups } from "./tools/app-workflows.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { probeToolGroups } from "./tools/tool-groups.js"
 import { probeOperationsFamilies } from "./tools/workspace-operations.js"
@@ -148,6 +149,7 @@ export async function main(
     includeThreadTools,
     includeAgentTurnTools,
     includeMyDataTools,
+    appWorkflowGroups,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -178,6 +180,7 @@ export async function main(
     probeThreadAccess(apiKey, baseUrl),
     probeAgentTurnsAccess(apiKey, baseUrl),
     probeMyDataAccess(apiKey, baseUrl),
+    probeAppWorkflowGroups(apiKey, baseUrl),
   ])
   // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
   const includeAppsToolset = appsToolsetAnswer === true
@@ -214,6 +217,7 @@ export async function main(
     includeThreadTools,
     includeAgentTurnTools,
     includeMyDataTools,
+    appWorkflowGroups,
   })
 
   const transport = new StdioServerTransport()

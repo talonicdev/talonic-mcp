@@ -18,6 +18,7 @@ import { registerAccounts } from "./tools/accounts.js"
 import { registerGrowthTools } from "./tools/growth.js"
 import { registerContractsTools } from "./tools/contracts.js"
 import { registerApTools } from "./tools/ap.js"
+import { registerAppWorkflowTools } from "./tools/app-workflows.js"
 import { registerDocGenTools } from "./tools/doc-gen.js"
 import { registerPartiesTools } from "./tools/parties.js"
 import { registerReviewTools } from "./tools/review.js"
@@ -304,6 +305,13 @@ export interface CreateServerOptions {
    * (`probeOperationsFamilies`). Listing visibility only. Defaults to none.
    */
   operationsFamilies?: readonly OperationsFamily[]
+
+  /**
+   * Ids of the app-workflow groups (`tools/app-workflows.ts`) whose probe
+   * passed for the credential; their tools are registered, the rest are not.
+   * Listing visibility only.
+   */
+  appWorkflowGroups?: readonly string[]
 
   /**
    * Whether the seven decision-task tools are listed as invocable. The hosted
@@ -673,6 +681,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.toolGroups?.length) {
     registerToolGroups(server, options.toolGroups, rawToken, baseUrl)
+  }
+  if (options.appWorkflowGroups?.length) {
+    registerAppWorkflowTools(server, rawToken, baseUrl, options.appWorkflowGroups)
   }
 
   if (options.operationsFamilies?.length) {

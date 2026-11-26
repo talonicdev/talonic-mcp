@@ -44,6 +44,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer } from "./server-factory.js"
 import { DECIDE_SCOPE, tokenHasDecideScope } from "./tools/decision-tasks.js"
 import { probeAccessState, type ProbeAnswer } from "./tools/_http.js"
+import { APP_WORKFLOW_GROUPS, probeAppWorkflowGroup } from "./tools/app-workflows.js"
 import { probeAgentTasksInUse, probeExternalAppsInUse } from "./tools/apps.js"
 import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
@@ -160,6 +161,20 @@ export const dataPoliciesAccessCached = makeAccessCache((t) =>
 export const workspaceDataAccessCached = makeAccessCache(pathProbe("/v1/catalog"))
 /** @internal Exported for tests. */
 export const schemaReviewAccessCached = makeAccessCache(pathProbe("/v1/schema-graph/review-queue"))
+/** One cache per app-workflow group (`tools/app-workflows.ts`). @internal Exported for tests. */
+export const appWorkflowAccessCached = new Map(
+  APP_WORKFLOW_GROUPS.map(
+    (g) => [g.id, makeAccessCache((t) => probeAppWorkflowGroup(g, t, base()))] as const,
+  ),
+)
+
+/** The ids of the app-workflow groups listed for this token. @internal Exported for tests. */
+export async function appWorkflowGroupsCached(token: string): Promise<string[]> {
+  const ids = [...appWorkflowAccessCached.keys()]
+  const ok = await Promise.all(ids.map((id) => appWorkflowAccessCached.get(id)!(token)))
+  return ids.filter((_, i) => ok[i])
+}
+
 /** Superadmin / growth-reader only. @internal Exported for tests. */
 export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
 /** Superadmin only. @internal Exported for tests. */
@@ -547,6 +562,8 @@ export interface CreateRequestHandlerOptions {
   workspaceDataAccess?: (token: string) => Promise<boolean>
   /** Override the schema review tool visibility check (primarily for tests). */
   schemaReviewAccess?: (token: string) => Promise<boolean>
+  /** Override the app-workflow group visibility check (primarily for tests). */
+  appWorkflowGroups?: (token: string) => Promise<readonly string[]>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
   /** Override the probe-gated tool group visibility check: the keys to list (primarily for tests). */
@@ -867,6 +884,7 @@ export function createRequestHandler(
       includeThreadTools,
       includeAgentTurnTools,
       includeMyDataTools,
+      appWorkflowGroups,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -899,6 +917,7 @@ export function createRequestHandler(
       (options.threadAccess ?? threadAccessCached)(token),
       (options.agentTurnsAccess ?? agentTurnsAccessCached)(token),
       (options.myDataAccess ?? myDataAccessCached)(token),
+      (options.appWorkflowGroups ?? appWorkflowGroupsCached)(token),
     ])
     // An externally driven mining round is claimed, heartbeated and closed
     // through the decision-task tools, so an autonomous app lists them too.
@@ -936,6 +955,7 @@ export function createRequestHandler(
       includeThreadTools,
       includeAgentTurnTools,
       includeMyDataTools,
+      appWorkflowGroups,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.
