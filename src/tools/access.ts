@@ -97,6 +97,10 @@ const to = z
   ])
   .describe("Recipient: a person or group id, or everyone")
 
+const DATA_POINTS_DESCRIPTION = `Values of single Spec fields colleagues shared with the caller, per Spec, lined up per row (row_key) with their context: document type, a date at the holder's precision, and who it came from unless hidden. Never the documents.
+USE WHEN: answering a question across colleagues' data the caller cannot open ("what did suppliers charge for X"). Answer with counts; cite no document. With mine=true: the caller's own Specs and which fields they share (sharing itself is confirmed in the app).
+RETURNS: { available, specs: [{ spec_id, name, fields, holders, total_rows, truncated, rows }] }.`
+
 /**
  * Register the `talonic_access_*` tools.
  *
@@ -184,6 +188,21 @@ export function registerAccessTools(
           })
         return call("POST", path, { reason: a.reason })
       },
+    ],
+    [
+      "talonic_access_data_points",
+      "Data points",
+      DATA_POINTS_DESCRIPTION,
+      {
+        mine: z.boolean().optional().describe("true: the Specs run over the caller's own documents and what each field shares"),
+        spec_id: zUuid().optional().describe("Shared with the caller: only this Spec"),
+      },
+      readOnly,
+      (a) =>
+        call(
+          "GET",
+          a.mine ? `${BASE}/data-points` : `${BASE}/data-points/shared${a.spec_id ? `?spec_id=${enc(a.spec_id)}` : ""}`,
+        ),
     ],
     [
       "talonic_access_shares",

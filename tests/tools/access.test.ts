@@ -60,6 +60,7 @@ describe("talonic_access_* tools", () => {
         .filter((n) => n.startsWith("talonic_access_"))
         .sort(),
     ).toEqual([
+      "talonic_access_data_points",
       "talonic_access_decide",
       "talonic_access_directory",
       "talonic_access_request",
@@ -72,7 +73,7 @@ describe("talonic_access_* tools", () => {
 
   it("marks reads read-only and only stop/deny-capable tools destructive", () => {
     const t = tools()
-    for (const n of ["directory", "requests", "shares"])
+    for (const n of ["data_points", "directory", "requests", "shares"])
       expect(t[`talonic_access_${n}`].annotations.readOnlyHint, n).toBe(true)
     for (const n of ["request", "decide", "share", "stop_share"])
       expect(t[`talonic_access_${n}`].annotations.readOnlyHint, n).toBe(false)
@@ -182,5 +183,15 @@ describe("talonic_access_* tools", () => {
     await tools().talonic_access_stop_share.handler({ kind: "scope", id: SCOPE })
     expect(call(0)).toMatchObject({ url: `${API}/shares/document/${ID}/stop`, method: "POST" })
     expect(call(1)).toMatchObject({ url: `${API}/shares/scope/${SCOPE}/stop`, method: "POST" })
+  })
+
+  it("data points: shared with the caller by default, the caller's own with mine", async () => {
+    const call = stub({})
+    await tools().talonic_access_data_points.handler({})
+    await tools().talonic_access_data_points.handler({ spec_id: ID })
+    await tools().talonic_access_data_points.handler({ mine: true })
+    expect(call(0)).toMatchObject({ url: `${API}/data-points/shared`, method: "GET" })
+    expect(call(1)).toMatchObject({ url: `${API}/data-points/shared?spec_id=${ID}`, method: "GET" })
+    expect(call(2)).toMatchObject({ url: `${API}/data-points`, method: "GET" })
   })
 })
