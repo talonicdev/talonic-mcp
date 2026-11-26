@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
 
+## [0.1.107] - 2026-11-26
+
 ### Added
 
 - **Author Specs.** Six `talonic_spec_*` tools over the new `/v1/specs` authoring routes: `talonic_spec_create` (from a document, a Spec JSON export or a schema), `talonic_spec_edit` (read, replace under its revision, rename), `talonic_spec_check`, `talonic_spec_test` (a preview run on samples that is never delivered), `talonic_spec_publish` and `talonic_spec_rollback` (with a `preview` diff). Publish and rollback carry `destructiveHint`. Listed only when the platform serves `GET /v1/specs/authoring` to the credential; the platform checks `specs:*` scopes and the person's Spec editor permissions on every call.
