@@ -756,6 +756,48 @@
       "kind": "pending-spec",
       "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/records/",
+      "kind": "pending-spec",
+      "reason": "Records routes: retention, legal holds, dispositions, audit log, erasure, storage usage (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-records.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/team/",
+      "kind": "pending-spec",
+      "reason": "Team routes: members, invitations, roles, groups, access proposals (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-team.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/workspace/deletion",
+      "kind": "pending-spec",
+      "reason": "Workspace deletion schedule and cancel (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-workspace-deletion.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/billing",
+      "kind": "pending-spec",
+      "reason": "Billing snapshot (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-billing-account.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/billing/portal",
+      "kind": "pending-spec",
+      "reason": "Billing payment portal link (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-billing-account.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/support/tickets",
+      "kind": "pending-spec",
+      "reason": "Support request (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/governance/v1-support.controller.ts"
     }
   ]
 }

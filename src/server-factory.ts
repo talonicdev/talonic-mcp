@@ -26,6 +26,11 @@ import { registerPortfolioTools } from "./tools/portfolio.js"
 import { registerProcessesTools } from "./tools/processes.js"
 import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerIntegrationsTools } from "./tools/integrations.js"
+import {
+  registerRecordsAdminTools,
+  registerTeamAdminTools,
+  registerWorkspaceTools,
+} from "./tools/governance.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerDataProductTools } from "./tools/data-products.js"
@@ -201,6 +206,26 @@ export interface CreateServerOptions {
    * lists tools that would 404 or 403. Listing visibility only.
    */
   includeIntegrationsTools?: boolean
+
+  /**
+   * Register the `talonic_team_*` workspace-team tools. Callers set this only
+   * after `probeTeamAdminAccess` passed (the person may manage the team).
+   * Listing visibility only; the platform re-checks every call.
+   */
+  includeTeamAdminTools?: boolean
+
+  /**
+   * Register the `talonic_records_*` records-management tools. Callers set
+   * this only after `probeRecordsAdminAccess` passed (the person holds the
+   * data permission). Listing visibility only.
+   */
+  includeRecordsAdminTools?: boolean
+
+  /**
+   * Register the `talonic_workspace_*` tools (billing, support, scheduled
+   * deletion). Callers set this only after `probeWorkspaceAccess` passed.
+   */
+  includeWorkspaceTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -595,6 +620,15 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
+  }
+  if (options.includeTeamAdminTools) {
+    registerTeamAdminTools(server, rawToken, baseUrl)
+  }
+  if (options.includeRecordsAdminTools) {
+    registerRecordsAdminTools(server, rawToken, baseUrl)
+  }
+  if (options.includeWorkspaceTools) {
+    registerWorkspaceTools(server, rawToken, baseUrl)
   }
   if (options.includeSubmissionsTools) {
     registerSubmissionsTools(server, rawToken, baseUrl)
