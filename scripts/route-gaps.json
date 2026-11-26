@@ -152,1218 +152,1218 @@
       "method": null,
       "path": "/v1/specs/authoring",
       "kind": "pending-spec",
-      "reason": "Spec authoring route (talonic_spec_*). Its spec operation lands with platform PR #2358 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/specs-authoring.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/specs/import",
       "kind": "pending-spec",
-      "reason": "Spec authoring route (talonic_spec_*). Its spec operation lands with platform PR #2358 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/specs-authoring.controller.ts"
     },
     {
       "method": "PATCH",
       "path": "/v1/specs/{}",
       "kind": "pending-spec",
-      "reason": "Spec authoring route (talonic_spec_*). Its spec operation lands with platform PR #2358 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/specs-authoring.controller.ts"
     },
     {
       "method": "PATCH",
       "path": "/v1/processes/{}",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/processes/{}/export",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/processes/{}/resources",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/{}/extract-pipeline",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/{}/try",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/{}/examples",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "DELETE",
       "path": "/v1/processes/{}/examples/{}",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/processes/{}/examples",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/{}/evaluate",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/processes/{}/scripts",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/groups",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/processes/groups/{}",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/processes/lookup-data/build",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path_prefix": "/v1/processes/{}/form-preview/",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path_prefix": "/v1/processes/{}/steps/",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "GET",
       "path_prefix": "/v1/processes/{}/sign-offs/",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": "POST",
       "path_prefix": "/v1/processes/{}/runs/{}/steps/",
       "kind": "pending-spec",
-      "reason": "Process Plane route (talonic_process_* A-4 tools). Served by platform PR #2357 (headless/process, x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed. A step id is not a UUID, so this is a prefix entry.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/processes/processes-api.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/integrations/connectors",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/integrations/{}/authorize",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/integrations/authorizations/",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/integrations-authorize.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/sources/connections/{}/sync",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/sources/{}/browse",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/sources/{}/import",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/sources/{}/imports",
       "kind": "pending-spec",
-      "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/relation-claims/cases",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/relation-claims/cases/{}",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "PATCH",
       "path": "/v1/relation-claims/cases/{}",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/relation-claims/cases/{}/narrate",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/relation-claims/review",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/relation-claims/{}/resolve",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/relation-claims/{}/reject",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/relation-claims/missing",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/case-synthesis/documents/{}/neighbors",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/cases/templates",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "PATCH",
       "path": "/v1/cases/templates/{}",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/cases/templates",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/field-reviews/checkout",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/field-reviews/claims",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/field-reviews/reference-view/{}",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/field-reviews/metrics",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/field-review-notes",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/field-review-notes",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/structuring/approvals/bulk-approve",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/structuring/approval-decisions/{}/diffs",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "POST",
       "path": "/v1/structuring/approval-decisions/{}/canonical",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/validation/runs/{}/confusion-matrix/{}",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": null,
       "path": "/v1/validation/runs/{}/judge-progress",
       "kind": "pending-spec",
-      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     },
     {
       "method": "GET",
       "path": "/v1/extract/queue-status",
       "kind": "pending-spec",
-      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/ingest-operations.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/settings/ingest-stages",
       "kind": "pending-spec",
-      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/capture-settings.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/collections",
       "kind": "pending-spec",
-      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/collections.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/collections/{}",
       "kind": "pending-spec",
-      "reason": "talonic_collections_list builds /v1/collections/{mine|counts} from its view argument. A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/collections.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/document-types/pending-confirmations",
       "kind": "pending-spec",
-      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/document-types.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/document-types/pending-confirmations/count",
       "kind": "pending-spec",
-      "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/document-types.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/schema-graph/review-queue",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/schema-graph.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/schema-graph/review-queue",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/schema-graph.controller.ts"
     },
     {
       "method": "PATCH",
       "path": "/v1/linking/link-keys/{}",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/linking.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/catalog",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/catalog",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/catalog/{}",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/catalog/{}/rows",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/suggestions/questions",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/suggestions/questions/{}/answer",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/suggestions/mappings",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/suggestions/mappings/{}/decision",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/suggestions/links",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/suggestions/links/{}/decision",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-policies/{}/compile",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-policies/{}/test",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-policies/{}/publish",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-policies/{}/runs",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
     },
     {
       "method": "PUT",
       "path": "/v1/data-products/{}/definition",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/data-products/{}/runs",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/runs",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "DELETE",
       "path": "/v1/data-products/{}/runs/{}",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/data-products/{}/pending-resolutions",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/resolve-field",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/auto-review",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/auto-resolve-singles",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/apply-id-rules",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/data-products/{}/regenerate-ids",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/data-products/{}/generated-ids",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/data-products/{}/sequence-counters",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "PATCH",
       "path": "/v1/data-products/{}/sequence-counters/{}/{}",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/data-products/{}/sequence-counters/{}/{}/ids",
       "kind": "pending-spec",
-      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/records/",
       "kind": "pending-spec",
-      "reason": "Records routes: retention, legal holds, dispositions, audit log, erasure, storage usage (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-records.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/team/",
       "kind": "pending-spec",
-      "reason": "Team routes: members, invitations, roles, groups, access proposals (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-team.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/workspace/deletion",
       "kind": "pending-spec",
-      "reason": "Workspace deletion schedule and cancel (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-workspace-deletion.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/billing",
       "kind": "pending-spec",
-      "reason": "Billing snapshot (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-billing-account.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/billing/portal",
       "kind": "pending-spec",
-      "reason": "Billing payment portal link (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-billing-account.controller.ts"
     },
     {
       "method": "POST",
       "path": "/v1/support/tickets",
       "kind": "pending-spec",
-      "reason": "Support request (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/governance/v1-support.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/thread/",
       "kind": "pending-spec",
-      "reason": "The person's own thread (talonic_thread_*). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/thread/thread-api.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/agent/turns/",
       "kind": "pending-spec",
-      "reason": "The person's own agent turns (talonic_agent_get_turn, talonic_agent_confirm_turn). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/agent-turns.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/agent/home/page",
       "kind": "pending-spec",
-      "reason": "The person's own home page (talonic_agent_home_page) and the agent-turn probe. Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/api/platform/agent-turns.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/my-data",
       "kind": "pending-spec",
-      "reason": "The person's own data feed (talonic_my_data). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/my-data/my-data-api.controller.ts"
     },
     {
       "method": null,
       "path_prefix": "/v1/my-data/",
       "kind": "pending-spec",
-      "reason": "Sharing and field requests (talonic_my_data_*). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/my-data/my-data-api.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/me/data",
       "kind": "pending-spec",
-      "reason": "The My Data tool probe. Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/me/me-data-api.controller.ts"
     },
     {
       "method": null,
       "path": "/v1/ar/connectors/trimble-tmw",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ar/overview",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ar/cash-application",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/ar/cash-application/apply",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ar/bill-ready",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/ar/bill-ready/apply",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ar/connectors/trimble-tmw",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/spend-audit",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/spend-audit",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/spend-audit/options",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/spend-audit/assumptions",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/spend-audit/todos/{key}/explain",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "DELETE",
       "path": "/v1/spend-audit/todos/{key}/explain",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/spend-audit/share",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/spend-audit/share",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "DELETE",
       "path": "/v1/spend-audit/share",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/objects/recent",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/objects/recent",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/objects/{type}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/objects/{type}/{key}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/objects/{type}/{key}/events",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/payables-desk/policy",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/payables-desk/desk",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/payables-desk/policy",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/payables-desk/policy",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/sheet-capture/specs",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/specs",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/sheet-capture/specs",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/specs/{structure_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PATCH",
       "path": "/v1/sheet-capture/specs/{structure_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/specs/{structure_id}/mappings",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PATCH",
       "path": "/v1/sheet-capture/specs/{structure_id}/mappings/{label_key}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/sheet-capture/specs/{structure_id}/mappings/{label_key}/approve",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/documents/{document_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/documents/{document_id}/checks",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/documents/{document_id}/facts",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/sheet-capture/documents/{document_id}/facts",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/documents/{document_id}/tables/{table_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/sheet-capture/documents/{document_id}/tables/{table_id}/cells/{a1}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/sheet-capture/documents/{document_id}/run",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/record-sets/{record_set_id}/page",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/record-sets/{record_set_id}/cells/{record_id}/{field_key}/provenance",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ap/bill",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ap/bill/file",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ap/order",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/ap/summary",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/ap/language",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/ap/rules/rules/{rule_id}/important",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/compliance/frameworks/{document_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/compliance/frameworks/{document_id}/extract",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/compliance/frameworks/{document_id}/rules",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PATCH",
       "path": "/v1/compliance/rules/{rule_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "DELETE",
       "path": "/v1/compliance/rules/{rule_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/money-found/config",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/money-found/catalog",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/money-found/config",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/money-found/config/propose",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/money-found/config",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/money-found/config/structure-clauses",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/money-found/config/cost-clauses",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "DELETE",
       "path": "/v1/money-found/config",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/money-found/rows/{lever_id}/{key}/state",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/price-baseline/needed",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/price-baseline/invoices",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/price-baseline/invoices/scan",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/price-baseline/invoices/{document_id}/match",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "PUT",
       "path": "/v1/price-baseline/invoices/{document_id}",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/contract-check/settings",
       "kind": "pending-spec",
-      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/contract-check/settings",
       "kind": "pending-spec",
-      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
     },
     {
       "method": "PUT",
       "path": "/v1/contract-check/settings",
       "kind": "pending-spec",
-      "reason": "Contract Check settings (talonic_contract_check_*; the group probe without a verb). Served today; its spec operations are on platform staging (x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform packages/api/src/contract-check/contract-check-api.controller.ts"
     },
     {
       "method": "GET",
       "path": "/v1/contract-check/settings/values",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": null,
       "path": "/v1/chart-to-data/read-charts",
       "kind": "pending-spec",
-      "reason": "Probe of an app-workflow group (talonic_*), served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/chart-to-data/pdfs/page",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "GET",
       "path": "/v1/chart-to-data/read-charts",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     },
     {
       "method": "POST",
       "path": "/v1/chart-to-data/read-charts",
       "kind": "pending-spec",
-      "reason": "App-workflow tool route; served by platform PR #2375 (A-22/A-23, x-audience public); it reaches the live spec on the production release after that PR merges, and this entry must then be removed.",
+      "reason": "ships with platform #2411",
       "served_by": "platform PR #2375 (talonicdev/platform)"
     }
   ]

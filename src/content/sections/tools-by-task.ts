@@ -32,6 +32,20 @@ export const TASKS: { task: ToolTask; id: string; title: string; intro: string }
     intro: `For any question about what the documents say (totals, duplicates, comparisons, a clause), call ${tool("talonic_ask")} first: one call returns a cited, checked answer.`,
   },
   {
+    task: "sources",
+    id: "sources",
+    title: "Connect sources and bring documents in",
+    intro:
+      "Connect a drive, mailbox or other system with a sign-in link the user opens, browse it, import from it and set how often it syncs. Then follow what is being read, and tune how new files are taken in.",
+  },
+  {
+    task: "organise",
+    id: "organise",
+    title: "Organise documents",
+    intro:
+      "Tag, move, rename and delete documents, group them into collections, keep saved filters, and confirm or correct the document type Talonic suggests.",
+  },
+  {
     task: "run",
     id: "run",
     title: "Run a Spec",
@@ -39,10 +53,24 @@ export const TASKS: { task: ToolTask; id: string; title: string; intro: string }
       "A Spec is a saved set of fields and checks your team set up in Talonic. Run it over documents to get one clean row per document.",
   },
   {
+    task: "specs",
+    id: "specs",
+    title: "Author a Spec",
+    intro:
+      "Create a Spec from a document, an export or a schema, edit it under its revision, check and test it on real documents, then publish it or roll back to an earlier version.",
+  },
+  {
     task: "review",
     id: "review",
     title: "Review and decide",
     intro: `Work that waits for a person or an outside agent: sign-offs and forms waiting for the user, checks a Spec hands to your agent, and decisions an app hands out. ${link("run-talonic-tasks", "Run Talonic tasks from your own agent")} explains the claim, work, submit loop.`,
+  },
+  {
+    task: "data",
+    id: "data",
+    title: "Data products, policies and the catalog",
+    intro:
+      "Keep shared data products and data policies current, browse the workspace data catalog and its rows, and decide suggested questions, mappings and links.",
   },
   {
     task: "build",
@@ -58,11 +86,18 @@ export const TASKS: { task: ToolTask; id: string; title: string; intro: string }
       "Start a published process for one item, see where its runs stand, follow one item through every step, and retry failed steps once the cause is fixed.",
   },
   {
+    task: "thread",
+    id: "thread",
+    title: "Your thread, the agent and My Data",
+    intro:
+      "Read and write in your Talonic thread, decide approvals, drafts and sheets waiting in it, confirm an agent turn, and see and share the data Talonic holds about you.",
+  },
+  {
     task: "apps",
     id: "apps",
     title: "Apps",
     intro:
-      "See which Talonic apps the workspace has. Apps you have enabled (for example Contracts, Accounts Payable, Document Generation or Price Baseline) add their own tools to sessions that can use them; each app's page under [Apps](https://talonic.com/docs/apps) lists them.",
+      "See which Talonic apps the workspace has, and work in the enabled ones: Receivables, Spend Audit, Payables Desk, Workbook capture, Compliance, Money Found, Contract Check, chart reading and business objects. Other apps (for example Contracts, Accounts Payable, Document Generation or Price Baseline) add their own tools to sessions that can use them; each app's page under [Apps](https://talonic.com/docs/apps) lists them.",
   },
   {
     task: "workspace",
@@ -70,6 +105,13 @@ export const TASKS: { task: ToolTask; id: string; title: string; intro: string }
     title: "Companies, credits and usage",
     intro:
       "Keep each company's documents apart with accounts, and check balance, pricing and what credits went on.",
+  },
+  {
+    task: "admin",
+    id: "admin",
+    title: "Team and records administration",
+    intro:
+      "Approve, invite and change access for team members (a change is proposed, then confirmed), and keep retention policies, legal holds, the audit log and erasure requests in order.",
   },
 ]
 
@@ -123,7 +165,7 @@ export const sections: RawSection[] = [
       {
         question: "Why does my agent not list some of these tools?",
         answer:
-          "Process tools appear only when your role can see processes, app tools only when the app is enabled for you, and ChatGPT omits the two generic data-query tools. Everything else is listed in every session.",
+          "Process tools appear only when your role can see processes; Spec authoring, sources, workspace operations, review, data, administration and thread tools only when your role can use that part of the workspace; app tools only when the app is enabled for you; and ChatGPT omits the two generic data-query tools. Each tool's page says when it is listed. Everything else is listed in every session.",
       },
     ],
     mentions: ["MCP tools", "document extraction", "AI agent tools"],

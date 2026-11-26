@@ -24,8 +24,57 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 export const REGISTRY_FILE = "src/content/generated/tool-registry.ts"
 export const MIRROR_FILE = "docs/sections.json"
 
-/** Groups the public tool reference documents, in reference order. */
-export const REFERENCE_GROUPS = ["core", "agent_tasks", "decision_tasks", "processes"]
+/**
+ * Groups the public tool reference documents, in reference order: the public
+ * groups plus every customer-facing probe-gated group. The app-gated groups
+ * whose app has its own page under talonic.com/docs/apps (Contracts, AP,
+ * Parties, Price Baseline, ... and the `app_ap` / `app_price_baseline`
+ * workflow tools that extend two of them) and the Talonic-internal groups are
+ * never in it.
+ */
+export const REFERENCE_GROUPS = [
+  "core",
+  "agent_tasks",
+  "decision_tasks",
+  "processes",
+  "spec_authoring",
+  "integrations",
+  "workspace_operations",
+  "review",
+  "cases",
+  "data_products",
+  "data_policies",
+  "workspace_data",
+  "schema_review",
+  "team_admin",
+  "records_admin",
+  "workspace_admin",
+  "thread",
+  "agent_turns",
+  "my_data",
+  "app_receivables",
+  "app_spend_audit",
+  "app_objects",
+  "app_payables_desk",
+  "app_workbook",
+  "app_record_sets",
+  "app_compliance",
+  "app_money_found",
+  "app_contract_check",
+  "app_chart_to_data",
+]
+
+/** createServer options that switch every reference group on at once. */
+export function referenceFlags() {
+  const out = {}
+  for (const g of GROUPS) {
+    if (!REFERENCE_GROUPS.includes(g.key) || !g.flags) continue
+    for (const [k, v] of Object.entries(g.flags)) {
+      out[k] = Array.isArray(v) ? [...(out[k] ?? []), ...v] : v
+    }
+  }
+  return out
+}
 
 /** Tools OpenAI / ChatGPT clients are not given (includeGenericExecutor: false). */
 async function openAiHidden(createServer, sdk) {
@@ -93,7 +142,7 @@ export async function registrySnapshot(createServer, sdk) {
   const groupOf = new Map()
   for (const g of inv.groups) for (const n of g.tools) groupOf.set(n, g.key)
   const hidden = await openAiHidden(createServer, sdk)
-  const listed = await listFull(createServer, sdk, { includeProcessesTools: true })
+  const listed = await listFull(createServer, sdk, referenceFlags())
   const order = (n) => REFERENCE_GROUPS.indexOf(groupOf.get(n))
   return listed
     .filter((t) => REFERENCE_GROUPS.includes(groupOf.get(t.name)))

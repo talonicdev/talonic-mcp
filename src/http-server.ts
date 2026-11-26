@@ -150,6 +150,7 @@ export const reviewAccessCached = makeAccessCache(pathProbe("/v1/field-reviews/s
 export const casesAccessCached = makeAccessCache((t) =>
   probeAccessState(t, base(), "/v1/relation-claims/cases", () => true, { limit: 1 }),
 )
+/** @internal Exported for tests. */
 export const dataProductsAccessCached = makeAccessCache((t) =>
   probeAccessState(t, base(), "/v1/data-products", () => true, { limit: 1 }),
 )

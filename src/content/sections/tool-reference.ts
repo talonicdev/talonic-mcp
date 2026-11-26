@@ -57,6 +57,12 @@ export function parseDescription(description: string): {
   return { lead, notes }
 }
 
+const RECHECKED =
+  "Being listed only means the tool is visible: Talonic checks your role again on every call."
+
+const app = (name: string) =>
+  `Listed when the ${name} app is enabled for your workspace and your role can use it. ${RECHECKED}`
+
 function availability(t: RegistryTool): string {
   const base: Record<RegistryTool["group"], string> = {
     core: "Listed in every Talonic MCP session, local or hosted.",
@@ -66,6 +72,31 @@ function availability(t: RegistryTool): string {
       "Listed in every session. Calling it needs a per-app `decide` grant on an API key, or, on a connector session, the `apps:decide` scope and a workspace role of senior member or above. Without it the tool stays listed but is marked not callable, and the agent can tell you to reconnect.",
     processes:
       "Listed when your workspace role has the Process Plane view permission. Changing, publishing and signing are checked again on every call against your role in the process.",
+    spec_authoring: `Listed when your workspace role can build and change Specs. ${RECHECKED}`,
+    integrations: `Listed when the session can read the workspace's sources (\`sources:read\` on a connector session); connecting, importing and sync settings need \`sources:write\`. ${RECHECKED}`,
+    workspace_operations: `Listed per area (Spec runs, ingest, ingest settings, document organising, collections, saved filters, document types) when your role can use that area of the workspace. ${RECHECKED}`,
+    review: `Listed when your role can review extracted values. ${RECHECKED}`,
+    cases: `Listed when your workspace has cases and your role can open them. ${RECHECKED}`,
+    data_products: `Listed when your role can see the workspace's data products; changes need \`products:write\` on a connector session. ${RECHECKED}`,
+    data_policies: `Listed when your role can see the workspace's data policies. ${RECHECKED}`,
+    workspace_data: `Listed when your role can read the workspace data catalog. ${RECHECKED}`,
+    schema_review: `Listed when your role can review suggested fields and links. ${RECHECKED}`,
+    team_admin: `Listed when your role may manage the workspace team. ${RECHECKED}`,
+    records_admin: `Listed when your role holds the records-management permission (retention, legal holds, audit log, erasure). ${RECHECKED}`,
+    workspace_admin: `Listed when your role can see the workspace's billing and account settings. ${RECHECKED}`,
+    thread: `Listed when your account has a Talonic thread. ${RECHECKED}`,
+    agent_turns: `Listed when your account can use the Talonic agent. ${RECHECKED}`,
+    my_data: `Listed when your account has My Data. ${RECHECKED}`,
+    app_receivables: app("Receivables"),
+    app_spend_audit: app("Spend Audit"),
+    app_objects: app("Business objects"),
+    app_payables_desk: app("Payables Desk"),
+    app_workbook: app("Workbook capture"),
+    app_record_sets: app("Record sets"),
+    app_compliance: app("Compliance"),
+    app_money_found: app("Money Found"),
+    app_contract_check: app("Contract Check"),
+    app_chart_to_data: app("Chart reading"),
   }
   return (
     base[t.group] +

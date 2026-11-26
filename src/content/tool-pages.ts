@@ -4,8 +4,23 @@
 // behaviour) comes from the live tool registry; see sections/tool-reference.ts.
 
 import type { ToolPage } from "./tool-reference-types"
+import { PROCESS_BUILD_PAGES } from "./pages/process-build"
+import { SPEC_AND_SOURCE_PAGES } from "./pages/specs-sources"
+import { OPERATIONS_PAGES } from "./pages/operations"
+import { REVIEW_AND_DATA_PAGES } from "./pages/review-data"
+import { ADMIN_AND_THREAD_PAGES } from "./pages/admin-thread"
+import { APP_WORKFLOW_PAGES } from "./pages/app-workflows"
 
+// Tools that arrived with the probe-gated groups keep their copy in
+// src/content/pages/*.ts, one file per area; the first block below is the
+// public groups and the original Process Plane tools.
 export const TOOL_PAGES: Record<string, ToolPage> = {
+  ...PROCESS_BUILD_PAGES,
+  ...SPEC_AND_SOURCE_PAGES,
+  ...OPERATIONS_PAGES,
+  ...REVIEW_AND_DATA_PAGES,
+  ...ADMIN_AND_THREAD_PAGES,
+  ...APP_WORKFLOW_PAGES,
   talonic_list_schemas: {
     task: "extract",
     seoTitle: "talonic_list_schemas — List Saved Extraction Schemas",

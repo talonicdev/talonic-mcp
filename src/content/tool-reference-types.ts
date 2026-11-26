@@ -13,11 +13,43 @@ export interface RegistryParam {
   enum?: unknown[]
 }
 
+/** Inventory groups the reference documents (scripts/gen-docs.mjs REFERENCE_GROUPS). */
+export type RegistryGroup =
+  | "core"
+  | "agent_tasks"
+  | "decision_tasks"
+  | "processes"
+  | "spec_authoring"
+  | "integrations"
+  | "workspace_operations"
+  | "review"
+  | "cases"
+  | "data_products"
+  | "data_policies"
+  | "workspace_data"
+  | "schema_review"
+  | "team_admin"
+  | "records_admin"
+  | "workspace_admin"
+  | "thread"
+  | "agent_turns"
+  | "my_data"
+  | "app_receivables"
+  | "app_spend_audit"
+  | "app_objects"
+  | "app_payables_desk"
+  | "app_workbook"
+  | "app_record_sets"
+  | "app_compliance"
+  | "app_money_found"
+  | "app_contract_check"
+  | "app_chart_to_data"
+
 /** One documented tool, as tools/list returns it. */
 export interface RegistryTool {
   name: string
   /** Inventory group key (scripts/tool-inventory.mjs GROUPS). */
-  group: "core" | "agent_tasks" | "decision_tasks" | "processes"
+  group: RegistryGroup
   title: string
   description: string
   readOnly: boolean
@@ -33,12 +65,18 @@ export type ToolTask =
   | "find"
   | "extract"
   | "ask"
+  | "sources"
+  | "organise"
   | "run"
+  | "specs"
   | "review"
+  | "data"
   | "build"
   | "automate"
+  | "thread"
   | "apps"
   | "workspace"
+  | "admin"
 
 /** Hand-written page copy for one tool; everything else is generated. */
 export interface ToolPage {
