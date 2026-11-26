@@ -136,6 +136,17 @@ export const reviewAccessCached = makeAccessCache(pathProbe("/v1/field-reviews/s
 export const casesAccessCached = makeAccessCache((t) =>
   probeAccessState(t, base(), "/v1/relation-claims/cases", () => true, { limit: 1 }),
 )
+export const dataProductsAccessCached = makeAccessCache((t) =>
+  probeAccessState(t, base(), "/v1/data-products", () => true, { limit: 1 }),
+)
+/** @internal Exported for tests. */
+export const dataPoliciesAccessCached = makeAccessCache((t) =>
+  probeAccessState(t, base(), "/v1/data-policies", () => true, { limit: 1 }),
+)
+/** @internal Exported for tests. */
+export const workspaceDataAccessCached = makeAccessCache(pathProbe("/v1/catalog"))
+/** @internal Exported for tests. */
+export const schemaReviewAccessCached = makeAccessCache(pathProbe("/v1/schema-graph/review-queue"))
 /** Superadmin / growth-reader only. @internal Exported for tests. */
 export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
 /** Superadmin only. @internal Exported for tests. */
@@ -333,18 +344,38 @@ const GLAMA_CLAIM_TOKEN =
  * grant, where catalog names mean exactly themselves; the legacy names above
  * keep their meaning, so the existing tools are unaffected.
  */
+/**
+ * Catalog scopes the probe-gated data product, data policy, workspace data and
+ * schema review tools use. The platform's OAuth scope list must contain each
+ * before a release that advertises them (else `/oauth/authorize` 400s).
+ */
+export const PRODUCTS_SCOPES = [
+  "products:read",
+  "products:write",
+  "specs:read",
+  "specs:write",
+  "runs:write",
+  "records:read",
+  "records:write",
+  "reviews:read",
+  "reviews:write",
+] as const
+
 /** @internal Exported for tests. The scopes the hosted connector requests. */
 export const SCOPES_SUPPORTED: readonly string[] = [
-  "extract:write",
-  "documents:read",
-  "schemas:read",
-  DECIDE_SCOPE,
-  "processes:read",
-  "processes:write",
-  "sources:read",
-  "sources:write",
-  "documents:write",
-  ...OPERATIONS_SCOPES.filter((s) => s !== "documents:write"),
+  ...new Set([
+    "extract:write",
+    "documents:read",
+    "schemas:read",
+    DECIDE_SCOPE,
+    "processes:read",
+    "processes:write",
+    "sources:read",
+    "sources:write",
+    "documents:write",
+    ...OPERATIONS_SCOPES,
+    ...PRODUCTS_SCOPES,
+  ]),
 ]
 
 function renderProtectedResourceMetadata(resourcePath = ""): {
@@ -485,6 +516,14 @@ export interface CreateRequestHandlerOptions {
   priceBaselineAccess?: (token: string) => Promise<boolean>
   /** Override the workspace operation family checks (primarily for tests). */
   operationsAccess?: (token: string) => Promise<OperationsFamily[]>
+  /** Override the data product tool visibility check (primarily for tests). */
+  dataProductsAccess?: (token: string) => Promise<boolean>
+  /** Override the data policy tool visibility check (primarily for tests). */
+  dataPoliciesAccess?: (token: string) => Promise<boolean>
+  /** Override the workspace data (catalog, suggestions) tool visibility check (primarily for tests). */
+  workspaceDataAccess?: (token: string) => Promise<boolean>
+  /** Override the schema review tool visibility check (primarily for tests). */
+  schemaReviewAccess?: (token: string) => Promise<boolean>
   /** Override the conditional admin visibility check (primarily for tests). */
   adminAgentTaskAccess?: (token: string) => Promise<boolean>
   /** Override the probe-gated tool group visibility check: the keys to list (primarily for tests). */
@@ -789,6 +828,10 @@ export function createRequestHandler(
       includeIntegrationsTools,
       includeAgentTaskTools,
       externalAppsInUse,
+      includeDataProductTools,
+      includeDataPolicyTools,
+      includeWorkspaceDataTools,
+      includeSchemaReviewTools,
       includeAppsToolset,
       includeMiningDriverTools,
       toolGroups,
@@ -811,6 +854,10 @@ export function createRequestHandler(
       (options.integrationsAccess ?? integrationsAccessCached)(token),
       (options.agentTasksAccess ?? agentTasksAccessCached)(token),
       (options.decisionTasksAccess ?? decisionTasksAccessCached)(token),
+      (options.dataProductsAccess ?? dataProductsAccessCached)(token),
+      (options.dataPoliciesAccess ?? dataPoliciesAccessCached)(token),
+      (options.workspaceDataAccess ?? workspaceDataAccessCached)(token),
+      (options.schemaReviewAccess ?? schemaReviewAccessCached)(token),
       (options.appsToolsetAccess ?? appsToolsetAccessCached)(token),
       (options.miningAccess ?? miningAccessCached)(token),
       (options.toolGroupsAccess ?? toolGroupsAccessCached)(token),
@@ -838,6 +885,10 @@ export function createRequestHandler(
       includeIntegrationsTools,
       includeAgentTaskTools,
       includeDecisionTaskTools,
+      includeDataProductTools,
+      includeDataPolicyTools,
+      includeWorkspaceDataTools,
+      includeSchemaReviewTools,
       includeAppsToolset,
       includeMiningDriverTools,
       toolGroups,

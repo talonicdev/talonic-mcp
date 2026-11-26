@@ -24,6 +24,10 @@ async function startHarness(options: CreateRequestHandlerOptions = {}): Promise<
       growthAccess: async () => false,
       adminAgentTaskAccess: async () => false,
       priceBaselineAccess: async () => false,
+      dataProductsAccess: async () => false,
+      dataPoliciesAccess: async () => false,
+      workspaceDataAccess: async () => false,
+      schemaReviewAccess: async () => false,
       agentTasksAccess: async () => true,
       decisionTasksAccess: async () => true,
       appsToolsetAccess: async () => false,
@@ -200,6 +204,13 @@ describe("HTTP server routing", () => {
       "reviews:write",
       "workspace:read",
       "workspace:write",
+      "products:read",
+      "products:write",
+      "specs:read",
+      "specs:write",
+      "records:read",
+      "records:write",
+      "reviews:read",
     ])
   })
 
@@ -404,6 +415,48 @@ describe("HTTP server routing", () => {
     expect(text).toContain("talonic_price_baseline_prices")
     expect(text).not.toContain("talonic_admin_list_agent_tasks")
   })
+
+  it.each([
+    ["dataProductsAccess", "talonic_data_product_", 14, "talonic_data_product_resolve_field"],
+    ["dataPoliciesAccess", "talonic_data_policy_", 4, "talonic_data_policy_publish"],
+    ["workspaceDataAccess", "talonic_catalog_", 3, "talonic_suggestion_decide_mapping"],
+    ["schemaReviewAccess", "talonic_schema_review_", 3, "talonic_link_key_set"],
+  ] as const)(
+    "tools/list includes the %s tools only when that probe passes",
+    async (option, prefix, count, member) => {
+      const names = async () => {
+        const res = await fetch(`${h.baseUrl}/mcp`, {
+          method: "POST",
+          headers: MCP_HEADERS,
+          body: JSON.stringify({ jsonrpc: "2.0", id: 8, method: "tools/list", params: {} }),
+        })
+        expect(res.status).toBe(200)
+        const text = await res.text()
+        const json = text.trim().startsWith("{")
+          ? text
+          : (text.split("\n").find((l) => l.startsWith("data: ")) ?? "").slice(6)
+        return ((JSON.parse(json) as any).result.tools as Array<{ name: string }>).map(
+          (t) => t.name,
+        )
+      }
+      const off = await names()
+      expect(off.filter((n) => n.startsWith(prefix))).toHaveLength(0)
+      expect(off).not.toContain(member)
+      await stopHarness(h)
+      h = await startHarness({ [option]: async () => true })
+      const on = await names()
+      expect(on.filter((n) => n.startsWith(prefix))).toHaveLength(count)
+      expect(on).toContain(member)
+      expect(on.length - off.length).toBe(
+        {
+          dataProductsAccess: 14,
+          dataPoliciesAccess: 4,
+          workspaceDataAccess: 9,
+          schemaReviewAccess: 4,
+        }[option],
+      )
+    },
+  )
 
   it.each(Object.values(WIDGET_URIS))(
     "widget template %s is served WITHOUT auth and with JSON-only Accept (review fix)",

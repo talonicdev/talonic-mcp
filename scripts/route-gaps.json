@@ -539,6 +539,223 @@
       "kind": "pending-spec",
       "reason": "A-3/A-8/A-9/A-10 workspace operations route. Served by platform PR #2377 (x-audience public); reaches the live spec on the production release after it merges, after which this entry must be removed.",
       "served_by": "platform packages/api/src/api/platform/document-types.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/schema-graph/review-queue",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/schema-graph.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/schema-graph/review-queue",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/schema-graph.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/linking/link-keys/{}",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/linking.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/catalog",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/catalog",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/catalog/{}",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/catalog/{}/rows",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/suggestions/questions",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/suggestions/questions/{}/answer",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/suggestions/mappings",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/suggestions/mappings/{}/decision",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/suggestions/links",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/suggestions/links/{}/decision",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/workspace-data.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-policies/{}/compile",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-policies/{}/test",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-policies/{}/publish",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-policies/{}/runs",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-policies.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/data-products/{}/definition",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/data-products/{}/runs",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/runs",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/data-products/{}/runs/{}",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/data-products/{}/pending-resolutions",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/resolve-field",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/auto-review",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/auto-resolve-singles",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/apply-id-rules",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/data-products/{}/regenerate-ids",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/data-products/{}/generated-ids",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/data-products/{}/sequence-counters",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/data-products/{}/sequence-counters/{}/{}",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/data-products/{}/sequence-counters/{}/{}/ids",
+      "kind": "pending-spec",
+      "reason": "Served on platform PR talonicdev/platform#2370 (headless/products); not in the live public spec until that PR deploys.",
+      "served_by": "platform packages/api/src/api/platform/data-products.controller.ts"
     }
   ]
 }

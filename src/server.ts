@@ -29,6 +29,10 @@ import { probeIntegrationsAccess } from "./tools/integrations.js"
 import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
+import { probeDataProductsAccess } from "./tools/data-products.js"
+import { probeDataPoliciesAccess } from "./tools/data-policies.js"
+import { probeWorkspaceDataAccess } from "./tools/workspace-data.js"
+import { probeSchemaReviewAccess } from "./tools/schema-review.js"
 import { probeAgentTaskAdminAccess } from "./tools/agent-tasks.js"
 import { probeToolGroups } from "./tools/tool-groups.js"
 import { probeOperationsFamilies } from "./tools/workspace-operations.js"
@@ -120,6 +124,10 @@ export async function main(
     includeProcessesTools,
     includeSpecAuthoringTools,
     includeIntegrationsTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
     appsToolsetAnswer,
     miningAnswer,
     toolGroups,
@@ -140,6 +148,10 @@ export async function main(
     probeProcessesAccess(apiKey, baseUrl),
     probeSpecAuthoringAccess(apiKey, baseUrl),
     probeIntegrationsAccess(apiKey, baseUrl),
+    probeDataProductsAccess(apiKey, baseUrl),
+    probeDataPoliciesAccess(apiKey, baseUrl),
+    probeWorkspaceDataAccess(apiKey, baseUrl),
+    probeSchemaReviewAccess(apiKey, baseUrl),
     probeAppsToolsetAccess(apiKey, baseUrl),
     probeMiningInUse(apiKey, baseUrl),
     probeToolGroups(apiKey, baseUrl),
@@ -166,6 +178,10 @@ export async function main(
     includeProcessesTools,
     includeSpecAuthoringTools,
     includeIntegrationsTools,
+    includeDataProductTools,
+    includeDataPolicyTools,
+    includeWorkspaceDataTools,
+    includeSchemaReviewTools,
     includeAppsToolset,
     includeMiningDriverTools,
     toolGroups,

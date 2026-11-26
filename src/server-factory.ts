@@ -28,6 +28,10 @@ import { registerMasterRecordsTools } from "./tools/master-records.js"
 import { registerIntegrationsTools } from "./tools/integrations.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
+import { registerDataProductTools } from "./tools/data-products.js"
+import { registerDataPolicyTools } from "./tools/data-policies.js"
+import { registerWorkspaceDataTools } from "./tools/workspace-data.js"
+import { registerSchemaReviewTools } from "./tools/schema-review.js"
 import { registerAdminAgentTaskTools, registerAgentTaskTools } from "./tools/agent-tasks.js"
 import { registerAppsTools } from "./tools/apps.js"
 import { registerAppsToolset } from "./tools/apps-toolset.js"
@@ -218,6 +222,31 @@ export interface CreateServerOptions {
    * Baseline app never lists tools that would 404. Listing visibility only.
    */
   includePriceBaselineTools?: boolean
+
+  /**
+   * Register the `talonic_data_product_*` tools. Callers set this only after
+   * `probeDataProductsAccess` passed. Listing visibility only.
+   */
+  includeDataProductTools?: boolean
+
+  /**
+   * Register the `talonic_data_policy_*` tools. Callers set this only after
+   * `probeDataPoliciesAccess` passed. Listing visibility only.
+   */
+  includeDataPolicyTools?: boolean
+
+  /**
+   * Register the `talonic_catalog_*` and `talonic_suggestion_*` tools. Callers
+   * set this only after `probeWorkspaceDataAccess` passed. Listing visibility only.
+   */
+  includeWorkspaceDataTools?: boolean
+
+  /**
+   * Register the `talonic_schema_review_*` tools and `talonic_link_key_set`.
+   * Callers set this only after `probeSchemaReviewAccess` passed. Listing
+   * visibility only.
+   */
+  includeSchemaReviewTools?: boolean
 
   /**
    * Keys of the probe-gated tool groups to register (`src/tools/tool-groups.ts`:
@@ -572,6 +601,18 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includePriceBaselineTools) {
     registerPriceBaselineTools(server, rawToken, baseUrl)
+  }
+  if (options.includeDataProductTools) {
+    registerDataProductTools(server, rawToken, baseUrl)
+  }
+  if (options.includeDataPolicyTools) {
+    registerDataPolicyTools(server, rawToken, baseUrl)
+  }
+  if (options.includeWorkspaceDataTools) {
+    registerWorkspaceDataTools(server, rawToken, baseUrl)
+  }
+  if (options.includeSchemaReviewTools) {
+    registerSchemaReviewTools(server, rawToken, baseUrl)
   }
   if (options.toolGroups?.length) {
     registerToolGroups(server, options.toolGroups, rawToken, baseUrl)
