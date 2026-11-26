@@ -22,6 +22,7 @@ import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
 import { probePortfolioAccess } from "./tools/portfolio.js"
 import { probeProcessesAccess } from "./tools/processes.js"
+import { probeSpecAuthoringAccess } from "./tools/spec-authoring.js"
 import { probeAppsToolsetAccess } from "./tools/apps-toolset.js"
 import { probeMiningInUse } from "./tools/mining-driver.js"
 import { probePriceBaselineAccess } from "./tools/price-baseline.js"
@@ -112,6 +113,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
     appsToolsetAnswer,
     miningAnswer,
     toolGroups,
@@ -127,6 +129,7 @@ export async function main(
     probePriceBaselineAccess(apiKey, baseUrl),
     probePortfolioAccess(apiKey, baseUrl),
     probeProcessesAccess(apiKey, baseUrl),
+    probeSpecAuthoringAccess(apiKey, baseUrl),
     probeAppsToolsetAccess(apiKey, baseUrl),
     probeMiningInUse(apiKey, baseUrl),
     probeToolGroups(apiKey, baseUrl),
@@ -148,6 +151,7 @@ export async function main(
     includePriceBaselineTools,
     includePortfolioTools,
     includeProcessesTools,
+    includeSpecAuthoringTools,
     includeAppsToolset,
     includeMiningDriverTools,
     toolGroups,

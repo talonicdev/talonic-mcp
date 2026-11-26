@@ -34,6 +34,7 @@ import { registerToMarkdown } from "./tools/to-markdown.js"
 import { registerFieldTools } from "./tools/fields.js"
 import { registerAgentRegistryTools } from "./tools/agent-tools.js"
 import { registerSpecTools } from "./tools/specs.js"
+import { registerSpecAuthoringTools } from "./tools/spec-authoring.js"
 import { registerRunTools } from "./tools/run.js"
 import { registerAskTools } from "./tools/ask.js"
 import { registerToolGroups } from "./tools/tool-groups.js"
@@ -161,6 +162,14 @@ export interface CreateServerOptions {
    * permission in the workspace).
    */
   includeProcessesTools?: boolean
+
+  /**
+   * Register the `talonic_spec_*` authoring tools (create, edit, check, test,
+   * publish, rollback). Callers set this only after `probeSpecAuthoringAccess`
+   * passed (the platform serves `GET /v1/specs/authoring` to the credential).
+   * Listing visibility only; the platform decides every call.
+   */
+  includeSpecAuthoringTools?: boolean
 
   /**
    * Register the `talonic_master_records_*` tools. Callers set this only after
@@ -508,6 +517,9 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeProcessesTools) {
     registerProcessesTools(server, rawToken, baseUrl)
+  }
+  if (options.includeSpecAuthoringTools) {
+    registerSpecAuthoringTools(server, rawToken, baseUrl)
   }
   if (options.includeMasterRecordsTools) {
     registerMasterRecordsTools(server, rawToken, baseUrl)
