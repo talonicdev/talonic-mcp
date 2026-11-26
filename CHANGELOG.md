@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > Write each change here. When a push to `main` publishes, the workflow bumps the version and promotes this block to `## [<version>] - <date>` itself (`scripts/promote-changelog.mjs`); the changelog lock requires a heading for the package version.
 
+### Added
+
+- **Access requests and sharing tools.** Seven `talonic_access_*` tools: `talonic_access_directory`, `talonic_access_requests`, `talonic_access_request`, `talonic_access_decide` (approve / deny / stop), `talonic_access_shares`, `talonic_access_share` (documents or a whole source) and `talonic_access_stop_share`. Listed only when `GET /v1/governance/sharing` answers `available: true`; the platform checks membership and holding on every call.
+
 ## [0.1.106] - 2026-11-25
 
 ### Changed
