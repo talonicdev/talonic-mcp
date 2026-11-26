@@ -36,6 +36,9 @@ const ALLOWLISTED_PROBES: Record<string, string> = {
   "processes.ts": "probeProcessesAccess",
   "spec-authoring.ts": "probeSpecAuthoringAccess",
   "integrations.ts": "probeIntegrationsAccess",
+  "thread.ts": "probeThreadAccess",
+  "agent-turns.ts": "probeAgentTurnsAccess",
+  "my-data.ts": "probeMyDataAccess",
   "_http.ts": "probeAccessState",
 }
 

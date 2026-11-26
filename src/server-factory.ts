@@ -31,6 +31,9 @@ import {
   registerTeamAdminTools,
   registerWorkspaceTools,
 } from "./tools/governance.js"
+import { registerThreadTools } from "./tools/thread.js"
+import { registerAgentTurnTools } from "./tools/agent-turns.js"
+import { registerMyDataTools } from "./tools/my-data.js"
 import { registerSubmissionsTools } from "./tools/submissions.js"
 import { registerPriceBaselineTools } from "./tools/price-baseline.js"
 import { registerDataProductTools } from "./tools/data-products.js"
@@ -233,6 +236,17 @@ export interface CreateServerOptions {
    * Records app never lists tools that would 404. Listing visibility only.
    */
   includeMasterRecordsTools?: boolean
+
+  /**
+   * Register the `talonic_thread_*`, agent-turn and `talonic_my_data_*` tools.
+   * Callers set each only after its probe passed (`probeThreadAccess`,
+   * `probeAgentTurnsAccess`, `probeMyDataAccess`): the credential is a person
+   * who reaches that surface. Listing visibility only; the platform decides
+   * every call as that person.
+   */
+  includeThreadTools?: boolean
+  includeAgentTurnTools?: boolean
+  includeMyDataTools?: boolean
 
   /**
    * Register the `talonic_submissions_*` tools. Callers set this only after
@@ -647,6 +661,15 @@ export function createServer(options: CreateServerOptions): McpServer {
   }
   if (options.includeSchemaReviewTools) {
     registerSchemaReviewTools(server, rawToken, baseUrl)
+  }
+  if (options.includeThreadTools) {
+    registerThreadTools(server, rawToken, baseUrl)
+  }
+  if (options.includeAgentTurnTools) {
+    registerAgentTurnTools(server, rawToken, baseUrl)
+  }
+  if (options.includeMyDataTools) {
+    registerMyDataTools(server, rawToken, baseUrl)
   }
   if (options.toolGroups?.length) {
     registerToolGroups(server, options.toolGroups, rawToken, baseUrl)

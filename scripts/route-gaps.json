@@ -798,6 +798,48 @@
       "kind": "pending-spec",
       "reason": "Support request (governance tools). Their /v1 routes and spec operations (x-audience public) land with platform PR #2366 and reach the live spec on the next production release, after which this entry must be removed.",
       "served_by": "platform packages/api/src/api/governance/v1-support.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/thread/",
+      "kind": "pending-spec",
+      "reason": "The person's own thread (talonic_thread_*). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/thread/thread-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/agent/turns/",
+      "kind": "pending-spec",
+      "reason": "The person's own agent turns (talonic_agent_get_turn, talonic_agent_confirm_turn). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/agent-turns.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/agent/home/page",
+      "kind": "pending-spec",
+      "reason": "The person's own home page (talonic_agent_home_page) and the agent-turn probe. Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/agent-turns.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/my-data",
+      "kind": "pending-spec",
+      "reason": "The person's own data feed (talonic_my_data). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/my-data/my-data-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path_prefix": "/v1/my-data/",
+      "kind": "pending-spec",
+      "reason": "Sharing and field requests (talonic_my_data_*). Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/my-data/my-data-api.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/me/data",
+      "kind": "pending-spec",
+      "reason": "The My Data tool probe. Served by platform PR #2369 (A-20/A-21/X-4), whose spec operations carry x-audience public; they reach the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/me/me-data-api.controller.ts"
     }
   ]
 }

@@ -17,6 +17,9 @@ import { probeGrowthAccess } from "./tools/growth.js"
 import { probeContractsAccess } from "./tools/contracts.js"
 import { probeApAccess } from "./tools/ap.js"
 import { probeMasterRecordsAccess } from "./tools/master-records.js"
+import { probeThreadAccess } from "./tools/thread.js"
+import { probeAgentTurnsAccess } from "./tools/agent-turns.js"
+import { probeMyDataAccess } from "./tools/my-data.js"
 import { probeSubmissionsAccess } from "./tools/submissions.js"
 import { probeDocGenAccess } from "./tools/doc-gen.js"
 import { probePartiesAccess } from "./tools/parties.js"
@@ -142,6 +145,9 @@ export async function main(
     includeTeamAdminTools,
     includeRecordsAdminTools,
     includeWorkspaceTools,
+    includeThreadTools,
+    includeAgentTurnTools,
+    includeMyDataTools,
   ] = await Promise.all([
     probeGrowthAccess(apiKey, baseUrl),
     probeAgentTaskAdminAccess(apiKey, baseUrl),
@@ -169,6 +175,9 @@ export async function main(
     probeTeamAdminAccess(apiKey, baseUrl),
     probeRecordsAdminAccess(apiKey, baseUrl),
     probeWorkspaceAccess(apiKey, baseUrl),
+    probeThreadAccess(apiKey, baseUrl),
+    probeAgentTurnsAccess(apiKey, baseUrl),
+    probeMyDataAccess(apiKey, baseUrl),
   ])
   // Unreachable platform at boot ("unknown") lists nothing; the boot probe has no cache to fall back on.
   const includeAppsToolset = appsToolsetAnswer === true
@@ -202,6 +211,9 @@ export async function main(
     includeTeamAdminTools,
     includeRecordsAdminTools,
     includeWorkspaceTools,
+    includeThreadTools,
+    includeAgentTurnTools,
+    includeMyDataTools,
   })
 
   const transport = new StdioServerTransport()
