@@ -1,6 +1,6 @@
 {
   "source": "https://api.talonic.com/v1/docs/openapi.json",
-  "fetched_at": "2026-11-25T04:32:57.395Z",
+  "fetched_at": "2026-11-26T11:05:00.112Z",
   "paths": {
     "/v1/extract": {
       "methods": [
@@ -211,6 +211,7 @@
       "methods": [
         "GET",
         "PUT",
+        "PATCH",
         "DELETE"
       ],
       "uuid_params": []
@@ -487,7 +488,8 @@
     },
     "/v1/document-types": {
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "uuid_params": []
     },
@@ -1295,7 +1297,7 @@
       ],
       "uuid_params": []
     },
-    "/v1/runs/{id}": {
+    "/v1/process/runs/{id}": {
       "methods": [
         "GET"
       ],
@@ -1498,13 +1500,15 @@
     },
     "/v1/specs": {
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "uuid_params": []
     },
     "/v1/specs/{id}": {
       "methods": [
-        "GET"
+        "GET",
+        "PATCH"
       ],
       "uuid_params": [
         "id"
@@ -2105,7 +2109,8 @@
     },
     "/v1/search/saved-filters": {
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "uuid_params": []
     },
@@ -2924,6 +2929,8 @@
     },
     "/v1/compliance/frameworks/{documentId}": {
       "methods": [
+        "GET",
+        "PATCH",
         "DELETE"
       ],
       "uuid_params": [
@@ -2932,7 +2939,8 @@
     },
     "/v1/compliance/frameworks/{documentId}/rules": {
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "uuid_params": [
         "documentId"
@@ -3193,6 +3201,7 @@
     "/v1/processes/{id}": {
       "methods": [
         "GET",
+        "PATCH",
         "DELETE"
       ],
       "uuid_params": [
@@ -4648,6 +4657,3155 @@
       "uuid_params": [
         "id"
       ]
+    },
+    "/v1/money-found/rows": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/summary": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contracts/summary": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contracts/processes/overview": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contracts/settings": {
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/portfolio": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/portfolio/conflicts": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/portfolio/companies/{accountId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "accountId"
+      ]
+    },
+    "/v1/portfolio/refresh": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/register/page": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/chart-to-data/pdfs/{documentId}/pages/{page}/diagram": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "documentId"
+      ]
+    },
+    "/v1/contract-check/status": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/settings": {
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/sync": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/sites": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/sites/{key}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/contracts/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/findings": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/crm-worklist": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/decisions": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/decisions/{id}/accept": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/ap/bills/accept": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/bills/withdraw": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/rules/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/rules/modes": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/rules/rules/{ruleId}/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "ruleId"
+      ]
+    },
+    "/v1/ap/rules/rules/{ruleId}/mode": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "ruleId"
+      ]
+    },
+    "/v1/compliance/frameworks/{documentId}/rules/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "documentId"
+      ]
+    },
+    "/v1/compliance/frameworks/{documentId}/rules/modes": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "documentId"
+      ]
+    },
+    "/v1/compliance/rules/{ruleId}/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "ruleId"
+      ]
+    },
+    "/v1/compliance/rules/{ruleId}/mode": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "ruleId"
+      ]
+    },
+    "/v1/parties/{id}/contracts": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/{id}/documents": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/{id}/history": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/{id}/directory-link": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/{id}/address-choice": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/{id}/names": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/names/{nameId}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "nameId"
+      ]
+    },
+    "/v1/parties/directory": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/parties/directory/search": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/parties/directory/imports": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/parties/directory/imports/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/directory/imports/{id}/rows": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/parties/directory/imports/{id}/activate": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/templates": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/templates/{templateId}/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "templateId"
+      ]
+    },
+    "/v1/apps/{id}/mining/templates/{templateId}/revoke": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "templateId"
+      ]
+    },
+    "/v1/apps/{id}/mining/protocol": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/reconcile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}/cancel": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}/tools": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}/tools/{name}": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}/tools/calls/{callId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "callId",
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/campaign": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/campaign/explore-again": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}/guidance": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/rounds/{runId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/apps/{id}/mining/hypotheses": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/hypotheses/{hypothesisId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "hypothesisId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/hypotheses/{hypothesisId}/regrade": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "hypothesisId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/hypotheses/{hypothesisId}/retire": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "hypothesisId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rules": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rules/{hypothesisId}/impact": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "hypothesisId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rules/{hypothesisId}/dismiss": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "hypothesisId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/rules/dismiss-lapsed": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/findings": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/findings/{findingId}": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": [
+        "findingId",
+        "id"
+      ]
+    },
+    "/v1/apps/{id}/mining/spend-caps": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/sources/connections": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/s3/dedicated-egress": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/kendox/dedicated-egress": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/dedicated-egress": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/slack/sign-in": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/s3": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/azure-blob": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/granola": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/slack": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/kendox": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/sql": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/external-upload": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/external-upload": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/root-folder": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/sync": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/sync-now": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/intake": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/connections/{id}/gmail-labels": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/gmail/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/outlook/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/hubspot/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/notion/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/teams/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/granola/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/s3/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/kendox/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/config": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/overview": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/tables": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/tables/{tableName}/columns": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/tables/{tableName}/rows": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/saved-queries": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/sql/{connectionId}/saved-queries/{queryId}": {
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "queryId"
+      ]
+    },
+    "/v1/sources/sql/{connectionId}/test-query": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/browse": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/browse-all": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/import": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/imports": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/imports/{importId}/resync": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "importId"
+      ]
+    },
+    "/v1/sources/{id}/make-private": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/keys": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sources/{id}/keys/{keyId}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "keyId"
+      ]
+    },
+    "/v1/sources/{id}/keys/{keyId}/rotate": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "keyId"
+      ]
+    },
+    "/v1/integrations/connectors": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/integrations/{connector}/authorize": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/integrations/authorizations/{id}": {
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/integrations/authorizations/{id}/destination": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/authoring": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/specs/import": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/specs/{id}/draft": {
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/check": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/samples": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/samples/{documentId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "documentId",
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/test": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/publish": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/versions/{n}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/versions/{a}/diff/{b}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/versions/{n}/rollback": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/share": {
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/rules": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/rules/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/rules/lint": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/rules/dry-run": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/ground-truth": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/ground-truth/{entryId}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "entryId",
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/ground-truth/score": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/specs/{id}/ground-truth/report": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/lookup-data/build": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/processes/groups": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/processes/groups/{groupId}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "groupId"
+      ]
+    },
+    "/v1/processes/groups/{groupId}/members": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": [
+        "groupId"
+      ]
+    },
+    "/v1/processes/{id}/export": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/resources": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/extract-pipeline": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/try": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/form-preview/{stepId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/examples": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/examples/{exampleId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "exampleId",
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/evaluate": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/scripts": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/steps/{stepId}/script/draft": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/steps/{stepId}/script/test": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/steps/{stepId}/script/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/sign-offs/{stepId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/processes/{id}/runs/{runId}/steps/{stepId}/items/{itemKey}/retry": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/ar/overview": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/cash-application": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/cash-application/apply": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/cash-application/export.csv": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/bill-ready": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/bill-ready/apply": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ar/connectors/trimble-tmw": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/spend": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/documents": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/logo": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/options": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/assumptions": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/todos/{key}/explain": {
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/todos/{key}/documents": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/spend-audit/share": {
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/objects/recent": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/objects/{type}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/objects/{type}/{key}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/objects/{type}/{key}/events": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/payables-desk/desk": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/payables-desk/policy": {
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/specs": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/specs/{specId}": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/specs/{specId}/mappings": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/specs/{specId}/mappings/{labelKey}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/specs/{specId}/mappings/{labelKey}/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}/checks": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}/facts": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}/tables/{tableId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}/tables/{tableId}/cells/{a1}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/sheet-capture/documents/{id}/run": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/record-sets/{id}/page": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/record-sets/{id}/cells/{recordId}/{fieldKey}/provenance": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/bill": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/bill/file": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/order": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/summary": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/language": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/ap/rules/rules/{ruleId}/important": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/compliance/frameworks/{documentId}/extract": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/compliance/rules/{ruleId}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/catalog": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/config": {
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/config/propose": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/config/structure-clauses": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/config/cost-clauses": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/money-found/rows/{leverId}/{key}/state": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/needed": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/invoices": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/invoices/scan": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/invoices/{documentId}/match": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/price-baseline/invoices/{documentId}": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/contract-check/settings/values": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/chart-to-data/pdfs/page": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/chart-to-data/read-charts": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/pipelines/{id}/documents": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/runs": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/start": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/retry-errored": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/retriage": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/documents/{docId}/field-states": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId",
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/cell-history": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/assembly/groups": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/assembly/needs-anchor": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/assembly/resolve-anchor": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/assembly/rerun": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/rule-holds": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/runs/{runId}/business-rule-holds/{holdId}/override": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "holdId",
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/pipelines/{id}/reconciliation-cases": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/pipelines/{id}/reconciliation-cases/export": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/extract/queue-status": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/extract/dedup/stats": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/extract/dedup/audit-log": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/extract/dedup/process-anyway": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/settings/ingest-stages": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/tags": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/system-tags": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/facets": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/batch-tag": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/{id}/tags": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/documents/batch-metadata/import": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/display-name-rule": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/display-name-rule/preview": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/display-name-rule/generate-script": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/display-name-rule/coverage": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/documents/display-name-rule/backfill": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/collections": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/collections/mine": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/collections/counts": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/collections/{id}/preview": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/collections/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/collections/{id}/rules": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/collections/{id}/rules/{ruleId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id",
+        "ruleId"
+      ]
+    },
+    "/v1/collections/{id}/documents": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/collections/{id}/documents/{documentId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "documentId",
+        "id"
+      ]
+    },
+    "/v1/collections/{id}/assignments": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/collections/{id}/assignments/{assignmentId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "assignmentId",
+        "id"
+      ]
+    },
+    "/v1/search/saved-filters/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/document-types/{id}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/document-types/pending-confirmations": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/document-types/pending-confirmations/count": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/document-types/pending-confirmations/{id}/resolve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/document-types/pending-confirmations/resolve-batch": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/document-types/pending-confirmations/merge-pending": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/document-types/pending-confirmations/auto-resolve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/document-types/pending-confirmations/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/field-reviews/metrics": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-reviews/reference-view/{docId}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-reviews/checkout": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-reviews/checkout-rows": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-reviews/claims": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-reviews/{docId}/{fieldKey}/provenance": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-reviews/{docId}/{fieldKey}/verdict-translations": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-reviews/{docId}/{fieldKey}/description-translations": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-reviews/{docId}/{fieldKey}/assign": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-reviews/{docId}/{fieldKey}/recommend": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/field-review-notes": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-review-notes/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/field-review-deprioritizations": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/field-review-deprioritizations/{id}/apply": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/field-review-deprioritizations/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/review-pinned-fields": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/review-pinned-fields/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/review-search-terms": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/review-search-terms/{id}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/review-search-suggestions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/review-search-statistics": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/matching/reference-data/import-bundle": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/structuring/approvals/bulk-approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/structuring/approval-decisions/{id}/diffs": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/structuring/approval-decisions/{id}/canonical": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/benchmarks": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/sessions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/confusion-matrix/{fieldName}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/csv-data": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/judge-progress": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/judge-accept": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/judge-reject": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/validation/runs/{id}/judge-bulk": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/cases/templates": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/cases/templates/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/cases/terminology": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/cases": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/cases/{caseKey}": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/cases/{caseKey}/narrate": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "caseKey"
+      ]
+    },
+    "/v1/relation-claims/graph": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/review": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/missing": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/relation-claims/{id}/resolve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/relation-claims/{id}/reject": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/relation-claims/backfill": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/entity-graph": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/entity-graph/status": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/entity-graph/rebuild": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/case-synthesis/documents/{docId}/neighbors": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "docId"
+      ]
+    },
+    "/v1/data-products/{id}/definition": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/runs": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/runs/{runId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id",
+        "runId"
+      ]
+    },
+    "/v1/data-products/{id}/pending-resolutions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/resolve-field": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/auto-review": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/auto-resolve-singles": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/apply-id-rules": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/regenerate-ids": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/generated-ids": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/sequence-counters": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/sequence-counters/{targetField}/{prefix}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-products/{id}/sequence-counters/{targetField}/{prefix}/ids": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-policies/{id}/compile": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-policies/{id}/test": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-policies/{id}/publish": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/data-policies/{id}/runs": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/schema-graph/review-queue": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/linking/link-keys/{fieldId}": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "fieldId"
+      ]
+    },
+    "/v1/catalog": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/catalog/{name}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/catalog/{name}/rows": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/suggestions/questions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/suggestions/questions/{id}/answer": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/suggestions/mappings": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/suggestions/mappings/{id}/decision": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/suggestions/links": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/suggestions/links/{id}/decision": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/archive-settings": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/retention-policies": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/retention-policies/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/retention-assignments": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/retention-assignments/{id}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/legal-holds": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/legal-holds/{id}/release": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/legal-holds/{id}/documents": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/legal-holds/{id}/documents/{documentId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "documentId",
+        "id"
+      ]
+    },
+    "/v1/records/dispositions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/dispositions/{documentId}/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "documentId"
+      ]
+    },
+    "/v1/records/disposition-certificates": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/audit-events": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/audit-events/export": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/audit-events/verify": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/fixity-checks": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/fixity-checks/run": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/format-report": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/erasure-requests": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/erasure-requests/{id}": {
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/erasure-requests/{id}/execute": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/tenant-export": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/tenant-export/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/tenant-export/{id}/download": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/storage-usage": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/compartments": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/compartments/mine": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/records/compartments/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/compartments/{id}/members": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/compartments/{id}/members/{userId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id",
+        "userId"
+      ]
+    },
+    "/v1/records/compartments/{id}/bindings": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/records/compartments/{id}/bindings/{bindingId}": {
+      "methods": [
+        "DELETE"
+      ],
+      "uuid_params": [
+        "bindingId",
+        "id"
+      ]
+    },
+    "/v1/team/members": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/pending": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/members/{userId}/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/members/{userId}/reject": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/invite": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/members/{userId}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/members/{userId}/permissions": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/role-permissions": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/role-permissions/{role}": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/organization": {
+      "methods": [
+        "PATCH"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/roles": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/roles/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/team/members/{userId}/workspace-role": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/groups": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/groups/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/team/groups/{id}/members": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/team/access/activity": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/access/preview/{userId}": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "userId"
+      ]
+    },
+    "/v1/team/access/proposals": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/team/access/proposals/{id}/confirm": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/team/access/proposals/{id}/cancel": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/iam/rules": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/iam/rules/{id}": {
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/iam/templates": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/workspace/deletion": {
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "uuid_params": []
+    },
+    "/v1/billing": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/billing/portal": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/billing/request-access": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/support/tickets": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/state": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/events": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/messages": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/files": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/approvals/{id}": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/thread/drafts": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/drafts/{approvalId}/decision": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "approvalId"
+      ]
+    },
+    "/v1/thread/sheets": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/thread/sheets/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/thread/sheets/{id}/decisions": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/thread/sheets/{id}/close": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/thread/figures/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/agent/turns/{id}": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/agent/turns/{id}/confirm": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/agent/home/page": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/my-data": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/my-data/sources/{id}/share": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/stop-sharing": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/items/share": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/items/stop-sharing": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/tags/share": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/tags/stop-sharing": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/tags/rename": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/sources/{id}/tags/delete": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/fields": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/my-data/fields/{id}/tier": {
+      "methods": [
+        "PUT"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/fields/{id}/requests": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/my-data/field-requests/{id}/trail": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/approve": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/deny": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/clarify": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/answer": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/second": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/withdraw": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/my-data/field-requests/{id}/stop": {
+      "methods": [
+        "POST"
+      ],
+      "uuid_params": [
+        "id"
+      ]
+    },
+    "/v1/me/data": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/me/data/items": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/me/workspace-data": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
+    },
+    "/v1/me/workspace-data/items": {
+      "methods": [
+        "GET"
+      ],
+      "uuid_params": []
     }
   }
 }
