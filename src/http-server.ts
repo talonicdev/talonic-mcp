@@ -125,6 +125,12 @@ export const integrationsAccessCached = makeAccessCache(pathProbe("/v1/integrati
 export const specAuthoringAccessCached = makeAccessCache(pathProbe("/v1/specs/authoring"))
 /** @internal Exported for tests. */
 export const partiesAccessCached = makeAccessCache(pathProbe("/v1/parties/status"))
+/** @internal Exported for tests. */
+export const reviewAccessCached = makeAccessCache(pathProbe("/v1/field-reviews/summary"))
+/** @internal Exported for tests. */
+export const casesAccessCached = makeAccessCache((t) =>
+  probeAccessState(t, base(), "/v1/relation-claims/cases", () => true, { limit: 1 }),
+)
 /** Superadmin / growth-reader only. @internal Exported for tests. */
 export const growthAccessCached = makeAccessCache(pathProbe("/v1/growth/access"))
 /** Superadmin only. @internal Exported for tests. */
@@ -412,6 +418,10 @@ export interface CreateRequestHandlerOptions {
   docGenAccess?: (token: string) => Promise<boolean>
   /** Override the Parties tool visibility check (primarily for tests). */
   partiesAccess?: (token: string) => Promise<boolean>
+  /** Override the review tool visibility check (primarily for tests). */
+  reviewAccess?: (token: string) => Promise<boolean>
+  /** Override the cases tool visibility check (primarily for tests). */
+  casesAccess?: (token: string) => Promise<boolean>
   /** Override the Portfolio tool visibility check (primarily for tests). */
   portfolioAccess?: (token: string) => Promise<boolean>
   /** Override the Process Plane tool visibility check (primarily for tests). */
@@ -740,6 +750,8 @@ export function createRequestHandler(
       includeAppsToolset,
       includeMiningDriverTools,
       toolGroups,
+      includeReviewTools,
+      includeCasesTools,
     ] = await Promise.all([
       (options.growthAccess ?? growthAccessCached)(token),
       (options.adminAgentTaskAccess ?? adminAgentTaskAccessCached)(token),
@@ -759,6 +771,8 @@ export function createRequestHandler(
       (options.appsToolsetAccess ?? appsToolsetAccessCached)(token),
       (options.miningAccess ?? miningAccessCached)(token),
       (options.toolGroupsAccess ?? toolGroupsAccessCached)(token),
+      (options.reviewAccess ?? reviewAccessCached)(token),
+      (options.casesAccess ?? casesAccessCached)(token),
     ])
     // An externally driven mining round is claimed, heartbeated and closed
     // through the decision-task tools, so an autonomous app lists them too.
@@ -783,6 +797,8 @@ export function createRequestHandler(
       includeAppsToolset,
       includeMiningDriverTools,
       toolGroups,
+      includeReviewTools,
+      includeCasesTools,
       ...(process.env["TALONIC_BASE_URL"] ? { baseUrl: process.env["TALONIC_BASE_URL"] } : {}),
       // Listing UX only: an OAuth token that visibly lacks apps:decide gets
       // the decision-task tools marked non-invocable. The platform decides.

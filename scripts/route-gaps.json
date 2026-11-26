@@ -336,6 +336,167 @@
       "kind": "pending-spec",
       "reason": "Source connect and import routes (talonic_integrations_*, talonic_sources_*), listed only after the integrations probe. Their spec operations land with platform PR #2365 (talonic/platform headless/sources, x-audience public) and reach the live spec on the next production release, after which this entry must be removed.",
       "served_by": "platform packages/api/src/api/sources/source-connections.controller.ts"
+    },
+    {
+      "method": null,
+      "path": "/v1/relation-claims/cases",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/relation-claims/cases/{}",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/relation-claims/cases/{}",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/relation-claims/cases/{}/narrate",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/relation-claims/review",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/relation-claims/{}/resolve",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/relation-claims/{}/reject",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/relation-claims/missing",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/case-synthesis/documents/{}/neighbors",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/cases/templates",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/cases/templates/{}",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/cases/templates",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by cases.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/field-reviews/checkout",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/field-reviews/claims",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/field-reviews/reference-view/{}",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/field-reviews/metrics",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/field-review-notes",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/field-review-notes",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/structuring/approvals/bulk-approve",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/structuring/approval-decisions/{}/diffs",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/structuring/approval-decisions/{}/canonical",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/validation/runs/{}/confusion-matrix/{}",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
+    },
+    {
+      "method": null,
+      "path": "/v1/validation/runs/{}/judge-progress",
+      "kind": "pending-spec",
+      "reason": "Review/cases route used by review.ts. Its spec operation lands with platform PR #2362 (x-audience public) and reaches the live spec on the next production release, after which this entry must be removed.",
+      "served_by": "platform packages/api/src/api/platform/ (/v1 review and cases controllers, PR #2362)"
     }
   ]
 }

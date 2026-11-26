@@ -49,6 +49,8 @@ const allProbesOff = {
   decisionTasksAccess: off,
   appsToolsetAccess: off,
   miningAccess: off,
+  reviewAccess: off,
+  casesAccess: off,
 }
 
 async function post(addr: string, body: unknown, headers: Record<string, string> = {}) {

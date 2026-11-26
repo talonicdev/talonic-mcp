@@ -70,6 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Contract Desk (16) and Transport Folders (13): work lists, evidence, decide / undo, assign / confirm and their withdrawals, the load's document set as an embedded PDF (up to 8 MB).
   - Compliance (39), Money Found (5), Customs declaration (3).
 
+- **Review and cases tools (listed only where the credential reaches them).** Twenty `talonic_review_*` tools: list, claim a batch for the person behind the credential, keep or release claims, claim one item, inspect the evidence and the cited page, compare a document with its reference values, resolve, propose a correction, recommend, the decision log as the receipt, review progress, notes; plus bulk approval, comparing sources and choosing the value to keep, benchmark lists and field accuracy, and deciding flagged values. Eleven `talonic_cases_*` tools: list and read cases with the quoted passage behind every link, rename or resolve, the case story, references to decide and their resolve / reject, referenced documents not uploaded, a document's neighbours, and case templates. Decision writes send a derived `Idempotency-Key`, so retrying the same call never applies it twice; every write accepts `idempotency_key`. Probes: `GET /v1/field-reviews/summary` and `GET /v1/relation-claims/cases?limit=1`. The hosted server's `scopes_supported` is unchanged; requesting the catalog scopes these tools name (`reviews:*`, `cases:*`) is a follow-up coordinated with the platform's scope catalog.
+
 ## [0.1.102] - 2026-11-22
 
 ### Added

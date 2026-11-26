@@ -349,6 +349,38 @@ describe("HTTP server routing", () => {
     expect(names).toContain("talonic_parties_read")
   })
 
+  it.each([
+    ["review", "talonic_review_", 20, "talonic_review_resolve"],
+    ["cases", "talonic_cases_", 11, "talonic_cases_get"],
+  ] as const)(
+    "tools/list includes the %s tools only when their probe passes",
+    async (group, prefix, count, sample) => {
+      const key = group === "review" ? "reviewAccess" : "casesAccess"
+      const list = async () => {
+        const res = await fetch(`${h.baseUrl}/mcp`, {
+          method: "POST",
+          headers: MCP_HEADERS,
+          body: JSON.stringify({ jsonrpc: "2.0", id: 6, method: "tools/list", params: {} }),
+        })
+        expect(res.status).toBe(200)
+        return res.text()
+      }
+      await stopHarness(h)
+      h = await startHarness({ [key]: async () => false })
+      expect(await list()).not.toContain(prefix)
+      await stopHarness(h)
+      h = await startHarness({ [key]: async () => true })
+      const text = await list()
+      const json = text.trim().startsWith("{")
+        ? text
+        : (text.split("\n").find((l) => l.startsWith("data: ")) ?? "").slice(6)
+      const tools = (JSON.parse(json) as any).result.tools as Array<{ name: string }>
+      const names = tools.map((t) => t.name).filter((n) => n.startsWith(prefix))
+      expect(names).toHaveLength(count)
+      expect(names).toContain(sample)
+    },
+  )
+
   it("tools/list includes the price baseline tools only when the Price Baseline probe passes", async () => {
     const list = async () => {
       const res = await fetch(`${h.baseUrl}/mcp`, {
